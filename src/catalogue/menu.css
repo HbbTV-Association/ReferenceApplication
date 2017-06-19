@@ -1,0 +1,368 @@
+body {
+    margin:0px;
+    padding:0px;
+    font-size:18px;
+	color: #000;
+	background-image:none !important;
+}
+div, span {
+	_border: 1px solid red;	
+}
+
+	#wrapper{
+		height: 720px;
+		width: 1280px;
+		overflow: hidden;
+		position: absolute;
+		top:0px;
+		left:0px;
+		background-image:url(images/bg_wrapper.png);
+		background-repeat:repeat-x;
+	}
+		#menu{
+
+		}
+		#topMenu {
+			height: 50px;
+			left: 0px;
+			overflow: visible;
+			position: absolute;
+			top: 45px;
+			white-space: nowrap;
+			width: 1280px;
+			-moz-transition: 0.5s left cubic-bezier(0.42,0,0.58,1);
+			-webkit-transition: 0.5s left cubic-bezier(0.42,0,0.58,1);
+			-o-transition: 0.5s left cubic-bezier(0.42,0,0.58,1);
+			transition: 0.5s left cubic-bezier(0.42,0,0.58,1);
+			
+
+			display:block;
+			z-index: 9;
+		}
+			.topmenuitem {
+				color: #fff;
+				display: inline-block;
+				font-size: 32px;
+				margin-left: 63px;
+				height: 50px;
+				line-height: 50px;
+				border-bottom: 5px solid transparent;
+			}
+
+			.topmenuitem.focused{
+				text-decoration: none !important;
+				border-bottom: 5px solid #f7921e !important;
+			}
+			.topmenuitem.selected{
+				text-decoration: none !important;
+				border-bottom: 5px solid #a5a5a4;
+				color: #a5a5a4;
+			}
+			.topmenuitem.focused.selected{
+				text-decoration: none !important;
+				border-bottom: 5px solid #f7921e !important;
+				color: #a5a5a4;
+			}			
+
+		#gridScrollView {
+			display: block;
+			height: 500px;
+			position: absolute;
+			top: 100px;
+			white-space: nowrap;
+			width: auto;
+			-moz-transition: 0.35s left cubic-bezier(0.42,0,0.58,1); 
+			-webkit-transition: 0.35s left cubic-bezier(0.42,0,0.58,1); 
+			-o-transition: 0.35s left cubic-bezier(0.42,0,0.58,1);
+			transition: 0.35s left cubic-bezier(0.42,0,0.58,1); 
+		}
+		
+		/* .grid leveys = .gridColumn marginaali leveys vaikuttaa .grid in leveyteen, pitää ottaa huomioon */
+		
+			.grid {
+				background-color: rgba(40, 40, 40, 0.8);
+				display: inline-block;
+				height: 530px;
+				position: absolute;
+				top: 10px;
+				white-space: nowrap;
+				width: auto;
+				word-wrap: normal;
+				 -moz-transition: 0.35s all cubic-bezier(0.42,0,0.58,1);
+				 -webkit-transition: 0.35s all cubic-bezier(0.42,0,0.58,1);
+				 -o-transition: 0.35s all cubic-bezier(0.42,0,0.58,1);
+				 transition: 0.35s all cubic-bezier(0.42,0,0.58,1);
+			}
+			.grid.zoom_in{
+				/*
+				-moz-transform:scale(1.15);
+				-webkit-transform:scale(1.15);
+				-o-transform:scale(1.15);
+				transform:scale(1.15);
+				*/
+			}
+				.gridColumn {
+					display: inline-block;
+					height: 520px;
+					margin-top: 6px;
+					overflow: hidden;
+					vertical-align: top;
+				}
+				.gridColumn:first-child{
+					margin-left: 12px;
+				}
+				.gridColumn:last-child{
+					margin-right: 12px;
+				}
+				.gridColumn.columnsize_3{
+					width: 294px;
+				}
+				.gridColumn.columnsize_6{
+					width: 588px;
+				}
+				/*
+				.gridColumn:first-child {
+					margin-left: 12px;	
+				}
+				.gridColumn:last-child {
+					margin-right: 12px;	
+				}
+				*/
+					.gridViewBox {
+						background-color: transparent;
+						border: 5px solid transparent;
+						color: #fff;
+						display: block;
+						height: 160px;
+						width: 284px;	
+						line-height: 160px;
+						overflow: hidden;
+						text-align: center;
+						transition: all 0.05s linear 0s;
+						vertical-align: middle;
+						white-space: normal;
+						
+						word-break: break-all;
+						
+ 						justify-content: center;
+    					align-items: center;
+    					overflow: hidden;
+						position:relative;
+						z-index: 2;
+						
+						display: block;
+						/*
+						_display: -webkit-box;
+						display: -webkit-flex;
+						display: -moz-box;
+						display: -ms-flexbox;
+						display: flex;
+						-webkit-flex-align: center;
+						-ms-flex-align: center;
+						-webkit-align-items: center;
+						align-items: center;
+						_flex: 1;
+						*/
+						float: left;
+
+						background-image: url(images/bg_gridViewBox_before.png);
+						background-repeat:no-repeat;
+						background-size: cover;
+						/**/
+
+				
+  -moz-background-clip: content;     /* Firefox 3.6 */
+  -webkit-background-clip: content;  /* Safari 4? Chrome 6? */
+  background-clip: content-box;
+					
+					}
+					.gridViewBox_1x1 {
+						width: 284px;
+						height: 160px;	
+					}					
+					.gridViewBox_2x2 {
+						width: 578px;
+						height: 330px;	
+						line-height: 330px;
+					}
+					.gridViewBox_1x2 {
+						width: 578px;
+						height: 160px;	
+					}
+					.gridViewBox_2x1 {
+						width: 284px;
+						height: 330px;	
+						line-height: 330px;
+					}
+			
+					.gridViewBox:first-child {
+						_margin-top: 6px;	
+					}
+/*
+					.gridViewBox:before {
+						position: absolute;
+						left: 0px;
+						top: 0px;
+						height: 160px;
+						width: 284px;
+						background-color: #000;
+						content:"";
+						z-index: 1;	
+						background-image: url(images/bg_gridViewBox_before.png);
+						background-repeat:no-repeat;
+						width: 100%;
+						height: 100%;
+						background-size:cover;
+					}
+				*/	
+					.gridViewBox.focused{
+						border: 5px solid #f7921e;
+						/*
+						border-radius: 5px;
+						-webkit-animation: focusBorderColorChange 10s infinite !important; 
+    					animation: focusBorderColorChange 10s infinite !important;
+						*/
+						/*				
+						-moz-transform:scale(1.08);
+						-webkit-transform:scale(1.08);
+						-o-transform:scale(1.08);
+						transform:scale(1.08);
+						*/
+					}
+					/* Chrome, Safari, Opera */
+					@-webkit-keyframes focusBorderColorChange {
+					    0% {border-color: #f7921e;}
+					    25% {border-color: #4411ee;}
+					    50% {border-color: #ee1122;}
+					    75% {border-color: #11ee22;}
+					    100% {border-color: #f7921e;}
+					}
+
+					@keyframes focusBorderColorChange {
+					    0% {border-color: #f7921e;}
+					    25% {border-color: #4411ee;}
+					    50% {border-color: #ee1122;}
+					    75% {border-color: #11ee22;}
+					    100% {border-color: #f7921e;}
+					}
+						.gridViewBox img {
+							flex-shrink: 0;
+							max-height: 100%;
+							max-width: 100%;
+							z-index: 10;
+							vertical-align: middle;
+						}
+						.gridViewBox span {
+							/*
+							line-height: 18px;
+							_margin-top: auto;
+							_margin-bottom: auto;
+							display: table-cell;
+							vertical-align:middle;
+							*/
+							position:absolute;
+							bottom: 0px;
+							left: 0px;	
+							width: 100%;
+							height: 30px;
+							line-height: 20px;
+							text-align:left;
+							padding-left: 10px;
+							padding-top: 10px;
+							text-overflow:ellipsis;
+							white-space:nowrap;
+							overflow:hidden;
+							z-index: 12;
+								background-image: url(images/bg_gridViewBox_span.png);
+								background-repeat: repeat-x;
+								font-size: 18px;
+								text-shadow: 1px 1px 2px #000;							
+						}
+
+
+#logo {
+	top: -15px;
+	/*
+	left: 970px;
+	*/
+	left: 55px;
+	height: 125px;
+	width: 235px;
+	background-image:url(images/logo_sofia.png);
+	background-repeat:no-repeat;
+	z-index: 10;
+	position:absolute;
+	
+  -webkit-animation: slidedown 2s; /* Safari 4+ */
+  -moz-animation:    slidedown 2s; /* Fx 5+ */
+  -o-animation:      slidedown 2s; /* Opera 12+ */
+  animation:         slidedown 2s; /* IE 10+, Fx 29+ */
+  /*
+  animation-delay: 2s;
+ margin-top: -125px;
+	*/
+}
+@keyframes slidedown {
+  0%   { margin-top: -125px; }
+  100% { margin-top: 0px; }
+}
+
+#itemDescription {
+	width: 1200px;
+	height: 80px;
+	top: 640px;
+	position: absolute;
+	color: #fff;
+	font-size: 21px;
+	left: 40px;	
+	background-color: #333;
+}
+
+/* Channel info */
+.channel_info{
+	color: #fff;
+	font-size: 24px;
+	right:50px;
+	position: absolute;
+
+	-moz-transition: all 0.10s linear;
+	-webkit-transition: all 0.10s linear;
+	-o-transition: all 0.10s linear;
+	transition: all 0.10s linear;
+
+	display:block;
+	top: 645px;
+	height: 60px;
+	line-height: 60px;
+	text-shadow: 1px 1px 1px #000;	
+	text-align:right;
+	padding-right: 10px;	
+}
+.channel_info span:first-child {
+  background-color: #222;
+    border-radius: 50%;
+    color: #aaa;
+    display: inline-block;
+    font-size: 34px;
+    height: 60px;
+    width: 60px;
+    letter-spacing: -2px;
+    line-height: 60px;
+    margin-right: 0px;
+    text-align: center;
+    text-shadow: 0 1px 1px #000;
+	box-shadow: 2px 2px 4px #000;
+	z-index: 10;
+	position:relative;
+	font-weight:800;
+	float: right;
+	margin-left: -7px;
+}
+.channel_info span:last-child {
+	color: #fff;
+	padding: 2px 15px 2px 10px;
+	z-index: 9;
+	position:relative;
+	border-radius: 4px;
+	text-align:right;
+}	

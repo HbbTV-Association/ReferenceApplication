@@ -1,0 +1,16 @@
+#debugScreen{
+	display : none;
+	position: absolute;
+	top:0px;
+	left:0px;
+	padding:30px;
+	background: rgba(0,0,0,0.75);
+	width:450px;
+	height: 640px;
+	z-index: 999;
+}
+#debugText{
+	position:absolute;
+	bottom:0px;
+	color:white;
+}

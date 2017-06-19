@@ -1,0 +1,135 @@
+#videodiv{
+	position: absolute;
+	z-index: 20;
+	overflow: hidden;
+}
+#video {
+  display: block;
+  height: 100%;
+  width: 100%;
+  z-index: 100;
+}
+#loadingImage {
+	background: rgba(0, 0, 0, 0) url("images/loading.gif") repeat scroll 0 0;
+	display: block;
+	height: 21px;
+	left: 614px;
+	position: absolute;
+	top: 350px;
+	width: 56px;
+	z-index: 20;
+}
+.hidden:not(#player_buttons){
+	display: none !important;
+}
+
+.fullscreen {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 1280px;
+	height: 720px;
+}
+
+/* Player controls */
+
+#playerControls {
+	background: rgba(0, 0, 0, 0.6) none repeat scroll 0 0;
+	bottom: 0;
+	height: 75px;
+	left: 0;
+	position: absolute;
+	text-align: center;
+	width: inherit;
+	padding-top: 20px;
+	z-index: 20;
+	-o-transition: bottom 0.3s linear;
+	-moz-transition: bottom 0.3s linear;
+	-webkit-transition: bottom 0.3s linear;
+	transition: bottom 0.3s linear;
+}
+#playerControls.hidden{
+	bottom: -95px !important;
+}
+#playerControls #playTime, #playerControls #playPosition{
+	color:white;
+	font-size: 14px;
+	position: absolute;
+	top:12px;
+}
+#playerControls #playPosition{
+	left:63px;
+}
+#playerControls #playTime{
+	right:63px;
+}
+
+#progressbarBg{
+	top:0px;
+	height:10px;
+	left:63px;
+	width: 1154px;
+	background: #111;
+	display: block;
+	position: absolute;
+}
+#progressbarBg .progressbar{
+	background-color: white;
+	height: inherit;
+	width: 0px;
+	position: 0px;
+	left:0px;
+}
+
+#playerButtonsContainer{
+	display: block;
+	position: absolute;
+	top:20px;
+	left:0px;
+	width: inherit;
+	height:22px;
+}
+
+.playerbtn {
+	background: rgba(0, 0, 0, 0) url("images/player_sprite.png") no-repeat scroll 0 0;
+	display: inline-block;
+	height: 23px;
+	margin-left: 20px;
+	position: static;
+	top: 0;
+	width: 40px;
+}
+.playerbtn:first-child{
+	margin-left: 0px;
+}
+.playerbtn.selected{
+	background: url("images/player_sprite_selected.png");
+	border: none !important;
+	background-repeat: no-repeat;
+	background-color: transparent !important;
+}
+.playerbtn.focused{
+	background: url("images/player_sprite_focused.png");
+	border: none !important;
+	background-repeat: no-repeat;
+	background-color: transparent !important;
+}
+
+#stop_icon, #stop_icon.focused, #stop_icon.selected {
+	background-position: -40px -4px;
+}
+#play_icon, #play_icon.focused, #play_icon.selected {
+	background-position: -80px -4px;
+}
+#pause_icon, #pause_icon.focused, #pause_icon.selected {
+	background-position: 0px -4px;
+}
+#forward_icon, #forward_icon.focused, #forward_icon.selected {
+	background-position: -120px -4px;
+}
+#rewind_icon, #rewind_icon.focused, #rewind_icon.selected {
+	background-position: -160px -4px;
+}
+#fullscreen_icon, #fullscreen_icon.focused, #fullscreen_icon.selected {
+	background-position: -200px -4px;
+}

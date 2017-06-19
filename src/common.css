@@ -1,0 +1,18 @@
+#info{
+	position:absolute;
+	top:300px;
+	background: #fff !important;
+	border-radius:5px;
+	border: 1px solid transparent;
+	left:400px;
+	width:480px;
+	padding:5px;
+	text-align:center;
+	color:#000 !important;
+	z-index:10001;
+	opacity : 1.0;
+}
+
+#info.hide{
+	opacity: 0.0 !important;
+}
