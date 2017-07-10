@@ -76,7 +76,7 @@ function createMenuEditor( menu, index )
 {
 	var menuform = $("<form class='menu'></form>");
 	menuform.append( "<div class='containertitle'>Menu name: <input name='title' class='subname' type='text' value='"+ menu.title +"'></input><input class='action' type='button' value='Rename' onclick=\"$('a[href=#tab"+index+"]').html( $(this).prev('input').val() );refreshSelectBoxes();\"><br></div>");
-	var table = $('<table border="0" cellspacing="0" cellpadding="5"><tbody id="table'+index+'"><tr><th>Focus</th><th>Move</th><th>Title</th><th>Description</th><th>Action</th><th>App type</th><th>Submenu</th><th>App icon</th></tr></tbody></table>');
+	var table = $('<table border="0" cellspacing="0" cellpadding="5"><tbody id="table'+index+'"><tr><th>Focus</th><th>Move</th><th>Title</th><th>Description</th><th>Action</th><th>App type</th><th>DRM</th><th>LA URL</th><th>Submenu</th><th>App icon</th></tr></tbody></table>');
 	
 	$.each( menu.items, function (i, item){
 		table.append( addRow( index, item ) );
@@ -114,12 +114,24 @@ function addRow( index, item )
 	} );
 	row.append('<td><select class="selectapp" name="app">'+optstring+'</select></td>');
 	
+	// drm
+	optstring = "";
+	$.each( ["NONE", "playready", "marlin", "widevine"], function( i, type ){
+		optstring += "<option value='"+type+"'"+(item.drm == type? " selected":"")+">"+type+"</option>";
+	});
+	row.append('<td><select class="selectdrm" name="drm">'+optstring+'</select></td>');
+	
+	// laurl
+	row.append('<td><input type="textbox" value="'+(item.la_url || "")+'" name="la_url"></input></td>');
+	
 	item.submenu = item.submenu || "NONE";
 	optstring = "";
 	$.each( menus, function( i, menu ){
 		optstring += "<option value='"+i+"'"+(item.submenu == i? " selected":"")+">"+menu.title+"</option>";
 	} );
 	row.append('<td><select class="selectsubmenu" name="submenu"><option value="NONE" '+(item.submenu == "NONE"? " selected":"")+'>No</option>'+optstring+'</select></td>');
+	
+	
 	
 	optstring = "<option data-img-src='css/images/noicon.png' value='' "+ (item.img == ""? "selected":"") +"></option>";
 	$.each( icons, function( i, icon ){

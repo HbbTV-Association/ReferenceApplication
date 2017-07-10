@@ -1,6 +1,3 @@
-console.log = function(){
-	debug( arguments );
-}
 
 function debug(){
 	if( !$("#debugScreen")[0] ){
@@ -21,6 +18,7 @@ function toggleDebug(){
 	}
 	else{
 		$("#debugScreen").show();
+		console.log = debug;
 	}
 		
 }

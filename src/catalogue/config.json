@@ -1,26 +1,26 @@
 {
     "menus": [
         {
-            "center": 0,
+            "center": 1,
             "title": "Main",
             "items": [
                 {
-                    "title": "Dash (free)",
+                    "title": "Clear DASH",
                     "app": 0,
                     "submenu": 1
                 },
                 {
-                    "title": "DASH (Playready)",
+                    "title": "PlayReady",
                     "app": 0,
                     "submenu": 2
                 },
                 {
-                    "title": "DASH (Marlin)",
+                    "title": "Marlin",
                     "app": 0,
                     "submenu": 3
                 },
                 {
-                    "title": "DASH (Widevine)",
+                    "title": "Widevine",
                     "app": 0,
                     "submenu": 4
                 },
@@ -30,44 +30,24 @@
                     "submenu": 5
                 },
                 {
-                    "title": "Audio Tracks",
-                    "app": 0,
-                    "submenu": 8
-                },
-                {
-                    "title": "Dolby",
-                    "app": 0,
-                    "submenu": 9
-                },
-                {
                     "title": "Settings",
                     "app": 0,
-                    "submenu": 7
+                    "submenu": 6
                 }
             ]
         },
         {
-            "center": 3,
-            "title": "DASH free",
+            "center": 0,
+            "title": "DASH",
             "items": [
-                {
-                    "title": "Llama Drama (25fps)",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p/manifest.mpd",
-                    "app": 6,
-                    "img": "icons/image_1280x720.jpg",
-                    "imagesize": {
-                        "0": 1280,
-                        "1": 720,
-                        "2": 2,
-                        "3": "width=\"1280\" height=\"720\"",
-                        "bits": 8,
-                        "channels": 3,
-                        "mime": "image/jpeg"
-                    }
+				{
+                    "title": "Reload Video cataloque",
+                    "eval": "location.reload();",
+                    "app": 0
                 },
                 {
-                    "title": "Llama Drama (25fps) 360p",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p/manifest_360p.mpd",
+                    "title": "Llama Drama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p_25f75g6s/manifest.mpd",
                     "app": 6,
                     "img": "icons/image_320x180.jpg",
                     "imagesize": {
@@ -81,8 +61,23 @@
                     }
                 },
                 {
-                    "title": "Llama Drama (25fps) 720p",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p/manifest_720p.mpd",
+                    "title": "Llama Drama HEVC 2160p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/manifest.mpd",
+                    "app": 6,
+                    "img": "icons/image_320x180.jpg",
+                    "imagesize": {
+                        "0": 320,
+                        "1": 180,
+                        "2": 2,
+                        "3": "width=\"320\" height=\"180\"",
+                        "bits": 8,
+                        "channels": 3,
+                        "mime": "image/jpeg"
+                    }
+                },
+				      {
+                    "title": "SD aspect ratio convert test",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/_sisainendev_/suite_dash/tstools/JOHARI/manifest.mpd",
                     "app": 6,
                     "img": "icons/image_320x180.jpg",
                     "imagesize": {
@@ -96,58 +91,15 @@
                     }
                 },
                 {
-                    "title": "Llama Drama (25fps) 1080p",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p/manifest_1080p.mpd",
+                    "title": "Gran Dillama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest.mpd",
                     "app": 6,
-                    "img": "icons/image_320x180.jpg",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "imagesize": {
                         "0": 320,
                         "1": 180,
                         "2": 2,
                         "3": "width=\"320\" height=\"180\"",
-                        "bits": 8,
-                        "channels": 3,
-                        "mime": "image/jpeg"
-                    }
-                },
-                {
-                    "title": "Levira portal live",
-                    "url": "http://hbbtv.levira.ee/hbbtv/portal/index.php",
-                    "app": 0,
-                    "img": "icons/icon_tasuta_tv_1x1.png",
-                    "imagesize": {
-                        "0": 284,
-                        "1": 160,
-                        "2": 3,
-                        "3": "width=\"284\" height=\"160\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "nPVR EPG",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/demo/pvr_epg2/index.php",
-                    "app": 0,
-                    "img": "icons/icons_2x2_nPVR_epg.png",
-                    "imagesize": {
-                        "0": 578,
-                        "1": 330,
-                        "2": 3,
-                        "3": "width=\"578\" height=\"330\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Toggle",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/DemoToggle/dev/launcher/index.php?ch=Channel_5",
-                    "app": 0,
-                    "img": "icons/togglered.jpg",
-                    "imagesize": {
-                        "0": 227,
-                        "1": 143,
-                        "2": 2,
-                        "3": "width=\"227\" height=\"143\"",
                         "bits": 8,
                         "channels": 3,
                         "mime": "image/jpeg"
@@ -157,14 +109,14 @@
         },
         {
             "center": 0,
-            "title": "DASH playready",
+            "title": "DASH PlayReady",
             "items": [
                 {
-                    "title": "Llama Drama (25fps) 1080p",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p_25f75g6s_drm/manifest.mpd",
-					"la_url" : "https://pr.test.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAAxJxWuYAAABgO8yf5javvGySaoNXNU41-38I8bw_jk0b57wCxXu9aZYZY7D-mtQC430DEl5_7O5V7WheqYy9ScMrB7JcKyIZUFRAy5YHY-ucy0DVH433QswoS_aBESjFH1116ej_Je--fhq-G5DipTNfS1OBK9_DNiUDhmo",
-                    "drm" : "playready",
-					"app": 6,
+                    "title": "Llama Drama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "playready",
+                    "la_url": "http://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N4IAAABgbPODbWWRn1_UUkKZ2MKGhqQ2LyuW8G62Xuvg1nnPKt5Nj2JOD_Df_lIS1ufoL9TjYn0Peul-gtENc-LhZr4NScPdF0EG9KfwGbe6rWzDoo2uft8fnAt4h5eifwVfJ7NGeDBZwTWYyuEAnnYwdlF42JqKjHg",
                     "img": "icons/image_320x180.jpg",
                     "imagesize": {
                         "0": 320,
@@ -177,240 +129,56 @@
                     }
                 },
                 {
-                    "title": 2048,
-                    "url": "http://mhp.sofiadigital.fi/tvportal/hha/2048/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "2048jQuery",
-                    "url": "http://tvportal.sofiadigital.tv/hha/2048jQuery/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "JuuriNyt",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/hha/juurinyt2nd/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "TRT Launcher",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/_sisainendev_/IBC2014TRT/TRT_ARTI/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "RTM",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/hha/RTM/index.php",
-                    "app": 0,
-                    "img": "icons/icons_2x1_ruutu.png",
+                    "title": "Llama Drama HEVC 2160p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "playready",
+                    "la_url": "http://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N5cAAABg2sjcJp4fH4kQvEQNv11A-ps213uY1ovQXyeWla9WuT5-l7wee_CV9111L922mJ3dfq6CRHKUAI4RG8KtQA-H62YfHNfJ48VXiK52yWSo8dLL7SSXqfGCn7ki86VylhoZo-CJlOC7KNb39dC_VDvvGMwRVZ8",
+                    "img": "icons/image_320x180.jpg",
                     "imagesize": {
-                        "0": 578,
-                        "1": 160,
-                        "2": 3,
-                        "3": "width=\"578\" height=\"160\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Superteks v2",
-                    "url": "http://tvportal.sofiadigital.tv/hha/Superteks_v2/News/index.php",
-                    "app": 0,
-                    "img": "icons/channelu.png",
-                    "imagesize": {
-                        "0": 448,
-                        "1": 448,
-                        "2": 3,
-                        "3": "width=\"448\" height=\"448\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Metro News",
-                    "url": "http://tvportal.sofiadigital.tv/mediaprima/Metro/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "NST News",
-                    "url": "http://tvportal.sofiadigital.tv/mediaprima/NST/index.php",
-                    "app": 0,
-                    "img": "icons/Logo_-_Atlas_New_Transparent_Blue_EPS_copy_copy.png",
-                    "imagesize": {
-                        "0": 670,
-                        "1": 478,
-                        "2": 3,
-                        "3": "width=\"670\" height=\"478\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "BHarian News",
-                    "url": "http://tvportal.sofiadigital.tv/mediaprima/BHarian/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "gMapsForHbbTV",
-                    "url": "http://tvportal.sofiadigital.tv/hha/gMapsForHbbTV/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Poker",
-                    "url": "http://tvportal.sofiadigital.tv/hha/poker/",
-                    "app": 0,
-                    "img": "icons/Virtual-live-1.png",
-                    "imagesize": {
-                        "0": 300,
-                        "1": 179,
-                        "2": 3,
-                        "3": "width=\"300\" height=\"179\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Rotator",
-                    "url": "http://tvportal.sofiadigital.tv/hha/rotator/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Liiga",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/hha/liiga2/index.php",
-                    "app": 0,
-                    "img": "icons/imgres.jpg",
-                    "imagesize": {
-                        "0": 225,
-                        "1": 225,
+                        "0": 320,
+                        "1": 180,
                         "2": 2,
-                        "3": "width=\"225\" height=\"225\"",
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
                         "channels": 3,
                         "mime": "image/jpeg"
                     }
                 },
                 {
-                    "title": "MyKlik",
-                    "url": "http://211.25.69.67/rtm/NewMyKlik/index.php",
-                    "app": 0,
-                    "img": "icons/TV3_red_logo.svg.png",
+                    "title": "Gran Dillama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "playready",
+                    "la_url": "http://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N1EAAABg3VbC6hcm2OPMY6f9s0E6icLxPMEjjeTa7ZxL38sgWg-XALJQO23HqC_RAhXc9Qf6R9a3qpQRXJdS3nZeSbxB5a8Tx94rksaedOsI3dqQVKdftiNuqi9QN16VSFP-JtpGLOywbqj1WQ-tWGrmI9uN3SVn7Hw",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "imagesize": {
-                        "0": 250,
-                        "1": 250,
-                        "2": 3,
-                        "3": "width=\"250\" height=\"250\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "NewMyKlik2",
-                    "url": "http://tvportal.sofiadigital.tv/hha/NewMyKlik2/",
-                    "app": 0
-                },
-                {
-                    "title": "RTM Radio",
-                    "url": "http://tvportal.sofiadigital.tv/hha/empty/",
-                    "app": 0
-                },
-                {
-                    "title": "Channel NewsAsia",
-                    "url": "http://tvportal.sofiadigital.tv/hha/NewsAsia/",
-                    "app": 0,
-                    "img": "icons/newsasia.png",
-                    "imagesize": {
-                        "0": 346,
-                        "1": 238,
-                        "2": 3,
-                        "3": "width=\"346\" height=\"238\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Channel8News",
-                    "url": "http://tvportal.sofiadigital.tv/hha/Ch8News/",
-                    "app": 0
-                },
-                {
-                    "title": "Clock",
-                    "url": "http://tvportal.sofiadigital.tv/hha/clock/",
-                    "app": 0,
-                    "img": "icons/TRT_ARTI1.png",
-                    "imagesize": {
-                        "0": 600,
-                        "1": 127,
-                        "2": 3,
-                        "3": "width=\"600\" height=\"127\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Toggle EPG (HHA)",
-                    "url": "http://tvportal.sofiadigital.tv/hha/Toggle/dev/epg/",
-                    "app": 0,
-                    "img": "icons/togglered.jpg",
-                    "imagesize": {
-                        "0": 227,
-                        "1": 143,
+                        "0": 320,
+                        "1": 180,
                         "2": 2,
-                        "3": "width=\"227\" height=\"143\"",
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
                         "channels": 3,
                         "mime": "image/jpeg"
                     }
                 },
                 {
-                    "title": "Launcher4",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/hha/launcher4/",
-                    "app": 0,
-                    "img": "icons/Logo_-_Atlas_New_Transparent_Blue_EPS_copy_copy.png",
+                    "title": "Gran Dillama AVC 1080p(proxy)",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "playready",
+                    "la_url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/expressplay_pr.php?service=prod1236",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "imagesize": {
-                        "0": 670,
-                        "1": 478,
-                        "2": 3,
-                        "3": "width=\"670\" height=\"478\"",
+                        "0": 320,
+                        "1": 180,
+                        "2": 2,
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
-                        "mime": "image/png"
+                        "channels": 3,
+                        "mime": "image/jpeg"
                     }
-                },
-                {
-                    "title": "ATLAS Portal",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/atlas/portal/index.php",
-                    "app": 0,
-                    "img": "icons/Logo_-_Atlas_New_Transparent_Blue_EPS_copy_copy.png",
-                    "imagesize": {
-                        "0": 670,
-                        "1": 478,
-                        "2": 3,
-                        "3": "width=\"670\" height=\"478\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "MP4 Video",
-                    "url": "http://tvportal.sofiadigital.tv/Videos/files/Matkaoppaat.mp4",
-                    "app": 0
-                },
-                {
-                    "title": "MPG Video",
-                    "url": "http://tvportal.sofiadigital.tv/Videos/files/Emmerdale.mpg",
-                    "app": 0,
-                    "img": "icons/Rio2016_ch3_500x500.png",
-                    "imagesize": {
-                        "0": 500,
-                        "1": 500,
-                        "2": 3,
-                        "3": "width=\"500\" height=\"500\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "DASH Video",
-                    "url": "http://tvportal.sofiadigital.tv/Videos/DASH/tears_of_steel_1080p.mpd",
-                    "app": 0
-                }
+                }				
             ]
         },
         {
@@ -418,69 +186,69 @@
             "title": "DASH Marlin",
             "items": [
                 {
-                    "title": "Dolbythek",
-                    "url": "http://streaming.dolby.com/hbbtv/dolbythek/dolby1.html",
-                    "app": 0,
-                    "img": "icons/ddplus.png",
+                    "title": "Llama Drama AVC 1080p",
+                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnsABCTebeq_LlmxMHAbqzR-qoKAIAlE9xihb7OrZdxLf2hCUyKzG8jGPyW-qO_-lZK-P83hsSUegB1GwzTrDUUtcqI_IRBOSo8Q_anbOV0KjtfIPfQ6_oIHrmbvzRXWa2jic4Qs9agLiu0qg9EXVUvnwBpToHhJWIXwsr4lndx0Qb-iokJSUse_tJ0_QUasfA0q58sCAAAABS2P8mWXSMenxFBK253XkjYfHEbsw#http%3A%2F%2Fmhp.sofiadigital.fi%2Ftvportal%2Freferenceapp%2Fvideos%2F01_llama_drama_1080p_25f75g6s%2Fdrm%2Fmanifest.mpd",
+                    "app": 6,
+                    "drm": "marlin",
+                    "img": "icons/image_320x180.jpg",
                     "imagesize": {
-                        "0": 300,
-                        "1": 168,
-                        "2": 3,
-                        "3": "width=\"300\" height=\"168\"",
+                        "0": 320,
+                        "1": 180,
+                        "2": 2,
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
-                        "mime": "image/png"
+                        "channels": 3,
+                        "mime": "image/jpeg"
                     }
                 },
-                {
-                    "title": "Teracom",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/teracom/launcher",
-                    "app": 0
-                },
-                {
-                    "title": "IRT TEST",
-                    "url": "http://tv-html.irt.de/hbbtv/tests/",
-                    "app": 0
-                },
-                {
-                    "title": "SVT",
-                    "url": "http://hbbtv.play.svt.se/index.xhtml",
-                    "app": 0,
-                    "img": "icons/svt-play.jpg",
+				{
+                    "title": "Llama Drama AVC 1080p",
+                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnsABCTebeq_LlmxMHAbqzR-qoKAIAlE9xihb7OrZdxLf2hCUyKzG8jGPyW-qO_-lZK-P83hsSUegB1GwzTrDUUtcqI_IRBOSo8Q_anbOV0KjtfIPfQ6_oIHrmbvzRXWa2jic4Qs9agLiu0qg9EXVUvnwBpToHhJWIXwsr4lndx0Qb-iokJSUse_tJ0_QUasfA0q58sCAAAABS2P8mWXSMenxFBK253XkjYfHEbsw#http%3A%2F%2Fmhp.sofiadigital.fi%2Ftvportal%2Freferenceapp%2Fvideos%2F01_llama_drama_1080p_25f75g6s%2Fdrm%2Fmanifest.mpd",
+                    "app": 6,
+                    "drm": "marlin",
+                    "img": "icons/image_320x180.jpg",
                     "imagesize": {
-                        "0": 310,
-                        "1": 163,
+                        "0": 320,
+                        "1": 180,
                         "2": 2,
-                        "3": "width=\"310\" height=\"163\"",
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
                         "channels": 3,
                         "mime": "image/jpeg"
                     }
                 },
                 {
-                    "title": "html5 areena",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/ylehbb/areena_dev_panasonic/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "NRK appglobe",
-                    "url": "http://poc-hbbtv.appglobe.accedo.tv",
-                    "app": 0
-                },
-                {
-                    "title": "toggle testsuite",
-                    "url": "http://hbbtv-testsuite.toggle.sg/toggleprod/testsuite/launcher/index.html",
-                    "app": 0,
-                    "img": "icons/togglered.jpg",
+                    "title": "Llama Drama HEVC 2160p",
+                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCm5ABBs-h_OnzvtAJ-jlxuJmXYUAIBEN7nHferFxaGyn_VxKZWvOOhtKTyBjHODmQAfRF1Wzs8Y9MbdI3XjyyHaeK9omhtkXrUVcMXPCKQQnPL8Hgj2vQQerFSCVKQ7iJOyWNwwOEEjIVb7LJPSpvpQN2ZgTOTC9wfi77xJZIMMQ_WJmk3ye8aR6RieSggYywfuU8oSjQAAABTbF2A9ybBtmi4044OFKZc1uHVLxg#http%3A%2F%2Fmhp.sofiadigital.fi%2Ftvportal%2Freferenceapp%2Fvideos%2F01_llama_drama_2160p_25f75g6s%2Fdrm%2Fmanifest.mpd",
+                    "app": 6,
+                    "drm": "marlin",
+                    "img": "icons/image_320x180.jpg",
                     "imagesize": {
-                        "0": 227,
-                        "1": 143,
+                        "0": 320,
+                        "1": 180,
                         "2": 2,
-                        "3": "width=\"227\" height=\"143\"",
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
                         "channels": 3,
                         "mime": "image/jpeg"
                     }
-                }
+                },
+                {
+                    "title": "Gran Dillama AVC 1080p",
+                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmhABCU6FFu1JCKdf2sava6tpz2AICJmbyWhhXDYtCNn-AjcDd5kw1DSFm5AuYtTzGcU9kcUTEKVgEmDkMT74c_zYkLIVLE909WxTQCfNrn2VBsvqWH6KM1wNzImTsonglbgJUN3kWAeNd7tdfFf8Ek2eEK8xjmo-9dd3_dc9TaoYnUyNLMQBcirbxIsdNHjNs8tQr-GQAAABRsz5JgBcFEBnaw4ZxQTLv7EP6zfg#http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "marlin",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "imagesize": {
+                        "0": 320,
+                        "1": 180,
+                        "2": 2,
+                        "3": "width=\"320\" height=\"180\"",
+                        "bits": 8,
+                        "channels": 3,
+                        "mime": "image/jpeg"
+                    }
+                }				
             ]
         },
         {
@@ -488,68 +256,38 @@
             "title": "DASH Widevine",
             "items": [
                 {
-                    "title": "DEMO",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/demo/index.php",
-                    "app": 0
+                    "title": "Llama Drama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "widevine",
+                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnsABCTebeq_LlmxMHAbqzR-qoKAIAlE9xihb7OrZdxLf2hCUyKzG8jGPyW-qO_-lZK-P83hsSUegB1GwzTrDUUtcqI_IRBOSo8Q_anbOV0KjtfIPfQ6_oIHrmbvzRXWa2jic4Qs9agLiu0qg9EXVUvnwBpToHhJWIXwsr4lndx0Qb-iokJSUse_tJ0_QUasfA0q58sCAAAABS2P8mWXSMenxFBK253XkjYfHEbsw#http%3A%2Fmyserver.com%2Fmyvideo%2Fdrm%2Fmanifest.mpd",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p_25f75g6s/image_320x180.jpg"
                 },
                 {
-                    "title": "viestiruutu-wall",
-                    "url": "http://viestiruutu.com/mka/mka/wall",
-                    "app": 0,
-                    "img": "icons/icon_somescreen.png",
+                    "title": "Llama Drama HEVC 2160p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "widevine",
+                    "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=AwAAABc2KZ8AAABwl8m-rkmHWxilRIq3uk7qWNwt8gwIGQvFtJ5eh4CDQDpj8k4aiPmwgoNPlJAWIEIWigv19yMC_DlHRl3fF3hPwrPLCKt3DUUb3E_qxEg7gvVQmp4blW4pqavSn8fKeNG_V5ILiR1KeUSDjZPQvcCGh-YHYlidxUn24NgB4jyXck0ua-Se",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_1080p_25f75g6s/image_320x180.jpg"
+                },
+                {
+                    "title": "Gran Dillama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
+                    "app": 6,
+                    "drm": "widevine",
+                    "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=AwAAABc2KdoAAABgCkHnpc8xrOH6wUdRQgbHfqHCIqeQsZeLQC4p7gzjeCwPlJT88ivOkPBhmoPy1jzru0NA1KygylfOZklDbpKQE9QHaXohnwu1q4qu-avFB5rTMk8Tth5o1jHyNoCOd1KtY_XaocX5yqxS6ued_WTZF9YofOg",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "imagesize": {
-                        "0": 284,
-                        "1": 160,
-                        "2": 3,
-                        "3": "width=\"284\" height=\"160\"",
+                        "0": 320,
+                        "1": 180,
+                        "2": 2,
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
-                        "mime": "image/png"
+                        "channels": 3,
+                        "mime": "image/jpeg"
                     }
-                },
-                {
-                    "title": "Digita-demo",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/digita-demo/startpage/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "RTM",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/rtm/launcher1/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "TELEKOM",
-                    "url": "http://tvportal.sofiadigital.tv/TELEKOM/",
-                    "app": 0
-                },
-                {
-                    "title": "Mediabroadcast",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/mediabroadcast/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "mediaprima azure",
-                    "url": "http://hbbtvapp01.cloudapp.net/mediaprima/tv3/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Atlas catch-up",
-                    "url": "http://tvportal.sofiadigital.tv/atlas/catchup/",
-                    "app": 0,
-                    "img": "icons/Logo_-_Atlas_New_Transparent_Blue_EPS_copy_copy.png",
-                    "imagesize": {
-                        "0": 670,
-                        "1": 478,
-                        "2": 3,
-                        "3": "width=\"670\" height=\"478\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "multithek",
-                    "url": "http://95.81.179.102/multithek/dvbt/index.php",
-                    "app": 0
-                }
+                }				
             ]
         },
         {
@@ -557,94 +295,37 @@
             "title": "Subtitles",
             "items": [
                 {
-                    "title": "Levira Portal DEV",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/levira_hbb/portal/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Vod Kanal2",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/levira_hbb/vod_kanal2/index.php",
-                    "app": 0,
-                    "img": "icons/kanal2.png",
+                    "title": "Gran Dillama AVC 1080p",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest_subob.mpd",
+                    "app": 6,
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "imagesize": {
-                        "0": 240,
-                        "1": 200,
-                        "2": 3,
-                        "3": "width=\"240\" height=\"200\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Vod TV3",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/levira_hbb/vod_tv3/index.php",
-                    "app": 0,
-                    "img": "icons/TV3_red_logo.svg.png",
-                    "imagesize": {
-                        "0": 250,
-                        "1": 250,
-                        "2": 3,
-                        "3": "width=\"250\" height=\"250\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "Vod Err",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/levira_hbb/vod_err/index.php",
-                    "app": 0,
-                    "img": "icons/imgres.jpg",
-                    "imagesize": {
-                        "0": 225,
-                        "1": 225,
+                        "0": 320,
+                        "1": 180,
                         "2": 2,
-                        "3": "width=\"225\" height=\"225\"",
+                        "3": "width=\"320\" height=\"180\"",
                         "bits": 8,
                         "channels": 3,
                         "mime": "image/jpeg"
                     }
                 },
                 {
-                    "title": "Levira News",
-                    "url": "http://media.err.ee:81/uudised/2014-06-19_TR_reinsalu.mp4",
-                    "app": 3
-                }
-            ]
-        },
-        {
-            "center": 0,
-            "title": "Spain",
-            "items": [
-                {
-                    "title": "Informacion TV",
-                    "url": "http://abra4prodprensaibericaali.abertistelecom.com/prensaiberica/",
-                    "app": 0
-                },
-                {
-                    "title": "Canal Sur",
-                    "url": "http://abra4prodcanalsur.abertistelecom.com/CSUR/",
-                    "app": 0
-                },
-                {
-                    "title": "TV de Badalona",
-                    "url": "http://abra4prodxal.abertistelecom.com/tvbadalona/",
-                    "app": 0
-                },
-                {
-                    "title": "Canal Sur",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/abertis/VASTContentProvider/TM/index.html",
-                    "app": 0
-                },
-                {
-                    "title": "VAST Lite",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/abertis/IB3/index.html",
-                    "app": 0
-                },
-                {
-                    "title": "New App - VersionLite",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/abertis/VersionLite/redbutton.php",
-                    "app": 0
-                }
+                    "title": "Gran Dillama AVC 1080p(prproxy)",
+                    "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest_subob.mpd",
+                    "app": 6,
+                    "drm": "playready",
+                    "la_url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/expressplay_pr.php?service=prod1236",
+                    "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "imagesize": {
+                        "0": 320,
+                        "1": 180,
+                        "2": 2,
+                        "3": "width=\"320\" height=\"180\"",
+                        "bits": 8,
+                        "channels": 3,
+                        "mime": "image/jpeg"
+                    }
+                }				
             ]
         },
         {
@@ -661,6 +342,16 @@
                     "eval": "showInfo( chdvb );",
                     "app": 0
                 },
+				{
+                    "title": "Set mode HbbTV 1.5",
+                    "eval": "profile.hbbtv='1.5';showInfo('Set mode: '+profile.hbbtv);",
+                    "app": 0
+                },
+                {
+                    "title": "Set mode HbbTV 2.0.1",
+                    "eval": "profile.hbbtv='2.0';showInfo('Set mode: '+profile.hbbtv);",
+                    "app": 0
+                },				
                 {
                     "title": "Delete cookies",
                     "eval": "deleteAllCookies(true);",
@@ -679,171 +370,6 @@
                 {
                     "title": "Check Internet Connection",
                     "eval": "showInfo( (navigator.onLine )); ",
-                    "app": 0
-                }
-            ]
-        },
-        {
-            "center": 0,
-            "title": "Audio tracks",
-            "items": [
-                {
-                    "title": "AH",
-                    "url": "http://tvportal.sofiadigital.tv/hha/gridEPG2/index.php?server_id=1",
-                    "app": 0,
-                    "img": "icons/mindigtv_logo.jpg",
-                    "imagesize": {
-                        "0": 296,
-                        "1": 397,
-                        "2": 2,
-                        "3": "width=\"296\" height=\"397\"",
-                        "bits": 8,
-                        "channels": 3,
-                        "mime": "image/jpeg"
-                    }
-                },
-                {
-                    "title": "TRT",
-                    "url": "http://tvportal.sofiadigital.tv/hha/gridEPG2/index.php?server_id=12",
-                    "app": 0,
-                    "img": "icons/TRT_ARTI1.png",
-                    "imagesize": {
-                        "0": 600,
-                        "1": 127,
-                        "2": 3,
-                        "3": "width=\"600\" height=\"127\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                },
-                {
-                    "title": "RTM",
-                    "url": "http://tvportal.sofiadigital.tv/rtm/gridEPG2/",
-                    "app": 0
-                },
-                {
-                    "title": "Delta",
-                    "url": "http://tvportal.sofiadigital.tv/deltahbbtv/epg/",
-                    "app": 0
-                },
-                {
-                    "title": "Toggle with DayMenu (DEV)",
-                    "url": "http://tvportal.sofiadigital.tv/hha/toggleEPG_withDayMenu/index.php",
-                    "app": 0,
-                    "img": "icons/togglered.jpg",
-                    "imagesize": {
-                        "0": 227,
-                        "1": 143,
-                        "2": 2,
-                        "3": "width=\"227\" height=\"143\"",
-                        "bits": 8,
-                        "channels": 3,
-                        "mime": "image/jpeg"
-                    }
-                },
-                {
-                    "title": "Mediaprima (DEV)",
-                    "url": "http://tvportal.sofiadigital.tv/hha/mediaprimaGridEPG/epg/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Anglatecnic",
-                    "url": "http://tvportal.sofiadigital.tv/anglatecnic/epg/",
-                    "app": 0
-                },
-                {
-                    "title": "ATLAS",
-                    "url": "http://tvportal.sofiadigital.tv/atlas/epg/",
-                    "app": 0,
-                    "img": "icons/Logo_-_Atlas_New_Transparent_Blue_EPS_copy_copy.png",
-                    "imagesize": {
-                        "0": 670,
-                        "1": 478,
-                        "2": 3,
-                        "3": "width=\"670\" height=\"478\"",
-                        "bits": 8,
-                        "mime": "image/png"
-                    }
-                }
-            ]
-        },
-        {
-            "center": 0,
-            "title": "Dolby",
-            "items": [
-                {
-                    "title": "Puzzle",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/puzzle/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Snake Game",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/Snake/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Chat applikaatio",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/PHP/PHPreadwrite/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "QR code - Icehockey",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/QR-code-test/index.html",
-                    "app": 0
-                },
-                {
-                    "title": "TimoTest",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/TimoTest/index.html",
-                    "app": 0
-                },
-                {
-                    "title": "Brightcove",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/brightcove/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "news Sofia",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/news_sofia/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "Dog-years",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/Human-Dog-years/HDY-HbbTV/index.html",
-                    "app": 0
-                },
-                {
-                    "title": "kello",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/clock/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "TRT weather-TVa",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/TRT_Weather/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "gMap-TVA",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/gMapsForHbbTV/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "HTML player",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/html_player/demos/player.html",
-                    "app": 0
-                },
-                {
-                    "title": "videotest",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/videotest/videos_myth.php",
-                    "app": 0
-                },
-                {
-                    "title": "Vplayer",
-                    "url": "http://212.226.118.80/videos/editordrm/soitin/index.php",
-                    "app": 0
-                },
-                {
-                    "title": "CSS editor",
-                    "url": "http://mhp.sofiadigital.fi/tvportal/tva/CSSeditors/wysiwyg-editor/distribution/demo.php",
                     "app": 0
                 }
             ]

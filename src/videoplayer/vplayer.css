@@ -2,12 +2,15 @@
 	position: absolute;
 	z-index: 20;
 	overflow: hidden;
+	opacity : 1.0;
+	transition: opacity 1s;
+	_width:100%;
+	_height: 100%;
 }
 #video {
   display: block;
-  height: 100%;
-  width: 100%;
-  z-index: 100;
+  _height: 100%;
+  _width: 100%;
 }
 #loadingImage {
 	background: rgba(0, 0, 0, 0) url("images/loading.gif") repeat scroll 0 0;
@@ -20,15 +23,16 @@
 	z-index: 20;
 }
 .hidden:not(#player_buttons){
-	display: none !important;
+	_display: none !important;
+	opacity : 0.0;
 }
 
 .fullscreen {
 	position: absolute;
-	top: 0px;
-	left: 0px;
-	width: 1280px;
-	height: 720px;
+	top: 0px !important;
+	left: 0px !important;
+	width: 1280px !important;
+	height: 720px !important;
 }
 
 /* Player controls */

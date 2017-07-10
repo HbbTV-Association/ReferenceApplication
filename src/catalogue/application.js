@@ -28,7 +28,13 @@ function init()
 		setLoading(false);
 	}, "json");
 	try{
-		vplayer = new VideoPlayer("videodiv", profile, 1280, 720);
+		if( profile.hbbtv == "1.5" ){
+			vplayer = new VideoPlayer("videodiv", profile);
+		}
+		else {
+			vplayer = new VideoPlayerHTML5("videodiv", profile);
+		}
+		vplayer.populate();
 	} catch(e){
 		console.log( e.message );
 	}

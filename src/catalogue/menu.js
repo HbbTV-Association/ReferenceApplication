@@ -70,54 +70,26 @@ Menu.prototype.setActiveItem = function(item){
 			}
 
 			console.log("activated GridViewBox");
+			
+			// TODO: fix video div css attributes and logic. video screen dimensions must be absolute value, not percentage
+			/*
 			if(self.focus.url && self.focus.url.length > 0){
 				if(self.focus.url.isVideoURL()){
+					
+					
+					console.log("temporaty disabled video autostart in preview");
+					return true;
+					
 					self.startBoxVideoTimeout = setTimeout( function(){
-						console.log("start video in GridViewBox box");
-						try{
-							for(var i = 0; i < vplayer.element.childNodes.length; i++){
-								if(vplayer.element.childNodes[i].id == "video" && vplayer.element.childNodes[i].tagName == "OBJECT"){
-									vplayer.element.removeChild(vplayer.element.childNodes[i]);
-								}
-							}
-						}
-						catch(e){
-							console.log(e);
-						}
 						
-						if(vplayer.video == null){
-							vplayer.populate();
-						}
-						
-						try{
-							vplayer.setURL( self.focus.url );
-							if( self.focus.la_url ){
-								vplayer.setDRM( "playready", self.focus.la_url );
-							}
-							else{
-								vplayer.setDRM( false );
-							}
-							//vplayer.video.data = self.focus.url;
-						} catch(e){
-							console.log("try: " + self.focus.url + " : " + e.message );
-						}
-						//self.focus.addVideo(vplayer.video, (self.focus.url) );
-						var position = $( self.focus.element ).offset();
-						$( "#videodiv" ).css( { 
-							position: "absolute", 
-							left : position.left, 
-							top : position.top, 
-							width : self.focus.element.offsetWidth + "px", 
-							height : self.focus.element.offsetHeight + "px",
-							"z-index" : 999
-						} );
-						//vplayer.video.setAttribute("width", self.focus.element.offsetWidth);
-						//vplayer.video.setAttribute("height", self.focus.element.offsetHeight);
+						self.prepareVideoStart();
 						vplayer.setFullscreen(false);
+						vplayer.setDisplay( self.focus.element );
 						vplayer.startVideo();
-					}, 3000);
+					}, 1500);
 				}
 			}
+			*/
 		}
 		return true;
 	}
@@ -159,21 +131,32 @@ Menu.prototype.navigate = function(key){
 					if( self.focus.eval ){
 						eval( self.focus.eval );
 					}
-					if(self.focus.url && self.focus.url.length > 0){
+					else if(self.focus.url && self.focus.url.length > 0){
 						console.log(self.focus.url);
-						if( self.focus.url.match(/\.mpd$/) ){
-							try{
-								vplayer.video.data = self.focus.url;
-								if( self.focus.la_url ){
-									vplayer.setDRM( "playready", self.focus.la_url );
-								}
-								else{
-									vplayer.setDRM( false );
-								}
-							} catch(e){
-								console.log("try: " + self.focus.url + " : " + e.message );
+						if( self.focus.url.match(/\.mpd$/) || self.focus.url.match(/\.mp4$/) ){
+							
+							// if profile changed, to 1.5 use VideoPlayer
+							if( profile.hbbtv == "1.5" && !(vplayer instanceof VideoPlayer ) ){
+								vplayer = new VideoPlayer("videodiv", profile);
+								vplayer.populate();
 							}
-							vplayer.startVideo();
+							else if( profile.hbbtv == "2.0" && !(vplayer instanceof VideoPlayerHTML5 ) ){
+								vplayer = new VideoPlayerHTML5("videodiv", profile);
+								vplayer.populate();
+							}
+							
+							// if video has not autostarted, start it
+							if( !vplayer.isPlaying() ){
+								console.log("init player session");
+								Monitor.initSession( self.focus.url, 6, profile.video, function(){
+									Monitor.videoStart();
+									self.prepareVideoStart();
+									vplayer.startVideo();
+								}); 
+							}
+							// change to fullscreen mode
+							vplayer.setFullscreen(true);
+							//vplayer.setDisplay( $("body")[0] ); //
 						}
 						else{
 							window.location.href = self.focus.url;
@@ -300,7 +283,33 @@ String.prototype.isVideoURL = function(){
 	return vplayer.getVideoType(file_extension) != null;
 }
 
-
+Menu.prototype.prepareVideoStart = function(){
+	var self = this;
+	if( vplayer.video == null ){
+		vplayer.createPlayer();
+	}
+	
+	try{
+		
+		// if marlin videos are formatted as tokenURL#media, extract them to fit for player interface
+		if( self.focus.drm == "marlin" && self.focus.url.match(/\#/) ){
+			var parts = url.split("#");
+			self.focus.la_url = parts[0];
+			self.focus.url = parts.parts[1];
+		}
+		
+		vplayer.setURL( self.focus.url );
+		if( self.focus.la_url ){
+			vplayer.setDRM( self.focus.drm, self.focus.la_url );
+		}
+		else{
+			vplayer.setDRM( false );
+		}
+		//vplayer.video.data = self.focus.url;
+	} catch(e){
+		console.log("try: " + self.focus.url + " : " + e.message );
+	}
+}
 
 
 

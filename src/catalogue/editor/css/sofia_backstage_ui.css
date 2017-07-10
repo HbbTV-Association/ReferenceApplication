@@ -157,6 +157,9 @@ tr[name=item] > td:nth-child(4){
 tr[name=item] > td:nth-child(5){
 	min-width:215px;
 }
+tr[name=item] > td:nth-child(8){
+	min-width:150px;
+}
 
 td{
 	vertical-align:top;

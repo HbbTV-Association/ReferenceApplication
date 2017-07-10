@@ -78,10 +78,14 @@ function showInfo( msg, timeout, inMs )
     }, timeout * ( inMs? 1 : 1000));
 	try{
 		$("#info").removeClass("hide");
-		$("#info").html( msg );
+		if( typeof msg != "string" ){
+			msg = JSON.stringify( msg );
+		}
+		$("#info").html( XMLEscape( msg ) );
+		console.log( msg  );
 	}
 	catch(e){
-		console.log( "error in show info function" );
+		console.log( "error in show info function: " + e.message );
 	}
 }
 
@@ -251,8 +255,32 @@ function XMLEscape(sValue, bUseApos) {
   return sval;
 }
 
+window.onerror = function(message, url, lineNumber) { 
+	showInfo( message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10 );
+    console.log(message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10);
+	return false; // when false, print it also to js console
+};
 
 
+	
+function updateOnlineStatus(event) {
+	var condition = navigator.onLine ? "online" : "offline";
+    console.log("Connection state changed to: " + condition);
+	showInfo("Connection state changed to: " + condition);
+}
 
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// adds event listener (action) for multiple (events) "separated by space" for object (obj) 
+function addEventListeners( obj, events, action ){
+	$.each(events.split(" "), function(i,event){
+		obj.addEventListener( event, action );		
+	});
+}
+
+function addZeroPrefix(n){
+	return ("0" + n).slice(-2);
+}
 
 

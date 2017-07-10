@@ -4,7 +4,7 @@
 //include_once("funcs.php");
 
 // enter to hidden superadmin page
-if( isset( $_GET['admin'] ) && isset( $_GET['admin'] ) == "sofiapeelo-salasana" )
+if( isset( $_GET['admin'] ) && $_GET['admin']  == "sofiapeelo-salasana" )
 {
 	header("location:admin.php?admin=". $_GET['admin']);
 	die();
@@ -14,48 +14,23 @@ if( isset( $_GET['admin'] ) && isset( $_GET['admin'] ) == "sofiapeelo-salasana" 
 
 
 session_start();
-if ($_SESSION['login']!= true)
+if ( !isset( $_SESSION['login'] ) || $_SESSION['login']!= true)
 {
 	header("location:login.php");
 }
 
-if( $_SESSION['uploadApp'] )
+if( isset( $_SESSION['uploadApp'] ) )
 {
 	$message = $_SESSION['uploadApp'];
 	unset( $_SESSION['uploadApp'] );
 }
-if( $_SESSION['uploadVideo'] )
+if( isset( $_SESSION['uploadVideo'] ) )
 {
 	$videoMessage = $_SESSION['uploadVideo'];
 	unset( $_SESSION['uploadVideo'] );
 }
 
 $settings = json_decode( file_get_contents("secret_conf_file.json"), true );
-
-$evt_name = "event1";
-
-//$evt_content = file_get_contents("http://mhp.sofiadigital.fi/tvportal/polling/actions.php?act=getevent&name=".$evt_name);
-
-include_once('config.php');
-$dbcon = @mysql_connect($dbhost, $dbuser, $dbpass);
-$SQL_server_db = @mysql_select_db($dbname, $dbcon);
-$dbaction = "SELECT id, name, url, img, x, y, delay, vk FROM $templates_table WHERE id=0";
-$dbexec = @mysql_query($dbaction, $dbcon);
-if (!$dbexec) {
-	header("location:error.php?err=20");
-	mysql_close($dbcon);
-	exit;
-}
-$evt_id = mysql_result($dbexec, 0, "id");
-$evt_name = mysql_result($dbexec, 0, "name");
-$evt_url = mysql_result($dbexec, 0, "url");
-$evt_img = mysql_result($dbexec, 0, "img");
-$evt_x = mysql_result($dbexec, 0, "x");
-$evt_y = mysql_result($dbexec, 0, "y");
-$evt_delay = mysql_result($dbexec, 0, "delay");
-$evt_vk = mysql_result($dbexec, 0, "vk");
-
-mysql_close($dbcon);
 
 $eventkeys = array("VK_GREEN","VK_YELLOW","VK_BLUE","VK_ENTER","VK_0","VK_1","VK_2","VK_3","VK_4","VK_5","VK_6","VK_7","VK_8","VK_9");
 $apptypes = array("Link","App","Video TS","Video MP4","Audio MP3","Audio MP4");
