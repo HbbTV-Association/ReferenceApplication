@@ -40,7 +40,7 @@
 	<script src='topmenu.js?version=1471527651' type='text/javascript'></script>
 	<script src='topmenuitem.js?version=1470740434' type='text/javascript'></script>
 	<script src='../videoplayer/videoplayer_html5.js?version=1499073910' type='text/javascript'></script>
-	<script src='../videoplayer/videoplayercontrols.js?version=1498637849' type='text/javascript'></script>
+	<!-- script src='../videoplayer/videoplayercontrols.js?version=1498637849' type='text/javascript'></script -->
 	<script src='../debugscreen.js?version=1498571047' type='text/javascript'></script>
 	<script src='navigation.js?version=1498026910' type='text/javascript'></script>
 	<script src='../videoplayer/monitor/monitor.js' type='text/javascript'></script>
@@ -77,6 +77,7 @@
 	<div id="wrapper">
 		<div id="logo"></div>
 		<div id="menu"></div>
+		<div id="itemDescription"></div>
 	</div>
 	
 	<div id="info" class="hide"></div>

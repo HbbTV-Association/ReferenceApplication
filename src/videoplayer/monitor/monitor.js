@@ -1,6 +1,6 @@
 /* Video Playback Monitor */
 
-var Monitor = new monitor( "../videoplayer/monitor/" );
+//var Monitor = new monitor( "../videoplayer/monitor/" );
 var Monitor = new monitor( "http://mhp.sofiadigital.fi/tvportal/referenceapp_monitor/" );
 
 function monitor( monitorRoot ) {
@@ -56,10 +56,10 @@ function monitor( monitorRoot ) {
 		
 		$.ajax({ 
 			async: true,
-			crossDomain: true,
-			xhrFields: {
-				withCredentials: true
-			},
+			//crossDomain: true,
+			//xhrFields: {
+			//	withCredentials: true
+			//},
 			type: "POST",
 			url: self.monitorRoot + "inittest.php",
 			contentType: "application/json; charset=utf-8",
@@ -173,10 +173,10 @@ function monitor( monitorRoot ) {
 
 		$.ajax({ 
 			async: true,
-			crossDomain: true,
-			xhrFields: {
-				withCredentials: true
-			},
+			//crossDomain: true,
+			//xhrFields: {
+			//	withCredentials: true
+			//},
 			type: "POST",
 			url: self.monitorRoot +  "senddata.php",
 			contentType: "application/json; charset=utf-8",

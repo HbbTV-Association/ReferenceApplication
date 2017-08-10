@@ -9,8 +9,8 @@
 }
 #video {
   display: block;
-  _height: 100%;
-  _width: 100%;
+  height: 720px;
+  width: 1280px;
 }
 #loadingImage {
 	background: rgba(0, 0, 0, 0) url("images/loading.gif") repeat scroll 0 0;
@@ -34,6 +34,175 @@
 	width: 1280px !important;
 	height: 720px !important;
 }
+
+.colorbtn {
+	display: inline-block;
+	background: url(../icons/colorbtns.png) no-repeat;
+	height: 30px;
+	width: 30px;
+	margin-right: 12px;
+	vertical-align: bottom;
+}
+#prew, #pff{
+	height: 30px;
+	width: 35px;
+	vertical-align: bottom;
+	top: 25px;
+	position: absolute;
+}
+#prew{
+	background: url(../icons/rew.png) no-repeat;
+	left: 75px;
+}
+#prew.activated{
+	background: url(../icons/rew_active.png) no-repeat !important;
+}
+#pff{
+	background: url(../icons/ff.png) no-repeat;
+	left: 185px;
+}
+#pff.activated{
+	background: url(../icons/ff_active.png) no-repeat !important;
+}
+
+#pff.disabled, #prew.disabled {
+	display: none !important;
+}
+
+#playerTitle, #player {
+	position: absolute;
+	left: 0px;
+	color: #FFF;
+	z-index: 527 !important;
+	font-size: 22px;
+	line-height: 1;
+	-o-transition: all 0.3s;
+	-moz-transition: all 0.3s;
+	-webkit-transition: all 0.3s;
+	transition: all 0.3s;
+}
+#playerTitle {
+	opacity: 0;
+	top: 0px;
+	padding-left: 0px;
+	width:1280px;
+	padding-top: 0px;
+	height: 400px;
+}
+#playerTitle.show{
+	opacity: 1;
+}
+
+#player {
+	width: 1280px;
+	height: 0px;
+	bottom: 0px;
+	background: rgba(0,0,0,0.4);
+}
+#player.show{
+	height : 150px !important;
+}
+#playposition {
+	position: absolute;
+	top: 47px;
+	left: 50%;
+	font-size: 13px;
+	z-index: 999;
+	height: 20px;
+	line-height: 20px;
+	width: 90px;
+	text-align: center;
+	margin-left: 160px;
+}
+#playtime {
+	position: absolute;
+	top: 23px;
+	left: 1010px;
+	font-size: 16px;
+	z-index: 999;
+	height: 30px;
+	line-height: 30px;
+	width: 200px;
+	text-align: right;
+}
+
+#progressbarbg {
+	position: absolute;
+	top: 33px;
+	left: 234px;
+	width: 895px;
+	height: 8px;
+	background-color: #181818;
+	background-color: black
+}
+#progressbar {
+	position: absolute;
+	background-color: #c60d90;
+	top: 33px;
+	left: 234px;
+	width: 895px;
+	height: 8px;
+}
+#progress_currentTime {
+	width: 2px;
+	background-color: #c60d90;
+	height: 18px;
+	position: absolute;
+	top: 28px;
+	left: 234px;
+	margin-left: 234px;
+	z-index: 100;
+}
+
+#progress_liveTime{
+	width: 120px;
+	height: 20px;
+	position: absolute;
+	z-index: 100;
+	top: 47px;
+    left: 234px;
+}
+
+
+#ppauseplay {
+	position: absolute;
+	top: 22px;
+	left: 132px;
+	width: 30px;
+	line-height: 30px;
+}
+.vcrbtn {
+	display: inline-block;
+	background: url(../icons/vcrbtns.png) no-repeat;
+	height: 30px;
+	margin-right: 15px;
+	vertical-align: bottom;
+}
+#pstop .vcrbtn {
+	background-position: 0px 0px;
+	width: 15px;
+}
+.play .vcrbtn {
+	background-position: -31px 0px;
+	width: 16px;
+	margin-left: 5px;
+}
+.play.activated .vcrbtn {
+	background-position: -31px 0px;
+	width: 16px;
+	margin-left: 5px;
+	background-image:url(../icons/vcrbtns_active.png);
+}
+.pause .vcrbtn {
+	background-position: -7px 0px;
+	width: 24px;
+}
+.pause.activated .vcrbtn {
+	background-position: -7px 0px;
+	width: 24px;
+	background-image:url(../icons/vcrbtns_active.png);
+}
+
 
 /* Player controls */
 

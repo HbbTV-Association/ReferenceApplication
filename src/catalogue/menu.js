@@ -292,11 +292,13 @@ Menu.prototype.prepareVideoStart = function(){
 	try{
 		
 		// if marlin videos are formatted as tokenURL#media, extract them to fit for player interface
+		/* This is for now commented out. If marlin url is formatted marlin.drm#dash.mpd use the url straight and not separate them as playurl and lisence url for drm agent
 		if( self.focus.drm == "marlin" && self.focus.url.match(/\#/) ){
 			var parts = url.split("#");
 			self.focus.la_url = parts[0];
 			self.focus.url = parts.parts[1];
 		}
+		*/
 		
 		vplayer.setURL( self.focus.url );
 		if( self.focus.la_url ){

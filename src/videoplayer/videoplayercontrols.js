@@ -61,10 +61,13 @@ VideoPlayerControls.prototype.navigate = function(key){
 	try{
 		switch(key){
 			case VK_LEFT:
+			
+			
 				var idx = self.buttons.indexOf(self.focusedButton);
 				if(idx > 0){
 					self.setFocus(self.buttons[idx-1]);
 				}
+			
 			break;
 
 			case VK_RIGHT:

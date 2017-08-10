@@ -40,10 +40,14 @@ GridViewBox.prototype.populate = function(){
 GridViewBox.prototype.setFocus = function(){
 	this.focused = true;
 	this.element.addClass("focused");
+	$("#itemDescription").html( this.desc );
+	console.log("focused desc: " + this.desc);
+	console.log("GridViewBox.prototype.setFocus");
 }
 GridViewBox.prototype.unsetFocus = function(){
 	this.focused = false;
 	this.element.removeClass("focused");
+	$("#itemDescription").html("");
 }
 
 GridViewBox.prototype.setVisible = function(visible){

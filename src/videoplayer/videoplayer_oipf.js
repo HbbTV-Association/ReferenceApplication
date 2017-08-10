@@ -1,4 +1,6 @@
-
+/***
+	OIPF AV-object player impelmentation for HbbTV
+***/
 
 
 function VideoPlayer(element_id, profile, width, height){
@@ -36,7 +38,7 @@ function VideoPlayer(element_id, profile, width, height){
 
 VideoPlayer.prototype.init = function(){
 	var self = this;
-	
+	/*
 	var buttons = [
 		{
 			"id": "pause_icon", 
@@ -73,43 +75,72 @@ VideoPlayer.prototype.init = function(){
 	for(var i = 0; i < buttons.length; i++){
 		this.controls.addButton(buttons[i].id, buttons[i].action);
 	}
+	*/
 }
 
 VideoPlayer.prototype.populate = function(){
 	this.element.innerHTML = "";
-	console.log("Try to create av-object ");
-	this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
-	console.log("Player created " + this.video);
-	this.element.appendChild(this.video);
+	this.video = null;
+	//console.log("Try to create av-object ");
+	//this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
+	//console.log("Player created " + this.video);
+	//this.element.appendChild(this.video);
 	this.loadingImage = document.createElement("div");
 	this.loadingImage.setAttribute("id", "loadingImage");
 	this.loadingImage.addClass("hidden");
 	this.element.appendChild(this.loadingImage);
-	this.element.appendChild(this.controls.element);
+	//this.element.appendChild(this.controls.element);
 	this.setFullscreen(true);
+}
+
+VideoPlayer.prototype.displayPlayer = function( sec ){
+	clearTimeout( this.hidePlayerTimer );
+	$("#player").removeClass("hide");
+	$("#player").addClass("show");
+	if(sec){
+		this.hidePlayerTimer = setTimeout( function(){
+			$("#player").removeClass("show");
+		}, sec * 1000);
+	}
 }
 
 VideoPlayer.prototype.navigate = function(key){
 	var self = this;
 	switch(key){
 		case VK_UP:
-			self.controls.show();
+			//self.controls.show();
+			self.displayPlayer(5);
 		break;
 
 		case VK_DOWN:
-			self.controls.hide();
+			//self.controls.hide();
+			self.displayPlayer(5);
 		break;
 
 		case VK_BACK:
 		case VK_STOP:
-			self.clearVideo();
+			//self.clearVideo();
+			self.stop();
 		break;
 
 		case VK_LEFT:
+		case VK_REWIND:
+			this.rewind( 30 );
+			self.displayPlayer(5);
+			break;
 		case VK_RIGHT:
+		case VK_FAST_FWD:
+			this.forward( 30 );
+			self.displayPlayer(5);
+			break;
 		case VK_ENTER:
-			self.controls.navigate(key);
-		break;
+			if( this.isPlaying() ){
+				this.pause();
+			}
+			else{
+				this.play();
+			}
+			break;
 	}
 }
 
@@ -127,7 +158,29 @@ VideoPlayer.prototype.setDisplay = function( container ){
 		this.setFullscreen(true);
 	}
 };
+VideoPlayer.prototype.createPlayer = function(){
+	
+	var self = this;
 
+	if( !$("#player")[0] ){
+		$("body").append( '<div id="player" class="hide">'
+			+'<div id="playposition"></div>'
+			+'<div id="playtime"></div>'
+			+'<div id="progress_currentTime" style="left:130px"></div>'
+            +'<div id="progressbarbg"></div><div id="progressSeekable" style="transition03all"></div><div id="progressbar" style="transition03all"></div>'
+			+'<div id="prew"></div>'
+			+'<div id="ppauseplay" class="pause"><div class="vcrbtn"></div><span id="pauseplay"></span></div> '
+			+'<div id="pff"></div>'
+			+'</div>');
+		console.log("Add player component");
+	}
+
+	if( this.profile.hbbtv == "1.5" ){
+		this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
+		this.element.appendChild( this.video );
+		return true;
+	}
+};
 
 VideoPlayer.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
@@ -136,18 +189,20 @@ VideoPlayer.prototype.setURL = function(url){
 	if( ! url.match(/^https?\:/) && typeof defaultVideoRoot == "string" && defaultVideoRoot.length ){
 	//	url = defaultVideoRoot + url;
 	}
+	var type = "application/dash+xml";
+	if( url.match(/mp4$/) ){
+		this.video.setAttribute("type", "video/mp4");
+	}
+	else{
+		this.video.setAttribute("type", type );
+	}
 	try{
 		//this.url = url;
 		this.video.data = url;
 	} catch( e ){
 		console.log( e.message );
 	}
-	
-	var type = "application/dash+xml";
-	//var type = this.getVideoType( url );
-	console.log("video type ", type);
-	
-	this.video.setAttribute("type", type );
+
 	return;
 };
 
@@ -196,11 +251,14 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 	if( !$("#drm")[0] ){
 		$("body").append("<div id='drm'></div>");
 	}
+	
+	console.log("Create DRM agent");
 	$("#drm").html('<object id="oipfDrm" type="application/oipfDrmAgent" width="0" height="0"></object>');
 	this.oipfDrm = $("#oipfDrm")[0];
 	this.drm.successCallback = callback;
 	var self = this;
 	// Case Playready
+	// TODO: other DRMs
 	if( this.drm.system == "playready" ){
 		var msgType = "application/vnd.ms-playready.initiator+xml";
 		var xmlLicenceAcquisition =
@@ -213,25 +271,37 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		  '</LicenseServerUriOverride>' +
 		'</PlayReadyInitiator>';
 		var DRMSysID = "urn:dvb:casystemid:19219";
-		try {
-			this.oipfDrm.onDRMMessageResult = drmMsgHandler;
-		} catch (e) {
-			console.log("sendLicenseRequest Error 1: " + e.message );
-		}
-		try {
-			this.oipfDrm.onDRMRightsError = drmRightsErrorHandler;
-		} catch (e) {
-			console.log("sendLicenseRequest Error 2: " + e.message );
-		}
-		try {
-			this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-		} catch (e) {
-			console.log("sendLicenseRequest Error 3: " + e.message );
-		}
+		
 	}
+	else if( this.drm.system == "marlin" ){
+		var msgType = "application/vnd.marlin.drm.actiontoken+xml";
+		var xmlLicenceAcquisition =
+		'<?xml version="1.0" encoding="utf-8"?>' +
+		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ this.drm.la_url +'</URL></RightsIssuer></RightsURL></Marlin>';
+		var DRMSysID = "urn:dvb:casystemid:19188";
+	}
+	
+	try {
+		this.oipfDrm.onDRMMessageResult = drmMsgHandler;
+	} catch (e) {
+		console.log("sendLicenseRequest Error 1: " + e.message );
+	}
+	try {
+		this.oipfDrm.onDRMRightsError = drmRightsErrorHandler;
+	} catch (e) {
+		console.log("sendLicenseRequest Error 2: " + e.message );
+	}
+	try {
+		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+	} catch (e) {
+		console.log("sendLicenseRequest Error 3: " + e.message );
+	}
+	
+	
 	
 	function drmMsgHandler(msgID, resultMsg, resultCode) {
 		showInfo("msgID, resultMsg, resultCode: " + msgID +","+  resultMsg +","+ resultCode);
+		var errorMessage = "";
 		switch (resultCode) {
 			case 0:
 				self.drm.ready = true;
@@ -239,37 +309,44 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 				self.drm.successCallback();
 			break;
 			case 1:
-				showInfo("DRM: Unspecified error");
+				errorMessage = ("DRM: Unspecified error");
 			break;
 			case 2:
-				showInfo("DRM: Cannot process request");
+				errorMessage = ("DRM: Cannot process request");
 			break;
 			case 3:
-				showInfo("DRM: Wrong format");
+				errorMessage = ("DRM: Wrong format");
 			break;
 			case 4:
-				showInfo("DRM: User Consent Needed");
+				errorMessage = ("DRM: User Consent Needed");
 			break;
 			case 5:
-				showInfo("DRM: Unknown DRM system");
+				errorMessage = ("DRM: Unknown DRM system");
 			break;
+		}
+		
+		if( resultCode > 0 ){
+			showInfo( errorMessage );
+			Monitor.drmError(errorMessage);
 		}
 	}
 
 	function drmRightsErrorHandler(resultCode, id, systemid, issuer) {
+		var errorMessage = "";
 		switch (resultCode) {
 			case 0:
-				showInfo("DRM: No license error");
+				errorMessage = ("DRM: No license error");
 			break;
 			case 1:
-				showInfo("DRM: Invalid license error");
+				errorMessage = ("DRM: Invalid license error");
 			break;
 			case 2:
-				showInfo("license valid");
+				errorMessage = ("license valid");
 			break;
 		}
+		showInfo( errorMessage );
+		Monitor.drmError(errorMessage);
 	}
-	
 
 };
 
@@ -315,7 +392,8 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 		
 		if(fullscreen){
 			self.setFullscreen(fullscreen);
-			self.controls.show();
+			//self.controls.show();
+			self.displayPlayer(5);
 		}
 	}
 	catch(e){
@@ -327,7 +405,8 @@ VideoPlayer.prototype.pause = function(){
 	var self = this;
 	try{
 		self.video.play(0);
-		self.controls.show();
+		//self.controls.show();
+		self.displayPlayer();
 		console.log("video should be playing now");
 	}
 	catch(e){
@@ -350,7 +429,8 @@ VideoPlayer.prototype.play = function(){
 	var self = this;
 	try{
 		self.video.play(1);
-		self.controls.show();
+		//self.controls.show();
+		self.displayPlayer(5);
 	}
 	catch(e){
 		console.log(e);
@@ -360,8 +440,11 @@ VideoPlayer.prototype.play = function(){
 VideoPlayer.prototype.rewind = function(){
 	var self = this;
 	try{
-		self.video.seek(Math.max(self.video.playPosition-30000, 0));
-		self.controls.show();
+		var ms = Math.max(self.video.playPosition-30000, 0);
+		self.video.seek( ms );
+		Monitor.videoSeek( Math.round( ms/1000 ) );
+		//self.controls.show();
+		self.displayPlayer(5);
 	}
 	catch(e){
 		console.log(e);
@@ -371,9 +454,11 @@ VideoPlayer.prototype.rewind = function(){
 VideoPlayer.prototype.forward = function(){
 	var self = this;
 	try{
-
-		self.video.seek(Math.min(self.video.playPosition+(30000), self.video.playTime));
-		self.controls.show();
+		var ms = Math.min(self.video.playPosition+(30000), self.video.playTime);
+		self.video.seek( ms ); 
+		Monitor.videoSeek( Math.round( ms/1000 ) );
+		//self.controls.show();
+		self.displayPlayer(5);
 	}
 	catch(e){
 		console.log(e);
@@ -388,10 +473,12 @@ VideoPlayer.prototype.clearVideo = function(){
 	try{
 		if(self.video){
 			self.video.stop();
+			$( "#video" ).remove(); // clear from dom
+			this.video = null;
 		}
 	}
 	catch(e){
-		console.log(e);
+		console.log( e.description );
 	}
 	this.subtitles = null;
 }
@@ -414,6 +501,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
         case 0: // stopped
         	clearInterval(self.progressUpdateInterval);
             self.setLoading(false);
+			Monitor.videoEnded(console.log);
             break;
         case 1: // playing
         	console.log("playing");
@@ -421,35 +509,39 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             self.setLoading(false);
             clearInterval(self.progressUpdateInterval);
             self.progressUpdateInterval = window.setInterval( function(){
-            	self.updateProgressBar()
+            	self.updateProgressBar();
             }, 1000);
+			Monitor.videoPlaying();
             break;
         case 2: // paused
             self.setLoading(false);
             clearInterval(self.progressUpdateInterval);
             if(self.isFullscreen()){
-                self.controls.show();
+                //self.controls.show();
             }
+			Monitor.videoPaused();
             break;
         case 3: // connecting
         	clearInterval(self.progressUpdateInterval);
             self.setLoading(true, "Connecting");
+			Monitor.videoConnecting();
             break;
         case 4: // buffering
         	clearInterval(self.progressUpdateInterval);
             self.setLoading(true, "Buffering");
+			Monitor.videoBuffering();
             break;
         case 5: // finished
         	clearInterval(self.progressUpdateInterval);
             self.setLoading(false);
             if(self.isFullscreen()){
-                self.controls.show();
+                //self.controls.show();
             }
             break;
         case 6: // error
         	clearInterval(self.progressUpdateInterval);
             self.setLoading(false);
-            self.controls.hide();
+            //self.controls.hide();
             var error = "";
             switch (self.video.error) {
                 case 0:
@@ -464,6 +556,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             }
             console.log("Error!: " + error);
             showInfo("Error!: " + error);
+			Monitor.videoError( error );
             //self.clearVideo();
             break;
         default:
@@ -474,27 +567,49 @@ VideoPlayer.prototype.doPlayStateChange = function(){
 }
 
 VideoPlayer.prototype.updateProgressBar = function(){
-	var self = this;
-	if(self.controls.progressbar){
-		self.controls.progressbar.style.width = self.controls.progressbar.parentNode.offsetWidth * (self.video.playPosition / self.video.playTime) + "px";
-	}
+	try{
+		var self = this;
+		var position = this.video.playPosition;
+		var duration = this.video.playTime;
+		
+		console.log("update progress bar");
+		
+		pbar = document.getElementById("progressbar");
 
-	document.getElementById("playPosition").innerHTML = "";
-	var playPosition = self.video.playPosition;
-	if(playPosition){
-		var pp_hours = Math.floor(playPosition / 1000 / 60 / 60);
-		var pp_minutes = Math.floor((playPosition-(pp_hours*1000*60*60)) / 1000 / 60);
-		var pp_seconds = Math.round((playPosition-(pp_hours*1000*60*60)-(pp_minutes*1000*60)) / 1000);
-		document.getElementById("playPosition").innerHTML = addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds);
-	}
+		var barWidth = Math.floor((position / duration) * 895 );
+		if(barWidth > 895){
+			barWidth = 895;
+		}
+		else if( barWidth < 0 ){
+			barWidth = 0;
+		}
+		
+		pbar.style.width = barWidth + "px";
+		
+		var play_position = barWidth;
+		
+		$("#playposition").css("left", play_position);
+		$("#progress_currentTime").css("left", play_position);
 
-	document.getElementById("playTime").innerHTML = "";
-	var playTime = self.video.playTime;
-	if(playTime){
-		var pt_hours = Math.floor(playTime / 1000 / 60 / 60);
-		var pt_minutes = Math.floor((playTime-(pt_hours*1000*60*60)) / 1000 / 60);
-		var pt_seconds = Math.round((playTime-(pt_hours*1000*60*60)-(pt_minutes*1000*60)) / 1000);
-		document.getElementById("playTime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
+
+		
+		$("#playposition").html("");
+		if(position){
+			var pp_hours = Math.floor(position / 1000 / 60 / 60);
+			var pp_minutes = Math.floor((position / 1000 -(pp_hours*60*60)) / 60);
+			var pp_seconds = Math.round((position / 1000 -(pp_hours*60*60)-(pp_minutes*60)));
+			$("#playposition").html( addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds) );
+		}
+
+		document.getElementById("playtime").innerHTML = "";
+		if(duration){
+			var pt_hours = Math.floor(duration / 1000 / 60 / 60);
+			var pt_minutes = Math.floor((duration / 1000-(pt_hours*60*60))  / 60);
+			var pt_seconds = Math.round((duration / 1000-(pt_hours*60*60)-(pt_minutes*60)) );
+			document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
+		}
+	} catch(e){
+		console.log( e.message );
 	}
 
 
@@ -531,4 +646,19 @@ VideoPlayer.prototype.isVisible = function(fs){
 	return this.visible;
 }
 
-
+VideoPlayer.prototype.getStreamComponents = function(){
+	
+	try {
+		if(typeof this.video.getComponents == 'function') {
+			this.subtitles = vidobj.getComponents(this.video.COMPONENT_TYPE_AUDIO);
+			if (this.subtitles.length > 1) {
+				showInfo("Found "+this.subtitles.length+" audio track(s)");
+			}
+		} else {
+			showInfo("Switching audio components not supported");
+		}
+	} catch (e) {
+		showInfo("Switching audio components not supported");
+	}
+	
+}

@@ -91,6 +91,8 @@ function globalNavigation( keyCode )
 	if( autoloadTimer )
 		clearTimeout( autoloadTimer );
 	
+	console.log("global navigation");
+	
 	switch (keyCode) {
 		case VK_RED:
 			//console.log("exit vod");
@@ -454,10 +456,10 @@ function onKey(keyCode) {
 		console.log("WRONG MENU SELECTED");
 	}
 	
-    if(mobilePlatformView && mobilePlatformView.open){
-            mobilePlatformView.navigate(keyCode);
-            return;
-    }
+    //if(mobilePlatformView && mobilePlatformView.open){
+    //        mobilePlatformView.navigate(keyCode);
+    //        return;
+    //}
     
     if( settings.open )
 	{
@@ -465,6 +467,8 @@ function onKey(keyCode) {
 		return;
 	}
     
+	console.log("onkey");
+	
 	if( dialog.open )
 	{
 		navigateDialog( keyCode );

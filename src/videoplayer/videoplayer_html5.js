@@ -1,17 +1,5 @@
 /***
-Notes:
-	
-	Video player respects the declaration of HbbTV 2.0.1 here: https://www.hbbtv.org/wp-content/uploads/2015/07/HbbTV-SPEC20-00023-001-HbbTV_2.0.1_specification_for_publication_clean.pdf
-	
-	Out of band subtitle tracks:
-	<video>
-		<source src='http://mycdn.de/video.mp4'type='video/mp4'>
-		<track kind='subtitles'srclang='de'label='German for the English'src='http://mycdn.de/subtitles_de.ttml'/>
-		<track kind='subtitles'srclang='de'label='German for the hard of hearing'src='http://mycdn.de/subtitles_de2.ttml'/>
-		<track kind='captions'srclang='en'src='http://mycdn.de/subtitles_hearing_impaired.ttml'/>
-	</video>
-
-	
+	HTML5 <video> player impelmentation for HbbTV
 ***/
 
 
@@ -45,13 +33,14 @@ function VideoPlayerHTML5(element_id, profile, width, height){
 
 	// Timers and intervals
 	this.progressUpdateInterval = null;
+	this.hidePlayerTimer = null;
 
 	this.init();
 }
 
 VideoPlayerHTML5.prototype.init = function(){
 	var self = this;
-	
+	/*
 	var buttons = [
 		{
 			"id": "pause_icon", 
@@ -88,43 +77,101 @@ VideoPlayerHTML5.prototype.init = function(){
 	for(var i = 0; i < buttons.length; i++){
 		this.controls.addButton(buttons[i].id, buttons[i].action);
 	}
+	*/
 }
 
 VideoPlayerHTML5.prototype.populate = function(){
 	this.element.innerHTML = "";
 	this.video = null;
-	//console.log("Player created "+ this.video);
-	//this.element.appendChild(this.video);
 	this.loadingImage = document.createElement("div");
 	this.loadingImage.setAttribute("id", "loadingImage");
 	this.loadingImage.addClass("hidden");
 	this.element.appendChild(this.loadingImage);
-	this.element.appendChild(this.controls.element);
+	//this.element.appendChild(this.controls.element);
 	this.setFullscreen(true);
+}
+
+VideoPlayerHTML5.prototype.displayPlayer = function( sec ){
+	clearTimeout( this.hidePlayerTimer );
+	$("#player").removeClass("hide");
+	$("#player").addClass("show");
+	if(sec){
+		this.hidePlayerTimer = setTimeout( function(){
+			$("#player").removeClass("show");
+		}, sec * 1000);
+	}
 }
 
 VideoPlayerHTML5.prototype.navigate = function(key){
 	var self = this;
 	switch(key){
 		case VK_UP:
-			self.controls.show();
+			//self.controls.show();
+			self.displayPlayer(5);
 		break;
 
 		case VK_DOWN:
-			self.controls.hide();
+			//self.controls.hide();
+			self.displayPlayer(5);
 		break;
 
 		case VK_BACK:
 		case VK_STOP:
-			self.clearVideo();
+			console.log("call: stop()");
+			self.stop();
 		break;
 
 		case VK_LEFT:
+		case VK_REWIND:
+			this.rewind( 30 );
+			self.displayPlayer(5);
+			break;
 		case VK_RIGHT:
+		case VK_FAST_FWD:
+			this.forward( 30 );
+			self.displayPlayer(5);
+			break;
 		case VK_ENTER:
-			self.controls.navigate(key);
+			if( this.isPlaying() ){
+				this.pause();
+			}
+			else{
+				this.play();
+			}
 		break;
+		case VK_YELLOW:
+			if( this.video.textTracks ){
+				n = 0;
+				$.each( this.video.textTracks, function(i, lang){
+					console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
+					lang.mode = 'hidden';
+					n++;
+				} );
+				this.subtitleTrack += 1;
+				if( this.subtitleTrack >= n )
+					this.subtitleTrack = 0;
+				this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+			}
+			break;
 	}
+}
+
+VideoPlayerHTML5.prototype.getStreamComponents = function(){
+	/*
+	try {
+		if(typeof this.video.getComponents == 'function') {
+			comps_a = vidobj.getComponents(vidobj.COMPONENT_TYPE_AUDIO);
+			if (comps_a.length > 1) {
+				showInfo("Found "+comps_a.length+" audio track(s)");
+				$('#paudio').show();
+			}
+		} else {
+			showInfo("Switching audio components not supported");
+		}
+	} catch (e) {
+		showInfo("Switching audio components not supported");
+	}
+	*/
 }
 
 VideoPlayerHTML5.prototype.setDisplay = function( container ){
@@ -141,9 +188,23 @@ VideoPlayerHTML5.prototype.setDisplay = function( container ){
 		this.setFullscreen(true);
 	}
 };
-
+	
 VideoPlayerHTML5.prototype.createPlayer = function(){
 	var self = this;
+
+	if( !$("#player")[0] ){
+		$("body").append( '<div id="player" class="hide">'
+			+'<div id="playposition"></div>'
+			+'<div id="playtime"></div>'
+			+'<div id="progress_currentTime" style="left:130px"></div>'
+            +'<div id="progressbarbg"></div><div id="progressSeekable" style="transition03all"></div><div id="progressbar" style="transition03all"></div>'
+			+'<div id="prew"></div>'
+			+'<div id="ppauseplay" class="pause"><div class="vcrbtn"></div><span id="pauseplay"></span></div> '
+			+'<div id="pff"></div>'
+			+'</div>');
+		console.log("Add player component");
+	}
+
 	if( this.profile.hbbtv == false ){
 		// TODO: EME
 		return false;
@@ -158,30 +219,37 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		var player = this.video;
 		addEventListeners( player, 'ended abort', function(e){
 			console.log( e.type );
-			self.clearVideo();
+			self.stop();
 		} );
 		
 		player.addEventListener('error', function(e){
 			self.setLoading(false);
-
-			var errorMessage = "undefined";
-			switch( self.video.error.code ){
-				case 1: /* MEDIA_ERR_ABORTED */ 
-					errorMessage = "fetching process aborted by user";
-					break;
-				case 2: /* MEDIA_ERR_NETWORK */
-					errorMessage = "error occurred when downloading";
-					break;
-				case 3: /* = MEDIA_ERR_DECODE */ 
-					errorMessage = "error occurred when decoding";
-					break;
-				case 4: /* MEDIA_ERR_SRC_NOT_SUPPORTED */ 
-					errorMessage = "audio/video not supported";
-					break;
+			if( !self.video ){
+				return;
 			}
-			showInfo( "MediaError: " + errorMessage );
-			
-			Monitor.videoError( errorMessage );
+			try{
+				var errorMessage = "undefined";
+				switch( self.video.error.code ){
+					case 1: /* MEDIA_ERR_ABORTED */ 
+						errorMessage = "fetching process aborted by user";
+						break;
+					case 2: /* MEDIA_ERR_NETWORK */
+						errorMessage = "error occurred when downloading";
+						break;
+					case 3: /* = MEDIA_ERR_DECODE */ 
+						errorMessage = "error occurred when decoding";
+						break;
+					case 4: /* MEDIA_ERR_SRC_NOT_SUPPORTED */ 
+						errorMessage = "audio/video not supported";
+						break;
+				}
+				showInfo( "MediaError: " + errorMessage );
+				
+				Monitor.videoError( errorMessage );
+			} catch(e){
+				console.log("error reading video error code");
+				console.log(e.description);
+			}
 		} );
 		
 		player.addEventListener('play', function(){ 
@@ -244,6 +312,24 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		player.addEventListener('timeupdate', function(){
 			self.updateProgressBar();
 		} );
+		
+		player.seek = function( sec, absolute ){
+			try{
+				var target = ( absolute? sec : player.currentTime + sec);
+				
+				if( target < 0 )
+					target = 0;
+				else if( target > player.duration )
+					return;
+				
+				console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
+				// Set position
+				player.currentTime = target;
+			} catch(e){
+				console.log("error seeking: " + e.description);
+			}
+		}
+		
 		return true;
 	}
 	return true;
@@ -268,8 +354,13 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 	if( ! url.match(/^https?\:/) && typeof defaultVideoRoot == "string" && defaultVideoRoot.length ){
 	//	url = defaultVideoRoot + url;
 	}
+
+	var type = "application/dash+xml";
 	if( url.match(/mp4$/) ){
 		this.video.setAttribute("type", "video/mp4");
+	}
+	else{
+		this.video.setAttribute("type", type );
 	}
 	
 	
@@ -280,12 +371,11 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 		console.log( e.message );
 	}
 	
-	var type = "application/dash+xml";
-	console.log("video type ", type);
 	
-	this.video.setAttribute("type", type );
+	
 	return;
 };
+
 
 VideoPlayerHTML5.prototype.setDRM = function( system, la_url){
 	if( !system ){
@@ -391,8 +481,10 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 			break;
 		}
 		
-		showInfo( errorMessage );
-		Monitor.drmError(errorMessage);
+		if( resultCode > 0 ){
+			showInfo( errorMessage );
+			Monitor.drmError(errorMessage);
+		}
 	}
 
 	function drmRightsErrorHandler(resultCode, id, systemid, issuer) {
@@ -417,6 +509,19 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
+	
+	try{
+		var broadcast = $("#broadcast")[0];
+		if( !broadcast )
+			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+		broadcast = $("#broadcast")[0];
+		broadcast.bindToCurrentChannel();
+		broadcast.stop();
+		console.log("broadcast stopped");
+	}
+	catch(e){
+		console.log("error stopping broadcast");
+	}
 	
 	var self = this;
 	
@@ -445,12 +550,29 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 		}
 		
 		// out-of-band subtitles must be an array containing containing language code and source.ttml file url.
-		if( this.subtitles ){
-			$.each( this.subtitles, function(i, lang){
+		var player = this.video;
+		this.subtitles = player.textTracks;
+		if( player.textTracks && player.textTracks.length ){
+			
+			$.each( player.textTracks, function(i, lang){
+				console.log( lang );
+				console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
 				$(this.video).append("<param name='subtitles' value='srclang:"+ lang.code +" src: " + lang.src + "' />");
+				lang.mode = 'hidden';
 			} );
+			this.subtitleTrack = 0;
+			player.textTracks[0].mode = "showing";
 		}
-		
+		else{
+			console.log( "no subs" );
+		}
+	}
+	catch(e){
+		console.log( e.message );
+		console.log( e.description );
+	}
+	
+	try{	
 		self.element.removeClass("hidden");
 		self.visible = true;
 		
@@ -458,11 +580,13 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 		self.video.play();
 		if(fullscreen){
 			self.setFullscreen(fullscreen);
-			self.controls.show();
+			//self.controls.show();
+			self.displayPlayer(5);
 		}
 	}
 	catch(e){
-		console.log(e);
+		console.log( e.message );
+		console.log( e.description );
 	}
 }
 
@@ -480,7 +604,8 @@ VideoPlayerHTML5.prototype.pause = function(){
 	var self = this;
 	try{
 		self.video.pause();
-		self.controls.show();
+		//self.controls.show();
+		self.displayPlayer();
 		console.log("video should be playing now");
 	}
 	catch(e){
@@ -490,12 +615,21 @@ VideoPlayerHTML5.prototype.pause = function(){
 
 VideoPlayerHTML5.prototype.stop = function(){
 	var self = this;
-	try{
-		self.video.stop();
+	
+	// if video not exist
+	if( !self.video ){
 		self.clearVideo();
+		return;
+	}
+	try{
+		self.video.pause();
+		console.log("video.pause(); succeed");
+		self.clearVideo();
+		console.log("clearVideo(); succeed");
 	}
 	catch(e){
-		console.log(e);
+		console.log("error stopping video");
+		console.log(e.description);
 	}
 }
 
@@ -503,35 +637,52 @@ VideoPlayerHTML5.prototype.play = function(){
 	var self = this;
 	try{
 		self.video.play();
-		self.controls.show();
+		self.displayPlayer(5);
 	}
 	catch(e){
 		console.log(e);
 	}
 }
 
-VideoPlayerHTML5.prototype.rewind = function(){
+VideoPlayerHTML5.prototype.rewind = function( sec ){
 	var self = this;
 	try{
-		console.log("rewind video 30s");
-		var sec = Math.max(self.video.currentTime-30, 0);
+		sec = sec || -30;
+		if( sec > 0 ){
+			sec = -sec;
+		}
+		//sec = Math.max(self.video.currentTime+sec, 0);
+		console.log("rewind video "+ sec +"s");
 		Monitor.videoSeek(sec);
 		self.video.seek(sec);
-		self.controls.show();
+		$("#prew").addClass("activated");
+		clearTimeout( this.seekActiveTimer );
+		this.seekActiveTimer = setTimeout( function(){
+			$("#prew").removeClass("activated");
+		}, 700);
 	}
 	catch(e){
-		console.log(e);
+		console.log(e.message);
+		console.log(e.description);
 	}
 }
 
-VideoPlayerHTML5.prototype.forward = function(){
+VideoPlayerHTML5.prototype.forward = function( sec ){
 	var self = this;
 	try{
-		console.log("forward video 30s");
-		var sec = Math.min(self.video.currentTime+(30), self.video.duration);
-		Monitor.videoSeek(sec);
-		self.video.seek(sec);
-		self.controls.show();
+		sec = sec || 30;
+		
+		if( self.video.duration > self.video.currentTime + sec ){
+			Monitor.videoSeek(sec);
+			self.video.seek(sec);
+			console.log("forward video "+sec+"s");
+			self.displayPlayer(5);
+			$("#pff").addClass("activated");
+			clearTimeout( this.seekActiveTimer );
+			this.seekActiveTimer = setTimeout( function(){
+				$("#pff").removeClass("activated");
+			}, 700);
+		}
 	}
 	catch(e){
 		console.log(e);
@@ -544,13 +695,15 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 	self.visible = false;
 	try{
 		if(self.video){
-			self.video.stop();
+			self.video.pause();
+			self.video.src = "";
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
 		}
 	}
 	catch(e){
-		console.log(e);
+		console.log("Error at clearVideo()");
+		console.log(e.description);
 	}
 	this.subtitles = null;
 }
@@ -573,30 +726,50 @@ VideoPlayerHTML5.prototype.updateProgressBar = function(){
 		var self = this;
 		var position = this.video.currentTime;
 		var duration = this.video.duration;
-		if(this.controls.progressbar){
-			this.controls.progressbar.style.width = this.controls.progressbar.parentNode.offsetWidth * (position / duration) + "px";
-		}
+		
+		console.log("update progress bar");
+		
+		pbar = document.getElementById("progressbar");
 
-		document.getElementById("playPosition").innerHTML = "";
+		var barWidth = Math.floor((position / duration) * 895 );
+		if(barWidth > 895){
+			barWidth = 895;
+		}
+		else if( barWidth < 0 ){
+			barWidth = 0;
+		}
+		
+		pbar.style.width = barWidth + "px";
+		
+		var play_position = barWidth;
+		
+		$("#playposition").css("left", play_position);
+		$("#progress_currentTime").css("left", play_position);
+
+
+		
+		$("#playposition").html("");
 		if(position){
 			var pp_hours = Math.floor(position / 60 / 60);
 			var pp_minutes = Math.floor((position-(pp_hours*60*60)) / 60);
 			var pp_seconds = Math.round((position-(pp_hours*60*60)-(pp_minutes*60)));
-			document.getElementById("playPosition").innerHTML = addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds);
+			$("#playposition").html( addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds) );
 		}
 
-		document.getElementById("playTime").innerHTML = "";
+		document.getElementById("playtime").innerHTML = "";
 		if(duration){
 			var pt_hours = Math.floor(duration / 60 / 60);
 			var pt_minutes = Math.floor((duration-(pt_hours*60*60))  / 60);
 			var pt_seconds = Math.round((duration-(pt_hours*60*60)-(pt_minutes*60)) );
-			document.getElementById("playTime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
+			document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
 		}
 	} catch(e){
 		console.log( e.message );
 	}
 
 }
+
+
 
 VideoPlayerHTML5.prototype.setLoading = function(loading, reason){
 	this.loading = loading;
@@ -620,7 +793,8 @@ VideoPlayerHTML5.prototype.setFullscreen = function(fs){
 	else{
 		this.element.removeClass("fullscreen");
 		this.setDisplay( menu.focus.element ); // sets video player object to child of focused tile element
-		this.controls.hide();
+		//this.controls.hide();
+		$("#player").removeClass("show");
 	}
 
 }

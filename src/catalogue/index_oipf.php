@@ -65,6 +65,7 @@ function onLoad() {
 	<div id="wrapper">
 		<div id="logo"></div>
 		<div id="menu"></div>
+		<div id="itemDescription"></div>
 	</div>
 	
 	<div id="info" class="hide"></div>
