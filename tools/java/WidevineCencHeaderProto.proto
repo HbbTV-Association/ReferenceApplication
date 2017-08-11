@@ -1,0 +1,42 @@
+// ..\protoc-3.3.0-win32\bin\protoc.exe   --java_out=.   WidevineCencHeaderProto.proto
+syntax="proto2";
+option optimize_for=CODE_SIZE;
+ 
+message WidevineCencHeader { 
+ enum Algorithm {
+    UNENCRYPTED = 0;
+    AESCTR = 1;
+ };
+ 
+ optional Algorithm algorithm = 1;
+ repeated bytes key_id = 2;
+ // Content provider name.
+ optional string provider = 3;
+ 
+ // A content identifier, specified by content provider.
+ optional bytes content_id = 4;
+ 
+ // Track type. Acceptable values are SD, HD and AUDIO. Used to
+ // differentiate content keys used by an asset.
+ optional string track_type_deprecated = 5;
+ 
+ // The name of a registered policy to be used for this asset.
+ optional string policy = 6;
+ 
+ //Crypto period index, for media using key rotation.
+ optional uint32 crypto_period_index = 7;
+  
+ // Optional protected context for group content. The grouped_license is a
+ // serialized SignedMessage.
+ optional bytes grouped_license = 8;
+ 
+ // Protection scheme identifying the encryption algorithm.
+ // Represented as one of the following 4CC values:
+ // 'cenc' (AES­CTR), 'cbc1' (AES­CBC),
+ // 'cens' (AES­CTR subsample), 'cbcs' (AES­CBC subsample).
+ optional uint32 protection_scheme = 9;
+ 
+ // Optional. For media using key rotation, this represents the duration
+ // of each crypto period in seconds.
+ optional uint32 crypto_period_seconds = 10;
+}

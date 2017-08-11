@@ -1,0 +1,15 @@
+## OS metafiles
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+/bak/
+/build/
+/classes/
+/build.num
+/*.bat
+/*.sh
+/lib/dasher.jar
+/local.properties

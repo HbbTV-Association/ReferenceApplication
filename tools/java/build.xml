@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dasher" default="build" basedir=".">
+
+	<property name="name" value="${ant.project.name}" />
+	<property name="build" value="./build" />
+	<property name="src" value="./src" />
+	<property name="version" value="1.0"/>
+
+	<property environment="env"/>
+
+	<path id="libs">
+	   <pathelement location="./lib/protobuf-java-3.3.0.jar" />
+	   <pathelement location="./lib/protobuf-java-util-3.3.0.jar" />
+	</path>
+
+	<tstamp>
+	   <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+
+	<target name="updatemanifest" description="Update manifest">
+	   <buildnumber file="build.num"/>
+
+	   <copy file="${src}/META-INF/MANIFEST.MF" 
+	      todir="${build}/META-INF/" overwrite="true" preservelastmodified="true"
+	   />
+
+	   <manifest file="${build}/META-INF/MANIFEST.MF" mode="update">
+	      <attribute name="Implementation-Version" value="${version}.${build.number} (${TODAY})"/>
+	      <attribute name="Implementation-Title"   value="${name}" />
+	   </manifest>
+	</target>
+
+	<target name="clean" description="Clean compiled classes">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="compile" depends="clean" description="Compile classes">
+		<mkdir dir="${build}"/>
+		<javac srcdir="${src}" destdir="${build}" target="1.7" source="1.7" encoding="ISO-8859-1" 
+			debug="true" debuglevel="lines,source" includeantruntime="false"
+			excludes="" >
+			<classpath refid="libs" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="updatemanifest" description="Create a .jar file">
+		<echo message="Build release: ${reltag}" />
+		<jar manifest="${build}/META-INF/MANIFEST.MF" 
+			 jarfile="./lib/${name}.jar" >
+  			<fileset dir="${build}">
+            </fileset>			
+		</jar>
+	</target>
+	
+	<target name="build" description="Build lib from scratch" depends="compile" >
+           <antcall target="jar"> <param name="reltag" value=""/> </antcall>
+	</target>	
+
+</project>
