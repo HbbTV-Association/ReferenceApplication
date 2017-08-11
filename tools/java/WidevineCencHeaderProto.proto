@@ -1,4 +1,12 @@
-// ..\protoc-3.3.0-win32\bin\protoc.exe   --java_out=.   WidevineCencHeaderProto.proto
+// Protobuffer template WidevineCencHeaderProto.proto is encoded to java file.
+// This is already included in a source folder so no need to regenerate.
+// - see src/com/google/protobuf/object/WidevineCencHeaderProto.java
+// You need Protobuf binary tools if want to generate java file.
+// - see website https://github.com/google/protobuf
+// - see specification https://storage.googleapis.com/wvdocs/Widevine_DRM_Encryption_API.pdf
+// Example command to generate template to java file:
+//  \protoc-3.3.0-win32\bin\protoc.exe  --java_out=.  WidevineCencHeaderProto.proto
+
 syntax="proto2";
 option optimize_for=CODE_SIZE;
  

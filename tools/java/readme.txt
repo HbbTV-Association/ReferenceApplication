@@ -72,19 +72,6 @@ values may be overriden by command-line arguments.
 See dasher.properties file for full documentation.
 
 
-Widevine protobuffer object
-============================
-Protobuffer template WidevineCencHeaderProto.proto is encoded to java file.
-This is already included in a source folder so no need to regenerate.
-- see src/com/google/protobuf/object/WidevineCencHeaderProto.java
-
-You need Protobuf binary tools if want to generate java file.
-- see website https://github.com/google/protobuf
-- see specification https://storage.googleapis.com/wvdocs/Widevine_DRM_Encryption_API.pdf
-Example command to generate template to java file:
-  \protoc-3.3.0-win32\bin\protoc.exe  --java_out=.  WidevineCencHeaderProto.proto
-
-
 Version history
 ============================
 2017-08-11:
