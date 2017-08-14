@@ -256,8 +256,8 @@ function XMLEscape(sValue, bUseApos) {
 }
 
 window.onerror = function(message, url, lineNumber) { 
-	showInfo( message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10 );
-    //console.log(message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10);
+	//showInfo( message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10 );
+    console.log(message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10);
 	return false; // when false, print it also to js console
 };
 

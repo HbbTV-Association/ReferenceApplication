@@ -40,44 +40,6 @@ function VideoPlayerHTML5(element_id, profile, width, height){
 
 VideoPlayerHTML5.prototype.init = function(){
 	var self = this;
-	/*
-	var buttons = [
-		{
-			"id": "pause_icon", 
-			"action": function(){
-				self.pause();
-			}
-		},
-		{
-			"id": "stop_icon", 
-			"action": function(){
-				self.stop();
-			} 
-		},
-		{
-			"id": "play_icon", 
-			"action": function(){
-				self.play();
-			} 
-		},
-		{
-			"id": "rewind_icon", 
-			"action": function(){
-				self.rewind();
-			} 
-		},
-		{
-			"id": "forward_icon", 
-			"action": function(){
-				self.forward();
-			} 
-		}
-	];
-	this.controls = new VideoPlayerControls("playerControls", buttons);
-	for(var i = 0; i < buttons.length; i++){
-		this.controls.addButton(buttons[i].id, buttons[i].action);
-	}
-	*/
 }
 
 VideoPlayerHTML5.prototype.populate = function(){
@@ -692,6 +654,7 @@ VideoPlayerHTML5.prototype.forward = function( sec ){
 VideoPlayerHTML5.prototype.clearVideo = function(){
 	var self = this;
 	self.element.addClass("hidden");
+	$("#player").removeClass("show");
 	self.visible = false;
 	try{
 		if(self.video){
