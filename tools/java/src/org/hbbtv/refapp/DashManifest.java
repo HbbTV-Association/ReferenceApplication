@@ -1,4 +1,4 @@
-package hbbtv.org.refapp;
+package org.hbbtv.refapp;
 
 import java.util.*;
 import java.io.File;
@@ -19,7 +19,12 @@ public class DashManifest {
 		this.file=file;
 	}
 
-	public void fixContent() throws Exception {
+	/**
+	 * Fix manifest formatting issues.
+	 * @param mode	h264,h265
+	 * @throws Exception
+	 */
+	public void fixContent(StreamSpec.TYPE mode) throws Exception {
 		modified=false;
 
 		String val;
@@ -39,6 +44,18 @@ public class DashManifest {
 			if (val.isEmpty() || val.equals("./") || val.equals(".")) {
 				modified=true;
 				elem.getParentNode().removeChild(elem);
+			}
+		}
+		
+		if (mode==StreamSpec.TYPE.VIDEO_H265) {
+			// drop dash264 profile tag
+			// profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264,urn:hbbtv:dash:profile:isoff-live:2012"
+			val = doc.getDocumentElement().getAttribute("profiles");
+			int idx=val.indexOf("http://dashif.org/guidelines/dash264");
+			if (idx>=0) {
+				modified=true;
+				val = val.replace( (idx>0?",":"")+"http://dashif.org/guidelines/dash264", "");
+				doc.getDocumentElement().setAttribute("profiles", val);
 			}
 		}
 
@@ -65,7 +82,7 @@ public class DashManifest {
 		}
 
 		// Move AdaptationSet.Representation.startWithSAP="1" to AdaptationSet.startWithSAP="1"
-		// if values are identical in a representation array.
+		// if all values are equal to each other.
 		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
 			String oldval=null;
@@ -91,7 +108,7 @@ public class DashManifest {
 		String[] values = new String[] {
 				"xmlns:cenc", "urn:mpeg:cenc:2013",
 				"xmlns:mspr", "urn:microsoft:playready",
-				"xmlns:mas", "urn:marlin:mas:1-0:services:schemas:mpd"
+				"xmlns:mas",  "urn:marlin:mas:1-0:services:schemas:mpd"
 		};
 		
 		Element elem = doc.getDocumentElement();

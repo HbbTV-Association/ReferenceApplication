@@ -1,4 +1,4 @@
-package hbbtv.org.refapp;
+package org.hbbtv.refapp;
 
 import java.io.*;
 import java.util.*;
@@ -43,8 +43,8 @@ public class MediaTools {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
 
 		int gop = fps*gopdur;
-		List<String> args=Arrays.asList(
-			FFMPEG, "-hide_banner", "-nostats",
+		List<String> args=Arrays.asList(FFMPEG, 
+			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4", "-preset", "fast",
 			"-c:v", "libx264", "-profile:v", "main", "-level", "4.0",
@@ -63,29 +63,56 @@ public class MediaTools {
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
-		int argIdx=args.indexOf("${overlayOpt}");		
-		if (overlayOpt.equals("1")) {
-			String arg="fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=38:box=1:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+60"
-					+ ":text='${size} ${bitrate} ${fps}fps ${gop}gop \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
-			arg = arg.replace("${size}", spec.size)
-				.replace("${bitrate}", spec.bitrate)
-				.replace("${fps}", ""+fps)
-				.replace("${gop}", ""+gop)
-				.replace("${libFolder}", libFolder);
-			args.set(argIdx, "drawtext="+arg);
-		} else {
-			args.remove(argIdx);
-			args.remove(argIdx-1);
-		}
-		
+		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);		
 		return args;
 	}
 
+	public static List<String> getTranscodeH265Args(File file, StreamSpec spec, 
+			int fps, int gopdur, String overlayOpt) {
+		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
+		String libFolder = Utils.getLibraryFolder(MediaTools.class);
+		libFolder = Utils.normalizePath(libFolder, true);
+		if (libFolder.charAt(1)==':') libFolder = libFolder.substring(2);
+	
+		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
+
+		// must also use x265-params custom argument to give a common ffmpeg args (ref,bf,g,keyint,etc..)
+		int gop = fps*gopdur;
+		List<String> args=Arrays.asList(FFMPEG, 
+			"-hide_banner", "-nostats",
+			"-i", inputFile,
+			"-threads", "4", "-preset", "fast",
+			"-c:v", "libx265", "-level", "5.0",	// profile=main(8bit) is given in x265-params
+			"-s:v", spec.size, 		// resolution 3840x2160
+			"-b:v", spec.bitrate, 	// video bitrate 2000k
+			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-refs", "3",			// reference frames
+			"-bf", "3",				// max number of bframes
+			"-g", ""+gop,			// GOP frames (fps=25, gopdur=3 -> gop=75)
+			"-keyint_min", ""+fps,	// I-Frame interval (keyframes)
+			"-b_strategy", "1",		// BPyramid strategy
+			"-flags", "+cgop",		// use ClosedGOP
+			"-sc_threshold", "0",	// disable Scenecut
+			"-x265-params", "profile=main:level_idc=5.0:min-keyint=${fps}:keyint=${gop}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
+			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
+			"-an", "-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+		);
+		args = new ArrayList<String>(args); // create modifiable list
+
+		int idx= args.indexOf("-x265-params")+1;
+		args.set(idx, args.get(idx)
+				.replace("${fps}", ""+fps)
+				.replace("${gop}", ""+gop) );
+		
+		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);
+		return args;
+	}
+	
 	public static List<String> getTranscodeAACArgs(File file, StreamSpec spec) {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
 		
-		List<String> args=Arrays.asList(
-			FFMPEG, "-hide_banner", "-nostats",
+		List<String> args=Arrays.asList(FFMPEG, 
+			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4",
 			"-c:v", "aac", "-strict", "experimental",
@@ -100,9 +127,8 @@ public class MediaTools {
 		return args;
 	}
 	
-	public static List<String> getDashH264Args(List<StreamSpec> specs, int segdur) {
-		List<String> args=Arrays.asList(
-			MP4BOX,
+	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur) {
+		List<String> args=Arrays.asList(MP4BOX,
 			"-dash", ""+(segdur*1000), 	// segment duration 6sec*1000
 			"-frag", ""+(segdur*1000),
 			"-mem-frags", "-rap",
@@ -126,11 +152,42 @@ public class MediaTools {
 		return args;
 	}
 
+	/**
+	 * Convert H265(HEV1) to H265(HVC1) media file.
+	 * @param outputFolder	working directory
+	 * @param spec
+	 * @throws IOException
+	 */
+	public static void convertHEV1toHVC1(File outputFolder, StreamSpec spec) throws IOException {
+		String inputFile = "temp-"+spec.name+".mp4";
+		String outputFile= "temp-"+spec.name+".hvc";
+		File iFile = new File(outputFolder, inputFile);
+		File oFile = new File(outputFolder, outputFile);
+		
+		oFile.delete();
+		List<String> args=Arrays.asList(MP4BOX,
+			"-raw", "1", inputFile,	// input:  temp-v1.mp4
+			"-out", outputFile		// output: temp-v1.hvc
+		);
+		executeProcess(args, outputFolder);
+		if (!oFile.exists())
+			throw new IOException("HEV1 to HVC1 conversion failed, " + inputFile);
+
+		iFile.delete();
+		args=Arrays.asList(MP4BOX,
+			"-add", outputFile,	// input:  temp-v1.hvc
+			inputFile			// output: temp-v1.mp4
+		);
+		executeProcess(args, outputFolder);
+		if (!iFile.exists())
+			throw new IOException("HEV1 to HVC1 conversion failed, " + outputFile);
+		oFile.delete(); // delete temporary temp-v1.hvc file
+	}	
+	
 	public static List<String> getDashCryptArgs(File drmspecFile, File outputFolder, StreamSpec spec) {
 		String streamFile = "temp-"+spec.name+".mp4";
-		List<String> args=Arrays.asList(
-			MP4BOX,
-			"-crypt", Utils.normalizePath(drmspecFile.getAbsolutePath(), true), // drm/manifest-drmspec.xml input file
+		List<String> args=Arrays.asList(MP4BOX,
+			"-crypt", Utils.normalizePath(drmspecFile.getAbsolutePath(), true), // drm/drmspec.xml input file
 			streamFile, // input unencrypted stream file
 			"-out", Utils.normalizePath(outputFolder.getAbsolutePath(), true)+"/"+streamFile
 		);
@@ -140,11 +197,11 @@ public class MediaTools {
 
 	public static List<String> getImageArgs(File file, int timeSec, String size) {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);		
-		List<String> args=Arrays.asList(
-			FFMPEG, "-hide_banner", "-nostats",
+		List<String> args=Arrays.asList(FFMPEG, 
+			"-hide_banner", "-nostats",
 			"-i", inputFile,
-			"-ss", ""+timeSec,	// timestamp seconds where image is taken from
-			"-vf", "scale="+size,
+			"-ss", ""+timeSec,		// timestamp seconds where image is taken from (1..n)
+			"-vf", "scale="+size,	// 640x360
 			"-qscale:v", "5",
 			"-vframes", "1",
 			"-an", "-y", "image_"+size+".jpg" 
@@ -341,6 +398,30 @@ public class MediaTools {
 		execp.getErrorStream().close();
 		execp.getOutputStream().close();
 		return builder.toString();
+	}
+
+	private static int updateOverlayOpt(List<String> args, StreamSpec spec, int fps, int gop, String overlayOpt, String libFolder) {
+		int argIdx=args.indexOf("${overlayOpt}");
+		if (argIdx>0) {
+			if (overlayOpt.equals("1")) {
+				String arg="fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=38:box=1:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+60"
+						+ ":text='${mode} ${size} ${bitrate} ${fps}fps ${gop}gop \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
+				arg = arg.replace("${size}", spec.size)
+					.replace("${mode}", spec.getCodec())	// H264,H265 substring
+					.replace("${bitrate}", spec.bitrate)
+					.replace("${fps}", ""+fps)
+					.replace("${gop}", ""+gop)
+					.replace("${libFolder}", libFolder);
+				if (spec.getWidth()>2500)
+					arg=arg.replace("fontsize=38", "fontsize=60"); // use larger font for 3840x2160 image
+				args.set(argIdx, "drawtext="+arg);
+			} else {
+				args.remove(argIdx);	// remove $overlayOpt arg
+				args.remove(argIdx-1);  // remove previous "-vf" videofilter arg
+				argIdx=-1;
+			}
+		}
+		return argIdx;
 	}
 	
 }

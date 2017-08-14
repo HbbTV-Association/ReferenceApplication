@@ -13,6 +13,15 @@
 	   <pathelement location="./lib/protobuf-java-util-3.3.0.jar" />
 	</path>
 
+	<pathconvert property="manifest.libs" pathsep=" ">
+	  <path refid="libs"/>
+	  <mapper>
+	    <chainedmapper>
+	       <flattenmapper/><globmapper from="*.jar" to="*.jar"/>
+	    </chainedmapper>
+	  </mapper>
+	</pathconvert>
+	
 	<tstamp>
 	   <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
@@ -28,6 +37,8 @@
 	   <manifest file="${build}/META-INF/MANIFEST.MF" mode="update">
 	      <attribute name="Implementation-Version" value="${version}.${build.number} (${TODAY})"/>
 	      <attribute name="Implementation-Title"   value="${name}" />
+	      <attribute name="Main-Class"   value="org.hbbtv.refapp.Dasher" />
+          <attribute name="Class-Path"   value="${manifest.libs}" />
 	   </manifest>
 	</target>
 

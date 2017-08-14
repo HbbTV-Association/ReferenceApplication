@@ -6,13 +6,13 @@ Input video file is trancoded to multiple streams (resolution, bitrate).
 Streams are dashed to an unecrypted manifest.mpd file.
 Streams are encrypted and dashed to a MultiDRM manifest.mpd file (playready,marlin,widevine).
 
-Best result is achieved if input file is h264/aac/25fps/16:9 format.
-- h264 video codec
+Best result is achieved if input file is h264,h265/aac/25fps/16:9 format.
+- AVC(h264) video codec, HEVC(h265) video codec
 - aac audio codec
-- 25 frame rate, some HbbTV televisions don't support less common rates
+- 25 frame rate, some HbbTV televisions may not support less common rates
 - aspect 16:9 resolution 1280x720, 1920x1080, 3840x2160 (pixel=1:1, display=16:9)
 
-You may use h265 input files and output h265 dash segments as well.
+Tool can output h264(AVC) or h265(HVC1) dash files.
 
 
 Binary tools requirements
@@ -48,13 +48,15 @@ Run dasher
 ====================
 Use Java7 to run an applicatiion.
 Trancode input file, save dash segments to output folder.
-  java -cp /refapp/lib/* hbbtv.org.refapp.Dasher config=dasher.properties input=/videos/input.mp4 output=/videos/dash/input/
+  java -jar "/refapp/lib/dasher.jar" config=dasher.properties input=/videos/video1.mp4 output=/videos/dash/video1/
 Trancode input file, save dash segments to current working folder.
-  java -cp /refapp/lib/* hbbtv.org.refapp.Dasher config=dasher.properties input=/videos/input.mp4 output=.
+  java -jar "/refapp/lib/dasher.jar" config=dasher.properties input=/videos/video1.mp4 output=.
 Trancode input file, override few configuration values.
-  java -cp /refapp/lib/* hbbtv.org.refapp.Dasher config=dasher.properties input=/videos/input.mp4 output=. drm.marlin=0 drm.widevine=0
-Transcode input file, output to current working directory, override few configuration values.
-  java -cp /refapp/lib/* hbbtv.org.refapp.Dasher config=dasher.properties logfile=manifest-log.txt drm.kid=rng drm.key=rng input=/videos/input.mp4 output=.
+  java -jar "/refapp/lib/dasher.jar" config=dasher.properties input=/videos/video1.mp4 output=. drm.marlin=0 drm.widevine=0
+Transcode input file, write logfile, use RandomNumberGenerator for kid and key
+  java -jar "/refapp/lib/dasher.jar" config=dasher.properties logfile=manifest-log.txt drm.kid=rng drm.key=rng input=/videos/video1.mp4 output=.
+Transcode input file, output H265 to current working directory, override few configuration values.
+  java -jar "/refapp/lib/dasher.jar" config=dasher.properties mode=h265 logfile=manifest-log.txt drm.kid=rng drm.key=rng input=/videos/video1.mp4 output=.
 
 Unecrypted files are written to output folder.
 Encrypted files are written to output/drm subfolder.
@@ -74,5 +76,7 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2017-08-14:
+- added h265 dash mode
 2017-08-11:
-- initial release, h264 mode only
+- initial release, supported h264 mode only
