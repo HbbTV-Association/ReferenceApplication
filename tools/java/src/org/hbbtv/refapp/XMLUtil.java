@@ -1,4 +1,4 @@
-package hbbtv.org.refapp;
+package org.hbbtv.refapp;
 
 import java.io.*;
 import java.util.*;

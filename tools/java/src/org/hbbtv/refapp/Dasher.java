@@ -1,4 +1,4 @@
-package hbbtv.org.refapp;
+package org.hbbtv.refapp;
 
 import java.util.*;
 import java.io.*;
@@ -45,7 +45,11 @@ public class Dasher {
 			
 			int fps = (int)Utils.getLong(meta, "videoFPS", 25);
 			int gopdur = (int)Utils.getLong(params, "gopdur", 3); // GOP duration in seconds
-			String overlayOpt = Utils.getString(params, "overlay", "0", true); // 1=enabled, 0=disabled 
+			String overlayOpt = Utils.getString(params, "overlay", "0", true); // 1=enabled, 0=disabled
+
+			val = Utils.getString(params, "mode", "", true); // h264,h265 
+			StreamSpec.TYPE mode = val.equalsIgnoreCase("h265") ?
+					StreamSpec.TYPE.VIDEO_H265 : StreamSpec.TYPE.VIDEO_H264;
 
 			// create preview images
 			// size: 640x360
@@ -73,19 +77,31 @@ public class Dasher {
 				if (val.isEmpty()) break;
 				String[] valopts = val.split(" ");
 				StreamSpec spec = new StreamSpec();
-				spec.type = StreamSpec.TYPE.VIDEO_H264;
+				spec.type = mode; // video mode is h264 or h265 
 				spec.name = valopts[0].trim();
-				spec.size = valopts[1].trim();
-				spec.bitrate = valopts[2].trim();
+				spec.size = valopts[1].toLowerCase(Locale.US).trim();
+				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
 				specs.add(spec);
 
-				List<String> args=MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
+				List<String> args;
+				if (spec.type==StreamSpec.TYPE.VIDEO_H265)
+					args=MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt);				
+				else 
+					args=MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
-				if (!val.endsWith("disable"))
+				
+				if (!val.endsWith("disable")) {
 					MediaTools.executeProcess(args, outputFolder);
+					if (spec.type==StreamSpec.TYPE.VIDEO_H265) {
+						// convert temp-v1.mp4(HEV1) to temp-v1.mp4(HVC1), this works better in dash devices. 
+						// TODO: create hvc1 directly in ffmpeg?
+						logger.println(String.format("%s Convert HEV1 to HVC1 (name=%s)", Utils.getNowAsString(), spec.name));
+						MediaTools.convertHEV1toHVC1(outputFolder, spec);
+					}					
 					//String buf = MediaTools.executeProcess(args, outputFolder);
 					//if (NL.length()>1) buf=buf.replace("\n", NL); 
 					//println(buf);
+				}
 			}
 
 			// transcode audio.1,audio.2,.. output streams
@@ -99,7 +115,7 @@ public class Dasher {
 				spec.type = StreamSpec.TYPE.AUDIO_AAC;
 				spec.name = valopts[0].trim();
 				spec.sampleRate = Integer.parseInt(valopts[1].trim());
-				spec.bitrate = valopts[2].trim();
+				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
 				spec.channels = Integer.parseInt(valopts[3].trim());
 				specs.add(spec);
 				
@@ -111,13 +127,13 @@ public class Dasher {
 			
 			// DASH: write unencypted segments+manifest
 			logger.println("");
-			List<String> args=MediaTools.getDashH264Args(specs, (int)Utils.getLong(params, "segdur", 6));
+			List<String> args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6));
 			logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, outputFolder);
 			
 			// Fix some of the common manifest problems after mp4box tool
 			DashManifest manifest = new DashManifest(new File(outputFolder, "manifest.mpd"));
-			manifest.fixContent();
+			manifest.fixContent(mode);
 			manifest.save( new File(outputFolder, "manifest.mpd") );
 			
 			// DASH: write encrypted segments+manifest if KID+KEY values are found
@@ -153,13 +169,13 @@ public class Dasher {
 				}
 
 				// dash encrypted segments
-				args=MediaTools.getDashH264Args(specs, (int)Utils.getLong(params, "segdur", 6));
+				args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6));
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
 
 				// fix manifest, add missing drmsystem namespaces
 				manifest = new DashManifest(new File(outputFolder, "drm/manifest.mpd"));
-				manifest.fixContent();
+				manifest.fixContent(mode);
 				manifest.addNamespaces();
 				
 				// add <ContentProtection> elements, remove CENC element if was disabled
