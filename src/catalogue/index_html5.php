@@ -26,25 +26,9 @@
 	
 	/*** End of Settings ***/
 	</script>
-	<link href='menu.css?version=1498116461' rel='stylesheet' type='text/css'/>
-	<link href='../videoplayer/vplayer.css?version=1498116560' rel='stylesheet' type='text/css'/>
-	<link href='../common.css?version=1498568138' rel='stylesheet' type='text/css'/>
-	<script src='../jquery-1.11.3.min.js?version=1475231609' type='text/javascript'></script>
-	<script src='../common.js?version=1498636970' type='text/javascript'></script>
-	<script src='application.js?version=1498571561' type='text/javascript'></script>
-	<script src='gridcolumn.js?version=1497337421' type='text/javascript'></script>
-	<script src='gridview.js?version=1472020302' type='text/javascript'></script>
-	<script src='gridscrollview.js?version=1471943889' type='text/javascript'></script>
-	<script src='gridviewbox.js?version=1497518410' type='text/javascript'></script>
-	<script src='menu.js?version=1499089377' type='text/javascript'></script>
-	<script src='topmenu.js?version=1471527651' type='text/javascript'></script>
-	<script src='topmenuitem.js?version=1470740434' type='text/javascript'></script>
-	<script src='../videoplayer/videoplayer_html5.js?version=1499073910' type='text/javascript'></script>
-	<!-- script src='../videoplayer/videoplayercontrols.js?version=1498637849' type='text/javascript'></script -->
-	<script src='../debugscreen.js?version=1498571047' type='text/javascript'></script>
-	<script src='navigation.js?version=1498026910' type='text/javascript'></script>
-	<script src='../videoplayer/monitor/monitor.js' type='text/javascript'></script>
-	<link href='../debugscreen.css?version=1497879428' rel='stylesheet' type='text/css'/>
+	<?php 
+		include("resources.php"); 
+	?>
 	
 	<script type="text/javascript" language="javascript">
 

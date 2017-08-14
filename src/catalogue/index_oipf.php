@@ -32,7 +32,6 @@
 	<?php 
 		include("resources.php"); 
 	?>
-	<script src='../videoplayer/monitor/monitor.js' type='text/javascript'></script>
 	
 <script type="text/javascript" language="javascript">
 

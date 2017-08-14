@@ -23,9 +23,10 @@ $resources = array(
 	"topmenuitem.js",
 	"../videoplayer/videoplayer_oipf.js",
 	"../videoplayer/videoplayer_html5.js",
-	"../videoplayer/videoplayercontrols.js",
+/*	"../videoplayer/videoplayercontrols.js", */
 	"../debugscreen.js",
 	"navigation.js",
+	"../videoplayer/monitor/monitor.js",
 	"../debugscreen.css"
 );
 
