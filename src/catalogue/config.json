@@ -297,12 +297,12 @@
                 },
                 {
                     "title": "Set mode HbbTV 1.5",
-                    "eval": "profile.hbbtv='1.5';showInfo('Set mode: '+profile.hbbtv);",
+                    "eval": "location.href='index_oipf.php'",
                     "app": 0
                 },
                 {
                     "title": "Set mode HbbTV 2.0.1",
-                    "eval": "profile.hbbtv='2.0';showInfo('Set mode: '+profile.hbbtv);",
+                    "eval": "location.href='index_html5.php'",
                     "app": 0
                 },
                 {
