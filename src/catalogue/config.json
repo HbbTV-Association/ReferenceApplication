@@ -35,25 +35,28 @@
                     "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/manifest.mpd",
 					"img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
-					"desc": "Description"
+					"desc": "video=3*h264, audio=1*aac, fps=25, gop=75, segdur=6sec"
                 },
                {
                     "title": "Llama Drama HEVC 2160p",
                     "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/manifest.mpd",
                     "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
-                    "app": 6
+                    "app": 6,
+					"desc": "video=4*h265, audio=1*aac, fps=25, gop=75, segdur=6sec"
                 },
                 {
                     "title": "Out of band subtitles (AVC 1080p)",
                     "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest_subob.mpd",
                     "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "app": 6
+                    "app": 6,
+					"desc": "TTML subtitles"
                 },
                 {
                     "title": "In-band subtitles (AVC 1080p)",
                     "url": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest_subib.mpd",
                     "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "app": 6
+                    "app": 6,
+					"desc": "In-band subtitles"
                 }				
             ]
         },
@@ -67,7 +70,8 @@
 					"img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
                     "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N4gAAABgd3yBAdSkbRHQrgSFK440HUNXYmUx8yQyb8Ytr2DMBk8wwrVvaReToyGhMuXFJccqypQTfQFRNE93iySoIp7QxHF-PCTqR9FzAf4YBn_I_S1y_r3m-q6PCvOg4EHNTnpgPE2PoFh9sBJREnQuPRT-jPuUR6I",
                     "drm": "playready",
-                    "app": 6
+                    "app": 6,
+					"desc": "init.mp4 pr,cenc,mrl PSSH tables"
                 },
                 {
                     "title": "Llama Drama HEVC 2160p",
@@ -75,7 +79,8 @@
                     "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
                     "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N3cAAABggO5JS5ChghTMsFCABL4mxV_7qVNMhJZxJjSzQRPWShc34lZMX6-xGoBtVMKr3Xo7pjMHXDrPg4VUi47jDdMt2Vs3Fzr_aIC61YJQ6BPeh6arpK6cVbNbsl1OWvfRE3vBmHhcTcQgHMVApKiAZuMviImfxXE",
                     "drm": "playready",
-                    "app": 6
+                    "app": 6,
+					"desc": "init.mp4 pr,cenc,mrl PSSH tables"					
                 },
                 {
                     "title": "Out of band subtitles (AVC 1080p)",
@@ -83,7 +88,8 @@
                     "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "la_url": "http://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N30AAABgBn4lJkOh7rGbzg8FAGA__5dMOL2dJWxTSTq2STx0DnBWAmske8JU1azAR0-__zPnMWvyKTqVh3ZtHJCPiwT7mu3BCzm3X7U1utgGfcZ97n6CClFjsUdHVQ70IqMuDkRUvIDi2BpU8VEn64kE56r1Evy0wFM",
                     "drm": "playready",
-                    "app": 6					
+                    "app": 6,
+					"desc": "TTML subtitles"					
                 },
                 {
                     "title": "In-band subtitles (AVC 1080p)",
@@ -91,7 +97,8 @@
                     "img": "http://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "la_url": "http://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N30AAABgBn4lJkOh7rGbzg8FAGA__5dMOL2dJWxTSTq2STx0DnBWAmske8JU1azAR0-__zPnMWvyKTqVh3ZtHJCPiwT7mu3BCzm3X7U1utgGfcZ97n6CClFjsUdHVQ70IqMuDkRUvIDi2BpU8VEn64kE56r1Evy0wFM",
                     "drm": "playready",
-                    "app": 6					
+                    "app": 6,
+					"desc": "In-band subtitles"					
                 }
             ]
         },
@@ -127,11 +134,6 @@
                     "app": 0
                 },
                 {
-                    "title": "Show Channel name",
-                    "eval": "showInfo( chdvb );",
-                    "app": 0
-                },
-                {
                     "title": "Set mode HbbTV 1.5",
                     "eval": "location.href='index_oipf.php'",
                     "app": 0
@@ -160,22 +162,6 @@
                     "title": "Check Internet Connection",
                     "eval": "showInfo( (navigator.onLine )); ",
                     "app": 0
-                },
-				{
-                    "title": "mp4 video test",
-                    "url": "http://meridian.sofiadigital.fi/tvportal/Videos/files/Matkaoppaat.mp4",
-                    "app": 6,
-                    "drm": "",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "imagesize": {
-                        "0": 320,
-                        "1": 180,
-                        "2": 2,
-                        "3": "width=\"320\" height=\"180\"",
-                        "bits": 8,
-                        "channels": 3,
-                        "mime": "image/jpeg"
-                    }
                 }
             ]
         }
