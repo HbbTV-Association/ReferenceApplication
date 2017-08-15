@@ -24,6 +24,12 @@ public class Dasher {
 			if (!val.endsWith("/")) val+="/";
 			File outputFolder = new File(val);
 			outputFolder.mkdirs();
+			
+			// delete old files from output folder
+			if (Utils.getBoolean(params, "deleteoldfiles", true))
+				deleteOldFiles(outputFolder);
+			else
+				new File(outputFolder, "manifest.mpd").delete();
 
 			val = Utils.getString(params, "logfile", "", true);
 			logger = new LogWriter();
@@ -34,9 +40,6 @@ public class Dasher {
 			logger.println(Utils.getNowAsString() + " Start dashing");
 			logger.println("input="  + Utils.normalizePath(inputFile.getAbsolutePath(), true) );
 			logger.println("output=" + Utils.normalizePath(outputFolder.getAbsolutePath(), true) );
-
-			// delete old files from output folder (seg0.m4s,init.mp4, temp-*.mp4 files?)
-			new File(outputFolder, "manifest.mpd").delete();
 
 			
 			Map<String,String> meta = MediaTools.readMetadata(inputFile);			
@@ -81,6 +84,8 @@ public class Dasher {
 				spec.name = valopts[0].trim();
 				spec.size = valopts[1].toLowerCase(Locale.US).trim();
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
+				spec.profile = Utils.getString(params, "video.profile", "", true);
+				spec.level   = Utils.getString(params, "video.level", "", true);
 				specs.add(spec);
 
 				List<String> args;
@@ -147,10 +152,13 @@ public class Dasher {
 				logger.println("drm.key="+params.get("drm.key"));
 				logger.println("drm.iv="+params.get("drm.iv"));
 				
-				// delete old files from output folder (seg0.m4s,init.mp4, temp-*.mp4 files?)
+				// delete old files from output folder
 				File outputFolderDrm=new File(outputFolder, "drm/");  // write to drm/ subfolder
 				outputFolderDrm.mkdir();
-				new File(outputFolder, "drm/manifest.mpd").delete();
+				if (Utils.getBoolean(params, "deleteoldfiles", true))
+					deleteOldFiles(outputFolderDrm);
+				else
+					new File(outputFolder, "drm/manifest.mpd").delete();
 
 				// create GPACDRM.xml drm specification file, write to workdir folder
 				File specFile=new File(outputFolder, "temp-gpacdrm.xml");
@@ -208,8 +216,25 @@ public class Dasher {
 			logger.println("");			
 			logger.println(Utils.getNowAsString() + " Completed dashing");			
 		} finally {
-			logger.close();
+			if (logger!=null) logger.close();
 		}
 	}
 
+	private static int deleteOldFiles(File folder) throws IOException {
+		int count=0;
+		String exts[] = new String[] { ".m4s", ".mp4", ".mpd", ".jpg" };
+		for(File file : folder.listFiles()) {
+			if (file.isFile()) {
+				String name = file.getName();
+				for(int idx=0; idx<exts.length; idx++) {
+					if (name.endsWith(exts[idx])) {
+						file.delete();
+						count++;
+					}
+				}
+			}
+		}
+		return count;
+	}
+	
 }

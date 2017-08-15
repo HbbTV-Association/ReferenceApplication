@@ -126,8 +126,9 @@ public class DashDRM {
 	}
 	
 	public String createPlayreadyMPDElement() throws Exception {
-		String opt = Utils.getString(params, "drm.playready", "0", true);
+		String opt = Utils.getString(params, "drm.playready", "0", true); // 0,1,pro,pssh
 		if (opt.equals("0")) return ""; // do not create element
+		else if (opt.equals("1")) opt="pro,pssh";
 		
 		String kid = Utils.getString(params, "drm.kid", "", true);
 		String key = Utils.getString(params, "drm.key", "", true);
