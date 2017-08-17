@@ -6,7 +6,7 @@ import java.io.*;
 /**
  * MAIN CLASS: Transcode, Dash, DashEncrypt input video file.
  * Example command, output if current working directory:
- *   java -cp /refapp/lib/* hbbtv.org.refapp.Dasher config=dasher.properties logfile=manifest-log.txt drm.kid=rng drm.key=rng input=/videos/input.mp4 output=.
+ *   java -jar /refapp/lib/dasher.jar config=dasher.properties logfile=/videos/file1/manifest-log.txt drm.kid=rng drm.key=rng input=/videos/file1.mp4 output=/videos/file1/
  */
 public class Dasher {
 	public static String NL = System.getProperty("line.separator", "\r\n");
@@ -78,24 +78,30 @@ public class Dasher {
 			for(int idx=1; ; idx++) {
 				val = Utils.getString(params, "video."+idx, "", true);
 				if (val.isEmpty()) break;
+				boolean isDisabled = val.endsWith("disable");
 				String[] valopts = val.split(" ");
 				StreamSpec spec = new StreamSpec();
 				spec.type = mode; // video mode is h264 or h265 
 				spec.name = valopts[0].trim();
 				spec.size = valopts[1].toLowerCase(Locale.US).trim();
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
-				spec.profile = Utils.getString(params, "video.profile", "", true);
-				spec.level   = Utils.getString(params, "video.level", "", true);
+
+				val = Utils.getString(params, "video."+idx+".profile", "", true);
+				if (val.isEmpty()) val = Utils.getString(params, "video.profile", "", true);
+				spec.profile=val;
+
+				val = Utils.getString(params, "video."+idx+".level", "", true);
+				if (val.isEmpty()) val = Utils.getString(params, "video.level", "", true);
+				spec.level=val;
+
 				specs.add(spec);
 
-				List<String> args;
-				if (spec.type==StreamSpec.TYPE.VIDEO_H265)
-					args=MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt);				
-				else 
-					args=MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
+				List<String> args = spec.type==StreamSpec.TYPE.VIDEO_H265 ?
+						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt) :
+						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				
-				if (!val.endsWith("disable")) {
+				if (!isDisabled) {
 					MediaTools.executeProcess(args, outputFolder);
 					if (spec.type==StreamSpec.TYPE.VIDEO_H265) {
 						// convert temp-v1.mp4(HEV1) to temp-v1.mp4(HVC1), this works better in dash devices. 
@@ -115,6 +121,7 @@ public class Dasher {
 			for(int idx=1; ; idx++) {
 				val = Utils.getString(params, "audio."+idx, "", true);
 				if (val.isEmpty()) break;
+				boolean isDisabled = val.endsWith("disable");				
 				String[] valopts = val.split(" "); 
 				StreamSpec spec = new StreamSpec();
 				spec.type = StreamSpec.TYPE.AUDIO_AAC;
@@ -126,7 +133,7 @@ public class Dasher {
 				
 				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
-				if (!val.endsWith("disable"))
+				if (!isDisabled)
 					MediaTools.executeProcess(args, outputFolder);
 			}
 			
