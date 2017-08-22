@@ -56,6 +56,8 @@ def registerMarlinMS3(drmType, auth, kid, enckey):
 	return buf
 	
 def register(drmType, auth, kid, enckey):
+	if kid.startswith("0x"): kid = kid[2:]
+	if enckey.startswith("0x"): enckey = enckey[2:]
 	obj={}
 	obj["kid"]=kid		
 	obj["key"]=enckey	## real production system should keep KEY value secret !!
@@ -82,7 +84,7 @@ def main():
 	now = datetime.datetime.utcnow()
 	obj={}
 	obj["created"]=now.strftime('%Y-%m-%dT%H:%M:%SZ')	
-	obj["Test1234"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341234", "12341234123412341234123412341234")
+	obj["Test1234"]=register(DRM_TYPE.TEST, options.authtest, "0x43215678123412341234123412341234", "0x12341234123412341234123412341234")
 	obj["Test1235"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341235", "12341234123412341234123412341235")
 	obj["Test1236"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341236", "12341234123412341234123412341236")
 	obj["Test1237"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341237", "12341234123412341234123412341237")
