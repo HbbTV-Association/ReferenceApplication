@@ -6,7 +6,7 @@ import java.io.*;
 /**
  * MAIN CLASS: Transcode, Dash, DashEncrypt input video file.
  * Example command, output if current working directory:
- *   java -cp /refapp/lib/* hbbtv.org.refapp.Dasher config=dasher.properties logfile=manifest-log.txt drm.kid=rng drm.key=rng input=/videos/input.mp4 output=.
+ *   java -jar /refapp/lib/dasher.jar config=dasher.properties logfile=/videos/file1/manifest-log.txt drm.kid=rng drm.key=rng input=/videos/file1.mp4 output=/videos/file1/
  */
 public class Dasher {
 	public static String NL = System.getProperty("line.separator", "\r\n");
@@ -24,6 +24,12 @@ public class Dasher {
 			if (!val.endsWith("/")) val+="/";
 			File outputFolder = new File(val);
 			outputFolder.mkdirs();
+			
+			// delete old files from output folder
+			if (Utils.getBoolean(params, "deleteoldfiles", true))
+				deleteOldFiles(outputFolder);
+			else
+				new File(outputFolder, "manifest.mpd").delete();
 
 			val = Utils.getString(params, "logfile", "", true);
 			logger = new LogWriter();
@@ -34,9 +40,6 @@ public class Dasher {
 			logger.println(Utils.getNowAsString() + " Start dashing");
 			logger.println("input="  + Utils.normalizePath(inputFile.getAbsolutePath(), true) );
 			logger.println("output=" + Utils.normalizePath(outputFolder.getAbsolutePath(), true) );
-
-			// delete old files from output folder (seg0.m4s,init.mp4, temp-*.mp4 files?)
-			new File(outputFolder, "manifest.mpd").delete();
 
 			
 			Map<String,String> meta = MediaTools.readMetadata(inputFile);			
@@ -75,22 +78,30 @@ public class Dasher {
 			for(int idx=1; ; idx++) {
 				val = Utils.getString(params, "video."+idx, "", true);
 				if (val.isEmpty()) break;
+				boolean isDisabled = val.endsWith("disable");
 				String[] valopts = val.split(" ");
 				StreamSpec spec = new StreamSpec();
 				spec.type = mode; // video mode is h264 or h265 
 				spec.name = valopts[0].trim();
 				spec.size = valopts[1].toLowerCase(Locale.US).trim();
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
+
+				val = Utils.getString(params, "video."+idx+".profile", "", true);
+				if (val.isEmpty()) val = Utils.getString(params, "video.profile", "", true);
+				spec.profile=val;
+
+				val = Utils.getString(params, "video."+idx+".level", "", true);
+				if (val.isEmpty()) val = Utils.getString(params, "video.level", "", true);
+				spec.level=val;
+
 				specs.add(spec);
 
-				List<String> args;
-				if (spec.type==StreamSpec.TYPE.VIDEO_H265)
-					args=MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt);				
-				else 
-					args=MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
+				List<String> args = spec.type==StreamSpec.TYPE.VIDEO_H265 ?
+						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt) :
+						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				
-				if (!val.endsWith("disable")) {
+				if (!isDisabled) {
 					MediaTools.executeProcess(args, outputFolder);
 					if (spec.type==StreamSpec.TYPE.VIDEO_H265) {
 						// convert temp-v1.mp4(HEV1) to temp-v1.mp4(HVC1), this works better in dash devices. 
@@ -110,6 +121,7 @@ public class Dasher {
 			for(int idx=1; ; idx++) {
 				val = Utils.getString(params, "audio."+idx, "", true);
 				if (val.isEmpty()) break;
+				boolean isDisabled = val.endsWith("disable");				
 				String[] valopts = val.split(" "); 
 				StreamSpec spec = new StreamSpec();
 				spec.type = StreamSpec.TYPE.AUDIO_AAC;
@@ -121,7 +133,7 @@ public class Dasher {
 				
 				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
-				if (!val.endsWith("disable"))
+				if (!isDisabled)
 					MediaTools.executeProcess(args, outputFolder);
 			}
 			
@@ -147,10 +159,13 @@ public class Dasher {
 				logger.println("drm.key="+params.get("drm.key"));
 				logger.println("drm.iv="+params.get("drm.iv"));
 				
-				// delete old files from output folder (seg0.m4s,init.mp4, temp-*.mp4 files?)
+				// delete old files from output folder
 				File outputFolderDrm=new File(outputFolder, "drm/");  // write to drm/ subfolder
 				outputFolderDrm.mkdir();
-				new File(outputFolder, "drm/manifest.mpd").delete();
+				if (Utils.getBoolean(params, "deleteoldfiles", true))
+					deleteOldFiles(outputFolderDrm);
+				else
+					new File(outputFolder, "drm/manifest.mpd").delete();
 
 				// create GPACDRM.xml drm specification file, write to workdir folder
 				File specFile=new File(outputFolder, "temp-gpacdrm.xml");
@@ -208,8 +223,25 @@ public class Dasher {
 			logger.println("");			
 			logger.println(Utils.getNowAsString() + " Completed dashing");			
 		} finally {
-			logger.close();
+			if (logger!=null) logger.close();
 		}
 	}
 
+	private static int deleteOldFiles(File folder) throws IOException {
+		int count=0;
+		String exts[] = new String[] { ".m4s", ".mp4", ".mpd", ".jpg" };
+		for(File file : folder.listFiles()) {
+			if (file.isFile()) {
+				String name = file.getName();
+				for(int idx=0; idx<exts.length; idx++) {
+					if (name.endsWith(exts[idx])) {
+						file.delete();
+						count++;
+					}
+				}
+			}
+		}
+		return count;
+	}
+	
 }

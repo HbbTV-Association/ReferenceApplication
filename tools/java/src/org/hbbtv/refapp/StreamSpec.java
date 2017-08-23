@@ -13,6 +13,9 @@ public class StreamSpec {
 	public int sampleRate;	// 44100, 48000	
 	public int channels;	// 2
 	
+	public String profile;	// h264: main, h265: main
+	public String level; 	// h264: 4.0,  h265: 5.0
+	
 	public int getWidth() {
 		int idx=size.indexOf('x');
 		return Integer.parseInt(size.substring(0, idx));

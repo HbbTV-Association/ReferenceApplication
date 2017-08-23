@@ -47,7 +47,9 @@ public class MediaTools {
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4", "-preset", "fast",
-			"-c:v", "libx264", "-profile:v", "main", "-level", "4.0",
+			"-c:v", "libx264", 
+			"-profile:v", spec.profile.isEmpty()?"main":spec.profile, 
+			"-level", spec.level.isEmpty()?"4.0":spec.level,
 			"-s:v", spec.size, 		// resolution 1920x1080
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
@@ -77,12 +79,14 @@ public class MediaTools {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
 
 		// must also use x265-params custom argument to give a common ffmpeg args (ref,bf,g,keyint,etc..)
+		String level = spec.level.isEmpty()?"5.0":spec.level;
 		int gop = fps*gopdur;
 		List<String> args=Arrays.asList(FFMPEG, 
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4", "-preset", "fast",
-			"-c:v", "libx265", "-level", "5.0",	// profile=main(8bit) is given in x265-params
+			"-c:v", "libx265", 
+			"-level", level,// profile=main(8bit) is given in x265-params
 			"-s:v", spec.size, 		// resolution 3840x2160
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
 			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
@@ -93,7 +97,7 @@ public class MediaTools {
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
-			"-x265-params", "profile=main:level_idc=5.0:min-keyint=${fps}:keyint=${gop}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
+			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${fps}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
 			"-an", "-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
 		);
@@ -101,8 +105,12 @@ public class MediaTools {
 
 		int idx= args.indexOf("-x265-params")+1;
 		args.set(idx, args.get(idx)
+				.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
+				.replace("${level}", level)
 				.replace("${fps}", ""+fps)
-				.replace("${gop}", ""+gop) );
+				.replace("${gop}", ""+gop)
+				.replace("${bitrate}", spec.bitrate)
+				);
 		
 		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);
 		return args;
