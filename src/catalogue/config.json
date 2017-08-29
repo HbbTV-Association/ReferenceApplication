@@ -92,12 +92,20 @@
                 },
                 {
                     "title": "Out of band subtitles (AVC 1080p)",
-                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest_subob.mpd",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N6YAAABgynx8CU7bnbFeXHRwMSa3eSHTyic298ArrO7in6Mhd67MVNz975FFugPl2EL_OzBk15A9P3W5M7hPCXus1G2dx19GWAnhBl_qN7Yrg5i2-U98vJh0OXVgcJvaqpgmmiZ6J8TG7AQpltY9q0FtSs6mw-MVzmc",
                     "drm": "playready",
                     "app": 6,
-					"desc": "TTML subtitles (to be re-implemented)"					
+					"desc": "TTML subtitles",
+					"subtitles" : [{
+                        "code" : "en",
+                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_en.xml"
+                    },
+                    {
+                        "code" : "fi",
+                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fi.xml"
+                    }]					
                 },
                 {
                     "title": "In-band subtitles (AVC 1080p)",

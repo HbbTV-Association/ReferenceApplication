@@ -71,6 +71,7 @@ if (typeof(VK_LEFT) == "undefined") {
 }
 
 document.addEventListener('keypress', function(e) {
+	showInfo("key press");
 	e.preventDefault();
 	//console.log("key event filtered");
 }, false);
@@ -212,7 +213,6 @@ function navigateScrollList( keyCode )
 			while( menustack.length && menustack.last() != 0 )
 				menustack.pop();
 			menu.center = 0;
-			//adjustGridTop( menu );
 			showMenuSmart( actmenu );
 			actmenu = 0;
 			showMenuSmart( actmenu );
@@ -250,7 +250,6 @@ function navigateScrollList( keyCode )
 				menu.center--; // one row up
 			} while( !menu.items[ menu.center ].items.length && menu.center );
 			
-			//menu.center--; // one row up
 			actlist = menu.items[ menu.center ];
 			adjustGridTop( menu ); // adjust row to be visible
 			
@@ -312,17 +311,9 @@ function navigateScrollList( keyCode )
 			var item = actlist.items[ actlist.center ];
 			console.log("load scroll list item or play asset", item);
 			
-			// satellite
-			console.log("ProgramInfo item", item);
 			if( !item.start ){
 				item.start = "0000-00-00T";
 			}
-			mcDataLayer.pagename = "sg:toggle:tv_hbbtv:catchup:"+item.start.split('T')[0].split('-').join('')+":"+item.code+"_"+item.title;
-			mcDataLayer.contentid = item.code;
-			mcDataLayer.contentname = item.title; 
-			console.log(mcDataLayer.pagename);
-			//_satellite.track('explicitfire');
-			// end of satellite
 			
 			stop = false;
 			if( item.code && !isNaN( parseInt( item.code ) ) ){
@@ -441,7 +432,7 @@ function onKey(keyCode) {
 	
 	
 	$("#info").addClass("hide");
-	//showInfo("key press " + keyCode);
+	showInfo("key press " + keyCode);
 	
 	if( errorPage )
 	{
@@ -456,10 +447,6 @@ function onKey(keyCode) {
 		console.log("WRONG MENU SELECTED");
 	}
 	
-    //if(mobilePlatformView && mobilePlatformView.open){
-    //        mobilePlatformView.navigate(keyCode);
-    //        return;
-    //}
     
     if( settings.open )
 	{

@@ -102,19 +102,31 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 			}
 		break;
 		case VK_YELLOW:
-			if( this.video.textTracks ){
-				n = 0;
-				$.each( this.video.textTracks, function(i, lang){
-					console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
-					lang.mode = 'hidden';
-					n++;
-				} );
-				this.subtitleTrack += 1;
-				if( this.subtitleTrack >= n )
-					this.subtitleTrack = 0;
-				this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+			try{
+				if( this.video.textTracks ){
+					console.log("switch text Track");
+					n = 0;
+					$.each( this.video.textTracks, function(i, lang){
+						console.log("Subtitles " + i + ": " + lang.language + " - " + lang.label + " mode: " + lang.mode);
+						lang.mode = 'hidden';
+						n++;
+					} );
+					this.subtitleTrack += 1;
+					if( this.subtitleTrack >= n )
+						this.subtitleTrack = 0;
+					this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+					console.log("set track " + this.subtitleTrack  + ": " + this.video.textTracks[ this.subtitleTrack ].language );
+					showInfo("set track " + this.subtitleTrack  + ": " + this.video.textTracks[ this.subtitleTrack ].language );
+				}
+			} catch( e ){
+				console.log( e.description );
 			}
-			break;
+		break;
+		default:
+			if( key >= VK_0 && key <= VK_9 ){
+				self.showSubtitleTrack( key );
+			}
+		break;
 	}
 }
 
@@ -179,6 +191,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
 		this.element.appendChild( this.video );
 		var player = this.video;
+		
+		console.log("html5 video object created");
+		
 		addEventListeners( player, 'ended abort', function(e){
 			console.log( e.type );
 			self.stop();
@@ -233,6 +248,12 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		
 		player.addEventListener('loadedmetadata', function(){
 			console.log("loadedmetadata");
+			try{
+				console.log( typeof self.setSubtitles );
+				self.setSubtitles(); // set subtitles AFTER metadata load
+			} catch( e ){
+				console.log( e.description );
+			}
 		} );
 		
 		addEventListeners( player, "waiting", function(e){ 
@@ -469,6 +490,79 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 };
 
+VideoPlayerHTML5.prototype.setSubtitles = function(){
+	// out-of-band subtitles must be an array containing containing language code and source.ttml file url.
+	
+	try{
+		var player = this.video;
+		
+		console.log("set subs from active assets metadata 'subtitles'");
+		this.subtitles = menu.focus.subtitles;
+		
+		console.log( JSON.stringify( this.subtitles ) );
+		
+		if( this.subtitles && this.subtitles.length ){
+			
+			$.each( this.subtitles, function(i, lang){
+				//console.log( lang );
+				console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
+				//var track = $("<track name='subtitles' value='srclang:"+ lang.code +" src: " + lang.src + "' />")[0];
+
+								
+				var track = document.createElement("track");
+				//track.kind = "captions";
+				track.kind = "subtitles";
+				track.label = "Language " + i;
+				track.srclang = lang.code;
+				track.src = lang.src;
+				track.addEventListener("load", function() {
+					console.log("text track ready: " + this.srclang);
+					if( this.language == this.subtitles[0].code ){
+						this.mode = "showing";
+						//player.textTracks[0].mode = "showing"; // disabled?
+					}
+					else{
+						this.mode = 'hidden';
+					}
+				});
+				player.appendChild(track);
+				
+			} );
+			console.log( "Text tracks: " + player.textTracks.length );
+			$.each( player.textTracks, function(i, track){
+				console.log( track );
+			} );
+			this.subtitleTrack = 0;
+			player.textTracks[0].mode = "showing";
+		}
+		else{
+			console.log( "no subs" );
+		}
+	} catch(e){
+		console.log("r:582  " + e.description );
+	}
+};
+
+VideoPlayerHTML5.prototype.showSubtitleTrack = function(nth){
+	var player = this.video;
+	if( player.textTracks.length <= nth ){
+		console.log( "No track " + nth + " available. Tracklist length is " + player.textTracks.length );
+		return;
+	}
+	// hide all tracks
+	$.each( player.textTracks, function(i, track){
+		track.mode = "hidden";
+		console.log( track );
+	} );
+	
+	// show selected
+	player.TextTracks.TextTrack[nth].mode = "showing";
+	
+	$.each( player.textTracks, function(i, track){
+		console.log( track.language + ": " + track.mode );
+	} );
+};
+
 VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
 	
@@ -508,25 +602,9 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	
 	try{
 		if( !self.video ){
+			console.log("populate player and create video object");
 			self.populate();
-		}
-		
-		// out-of-band subtitles must be an array containing containing language code and source.ttml file url.
-		var player = this.video;
-		this.subtitles = player.textTracks;
-		if( player.textTracks && player.textTracks.length ){
-			
-			$.each( player.textTracks, function(i, lang){
-				console.log( lang );
-				console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
-				$(this.video).append("<param name='subtitles' value='srclang:"+ lang.code +" src: " + lang.src + "' />");
-				lang.mode = 'hidden';
-			} );
-			this.subtitleTrack = 0;
-			player.textTracks[0].mode = "showing";
-		}
-		else{
-			console.log( "no subs" );
+			self.createPlayer();
 		}
 	}
 	catch(e){
@@ -550,17 +628,9 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 		console.log( e.message );
 		console.log( e.description );
 	}
-}
+};
 
-VideoPlayerHTML5.prototype.setSubtitles = function( subtitles ){
-	if( subtitles ){
-		console.log("setSubtitles()");
-		this.subtitles = subtitles;
-	}
-	else{
-		this.subtitles = null;
-	}
-}
+
 
 VideoPlayerHTML5.prototype.pause = function(){
 	var self = this;
@@ -573,7 +643,7 @@ VideoPlayerHTML5.prototype.pause = function(){
 	catch(e){
 		console.log(e);
 	}
-}
+};
 
 VideoPlayerHTML5.prototype.stop = function(){
 	var self = this;
@@ -593,7 +663,7 @@ VideoPlayerHTML5.prototype.stop = function(){
 		console.log("error stopping video");
 		console.log(e.description);
 	}
-}
+};
 
 VideoPlayerHTML5.prototype.play = function(){
 	var self = this;
@@ -604,7 +674,7 @@ VideoPlayerHTML5.prototype.play = function(){
 	catch(e){
 		console.log(e);
 	}
-}
+};
 
 VideoPlayerHTML5.prototype.rewind = function( sec ){
 	var self = this;
@@ -627,7 +697,7 @@ VideoPlayerHTML5.prototype.rewind = function( sec ){
 		console.log(e.message);
 		console.log(e.description);
 	}
-}
+};
 
 VideoPlayerHTML5.prototype.forward = function( sec ){
 	var self = this;
@@ -649,7 +719,7 @@ VideoPlayerHTML5.prototype.forward = function( sec ){
 	catch(e){
 		console.log(e);
 	}
-}
+};
 
 VideoPlayerHTML5.prototype.clearVideo = function(){
 	var self = this;
@@ -669,20 +739,20 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 		console.log(e.description);
 	}
 	this.subtitles = null;
-}
+};
 
 VideoPlayerHTML5.prototype.isFullscreen = function(){
 	var self = this;
 	return self.fullscreen;
-}
+};
 
 VideoPlayerHTML5.prototype.isPlaying = function(){
 	return ( this.video && !this.video.paused ); // return true/false
-}
+};
 
 VideoPlayerHTML5.prototype.doPlayStateChange = function(){
 	
-}
+};
 
 VideoPlayerHTML5.prototype.updateProgressBar = function(){
 	try{
@@ -690,7 +760,7 @@ VideoPlayerHTML5.prototype.updateProgressBar = function(){
 		var position = this.video.currentTime;
 		var duration = this.video.duration;
 		
-		console.log("update progress bar");
+		//console.log("update progress bar");
 		
 		pbar = document.getElementById("progressbar");
 
@@ -730,7 +800,7 @@ VideoPlayerHTML5.prototype.updateProgressBar = function(){
 		console.log( e.message );
 	}
 
-}
+};
 
 
 
@@ -745,7 +815,7 @@ VideoPlayerHTML5.prototype.setLoading = function(loading, reason){
 	if(reason){
 		console.log(reason);
 	}
-}
+};
 
 VideoPlayerHTML5.prototype.setFullscreen = function(fs){
 	this.fullscreen = fs;
@@ -760,8 +830,8 @@ VideoPlayerHTML5.prototype.setFullscreen = function(fs){
 		$("#player").removeClass("show");
 	}
 
-}
+};
 
 VideoPlayerHTML5.prototype.isVisible = function(fs){
 	return this.visible;
-}
+};

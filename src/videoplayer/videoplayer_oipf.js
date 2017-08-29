@@ -160,6 +160,8 @@ VideoPlayer.prototype.setDisplay = function( container ){
 };
 VideoPlayer.prototype.createPlayer = function(){
 	
+	console.log("createPlayer()");
+	
 	var self = this;
 
 	if( !$("#player")[0] ){
@@ -376,6 +378,16 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 	try{
 		if( !self.video ){
 			self.populate();
+		}
+		
+		var player = this.video;
+		this.subtitles = player.textTracks;
+		
+		console.log( JSON.stringify( this.subtitles ) );
+		
+		if( true ){
+			console.log("set subs")
+			this.subtitles = menu.focus.subtitles;
 		}
 		
 		// out-of-band subtitles must be an array containing containing language code and source.ttml file url.

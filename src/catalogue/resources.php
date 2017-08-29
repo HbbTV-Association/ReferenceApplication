@@ -11,6 +11,7 @@ $resources = array(
 	"menu.css",
 	"../videoplayer/vplayer.css",
 	"../common.css",
+	"../debugscreen.css",
 	"../jquery-1.11.3.min.js",
 	"../common.js",
 	"application.js",
@@ -23,11 +24,9 @@ $resources = array(
 	"topmenuitem.js",
 	"../videoplayer/videoplayer_oipf.js",
 	"../videoplayer/videoplayer_html5.js",
-/*	"../videoplayer/videoplayercontrols.js", */
 	"../debugscreen.js",
-	"navigation.js",
-	"../videoplayer/monitor/monitor.js",
-	"../debugscreen.css"
+	"navigation.js", 
+	"../videoplayer/monitor/monitor.js"
 );
 
 
@@ -35,7 +34,7 @@ $resources = array(
 
 // 1. Do not use minified version on mhp if not set optimize=1.
 // 2. Do not use minified if it does not exist. run first minify.php
-if( !file_exists( "app.min.js" ) || ( (strpos( $_SERVER['SERVER_NAME'], "mhp") !== FALSE || !$optimizeDefault ) && !isset( $_GET["optimize"] ) ) ){ //mhp or min file not found
+if( !file_exists( "app.min.js" ) || ( !$optimizeDefault && !isset( $_GET["optimize"] ) ) ){ // min-file not found or not set to optimize
 	$useMinified = false;
 }
 else{
@@ -45,7 +44,7 @@ else{
 }
 
 // css
-if( !file_exists( "app.min.css" ) || ( (strpos( $_SERVER['SERVER_NAME'], "mhp") !== FALSE || !$optimizeDefault ) && !isset( $_GET["optimize"] ) ) ){ //mhp or min file not found
+if( !file_exists( "app.min.css" ) || ( !$optimizeDefault && !isset( $_GET["optimize"] ) ) ){ // min-file not found or not set to optimize
 	$useMinifiedCss = false;
 }
 else{
@@ -54,12 +53,14 @@ else{
 	echo "<link href='$fileversion' rel='stylesheet' type='text/css'/>\n";
 }
 
-foreach($resources as $file){
-	$fileversion = $file . "?version=" . filemtime( $file );
-	if( !$useMinified && substr( $file, -2 ) == "js" ){
-		echo "<script src='$fileversion' type='text/javascript'></script>\n";
-	}else if( !$useMinifiedCss && substr( $file, -3 ) == "css" ){
-		echo "<link href='$fileversion' rel='stylesheet' type='text/css'/>\n";
+if( !$useMinified || !$useMinifiedCss ){
+	foreach($resources as $file){
+		$fileversion = $file . "?version=" . filemtime( $file );
+		if( !$useMinified && substr( $file, -2 ) == "js" ){
+			echo "<script src='$fileversion' type='text/javascript'></script>\n";
+		}else if( !$useMinifiedCss && substr( $file, -3 ) == "css" ){
+			echo "<link href='$fileversion' rel='stylesheet' type='text/css'/>\n";
+		}
 	}
 }
 

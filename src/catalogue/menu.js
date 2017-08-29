@@ -68,28 +68,7 @@ Menu.prototype.setActiveItem = function(item){
 				var left = -Number(self.gridScrollView.getBoxLeft(item) + (item.element.offsetWidth/2) - 640);
 				self.gridScrollView.scrollLeftTo(left);
 			}
-
-			console.log("activated GridViewBox");
 			
-			// TODO: fix video div css attributes and logic. video screen dimensions must be absolute value, not percentage
-			/*
-			if(self.focus.url && self.focus.url.length > 0){
-				if(self.focus.url.isVideoURL()){
-					
-					
-					console.log("temporaty disabled video autostart in preview");
-					return true;
-					
-					self.startBoxVideoTimeout = setTimeout( function(){
-						
-						self.prepareVideoStart();
-						vplayer.setFullscreen(false);
-						vplayer.setDisplay( self.focus.element );
-						vplayer.startVideo();
-					}, 1500);
-				}
-			}
-			*/
 		}
 		return true;
 	}
@@ -156,7 +135,6 @@ Menu.prototype.navigate = function(key){
 							}
 							// change to fullscreen mode
 							vplayer.setFullscreen(true);
-							//vplayer.setDisplay( $("body")[0] ); //
 						}
 						else{
 							window.location.href = self.focus.url;
