@@ -76,6 +76,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2017-09-01:
+- added EMSG event inserter
 2017-08-14:
 - added h265 dash mode
 2017-08-11:
