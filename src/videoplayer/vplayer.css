@@ -4,14 +4,57 @@
 	overflow: hidden;
 	opacity : 1.0;
 	transition: opacity 1s;
-	_width:100%;
-	_height: 100%;
+	background:black;
+	
+	top: 0px;
+	left: 0px;
+	width: 1280px;
+	height: 720px;
 }
-#video {
-  display: block;
-  height: 720px;
-  width: 1280px;
+#video, #ad1, #ad2 {
+	display: block;
+	opacity : 1.0;
+	transition: all 0.5s;
+	position: absolute;
+	width: 1280px;
+	height: 720px;
+	top: 0px;
+	left: 0px;
 }
+
+#adInfo{
+	display: block;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 1280px;
+	height: 0px;
+	z-index: 99;
+	opacity:0.0;
+	transition: all 0.5s;
+	background-color: rgba(0,0,0,0.7);
+	color:white;
+	text-align: center ;
+}
+#adInfo.show{
+	height: 40px !important;
+	opacity:1.0 !important;
+}
+
+.hide{
+	display: none !important;
+	_left:-1280px !important;
+}
+.slideleft {
+	left:-1280px !important;
+	opacity : 0.0 !important;
+}
+.slideright {
+	left:1280px !important;
+	display: none !important;
+}
+
+
 #loadingImage {
 	background: rgba(0, 0, 0, 0) url("images/loading.gif") repeat scroll 0 0;
 	display: block;
@@ -23,9 +66,10 @@
 	z-index: 20;
 }
 .hidden:not(#player_buttons){
-	_display: none !important;
 	opacity : 0.0;
 }
+
+
 
 .fullscreen {
 	position: absolute;
@@ -98,6 +142,7 @@
 	height: 0px;
 	bottom: 0px;
 	background: rgba(0,0,0,0.4);
+	display:none;
 }
 #player.show{
 	height : 150px !important;

@@ -18,6 +18,7 @@ if (typeof(KeyEvent) != 'undefined') {
     var VK_BLUE = KeyEvent.VK_BLUE;
     var VK_PLAY = KeyEvent.VK_PLAY;
     var VK_PAUSE = KeyEvent.VK_PAUSE;
+    var VK_PLAY_PAUSE = KeyEvent.VK_PLAY_PAUSE;
     var VK_STOP = KeyEvent.VK_STOP;
     var VK_FAST_FWD = KeyEvent.VK_FAST_FWD;
     var VK_REWIND = KeyEvent.VK_REWIND;
@@ -58,6 +59,7 @@ if (typeof(VK_LEFT) == "undefined") {
 
   var VK_PLAY = 415;
   var VK_PAUSE = 19;
+  var VK_PLAY_PAUSE = 463;
   var VK_STOP = 413;
   var VK_FAST_FWD = 417;
   var VK_REWIND   = 412;

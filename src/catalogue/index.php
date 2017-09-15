@@ -112,8 +112,9 @@ function onLoad() {
 	<div id="videodiv"></div>
 	
 	<div id="wrapper">
-		<div id="logo"></div>
+		<div id="logo1"></div>
 		<div id="menu"></div>
+		<div id="logo2"></div>
 		<div id="itemDescription"></div>
 	</div>
 	

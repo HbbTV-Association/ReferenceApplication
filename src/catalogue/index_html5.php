@@ -18,8 +18,7 @@
 	<title>HbbTV Reference Video Application</title>
 
 	<meta http-equiv="content-type" content="Content-Type: application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
-	<script type="text/javascript" language="javascript">
-	<![CDATA[
+	<script type="application/javascript" language="javascript">
 	
 	
 	var profile = { hbbtv : "2.0", video : "html5"};
@@ -43,8 +42,6 @@
 		registerKeys(1);
 		registerKeyListener();
 	}
-	
-	]]>
 	</script>
 	
 	<?php
@@ -63,8 +60,9 @@
 	<div id="videodiv"></div>
 	
 	<div id="wrapper">
-		<div id="logo"></div>
+		<div id="logo1"></div>
 		<div id="menu"></div>
+		<div id="logo2"></div>
 		<div id="itemDescription"></div>
 	</div>
 	

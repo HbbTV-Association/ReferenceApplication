@@ -279,6 +279,14 @@ Menu.prototype.prepareVideoStart = function(){
 		*/
 		
 		vplayer.setURL( self.focus.url );
+		
+		if( self.focus.adBreaks ){
+			vplayer.setAdBreaks( self.focus.adBreaks );
+		}
+		else{
+			vplayer.setAdBreaks( null ); // no ads
+		}
+		
 		if( self.focus.la_url ){
 			vplayer.setDRM( self.focus.drm, self.focus.la_url );
 		}

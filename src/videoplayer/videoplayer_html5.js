@@ -66,6 +66,13 @@ VideoPlayerHTML5.prototype.displayPlayer = function( sec ){
 
 VideoPlayerHTML5.prototype.navigate = function(key){
 	var self = this;
+	
+	console.log("Key code pressed: " + key);
+	
+	if( self.onAdBreak ){
+		console.log("Navigation on ad break");
+	}
+	
 	switch(key){
 		case VK_UP:
 			//self.controls.show();
@@ -85,20 +92,32 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 
 		case VK_LEFT:
 		case VK_REWIND:
-			this.rewind( 30 );
-			self.displayPlayer(5);
+			if( !self.onAdBreak ){
+				self.rewind( 30 );
+				self.displayPlayer(5);
+			}
 			break;
 		case VK_RIGHT:
 		case VK_FAST_FWD:
-			this.forward( 30 );
-			self.displayPlayer(5);
+			if( !self.onAdBreak ){
+				self.forward( 30 );
+				self.displayPlayer(5);
+			}
 			break;
 		case VK_ENTER:
-			if( this.isPlaying() ){
-				this.pause();
+		case VK_PLAY_PAUSE:
+		case VK_PAUSE:
+		case VK_PLAY:
+			if( !self.onAdBreak ){
+				console.log("pauseplay ad?");
 			}
 			else{
-				this.play();
+				if( this.isPlaying() ){
+					this.pause();
+				}
+				else{
+					this.play();
+				}
 			}
 		break;
 		case VK_YELLOW:
@@ -113,10 +132,15 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 					} );
 					this.subtitleTrack += 1;
 					if( this.subtitleTrack >= n )
-						this.subtitleTrack = 0;
-					this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
-					console.log("set track " + this.subtitleTrack  + ": " + this.video.textTracks[ this.subtitleTrack ].language );
-					showInfo("set track " + this.subtitleTrack  + ": " + this.video.textTracks[ this.subtitleTrack ].language );
+						this.subtitleTrack = -1;
+					if( this.subtitleTrack >= 0 ){
+						this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+						console.log("set track " + this.subtitleTrack  + ": " + this.video.textTracks[ this.subtitleTrack ].language );
+						showInfo("Switch subtitles to language: " + this.video.textTracks[ this.subtitleTrack ].label );
+					}
+					else{
+						showInfo("Subtitles off");
+					}
 				}
 			} catch( e ){
 				console.log( e.description );
@@ -243,7 +267,27 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		player.addEventListener('canplay', function(){
 			canplay = true;
 			console.log("canplay");
-			player.play();
+			// check prerolls on first start
+			if( self.adBreaks ){
+				console.log("has ads");
+				var playPreroll = false;
+				$.each( self.adBreaks, function(n, adBreak){
+					if( !adBreak.played && adBreak.position == "preroll" ){
+						console.log("found preroll ad");
+						console.log("play preroll");
+						adBreak.played = true;
+						playPreroll = true;
+						self.getAds( adBreak );
+						return false;
+					}
+				});
+				
+			}
+			
+			if( !playPreroll ){
+				player.play();
+			}
+			
 		} );
 		
 		player.addEventListener('loadedmetadata', function(){
@@ -251,6 +295,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			try{
 				console.log( typeof self.setSubtitles );
 				self.setSubtitles(); // set subtitles AFTER metadata load
+				
+				
+			
 			} catch( e ){
 				console.log( e.description );
 			}
@@ -265,7 +312,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			console.log( e.type );
 		} );
 		
-		addEventListeners( player, 'playing playing pause emptied', function(e){
+		addEventListeners( player, 'playing pause emptied', function(e){
 			self.setLoading(false);
 			console.log( e.type );
 		} );
@@ -289,11 +336,71 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		player.addEventListener('playing', function(){
 			Monitor.videoPlaying();
 			self.setLoading(false);
+			var tracks = self.video.videoTracks.length;
+			console.log("Video tracks: " + tracks );
+			if( tracks ){
+				console.log( self.video.videoTracks[0] );
+				//self.video.videoTracks[0].addEventListener('change', function(event){
+				//	console.log("video track [0] event:");
+				//	console.log( event );
+				//});
+			}
+			
+			// set up inband cue events listeners
+			console.log("set up cuechange listeners");
+			$.each( player.textTracks, function( i, track ){
+				
+				console.log("text track " + i);
+				track.oncuechange = function(evt) {
+					
+					showInfo("cuechange! kind=" + this.kind);
+					try{
+						console.log( this.id );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.data );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.track );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.track.activeCues );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						
+						var myTrack = this.track;             // track element is "this" 
+						var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
+						if (myCues.length > 0) {              
+							console.log( myCues[0].getCueAsSource() ); 
+						}
+					} catch(e){
+						console.log("error", e.message );
+					}
+				};
+				track.mode = "showing";
+				//console.log( JSON.stringify( track ) );
+				/*
+				$(track).on("cuechange", function(evt) {
+					showInfo("cuechange!");
+					console.log( JSON.stringify( evt ) );
+				});
+				*/
+			});
+			
 		} );
 		
 		
 		player.addEventListener('timeupdate', function(){
 			self.updateProgressBar();
+			self.checkAds();
 		} );
 		
 		player.seek = function( sec, absolute ){
@@ -359,6 +466,149 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 	return;
 };
 
+VideoPlayerHTML5.prototype.checkAds = function(){
+	//console.log("checkAds");
+	if( this.adBreaks ){
+		
+		var position =  Math.floor( this.video.currentTime );
+		var self = this;
+		$.each( this.adBreaks, function(n, adBreak){
+			if( !adBreak.played && adBreak.position == position ){
+				console.log("found ad break at position " + position);
+				adBreak.played = true;
+				self.getAds( adBreak ); // play ads on current second
+				return false;
+			}
+		} );
+	}
+};
+
+VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
+	
+	// if ad players are prepared do nothing
+	if( $("#ad1")[0] && $("#ad2")[0] ){
+		console.log("ready to play ads");
+		return;
+	}
+	var self = this;
+	// create new adPlayers
+	self.adPlayer = [ $("<video id='ad1' type='video/mp4' preload='auto'></video>")[0], $("<video id='ad2' type='video/mp4' preload='auto'></video>")[0] ];
+	self.element.appendChild( self.adPlayer[0] );
+	self.element.appendChild( self.adPlayer[1] );
+	self.element.appendChild( $("<div id='adInfo'></div>")[0] );
+	
+	console.log("html5 ad-video objects created");
+	
+	var adEnd = function(e){
+		self.setLoading(false);
+		
+		console.log("ad ended. adCount="+ self.adCount + " adBuffer length: " + self.adBuffer.length );
+		console.log( e.type );
+		var player = $(this);
+		if( self.adCount < self.adBuffer.length ){
+			player.addClass("hide");
+			
+			self.playAds();
+			
+		}
+		else{
+			// no more ads, continue content
+			console.log("No more ads, continue content video");
+			self.onAdBreak = false;
+			player.addClass("hide"); // hide ad video
+			$("#adInfo").removeClass("show");
+			
+			self.video.play();
+			$(self.video).removeClass("hide"); // show content video
+		}
+		
+	};
+	
+	var onAdPlay = function(){ 
+		//console.log("ad play event triggered");
+		
+		//$("#adInfo").html("");
+	};
+	
+	var onAdProgress = function(e){ 
+		//console.log( e.type );
+	};
+	
+	var onAdTimeupdate = function(){
+		//self.updateProgressBar();
+		var timeLeft = Math.floor( this.duration - this.currentTime )
+		if( timeLeft != NaN ){
+			//console.log( timeLeft );
+			$("#adInfo").addClass("show");
+			$("#adInfo").html("Ad " + self.adCount + "/" + self.adBuffer.length + " (" + timeLeft + "s)" );
+		}
+	};
+	
+	addEventListeners( self.adPlayer[0], 'ended', adEnd );
+	addEventListeners( self.adPlayer[1], 'ended', adEnd );
+	addEventListeners( self.adPlayer[0], 'playing', onAdPlay );
+	addEventListeners( self.adPlayer[1], 'playing', onAdPlay );
+	addEventListeners( self.adPlayer[0], 'timeupdate', onAdTimeupdate );
+	addEventListeners( self.adPlayer[1], 'timeupdate', onAdTimeupdate );
+	addEventListeners( self.adPlayer[0], 'progress', onAdProgress );
+	addEventListeners( self.adPlayer[1], 'progress', onAdProgress );
+};
+
+VideoPlayerHTML5.prototype.getAds = function( adBreak ){
+	this.onAdBreak = true; // disable seeking
+	this.adCount = 0;
+	this.video.pause();
+	var self = this;
+	console.log("get ads breaks=" + adBreak.ads);
+	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
+		self.adBuffer = ads;
+		//self.adCount = ads.length;
+		console.log( "Got " + ads.length + " ads");
+		
+		self.prepareAdPlayers();
+		
+		self.playAds();
+		
+	}, "json" );
+};
+
+VideoPlayerHTML5.prototype.playAds = function(){
+	this.onAdBreak = true; // disable seeking
+	this.video.pause();
+	$(this.video).addClass("hide");
+	
+	var self = this;
+	
+	var activeAdPlayer = self.adPlayer[ self.adCount % 2 ];
+	var idleAdPlayer = self.adPlayer[ (self.adCount + 1) % 2 ];
+	
+	// for the first ad, set active ad src. Later the active players url is always set and preload before the player is activated
+	if( self.adCount == 0 ){
+		activeAdPlayer.src = self.adBuffer[ self.adCount ];
+	}
+	
+	self.adCount++
+	
+	// set next ad url to idle player and preload it
+	if( self.adBuffer.length > self.adCount ){
+		idleAdPlayer.src = self.adBuffer[ self.adCount ];
+		idleAdPlayer.load();
+	}
+	
+	activeAdPlayer.play();
+	$( activeAdPlayer ).removeClass("hide");
+	$( idleAdPlayer ).addClass("hide");
+};
+
+VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
+	if( !breaks){
+		this.breaks = null;
+	}
+	else{
+		console.log("setAdBreaks(", breaks ,")");
+		this.adBreaks = breaks;
+	}
+};
 
 VideoPlayerHTML5.prototype.setDRM = function( system, la_url){
 	if( !system ){
@@ -525,6 +775,9 @@ VideoPlayerHTML5.prototype.setSubtitles = function(){
 						this.mode = 'hidden';
 					}
 				});
+				track.addEventListener("oncuechange", function() {
+					console.log("oncuechange");
+				});
 				player.appendChild(track);
 				
 			} );
@@ -563,13 +816,15 @@ VideoPlayerHTML5.prototype.showSubtitleTrack = function(nth){
 	} );
 };
 
+
 VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
 	
 	try{
 		var broadcast = $("#broadcast")[0];
-		if( !broadcast )
+		if( !broadcast ){
 			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+		}
 		broadcast = $("#broadcast")[0];
 		broadcast.bindToCurrentChannel();
 		broadcast.stop();

@@ -65,7 +65,29 @@
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
 					"desc": "In-band subtitles"
-                }				
+                },
+                {
+                    "title": "AD Insertion (DataCue)",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest_subib_evt.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "app": 6,
+					"desc": "In-band ad tracks delivered from TextTracks DataCue"
+                },
+                {
+                    "title": "Linear AD Insertion",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/manifest_evtib.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "app": 6,
+					"desc": "Ads delivered from any ad-server on ad-event time",
+					"adBreaks" : [
+						{ "position" : "preroll", "ads" : 1 },
+						{ "position" : 10, "ads" : 3 },
+						{ "position" : 20, "ads" : 1 },
+						{ "position" : 30, "ads" : 3 },
+						{ "position" : "postroll", "ads" : 1 }
+					]
+                }	
+				
             ]
         },
         {

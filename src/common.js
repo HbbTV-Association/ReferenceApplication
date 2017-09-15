@@ -82,7 +82,7 @@ function showInfo( msg, timeout, inMs )
 			msg = JSON.stringify( msg );
 		}
 		$("#info").html( XMLEscape( msg ) );
-		console.log( msg  );
+		//console.log( msg  );
 	}
 	catch(e){
 		console.log( "error in show info function: " + e.message );

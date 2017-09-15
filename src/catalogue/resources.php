@@ -57,7 +57,8 @@ if( !$useMinified || !$useMinifiedCss ){
 	foreach($resources as $file){
 		$fileversion = $file . "?version=" . filemtime( $file );
 		if( !$useMinified && substr( $file, -2 ) == "js" ){
-			echo "<script src='$fileversion' type='text/javascript'></script>\n";
+			//echo "<script src='$fileversion' type='text/javascript'></script>\n";
+			echo "<script src='$fileversion' type='application/javascript'></script>\n";
 		}else if( !$useMinifiedCss && substr( $file, -3 ) == "css" ){
 			echo "<link href='$fileversion' rel='stylesheet' type='text/css'/>\n";
 		}
