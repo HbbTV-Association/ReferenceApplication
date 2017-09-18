@@ -8,22 +8,37 @@ import org.mp4parser.Box;
 
 /**
  * Insert EventMessageBox(EMSG) to mp4 segment.
- * Optional: Remove existing EMSG boxes from file
+ * Remove existing EMSG boxes from file.
+ * Modify manifest.mpd file.
  *
  * Insert EMSG to segment file:
  *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input=dash/v1_1.m4s scheme="urn:my:scheme" value="1" ts=1 ptd=1 dur=0xFFFF id=1 msg="any payload"
  * Remove all EMSG boxes from segment file:
  *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input=dash/v1_1.m4s scheme=""
+ *   
+ * Insert InbandEventStream element to mpd manifest 
+ *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter mode=mpd input="dash/manifest.mpd" scheme="urn:my:scheme" value="1"
+ * Remove all InbandEventStream elements from mpd manifest 
+ *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter mode=mpd input="dash/manifest.mpd" scheme=""
  */
 public class EventInserter {
 
 	public static void main(String[] args) throws Exception {
 		Map<String,String> params = Utils.parseParams(args);
-		
+
         File videoFile = new File(params.get("input"));
         if (!videoFile.exists())
             throw new FileNotFoundException(videoFile.getAbsolutePath() + " not found");
 
+		String mode = Utils.getString(params, "mode", "", true);
+		if (mode.equalsIgnoreCase("mpd")) {
+			// add <InbandEventStream..> to manifest, or delete from manifest
+			doMPD(videoFile, params);
+			return;
+		}
+        
+		// mode=emsg (EMSG inserter, EMSG delete)
+		
         // if output is empty then use temp file for writing and rename to an output name
         String val = Utils.getString(params, "output", "", true);
 		File outputFile = val.isEmpty() ? videoFile : new File(val);
@@ -126,4 +141,29 @@ public class EventInserter {
 		}
 	}
 
+	private static void doMPD(File manifestFile, Map<String,String> params) throws Exception {
+		// <InbandEventStream schemeIdUri="http://hbbtv.org/refapp" value="1"/>
+		String val = Utils.getString(params, "output", "", true);
+		File outputFile = val.isEmpty() ? manifestFile : new File(val);
+
+		val = Utils.getString(params, "scheme", "", true);
+    	if (val.startsWith("0x")) val=new String(Utils.hexToBytes(val.substring(2)), "UTF-8");            	
+    	String scheme = val; // "urn:mpeg:dash:event:2012" or something else
+
+    	val = Utils.getString(params, "value", "", true); // same as <InbandEventStream value="x"..>
+    	val = val.startsWith("0x") ? 
+    		new String(Utils.hexToBytes(val.substring(2)), "UTF-8") : val;
+    		
+    	DashManifest manifest = new DashManifest(manifestFile);
+    	if (!scheme.isEmpty()) {
+    		// add element to AdaptationSet(video) block 
+    		manifest.addInbandEventStreamElement(scheme, val, "video");
+    		manifest.save(outputFile);
+    	} else {
+    		manifest.removeInbandEventStreamElement(null, null);
+    		manifest.save(outputFile);
+    	}
+	}
+
+	
 }
