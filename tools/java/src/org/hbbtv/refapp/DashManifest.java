@@ -4,21 +4,34 @@ import java.util.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Fix some of the common manifest.mpd formatting problems. 
+ * Fix some of the common manifest.mpd formatting problems.
+ * Modify manifest elements, save new manifest.mpd file.
  */
 public class DashManifest {
 	private File file;
 	private Document doc;
 	private boolean modified;
 	
-	public DashManifest(File file) {
+	public DashManifest(File file) throws IOException {
 		this.file=file;
+		readInputFile();
 	}
 
+	private void readInputFile() throws IOException {
+		FileInputStream fis = new FileInputStream(file);
+		try {
+			doc = XMLUtil.createDocument(fis);
+		} finally {
+			try { fis.close(); } catch(Exception ex){}
+		}		
+	}
+	
 	/**
 	 * Fix manifest formatting issues.
 	 * @param mode	h264,h265
@@ -26,19 +39,10 @@ public class DashManifest {
 	 */
 	public void fixContent(StreamSpec.TYPE mode) throws Exception {
 		modified=false;
-
 		String val;
-		Element elem;
-		
-		FileInputStream fis = new FileInputStream(file);
-		try {
-			doc = XMLUtil.createDocument(fis);
-		} finally {
-			try { fis.close(); } catch(Exception ex){}
-		}
 
 		// remove an empty <BaseURL></BaseURL> element
-		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "BaseURL");
+		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "BaseURL");
 		if (elem!=null) {
 			val = XMLUtil.getText(elem, "");
 			if (val.isEmpty() || val.equals("./") || val.equals(".")) {
@@ -157,6 +161,42 @@ public class DashManifest {
 					elemCP.getParentNode().removeChild(elemCP);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Add <InbandEventStream..> element
+	 * @param scheme
+	 * @param value
+	 * @param mimeAS	add before "video" or "audio" representations
+	 */
+	public void addInbandEventStreamElement(String scheme, String value, String mimeAS) {
+		// add IES element before <Representation..> element within video or audio AdaptationSet
+		String xml = String.format("<InbandEventStream schemeIdUri=\"%s\" value=\"%s\"/>"
+				, Utils.XMLEncode(scheme, true, false), Utils.XMLEncode(value, true, false) );				
+		Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
+
+		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
+		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			List<Element> elems = XMLUtil.getChildElements(elemAS, "Representation");
+			if (elems.isEmpty() || !elems.get(0).getAttribute("mimeType").startsWith(mimeAS))
+				continue; // not given mimeType="video/mp4", "audio/mp4"
+
+			modified=true;
+			elem = elems.get(0); // first Representation element
+			elemAS.insertBefore( doc.importNode(newElem, true), elem);
+			break;
+		}
+	}
+	
+	public void removeInbandEventStreamElement(String scheme, String value) {
+		// remove all <IES..> elements
+		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
+		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			List<Element> elems = XMLUtil.getChildElements(elemAS, "InbandEventStream");
+			if (!elems.isEmpty()) modified=true;
+			for(Element elemIES : elems)
+				elemIES.getParentNode().removeChild(elemIES);
 		}
 	}
 	
