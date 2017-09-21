@@ -4,6 +4,7 @@
 
 
 
+
 function VideoPlayerHTML5(element_id, profile, width, height){
 	this.FILETYPES = {
 		MP4:0,
@@ -67,8 +68,6 @@ VideoPlayerHTML5.prototype.displayPlayer = function( sec ){
 VideoPlayerHTML5.prototype.navigate = function(key){
 	var self = this;
 	
-	console.log("Key code pressed: " + key);
-	
 	if( self.onAdBreak ){
 		console.log("Navigation on ad break");
 	}
@@ -109,9 +108,6 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 		case VK_PAUSE:
 		case VK_PLAY:
 			if( !self.onAdBreak ){
-				console.log("pauseplay ad?");
-			}
-			else{
 				if( this.isPlaying() ){
 					this.pause();
 				}
@@ -269,38 +265,26 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			console.log("canplay");
 			// check prerolls on first start
 			if( self.adBreaks ){
-				console.log("has ads");
 				var playPreroll = false;
 				$.each( self.adBreaks, function(n, adBreak){
 					if( !adBreak.played && adBreak.position == "preroll" ){
-						console.log("found preroll ad");
 						console.log("play preroll");
 						adBreak.played = true;
 						playPreroll = true;
 						self.getAds( adBreak );
 						return false;
 					}
-				});
-				
+				});	
 			}
 			
+			// if preroll is not found, move on to content video
 			if( !playPreroll ){
 				player.play();
 			}
-			
 		} );
 		
 		player.addEventListener('loadedmetadata', function(){
 			console.log("loadedmetadata");
-			try{
-				console.log( typeof self.setSubtitles );
-				self.setSubtitles(); // set subtitles AFTER metadata load
-				
-				
-			
-			} catch( e ){
-				console.log( e.description );
-			}
 		} );
 		
 		addEventListeners( player, "waiting", function(e){ 
@@ -334,67 +318,16 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		} );
 		
 		player.addEventListener('playing', function(){
+			if( self.firstPlay ){
+				// set out-of-band subtitles
+				self.setSubtitles();
+				// set TextTrackCue listeners
+				self.setTextTrackCues();
+				self.firstPlay = false;
+			}
+
 			Monitor.videoPlaying();
 			self.setLoading(false);
-			var tracks = self.video.videoTracks.length;
-			console.log("Video tracks: " + tracks );
-			if( tracks ){
-				console.log( self.video.videoTracks[0] );
-				//self.video.videoTracks[0].addEventListener('change', function(event){
-				//	console.log("video track [0] event:");
-				//	console.log( event );
-				//});
-			}
-			
-			// set up inband cue events listeners
-			console.log("set up cuechange listeners");
-			$.each( player.textTracks, function( i, track ){
-				
-				console.log("text track " + i);
-				track.oncuechange = function(evt) {
-					
-					showInfo("cuechange! kind=" + this.kind);
-					try{
-						console.log( this.id );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.data );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.track );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.track.activeCues );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						
-						var myTrack = this.track;             // track element is "this" 
-						var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
-						if (myCues.length > 0) {              
-							console.log( myCues[0].getCueAsSource() ); 
-						}
-					} catch(e){
-						console.log("error", e.message );
-					}
-				};
-				track.mode = "showing";
-				//console.log( JSON.stringify( track ) );
-				/*
-				$(track).on("cuechange", function(evt) {
-					showInfo("cuechange!");
-					console.log( JSON.stringify( evt ) );
-				});
-				*/
-			});
-			
 		} );
 		
 		
@@ -424,6 +357,76 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	}
 	return true;
 }
+
+
+VideoPlayerHTML5.prototype.setTextTrackCues = function(){
+	
+	// set up inband cue events listeners
+	console.log("set up cuechange listeners");
+	function arrayBufferToString(buffer){
+		var arr = new Uint8Array(buffer);
+		var str = String.fromCharCode.apply(String, arr);
+		if(/[\u0080-\uffff]/.test(str)){
+			throw new Error("this string seems to contain (still encoded) multibytes");
+		}
+		return str;
+	}
+	
+	var player = this.video;
+	
+	if( !player.textTracks ){
+		console.log("No textTracks");
+		return;
+	}
+	
+	
+	
+	$.each( player.textTracks, function( i, track ){
+		
+		console.log("text track " + i);
+	
+		track.oncuechange = function(evt) {
+			
+			
+			try{
+				console.log( "cue 0 "+ this.cues[0].id + " data=" + arrayBufferToString( this.cues[0].data ) );
+			} catch(e){
+				console.log("error arrayBufferToString ", e.message );
+			}
+			try{                                                    
+				if ( this.cues && this.cues.length > 0) {              
+					console.log("cue keys: ",  Object.keys( this.cues[0] ) ); 
+					$.each( this.cues, function(c, cue){
+						var cueValue = arrayBufferToString( cue.data );
+						console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
+						console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime );
+						showInfo( "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime );
+						// Testing:
+						/*
+						cue.onenter = function(){
+							console.log( "cue " + cue.id + ": " + cueValue);
+							showInfo( "cue " + cue.id + ": " + cueValue);
+						};
+						
+						$.each( cue , function(name, value){
+							try{
+								console.log( "cues["+c+"]."+name+" ("+ value.constructor.name+") = " );
+								console.log( value );
+							} catch(e){
+								console.log( "error reading cue attribute: " + name );
+							}
+						} );
+						*/
+					} );
+				}
+			} catch(e){
+				console.log("error Reading cues", e.message );
+			}
+		};
+		track.mode = "showing";
+		
+	});
+};
 
 /*
 TODO: Add analytics
@@ -792,7 +795,7 @@ VideoPlayerHTML5.prototype.setSubtitles = function(){
 			console.log( "no subs" );
 		}
 	} catch(e){
-		console.log("r:582  " + e.description );
+		console.log("Error: setSubtitles: " + e.description );
 	}
 };
 
@@ -835,6 +838,8 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	}
 	
 	var self = this;
+	this.onAdBreak = false;
+	this.firstPlay = true;
 	
 	if( this.drm && this.drm.ready == false ){
 		console.log("Send DRM License aquistion");
@@ -902,7 +907,7 @@ VideoPlayerHTML5.prototype.pause = function(){
 
 VideoPlayerHTML5.prototype.stop = function(){
 	var self = this;
-	
+	this.onAdBreak = false;
 	// if video not exist
 	if( !self.video ){
 		self.clearVideo();

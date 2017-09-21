@@ -25,6 +25,7 @@ $resources = array(
 	"../videoplayer/videoplayer_oipf.js",
 	"../videoplayer/videoplayer_html5.js",
 	"../debugscreen.js",
+	"../keycodes.js",
 	"navigation.js", 
 	"../videoplayer/monitor/monitor.js"
 );

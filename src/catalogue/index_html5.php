@@ -37,10 +37,14 @@
 	var main 		= null;
 
 	function onLoad(){
+		
+		
+		
 		showApplication();
 		init();
 		registerKeys(1);
 		registerKeyListener();
+		
 	}
 	</script>
 	

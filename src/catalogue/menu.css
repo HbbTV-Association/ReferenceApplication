@@ -241,12 +241,12 @@ div, span {
 }
 
 #logo2 {
-	top: -15px;
-	right: 55px;
-	height: 125px;
-	width: 235px;
-	background-image:url(images/logo_hbbtv.jpg);
-	background-size: 235px;
+	top: 32px;
+	left: 280px;
+	height: 86px;
+	width: 211px;
+	background-image: url(images/logo_hbbtv.jpg);
+	background-size: 130px;
 }
 
 @keyframes slidedown {
