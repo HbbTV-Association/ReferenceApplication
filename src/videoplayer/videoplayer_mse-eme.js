@@ -4,8 +4,7 @@
 
 
 
-
-function VideoPlayerHTML5(element_id, profile, width, height){
+function VideoPlayerEME(element_id, profile, width, height){
 	this.FILETYPES = {
 		MP4:0,
 		MPEG:1,
@@ -39,11 +38,11 @@ function VideoPlayerHTML5(element_id, profile, width, height){
 	this.init();
 }
 
-VideoPlayerHTML5.prototype.init = function(){
+VideoPlayerEME.prototype.init = function(){
 	var self = this;
 }
 
-VideoPlayerHTML5.prototype.populate = function(){
+VideoPlayerEME.prototype.populate = function(){
 	this.element.innerHTML = "";
 	this.video = null;
 	this.loadingImage = document.createElement("div");
@@ -54,7 +53,7 @@ VideoPlayerHTML5.prototype.populate = function(){
 	this.setFullscreen(true);
 }
 
-VideoPlayerHTML5.prototype.displayPlayer = function( sec ){
+VideoPlayerEME.prototype.displayPlayer = function( sec ){
 	clearTimeout( this.hidePlayerTimer );
 	$("#player").removeClass("hide");
 	$("#player").addClass("show");
@@ -65,8 +64,10 @@ VideoPlayerHTML5.prototype.displayPlayer = function( sec ){
 	}
 }
 
-VideoPlayerHTML5.prototype.navigate = function(key){
+VideoPlayerEME.prototype.navigate = function(key){
 	var self = this;
+	
+	console.log("Key code pressed: " + key);
 	
 	if( self.onAdBreak ){
 		console.log("Navigation on ad break");
@@ -108,6 +109,9 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 		case VK_PAUSE:
 		case VK_PLAY:
 			if( !self.onAdBreak ){
+				console.log("pauseplay ad?");
+			}
+			else{
 				if( this.isPlaying() ){
 					this.pause();
 				}
@@ -150,7 +154,7 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 	}
 }
 
-VideoPlayerHTML5.prototype.getStreamComponents = function(){
+VideoPlayerEME.prototype.getStreamComponents = function(){
 	/*
 	try {
 		if(typeof this.video.getComponents == 'function') {
@@ -168,7 +172,7 @@ VideoPlayerHTML5.prototype.getStreamComponents = function(){
 	*/
 }
 
-VideoPlayerHTML5.prototype.setDisplay = function( container ){
+VideoPlayerEME.prototype.setDisplay = function( container ){
 	if( container ){
 		// detach from DOM
 		var element = $(this.element).detach();
@@ -183,7 +187,7 @@ VideoPlayerHTML5.prototype.setDisplay = function( container ){
 	}
 };
 	
-VideoPlayerHTML5.prototype.createPlayer = function(){
+VideoPlayerEME.prototype.createPlayer = function(){
 	var self = this;
 
 	if( !$("#player")[0] ){
@@ -200,8 +204,47 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	}
 
 	if( this.profile.hbbtv == false ){
-		// TODO: EME
-		return false;
+		try{
+			this.video = $("<video id='video' data-dashjs-player controls></video>")[0];
+			this.element.appendChild( this.video );
+			var player = this.video;
+			console.log( "video object created ", this.video );
+		} catch( e ){
+			console.log("Error creating dashjs video object ", e.description );
+		}
+		
+		addEventListeners( player, 'ended abort', function(e){
+			console.log( e.type );
+			self.stop();
+		} );
+		
+		var canplay = false;
+		player.addEventListener('canplay', function(){
+			canplay = true;
+			console.log("canplay");
+			// check prerolls on first start
+			if( self.adBreaks ){
+				console.log("has ads");
+				var playPreroll = false;
+				$.each( self.adBreaks, function(n, adBreak){
+					if( !adBreak.played && adBreak.position == "preroll" ){
+						console.log("found preroll ad");
+						console.log("play preroll");
+						adBreak.played = true;
+						playPreroll = true;
+						self.getAds( adBreak );
+						return false;
+					}
+				});
+				
+			}
+			
+			if( !playPreroll ){
+				player.play();
+			}
+			
+		} );
+		
 	}
 	else if( this.profile.hbbtv == "1.5" ){
 		this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
@@ -265,31 +308,38 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			console.log("canplay");
 			// check prerolls on first start
 			if( self.adBreaks ){
+				console.log("has ads");
 				var playPreroll = false;
 				$.each( self.adBreaks, function(n, adBreak){
 					if( !adBreak.played && adBreak.position == "preroll" ){
+						console.log("found preroll ad");
 						console.log("play preroll");
 						adBreak.played = true;
 						playPreroll = true;
 						self.getAds( adBreak );
 						return false;
 					}
-				});	
+				});
+				
 			}
 			
-			// if preroll is not found, move on to content video
 			if( !playPreroll ){
 				player.play();
 			}
+			
 		} );
 		
 		player.addEventListener('loadedmetadata', function(){
 			console.log("loadedmetadata");
-		} );
-		
-		player.addEventListener('loadstart', function(){
-			console.log("loadstart");
-			self.setLoading(true);
+			try{
+				console.log( typeof self.setSubtitles );
+				self.setSubtitles(); // set subtitles AFTER metadata load
+				
+				
+			
+			} catch( e ){
+				console.log( e.description );
+			}
 		} );
 		
 		addEventListeners( player, "waiting", function(e){ 
@@ -312,10 +362,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			Monitor.videoEnded(console.log);
 		} );
 		
-		player.addEventListener('progress', function( e ){
+		player.addEventListener('progress', function(){
 			//Monitor.videoBuffering(); 
-			var load = this.buffered.end(0) / this.duration;
-			console.log( this.buffered, load + "%", " load in seconds: " + this.buffered.end(0) );
+			self.setLoading(false);
 		} );
 		
 		player.addEventListener('pause', function(){
@@ -324,16 +373,60 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		} );
 		
 		player.addEventListener('playing', function(){
-			if( self.firstPlay ){
-				// set out-of-band subtitles
-				self.setSubtitles();
-				// set TextTrackCue listeners
-				self.setTextTrackCues();
-				self.firstPlay = false;
-			}
-
 			Monitor.videoPlaying();
 			self.setLoading(false);
+			var tracks = self.video.videoTracks.length;
+			console.log("Video tracks: " + tracks );
+			
+			// set up inband cue events listeners
+			console.log("set up cuechange listeners");
+			$.each( player.textTracks, function( i, track ){
+				
+				console.log("text track " + i);
+				track.oncuechange = function(evt) {
+					
+					showInfo("cuechange! kind=" + this.kind);
+					try{
+						console.log( this.id );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.data );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.track );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.track.activeCues );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						
+						var myTrack = this.track;             // track element is "this" 
+						var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
+						if (myCues.length > 0) {              
+							console.log( myCues[0].getCueAsSource() ); 
+						}
+					} catch(e){
+						console.log("error", e.message );
+					}
+				};
+				track.mode = "showing";
+				//console.log( JSON.stringify( track ) );
+				/*
+				$(track).on("cuechange", function(evt) {
+					showInfo("cuechange!");
+					console.log( JSON.stringify( evt ) );
+				});
+				*/
+			});
+			
 		} );
 		
 		
@@ -364,76 +457,6 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	return true;
 }
 
-
-VideoPlayerHTML5.prototype.setTextTrackCues = function(){
-	
-	// set up inband cue events listeners
-	console.log("set up cuechange listeners");
-	function arrayBufferToString(buffer){
-		var arr = new Uint8Array(buffer);
-		var str = String.fromCharCode.apply(String, arr);
-		if(/[\u0080-\uffff]/.test(str)){
-			throw new Error("this string seems to contain (still encoded) multibytes");
-		}
-		return str;
-	}
-	
-	var player = this.video;
-	
-	if( !player.textTracks ){
-		console.log("No textTracks");
-		return;
-	}
-	
-	
-	
-	$.each( player.textTracks, function( i, track ){
-		
-		console.log("text track " + i);
-	
-		track.oncuechange = function(evt) {
-			
-			
-			try{
-				console.log( "cue 0 "+ this.cues[0].id + " data=" + arrayBufferToString( this.cues[0].data ) );
-			} catch(e){
-				console.log("error arrayBufferToString ", e.message );
-			}
-			try{                                                    
-				if ( this.cues && this.cues.length > 0) {              
-					console.log("cue keys: ",  Object.keys( this.cues[0] ) ); 
-					$.each( this.cues, function(c, cue){
-						var cueValue = arrayBufferToString( cue.data );
-						console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
-						console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime );
-						showInfo( "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime );
-						// Testing:
-						/*
-						cue.onenter = function(){
-							console.log( "cue " + cue.id + ": " + cueValue);
-							showInfo( "cue " + cue.id + ": " + cueValue);
-						};
-						
-						$.each( cue , function(name, value){
-							try{
-								console.log( "cues["+c+"]."+name+" ("+ value.constructor.name+") = " );
-								console.log( value );
-							} catch(e){
-								console.log( "error reading cue attribute: " + name );
-							}
-						} );
-						*/
-					} );
-				}
-			} catch(e){
-				console.log("error Reading cues", e.message );
-			}
-		};
-		track.mode = "showing";
-		
-	});
-};
-
 /*
 TODO: Add analytics
 Monitor.videoConnecting(); // playstate 3
@@ -446,36 +469,15 @@ Monitor.switchSubtitle(lang); // annetaan valitun raidan kielikoodi
 
 
 
-VideoPlayerHTML5.prototype.setURL = function(url){
+VideoPlayerEME.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
 	
-	// add defaultVideoRoot prefix for non abolute video urls if defaultVideoRoot is set
-	if( ! url.match(/^https?\:/) && typeof defaultVideoRoot == "string" && defaultVideoRoot.length ){
-	//	url = defaultVideoRoot + url;
-	}
-
-	var type = "application/dash+xml";
-	if( url.match(/mp4$/) ){
-		this.video.setAttribute("type", "video/mp4");
-	}
-	else{
-		this.video.setAttribute("type", type );
-	}
-	
-	
-	try{
-		//this.url = url;
-		this.video.src = url;
-	} catch( e ){
-		console.log( e.message );
-	}
-	
-	
-	
+	this.player = dashjs.MediaPlayer().create();
+    this.player.initialize(document.querySelector("#video"), url, true);
 	return;
 };
 
-VideoPlayerHTML5.prototype.checkAds = function(){
+VideoPlayerEME.prototype.checkAds = function(){
 	//console.log("checkAds");
 	if( this.adBreaks ){
 		
@@ -492,7 +494,7 @@ VideoPlayerHTML5.prototype.checkAds = function(){
 	}
 };
 
-VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
+VideoPlayerEME.prototype.prepareAdPlayers = function(){
 	
 	// if ad players are prepared do nothing
 	if( $("#ad1")[0] && $("#ad2")[0] ){
@@ -563,7 +565,7 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 	addEventListeners( self.adPlayer[1], 'progress', onAdProgress );
 };
 
-VideoPlayerHTML5.prototype.getAds = function( adBreak ){
+VideoPlayerEME.prototype.getAds = function( adBreak ){
 	this.onAdBreak = true; // disable seeking
 	this.adCount = 0;
 	this.video.pause();
@@ -581,7 +583,7 @@ VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 	}, "json" );
 };
 
-VideoPlayerHTML5.prototype.playAds = function(){
+VideoPlayerEME.prototype.playAds = function(){
 	this.onAdBreak = true; // disable seeking
 	this.video.pause();
 	$(this.video).addClass("hide");
@@ -609,7 +611,7 @@ VideoPlayerHTML5.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
+VideoPlayerEME.prototype.setAdBreaks = function( breaks ){
 	if( !breaks){
 		this.breaks = null;
 	}
@@ -619,7 +621,7 @@ VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
 	}
 };
 
-VideoPlayerHTML5.prototype.setDRM = function( system, la_url){
+VideoPlayerEME.prototype.setDRM = function( system, la_url){
 	if( !system ){
 		this.drm = null;
 	}
@@ -629,7 +631,7 @@ VideoPlayerHTML5.prototype.setDRM = function( system, la_url){
 	}
 };
 
-VideoPlayerHTML5.prototype.getVideoType = function(file_extension){
+VideoPlayerEME.prototype.getVideoType = function(file_extension){
 	if(file_extension == "mp4"){
 		return this.FILETYPES.MP4;
 	}
@@ -642,7 +644,7 @@ VideoPlayerHTML5.prototype.getVideoType = function(file_extension){
 	return null;
 };
 
-VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
+VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
 	
 	/***
@@ -749,7 +751,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 };
 
-VideoPlayerHTML5.prototype.setSubtitles = function(){
+VideoPlayerEME.prototype.setSubtitles = function(){
 	// out-of-band subtitles must be an array containing containing language code and source.ttml file url.
 	
 	try{
@@ -801,11 +803,11 @@ VideoPlayerHTML5.prototype.setSubtitles = function(){
 			console.log( "no subs" );
 		}
 	} catch(e){
-		console.log("Error: setSubtitles: " + e.description );
+		console.log("r:582  " + e.description );
 	}
 };
 
-VideoPlayerHTML5.prototype.showSubtitleTrack = function(nth){
+VideoPlayerEME.prototype.showSubtitleTrack = function(nth){
 	var player = this.video;
 	if( player.textTracks.length <= nth ){
 		console.log( "No track " + nth + " available. Tracklist length is " + player.textTracks.length );
@@ -826,7 +828,7 @@ VideoPlayerHTML5.prototype.showSubtitleTrack = function(nth){
 };
 
 
-VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
+VideoPlayerEME.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
 	
 	try{
@@ -844,8 +846,6 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	}
 	
 	var self = this;
-	this.onAdBreak = false;
-	this.firstPlay = true;
 	
 	if( this.drm && this.drm.ready == false ){
 		console.log("Send DRM License aquistion");
@@ -898,7 +898,7 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 
 
 
-VideoPlayerHTML5.prototype.pause = function(){
+VideoPlayerEME.prototype.pause = function(){
 	var self = this;
 	try{
 		self.video.pause();
@@ -911,9 +911,9 @@ VideoPlayerHTML5.prototype.pause = function(){
 	}
 };
 
-VideoPlayerHTML5.prototype.stop = function(){
+VideoPlayerEME.prototype.stop = function(){
 	var self = this;
-	this.onAdBreak = false;
+	
 	// if video not exist
 	if( !self.video ){
 		self.clearVideo();
@@ -931,7 +931,7 @@ VideoPlayerHTML5.prototype.stop = function(){
 	}
 };
 
-VideoPlayerHTML5.prototype.play = function(){
+VideoPlayerEME.prototype.play = function(){
 	var self = this;
 	try{
 		self.video.play();
@@ -942,7 +942,7 @@ VideoPlayerHTML5.prototype.play = function(){
 	}
 };
 
-VideoPlayerHTML5.prototype.rewind = function( sec ){
+VideoPlayerEME.prototype.rewind = function( sec ){
 	var self = this;
 	try{
 		sec = sec || -30;
@@ -965,7 +965,7 @@ VideoPlayerHTML5.prototype.rewind = function( sec ){
 	}
 };
 
-VideoPlayerHTML5.prototype.forward = function( sec ){
+VideoPlayerEME.prototype.forward = function( sec ){
 	var self = this;
 	try{
 		sec = sec || 30;
@@ -987,7 +987,7 @@ VideoPlayerHTML5.prototype.forward = function( sec ){
 	}
 };
 
-VideoPlayerHTML5.prototype.clearVideo = function(){
+VideoPlayerEME.prototype.clearVideo = function(){
 	var self = this;
 	self.element.addClass("hidden");
 	$("#player").removeClass("show");
@@ -1007,20 +1007,20 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 	this.subtitles = null;
 };
 
-VideoPlayerHTML5.prototype.isFullscreen = function(){
+VideoPlayerEME.prototype.isFullscreen = function(){
 	var self = this;
 	return self.fullscreen;
 };
 
-VideoPlayerHTML5.prototype.isPlaying = function(){
+VideoPlayerEME.prototype.isPlaying = function(){
 	return ( this.video && !this.video.paused ); // return true/false
 };
 
-VideoPlayerHTML5.prototype.doPlayStateChange = function(){
+VideoPlayerEME.prototype.doPlayStateChange = function(){
 	
 };
 
-VideoPlayerHTML5.prototype.updateProgressBar = function(){
+VideoPlayerEME.prototype.updateProgressBar = function(){
 	try{
 		var self = this;
 		var position = this.video.currentTime;
@@ -1070,7 +1070,7 @@ VideoPlayerHTML5.prototype.updateProgressBar = function(){
 
 
 
-VideoPlayerHTML5.prototype.setLoading = function(loading, reason){
+VideoPlayerEME.prototype.setLoading = function(loading, reason){
 	this.loading = loading;
 	if(this.loading){
 		this.loadingImage.removeClass("hidden");
@@ -1083,7 +1083,7 @@ VideoPlayerHTML5.prototype.setLoading = function(loading, reason){
 	}
 };
 
-VideoPlayerHTML5.prototype.setFullscreen = function(fs){
+VideoPlayerEME.prototype.setFullscreen = function(fs){
 	this.fullscreen = fs;
 	if(fs){
 		this.element.addClass("fullscreen");
@@ -1098,6 +1098,6 @@ VideoPlayerHTML5.prototype.setFullscreen = function(fs){
 
 };
 
-VideoPlayerHTML5.prototype.isVisible = function(fs){
+VideoPlayerEME.prototype.isVisible = function(fs){
 	return this.visible;
 };

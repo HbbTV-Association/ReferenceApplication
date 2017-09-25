@@ -31,6 +31,9 @@ function init()
 		if( profile.hbbtv == "1.5" ){
 			vplayer = new VideoPlayer("videodiv", profile);
 		}
+		else if( profile.hbbtv == false ) {
+			vplayer = new VideoPlayerEME("videodiv", profile);
+		}
 		else {
 			vplayer = new VideoPlayerHTML5("videodiv", profile);
 		}
