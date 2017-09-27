@@ -27,7 +27,8 @@ $resources = array(
 	"../debugscreen.js",
 	"../keycodes.js",
 	"navigation.js", 
-	"../videoplayer/monitor/monitor.js"
+	"../videoplayer/monitor/monitor-base.js", /* Monitor interface is and must be included and present */
+	"../videoplayer/monitor/monitor.js" /* Monitor implementation is not included to reference application */
 );
 
 

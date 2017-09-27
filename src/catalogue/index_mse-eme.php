@@ -58,7 +58,6 @@
 	<!-- mse-eme additions to resources -->
 	<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 	<script src="../videoplayer/videoplayer_mse-eme.js" ></script>
-	
 </head>
 <body onload="onLoad();">
 	<div style="visibility:hidden;width:0px;height:0px;">

@@ -207,11 +207,13 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		try{
 			this.video = $("<video id='video' data-dashjs-player controls></video>")[0];
 			this.element.appendChild( this.video );
-			var player = this.video;
-			console.log( "video object created ", this.video );
+			this.player = dashjs.MediaPlayer().create();
+			console.log( "video object created ", this.player );
 		} catch( e ){
 			console.log("Error creating dashjs video object ", e.description );
 		}
+		
+		var player = this.video;
 		
 		addEventListeners( player, 'ended abort', function(e){
 			console.log( e.type );
@@ -244,6 +246,129 @@ VideoPlayerEME.prototype.createPlayer = function(){
 			}
 			
 		} );
+		
+		player.addEventListener('loadedmetadata', function(){
+			console.log("loadedmetadata");
+			try{
+				console.log( typeof self.setSubtitles );
+				self.setSubtitles(); // set subtitles AFTER metadata load
+				
+				
+			
+			} catch( e ){
+				console.log( e.description );
+			}
+		} );
+		
+		addEventListeners( player, "waiting", function(e){ 
+			console.log( e.type );
+			self.setLoading(true);
+		} );
+		
+		addEventListeners( player, "waiting stalled suspend", function(e){ 
+			console.log( e.type );
+		} );
+		
+		addEventListeners( player, 'playing pause emptied', function(e){
+			self.setLoading(false);
+			console.log( e.type );
+		} );
+		
+		
+		player.addEventListener('ended emptied error', function(){
+			self.setLoading(false);
+			Monitor.videoEnded(console.log);
+		} );
+		
+		player.addEventListener('progress', function(){
+			//Monitor.videoBuffering(); 
+			self.setLoading(false);
+		} );
+		
+		player.addEventListener('pause', function(){
+			Monitor.videoPaused(); 
+			self.setLoading(false);
+		} );
+		
+		player.addEventListener('playing', function(){
+			Monitor.videoPlaying();
+			self.setLoading(false);
+			var tracks = self.video.videoTracks.length;
+			console.log("Video tracks: " + tracks );
+			
+			// set up inband cue events listeners
+			console.log("set up cuechange listeners");
+			$.each( player.textTracks, function( i, track ){
+				
+				console.log("text track " + i);
+				track.oncuechange = function(evt) {
+					
+					showInfo("cuechange! kind=" + this.kind);
+					try{
+						console.log( this.id );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.data );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.track );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						console.log( this.track.activeCues );
+					} catch(e){
+						console.log("error", e.message );
+					}
+					try{
+						
+						var myTrack = this.track;             // track element is "this" 
+						var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
+						if (myCues.length > 0) {              
+							console.log( myCues[0].getCueAsSource() ); 
+						}
+					} catch(e){
+						console.log("error", e.message );
+					}
+				};
+				track.mode = "showing";
+				//console.log( JSON.stringify( track ) );
+				/*
+				$(track).on("cuechange", function(evt) {
+					showInfo("cuechange!");
+					console.log( JSON.stringify( evt ) );
+				});
+				*/
+			});
+			
+		} );
+		
+		
+		player.addEventListener('timeupdate', function(){
+			self.updateProgressBar();
+			self.checkAds();
+		} );
+		
+		player.seek = function( sec, absolute ){
+			try{
+				var target = ( absolute? sec : player.currentTime + sec);
+				
+				if( target < 0 )
+					target = 0;
+				else if( target > player.duration )
+					return;
+				
+				console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
+				// Set position
+				player.currentTime = target;
+			} catch(e){
+				console.log("error seeking: " + e.description);
+			}
+		}
 		
 	}
 	else if( this.profile.hbbtv == "1.5" ){
@@ -472,8 +597,8 @@ Monitor.switchSubtitle(lang); // annetaan valitun raidan kielikoodi
 VideoPlayerEME.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
 	
-	this.player = dashjs.MediaPlayer().create();
-    this.player.initialize(document.querySelector("#video"), url, true);
+	
+    this.player.initialize( this.video , url, true);
 	return;
 };
 

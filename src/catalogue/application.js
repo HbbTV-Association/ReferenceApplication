@@ -27,6 +27,12 @@ function init()
 		menu = new Menu("menu", new_config);
 		setLoading(false);
 	}, "json");
+	
+	if( typeof Monitor == "undefined" ){
+		// Monitor instance must be accessible in the application.
+		Monitor = new monitor( null );
+	}
+	
 	try{
 		if( profile.hbbtv == "1.5" ){
 			vplayer = new VideoPlayer("videodiv", profile);
