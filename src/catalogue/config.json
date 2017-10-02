@@ -45,7 +45,7 @@
 					"desc": "video=4*h265, audio=1*aac, fps=25, gop=75, segdur=6sec"
                 },
                 {
-                    "title": "Out of band subtitles (AVC 1080p)",
+                    "title": "Out of band subtitles",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
@@ -60,49 +60,28 @@
                     }]
                 },
                 {
-                    "title": "In-band subtitles (AVC 1080p)",
+                    "title": "In-band subtitles",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest_subib.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
 					"desc": "In-band subtitles"
                 },
                 {
-                    "title": "AD Insertion (DataCue)",
-                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest_subib_evt.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "app": 6,
-					"desc": "In-band ad tracks delivered from TextTracks DataCue"
-                },
-                {
                     "title": "Linear AD Insertion",
-                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/manifest_evtib.mpd",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
 					"desc": "Ads delivered from any ad-server on ad-event time",
 					"adBreaks" : [
 						{ "position" : "preroll", "ads" : 1 },
 						{ "position" : 10, "ads" : 3 },
-						{ "position" : 20, "ads" : 1 },
-						{ "position" : 30, "ads" : 3 },
-						{ "position" : "postroll", "ads" : 1 }
-					]
-                },
-				{
-                    "title": "AD Insertion (DataCue with linear ads)",
-                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/manifest_evtib.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "app": 6,
-					"desc": "Ads delivered from any ad-server on ad-event time",
-					"adBreaks" : [
-						{ "position" : "preroll", "ads" : 1 },
-						{ "position" : 10, "ads" : 3 },
-						{ "position" : 20, "ads" : 1 },
-						{ "position" : 30, "ads" : 3 },
+						{ "position" : 30, "ads" : 1 },
+						{ "position" : 60, "ads" : 3 },
 						{ "position" : "postroll", "ads" : 1 }
 					]
                 },
                 {
-                    "title": "AD Insertion (DataCue 2)",
+                    "title": "In-band events",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/manifest_evtib.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
@@ -119,25 +98,25 @@
                     "title": "Tears of Steel AVC 1080p",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
 					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N2cAAABgs1DNCXiiZv9XbT0SHetAsUCj2qPsEH1qFnRVn9G9FapJnjmqx1E-rqMEJarWxIYFjBIl4keiapYp7_Ahqp-oR2YpMeLoJA_wkqS_I7-uqDoxds_ZxQXeRwPpi4wl9iLjp9R6ADXJpoD7IeKkTQjPCkLMZ9o",
+                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
                     "drm": "playready",
                     "app": 6,
-					"desc": "init.mp4 pr,cenc,mrl PSSH tables, ExpressPlay keys"
+					"desc": "init.mp4 pr,cenc,mrl PSSH tables"
                 },
                 {
                     "title": "Llama Drama HEVC 2160p",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N10AAABgbR_-ud5X4bbB6VEqLFccStO1UtzjvAfhu4XrG9xoGJZyKUJpwo6KO0oqoiRtmPVokH2qEZPN6FNMWvQTs0BP1wUD30igl5TJ8W-wUuLvX0aklw2VvMNxQubNdGvqZSK6GI6CC1hznUXbpIuOMBKgBPGQnYc",
+                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNQ==)",
                     "drm": "playready",
                     "app": 6,
-					"desc": "init.mp4 pr,cenc,mrl PSSH tables, ExpressPlay keys"					
+					"desc": "init.mp4 pr,cenc,mrl PSSH tables"					
                 },
                 {
-                    "title": "Out of band subtitles (AVC 1080p)",
+                    "title": "Out of band subtitles",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N6YAAABgynx8CU7bnbFeXHRwMSa3eSHTyic298ArrO7in6Mhd67MVNz975FFugPl2EL_OzBk15A9P3W5M7hPCXus1G2dx19GWAnhBl_qN7Yrg5i2-U98vJh0OXVgcJvaqpgmmiZ6J8TG7AQpltY9q0FtSs6mw-MVzmc",
+                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
                     "drm": "playready",
                     "app": 6,
 					"desc": "TTML subtitles",
@@ -151,23 +130,39 @@
                     }]					
                 },
                 {
-                    "title": "In-band subtitles (AVC 1080p)",
+                    "title": "In-band subtitles",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest_subib.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N6YAAABgynx8CU7bnbFeXHRwMSa3eSHTyic298ArrO7in6Mhd67MVNz975FFugPl2EL_OzBk15A9P3W5M7hPCXus1G2dx19GWAnhBl_qN7Yrg5i2-U98vJh0OXVgcJvaqpgmmiZ6J8TG7AQpltY9q0FtSs6mw-MVzmc",
+                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
                     "drm": "playready",
                     "app": 6,
 					"desc": "In-band subtitles"					
                 },
-			    {
-                    "title": "Tears of Steel AVC 1080p",
-                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
-					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
+                {
+                    "title": "Linear AD Insertion",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
                     "drm": "playready",
                     "app": 6,
-					"desc": "Microsoft DRM keys"
-                }
+					"desc": "Ads delivered from any ad-server on ad-event time",
+					"adBreaks" : [
+						{ "position" : "preroll", "ads" : 1 },
+						{ "position" : 10, "ads" : 3 },
+						{ "position" : 30, "ads" : 1 },
+						{ "position" : 60, "ads" : 3 },
+						{ "position" : "postroll", "ads" : 1 }
+					]
+                },
+                {
+                    "title": "In-band events",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/drm/manifest_evtib.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+					"la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNA==)",
+					"drm": "playready",
+                    "app": 6,
+					"desc": "TextTrack cues in inband tracks"
+                }						
             ]
         },
         {
@@ -176,9 +171,25 @@
             "items": [
                 {
                     "title": "Tears of Steel AVC 1080p",
+                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnUABCQApiB_O91WSib7_0y9tUDAIBOuy-wyWcAEWbvTQKq8ib2xNjXpUXzPxEVy_2ZvmWFDyjHS7DnSq3vVWhZbA-ZKJxd1fSherdGqqem3kSdAqn7WqOOAQ8O-BUHiVndUEFFQ46X9B9aIy1_nYpyNAbZm7pB1brZJXnhiIGV9Hlv2yEk-3o2DgdxHk1O5ZQV32E1EwAAABR2l17hdV-NKTpIiVDpf9UsUa-CoQ#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
+					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
+                    "drm": "marlin",
+                    "app": 6,
+					"desc": "MS3 compound URL"	
+                },
+                {
+                    "title": "Llama Drama HEVC 2160p",
+                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmmABAidD_7JlefKK5aUhkSmMz1AIDH7E31IGYslV5nP-sAlRSZ7r-Dk-hlNLIIETvXcKuTk3fan047utvR878X4LzZxihgQ1QK66Cpc1KRDZz9O2xMU11dHyfvpW8qdrfpzPs5COtRfSxGGsRWo3bWfoBP6Bw6hUTjJBqJAEELQ0TB11EGICNWDUS283SVKj1LnO16_AAAABSousD8I99B3VjW277l3akIocLn2Q#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
+                    "drm": "marlin",
+                    "app": 6,
+					"desc": "MS3 compound URL"
+                },
+				{
+                    "title": "Tears of Steel AVC 1080p",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
 					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCntABAdncsO0d71En0i5BCEYMPCAICqZwAm37Lsf25jPbYOEv8g6y8va6p2qW90GGHmTExPQa8ArqC3G0IFOaBg9HuisM9J7Pp7GwQ-Ck1fBVTEM0fylPKj85Jf3hc_H46cTmrHeeBK0x4t3LGWVvEBNgDfcr6gaoVzS986nCTFCeqER36k5fwvbDzJ83AD7yKf3PsXQwAAABRlQUrfR4ehTeyJoiNn6jq-vcq6mQ",
+                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnUABCQApiB_O91WSib7_0y9tUDAIBOuy-wyWcAEWbvTQKq8ib2xNjXpUXzPxEVy_2ZvmWFDyjHS7DnSq3vVWhZbA-ZKJxd1fSherdGqqem3kSdAqn7WqOOAQ8O-BUHiVndUEFFQ46X9B9aIy1_nYpyNAbZm7pB1brZJXnhiIGV9Hlv2yEk-3o2DgdxHk1O5ZQV32E1EwAAABR2l17hdV-NKTpIiVDpf9UsUa-CoQ",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "License acquisition w/ OIPF DRMAgent"	
@@ -187,26 +198,10 @@
                     "title": "Llama Drama HEVC 2160p",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnfABCd1cQZBp53uh3Xag9l4Y5QAIBp9XVvipNq9H8exeUBKYl98PbrT-o1exPy5NlbKc8ezr2WlIaSnScyyQI14fOdihs95ToNswhkJomnLNNuXI5YPeBIB1BpNffqs5wVtXsybW5mUo1rrZJvPHnwCjVd-M3fG729O4Vw2QS59uc40ZRjuzUQ5dowJgbSrfcbUXfVMAAAABR86WyV55ipai3VZJ-aPXjRe7sTxA",
+                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmmABAidD_7JlefKK5aUhkSmMz1AIDH7E31IGYslV5nP-sAlRSZ7r-Dk-hlNLIIETvXcKuTk3fan047utvR878X4LzZxihgQ1QK66Cpc1KRDZz9O2xMU11dHyfvpW8qdrfpzPs5COtRfSxGGsRWo3bWfoBP6Bw6hUTjJBqJAEELQ0TB11EGICNWDUS283SVKj1LnO16_AAAABSousD8I99B3VjW277l3akIocLn2Q",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "License acquisition w/ OIPF DRMAgent"
-                },
-                {
-                    "title": "Tears of Steel AVC 1080p",
-                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCntABAdncsO0d71En0i5BCEYMPCAICqZwAm37Lsf25jPbYOEv8g6y8va6p2qW90GGHmTExPQa8ArqC3G0IFOaBg9HuisM9J7Pp7GwQ-Ck1fBVTEM0fylPKj85Jf3hc_H46cTmrHeeBK0x4t3LGWVvEBNgDfcr6gaoVzS986nCTFCeqER36k5fwvbDzJ83AD7yKf3PsXQwAAABRlQUrfR4ehTeyJoiNn6jq-vcq6mQ#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
-					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
-                    "drm": "marlin",
-                    "app": 6,
-					"desc": "MS3 compound URL"	
-                },
-                {
-                    "title": "Llama Drama HEVC 2160p",
-                    "url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnfABCd1cQZBp53uh3Xag9l4Y5QAIBp9XVvipNq9H8exeUBKYl98PbrT-o1exPy5NlbKc8ezr2WlIaSnScyyQI14fOdihs95ToNswhkJomnLNNuXI5YPeBIB1BpNffqs5wVtXsybW5mUo1rrZJvPHnwCjVd-M3fG729O4Vw2QS59uc40ZRjuzUQ5dowJgbSrfcbUXfVMAAAABR86WyV55ipai3VZJ-aPXjRe7sTxA#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
-                    "drm": "marlin",
-                    "app": 6,
-					"desc": "MS3 compound URL"
                 }
             ]
         },

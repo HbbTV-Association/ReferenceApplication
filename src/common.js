@@ -190,24 +190,6 @@ function getClosest(from, target, direction){
 	return closestItem;
 }
 
-/*
-function registerKeyListener() {
-	document.addEventListener('keydown', function(e) {
-		var code = e.keyCode;
-		//if( code == 8 )
-			e.preventDefault();
-		if( e.key == "MediaNextTrack" )
-			code = VK_FAST_FWD;
-		else if( e.key == "MediaPreviousTrack" )
-			code = VK_REWIND;
-		
-		console.log( "key " + code );
-		if (onKey(code)){
-			e.preventDefault();
-		}
-	}, false);
-}
-*/
 
 var registeredKeys = [];
 function registerKeys(mode) {

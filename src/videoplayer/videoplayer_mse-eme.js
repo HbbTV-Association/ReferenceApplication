@@ -49,7 +49,6 @@ VideoPlayerEME.prototype.populate = function(){
 	this.loadingImage.setAttribute("id", "loadingImage");
 	this.loadingImage.addClass("hidden");
 	this.element.appendChild(this.loadingImage);
-	//this.element.appendChild(this.controls.element);
 	this.setFullscreen(true);
 }
 
@@ -75,12 +74,10 @@ VideoPlayerEME.prototype.navigate = function(key){
 	
 	switch(key){
 		case VK_UP:
-			//self.controls.show();
 			self.displayPlayer(5);
 		break;
 
 		case VK_DOWN:
-			//self.controls.hide();
 			self.displayPlayer(5);
 		break;
 
@@ -109,9 +106,6 @@ VideoPlayerEME.prototype.navigate = function(key){
 		case VK_PAUSE:
 		case VK_PLAY:
 			if( !self.onAdBreak ){
-				console.log("pauseplay ad?");
-			}
-			else{
 				if( this.isPlaying() ){
 					this.pause();
 				}
@@ -205,7 +199,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 
 	if( this.profile.hbbtv == false ){
 		try{
-			this.video = $("<video id='video' data-dashjs-player controls></video>")[0];
+			this.video = $("<video id='video' data-dashjs-player></video>")[0];
 			this.element.appendChild( this.video );
 			this.player = dashjs.MediaPlayer().create();
 			console.log( "video object created ", this.player );
@@ -224,10 +218,12 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		player.addEventListener('canplay', function(){
 			canplay = true;
 			console.log("canplay");
+			
+			var playPreroll = false;
 			// check prerolls on first start
 			if( self.adBreaks ){
 				console.log("has ads");
-				var playPreroll = false;
+				
 				$.each( self.adBreaks, function(n, adBreak){
 					if( !adBreak.played && adBreak.position == "preroll" ){
 						console.log("found preroll ad");
@@ -293,8 +289,6 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		player.addEventListener('playing', function(){
 			Monitor.videoPlaying();
 			self.setLoading(false);
-			var tracks = self.video.videoTracks.length;
-			console.log("Video tracks: " + tracks );
 			
 			// set up inband cue events listeners
 			console.log("set up cuechange listeners");
@@ -1011,7 +1005,7 @@ VideoPlayerEME.prototype.startVideo = function(fullscreen){
 		self.video.play();
 		if(fullscreen){
 			self.setFullscreen(fullscreen);
-			//self.controls.show();
+
 			self.displayPlayer(5);
 		}
 	}
@@ -1027,7 +1021,6 @@ VideoPlayerEME.prototype.pause = function(){
 	var self = this;
 	try{
 		self.video.pause();
-		//self.controls.show();
 		self.displayPlayer();
 		console.log("video should be playing now");
 	}
@@ -1217,7 +1210,6 @@ VideoPlayerEME.prototype.setFullscreen = function(fs){
 	else{
 		this.element.removeClass("fullscreen");
 		this.setDisplay( menu.focus.element ); // sets video player object to child of focused tile element
-		//this.controls.hide();
 		$("#player").removeClass("show");
 	}
 
