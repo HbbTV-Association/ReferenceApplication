@@ -140,13 +140,15 @@
 #player {
 	width: 1280px;
 	height: 0px;
-	bottom: 0px;
+	_bottom: 0px;
+    top: 720px;
 	background: rgba(0,0,0,0.4);
 	opacity: 0.0;
 }
 #player.show{
 	height : 150px !important;
 	opacity: 1.0 !important;
+    top: 570px;
 }
 #playposition {
 	position: absolute;
@@ -179,11 +181,11 @@
 	width: 895px;
 	height: 8px;
 	background-color: #181818;
-	background-color: black
+	background-color: black;
 }
 #progressbar {
 	position: absolute;
-	background-color: #c60d90;
+	background-color: #f7921d;
 	top: 33px;
 	left: 234px;
 	width: 895px;
@@ -191,7 +193,7 @@
 }
 #progress_currentTime {
 	width: 2px;
-	background-color: #c60d90;
+	background-color: #f7921d;
 	height: 18px;
 	position: absolute;
 	top: 28px;

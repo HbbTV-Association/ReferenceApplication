@@ -9,6 +9,7 @@
 		"supported" : true,
 		"hbbtv" : "1.5",
 		"video" : "avobject",
+		"version" : "oipf",
 		"contentType" : "application/vnd.hbbtv.xhtml+xml",
 		"xmlHeader" : "<?xml version='1.0' encoding='utf-8' ?>",
 		"doctype" : "<!DOCTYPE html PUBLIC '-//HbbTV//1.2.1//EN' 'http://www.hbbtv.org/dtd/HbbTV-1.2.1.dtd'>"
@@ -17,6 +18,7 @@
 		"supported" : true,
 		"hbbtv" : "2.0",
 		"video" : "html5",
+		"version" : "html5",
 		"contentType" : "text/html",
 		"xmlHeader" : "",
 		"doctype" : "<!DOCTYPE html PUBLIC '-//HbbTV//1.4.1//EN' 'http://www.hbbtv.org/dtd/HbbTV-1.4.1.dtd'>"
@@ -25,6 +27,7 @@
 		"supported" : true,
 		"hbbtv" : false,
 		"video" : "html5",
+		"version" : "mse-eme",
 		"contentType" : "text/html",
 		"xmlHeader" : "",
 		"doctype" : "<!DOCTYPE html>"

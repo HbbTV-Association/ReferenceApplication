@@ -35,7 +35,8 @@
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/manifest.mpd",
 					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
                     "app": 6,
-					"desc": "video=3*h264, audio=1*aac, fps=25, gop=75, segdur=6sec"
+					"desc": "video=3*h264, audio=1*aac, fps=25, gop=75, segdur=6sec",
+					"profile" : ["html5", "oipf", "mse-eme"]
                 },
                {
                     "title": "Llama Drama HEVC 2160p",
@@ -212,37 +213,50 @@
                 {
                     "title": "Reload Video cataloque",
                     "eval": "location.reload();",
-                    "app": 0
+                    "app": 0,
+                    "img": "icons/icons_1x1_reload.png"                  
                 },
                 {
                     "title": "Set mode HbbTV 1.5",
                     "eval": "location.href='index_oipf.php'",
-                    "app": 0
+                    "app": 0,
+                    "img": "icons/icons_1x1_wrench.png"
                 },
                 {
                     "title": "Set mode HbbTV 2.0.1",
                     "eval": "location.href='index_html5.php'",
-                    "app": 0
+                    "app": 0,
+                    "img": "icons/icons_1x1_wrench.png"
+                },
+				{
+                    "title": "Set mode MSE-EME",
+                    "eval": "location.href='index_mse-eme.php'",
+                    "app": 0,
+                    "img": "icons/icons_1x1_wrench.png"
                 },
                 {
                     "title": "Delete cookies",
                     "eval": "deleteAllCookies(true);",
-                    "app": 0
+                    "app": 0,
+                    "img": "icons/icons_1x1_delete.png" 
                 },
                 {
                     "title": "Do a funny trick",
                     "eval": "$( menu.focus.element ).css({'transform':'rotate(180deg)','transition':'transform 2s'});",
-                    "app": 0
+                    "app": 0,
+                     "img": "icons/icons_1x1_funny.png"
                 },
                 {
                     "title": "Test Localstorage",
                     "eval": "showInfo( typeof(localStorage) );",
-                    "app": 0
+                    "app": 0,
+                    "img": "icons/icons_1x1_localstorage.png"                     
                 },
                 {
                     "title": "Check Internet Connection",
                     "eval": "showInfo( (navigator.onLine )); ",
-                    "app": 0
+                    "app": 0,
+                    "img": "icons/icons_1x1_checkinternet.png"
                 }
             ]
         }

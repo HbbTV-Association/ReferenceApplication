@@ -21,10 +21,9 @@
 	/***
 		Settings
 	***/
-	var profile = { hbbtv : "1.5", video : "avobject"};
+	var profile = { hbbtv : "1.5", video : "avobject", version : "oipf"};
 	
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
-	//var defaultVideoRoot = "http://tvportal.sofiadigital.tv/referenceapp/videos/"; 
 	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
 	
 	</script>

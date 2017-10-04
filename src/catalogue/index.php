@@ -71,10 +71,9 @@
 	/***
 		Settings
 	***/
-	var profile = { hbbtv : "<?php echo $profile['hbbtv']; ?>", video : "<?php echo $profile['video']; ?>"};
+	var profile = { hbbtv : "<?php echo $profile['hbbtv']; ?>", video : "<?php echo $profile['video']; ?>", version : "<?php echo $profile['version']; ?>"};
 	
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
-	//var defaultVideoRoot = "http://tvportal.sofiadigital.tv/referenceapp/videos/"; 
 	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
 	
 	</script>

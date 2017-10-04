@@ -4,6 +4,8 @@ body {
     font-size:18px;
 	color: #000;
 	background-image:none !important;
+    overflow: hidden;
+    font-family: Tiresias, TiresiasScreenfont, sans-serif;
 }
 div, span {
 	_border: 1px solid red;	
@@ -47,21 +49,32 @@ div, span {
 				height: 50px;
 				line-height: 50px;
 				border-bottom: 5px solid transparent;
+                
+                -moz-transition: all 0.10s linear;
+                -webkit-transition: all 0.10s linear;
+                -o-transition: all 0.10s linear;
+                transition: all 0.10s linear;                
 			}
 
 			.topmenuitem.focused{
 				text-decoration: none !important;
 				border-bottom: 5px solid #f7921e !important;
+                -webkit-transform: scale(1.3,1.3);
+                transform: scale(1.3,1.3);
+                color: #f7921e !important;
 			}
 			.topmenuitem.selected{
 				text-decoration: none !important;
-				border-bottom: 5px solid #a5a5a4;
 				color: #a5a5a4;
+                -webkit-transform: scale(1.3,1.3);
+                transform: scale(1.3,1.3);
 			}
 			.topmenuitem.focused.selected{
 				text-decoration: none !important;
 				border-bottom: 5px solid #f7921e !important;
-				color: #a5a5a4;
+                -webkit-transform: scale(1.3,1.3);
+                transform: scale(1.3,1.3);
+                color: #f7921e !important;
 			}			
 
 		#gridScrollView {
@@ -119,11 +132,9 @@ div, span {
 						background-color: transparent;
 						border: 5px solid transparent;
 						color: #fff;
-						display: block;
 						height: 160px;
 						width: 284px;	
 						line-height: 160px;
-						overflow: hidden;
 						text-align: center;
 						transition: all 0.05s linear 0s;
 						vertical-align: middle;
@@ -198,8 +209,9 @@ div, span {
 							max-height: 100%;
 							max-width: 100%;
 							z-index: 10;
-							vertical-align: middle;
 							position:relative;
+                            top: 0px;
+                            left: 0px;
 						}
 						.gridViewBox span {
 							position:absolute;
@@ -226,42 +238,57 @@ div, span {
 	background-repeat:no-repeat;
 	z-index: 10;
 	position:absolute;
-	-webkit-animation: slidedown 2s; /* Safari 4+ */
-	-moz-animation:    slidedown 2s; /* Fx 5+ */
-	-o-animation:      slidedown 2s; /* Opera 12+ */
-	animation:         slidedown 2s; /* IE 10+, Fx 29+ */
+	-webkit-animation: fromLeft 2s; /* Safari 4+ */
+	-moz-animation:    fromLeft 2s; /* Fx 5+ */
+	-o-animation:      fromLeft 2s; /* Opera 12+ */
+	animation:         fromLeft 2s; /* IE 10+, Fx 29+ */
 }
 
+
+
 #logo1 {
-	top: -15px;
+	top: 0px;
 	left: 55px;
-	height: 125px;
+	height: 175px;
 	width: 235px;
-	background-image:url(images/logo_sofia.png);
+	background-image:url(images/logo_hbbtv.png);
 }
 
 #logo2 {
-	top: 32px;
-	left: 280px;
-	height: 86px;
-	width: 211px;
-	background-image: url(images/logo_hbbtv.jpg);
-	background-size: 130px;
+	top: 590px;
+	left: -235px;
+    left: 55px;
+	height: 125px;
+	width: 235px;
+	background-image: url(images/logo_sofia.png);
+    /*
+    -webkit-animation-delay: 1s;
+    animation-delay: 1s;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+    */
 }
 
 @keyframes slidedown {
   0%   { margin-top: -125px; }
   100% { margin-top: 0px; }
 }
+@keyframes fromLeft {
+  0%   { left: -235px; }
+  100% { left: 55px; }
+}
 
 #itemDescription {
-	width: 1200px;
+	width: 592px;
 	height: 80px;
-	top: 640px;
+	top: 650px;
 	position: absolute;
 	color: #fff;
 	font-size: 21px;
-	left: 40px;	
+	left: 334px;
+    background-image: url(images/bg_itemDescription.png);
+    background-repeat: repeat-x;
+    padding: 10px;
 }
 
 /* Channel info */

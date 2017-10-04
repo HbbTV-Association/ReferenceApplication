@@ -1,18 +1,9 @@
 <?php
 	date_default_timezone_set("Europe/Helsinki");
-	
-	//error_reporting(E_ALL);
-	//ini_set('display_errors', 1);
-	
 	header( "Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 	header( "Cache-Control: no-cache, must-revalidate" );
 	header( "Pragma: no-cache" );
 	header( "Content-Type: text/html;charset=utf-8" );
-	
-	/*
-	header( "Content-Type: application/vnd.hbbtv.xhtml+xml;charset=utf-8" );
-	echo "<?xml version='1.0' encoding='utf-8' ?>\n"; 
-	*/
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -20,11 +11,11 @@
 	<title>HbbTV Reference Video Application</title>
 
 	<meta http-equiv="content-type" content="Content-Type: text/html; charset=UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<script type="application/javascript" language="javascript">
 	
 	
-	var profile = { hbbtv : false, video : "dashjs"};
+	var profile = { hbbtv : false, video : "dashjs", version : "mse-eme"};
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
 	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
 	

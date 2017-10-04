@@ -20,7 +20,17 @@ function init()
 		for(var i = 0; i < main.items.length; i++){
 			if(main.items[i].submenu){
 				var submenu = config[main.items[i].submenu];
-				new_config.push({"items":submenu.items, "title":main.items[i].title});
+				var submenuItems = [];
+				$.each( submenu.items, function(i, item){
+					// add asset items that has no profile specified or if has, it corresponds to current app profile
+					if( !item.profile || item.profile.includes( profile.version ) ){
+						submenuItems.push( item );
+					}
+					else{
+						console.log("dropped non suitable asset away from config ", item);
+					}
+				});
+				new_config.push({"items": submenuItems, "title":main.items[i].title});
 			}
 		}
 

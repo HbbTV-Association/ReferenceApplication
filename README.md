@@ -48,6 +48,13 @@ OIPF AV object video player component:
 
 	src/videoplayer/videoplayer_oipf.js
 
+MSE-EME version of the application for target browser Edge:
+
+	src/catalogue/index_mse-eme.php
+
+MSE-EME video player component:
+
+	src/videoplayer/videoplayer_mse-eme.js
 	
 
 General main application to be used for all HbbTV devices. Application tries to determine HbbTV version of the device and use the preferred player.
@@ -58,6 +65,10 @@ General main application to be used for all HbbTV devices. Application tries to 
 
 Monitor module to implement analytics about use cases of video playback. Monitor can be changed but it must follow the monitor interface.
 
+	Interface included:
+	src/videoplayer/monitor/monitor-base.js
+	
+	Implementation (excluded but may be implemented for differeent analytics systems):
 	src/videoplayer/monitor/monitor.js
 
 
