@@ -116,8 +116,10 @@ Menu structure for the catalogue app should respect used json structure defined 
                     "title": "NoDRM",
                     "app": "Specifies app type or video type. Obsolote for submenu entries",
                     "app": 0,
-                    "submenu": "submenu index tell which gridview menu will open when this entry is selected"
-                    "submenu": 1
+                    "submenu": "submenu index tell which gridview menu will open when this entry is selected",
+                    "submenu": 1,
+					"profile" : [ "list of versions of the app this asset is available" ]
+					"profile" : ["html5", "oipf", "mse-eme"]
                 },
                 {
                     "title": "PlayReady",
