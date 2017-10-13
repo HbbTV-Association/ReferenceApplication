@@ -4,18 +4,11 @@
 
 
 
-
 function VideoPlayerHTML5(element_id, profile, width, height){
 	this.FILETYPES = {
 		MP4:0,
 		MPEG:1,
 		DASH:2
-	};
-	this.DRMTYPES = {
-		NONE:0,
-		PLAYREADY:1,
-		MARLIN:2,
-		WIDEVINE:3
 	};
 	this.element_id = element_id;
 	this.element = document.getElementById(element_id);
@@ -35,12 +28,6 @@ function VideoPlayerHTML5(element_id, profile, width, height){
 	// Timers and intervals
 	this.progressUpdateInterval = null;
 	this.hidePlayerTimer = null;
-
-	this.init();
-}
-
-VideoPlayerHTML5.prototype.init = function(){
-	var self = this;
 }
 
 VideoPlayerHTML5.prototype.populate = function(){
@@ -50,7 +37,6 @@ VideoPlayerHTML5.prototype.populate = function(){
 	this.loadingImage.setAttribute("id", "loadingImage");
 	this.loadingImage.addClass("hidden");
 	this.element.appendChild(this.loadingImage);
-	//this.element.appendChild(this.controls.element);
 	this.setFullscreen(true);
 }
 
@@ -151,21 +137,7 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 }
 
 VideoPlayerHTML5.prototype.getStreamComponents = function(){
-	/*
-	try {
-		if(typeof this.video.getComponents == 'function') {
-			comps_a = vidobj.getComponents(vidobj.COMPONENT_TYPE_AUDIO);
-			if (comps_a.length > 1) {
-				showInfo("Found "+comps_a.length+" audio track(s)");
-				$('#paudio').show();
-			}
-		} else {
-			showInfo("Switching audio components not supported");
-		}
-	} catch (e) {
-		showInfo("Switching audio components not supported");
-	}
-	*/
+
 }
 
 VideoPlayerHTML5.prototype.setDisplay = function( container ){
@@ -199,168 +171,161 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		console.log("Add player component");
 	}
 
-	if( this.profile.hbbtv == false ){
-		// TODO: EME
-		return false;
-	}
-	else if( this.profile.hbbtv == "1.5" ){
-		this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
-		this.element.appendChild( this.video );
-	}
-	else if( this.profile.hbbtv == "2.0" ){
-		this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
-		this.element.appendChild( this.video );
-		var player = this.video;
-		
-		console.log("html5 video object created");
-		
-		addEventListeners( player, 'ended abort', function(e){
-			console.log( e.type );
-			self.stop();
-		} );
-		
-		player.addEventListener('error', function(e){
-			self.setLoading(false);
-			if( !self.video ){
-				return;
+	
+	
+	this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
+	this.element.appendChild( this.video );
+	var player = this.video;
+	
+	console.log("html5 video object created");
+	
+	addEventListeners( player, 'ended abort', function(e){
+		console.log( e.type );
+		self.stop();
+	} );
+	
+	player.addEventListener('error', function(e){
+		self.setLoading(false);
+		if( !self.video ){
+			return;
+		}
+		try{
+			var errorMessage = "undefined";
+			switch( self.video.error.code ){
+				case 1: /* MEDIA_ERR_ABORTED */ 
+					errorMessage = "fetching process aborted by user";
+					break;
+				case 2: /* MEDIA_ERR_NETWORK */
+					errorMessage = "error occurred when downloading";
+					break;
+				case 3: /* = MEDIA_ERR_DECODE */ 
+					errorMessage = "error occurred when decoding";
+					break;
+				case 4: /* MEDIA_ERR_SRC_NOT_SUPPORTED */ 
+					errorMessage = "audio/video not supported";
+					break;
 			}
-			try{
-				var errorMessage = "undefined";
-				switch( self.video.error.code ){
-					case 1: /* MEDIA_ERR_ABORTED */ 
-						errorMessage = "fetching process aborted by user";
-						break;
-					case 2: /* MEDIA_ERR_NETWORK */
-						errorMessage = "error occurred when downloading";
-						break;
-					case 3: /* = MEDIA_ERR_DECODE */ 
-						errorMessage = "error occurred when decoding";
-						break;
-					case 4: /* MEDIA_ERR_SRC_NOT_SUPPORTED */ 
-						errorMessage = "audio/video not supported";
-						break;
-				}
-				showInfo( "MediaError: " + errorMessage );
-				
-				Monitor.videoError( errorMessage );
-			} catch(e){
-				console.log("error reading video error code");
-				console.log(e.description);
-			}
-		} );
-		
-		player.addEventListener('play', function(){ 
-			console.log("video play event triggered");
-		} );
-		
-		player.seektimer = null;
-		player.addEventListener('seeked', function(){
-			console.log("Seeked");
-			player.play();
-		});
-		
-		var canplay = false;
-		player.addEventListener('canplay', function(){
-			canplay = true;
-			console.log("canplay");
-			// check prerolls on first start
-			if( self.adBreaks ){
-				var playPreroll = false;
-				$.each( self.adBreaks, function(n, adBreak){
-					if( !adBreak.played && adBreak.position == "preroll" ){
-						console.log("play preroll");
-						adBreak.played = true;
-						playPreroll = true;
-						self.getAds( adBreak );
-						return false;
-					}
-				});	
-			}
+			showInfo( "MediaError: " + errorMessage );
 			
-			// if preroll is not found, move on to content video
-			if( !playPreroll ){
-				player.play();
-			}
-		} );
-		
-		player.addEventListener('loadedmetadata', function(){
-			console.log("loadedmetadata");
-		} );
-		
-		player.addEventListener('loadstart', function(){
-			console.log("loadstart");
-			self.setLoading(true);
-		} );
-		
-		addEventListeners( player, "waiting", function(e){ 
-			console.log( e.type );
-			self.setLoading(true);
-		} );
-		
-		addEventListeners( player, "waiting stalled suspend", function(e){ 
-			console.log( e.type );
-		} );
-		
-		addEventListeners( player, 'playing pause emptied', function(e){
-			self.setLoading(false);
-			console.log( e.type );
-		} );
-		
-		
-		player.addEventListener('ended emptied error', function(){
-			self.setLoading(false);
-			Monitor.videoEnded(console.log);
-		} );
-		
-		player.addEventListener('progress', function( e ){
-			//Monitor.videoBuffering(); 
-			var load = this.buffered.end(0) / this.duration;
-			console.log( this.buffered, load + "%", " load in seconds: " + this.buffered.end(0) );
-		} );
-		
-		player.addEventListener('pause', function(){
-			Monitor.videoPaused(); 
-			self.setLoading(false);
-		} );
-		
-		player.addEventListener('playing', function(){
-			if( self.firstPlay ){
-				// set out-of-band subtitles
-				self.setSubtitles();
-				// set TextTrackCue listeners
-				self.setTextTrackCues();
-				self.firstPlay = false;
-			}
-
-			Monitor.videoPlaying();
-			self.setLoading(false);
-		} );
-		
-		
-		player.addEventListener('timeupdate', function(){
-			self.updateProgressBar();
-			self.checkAds();
-		} );
-		
-		player.seek = function( sec, absolute ){
-			try{
-				var target = ( absolute? sec : player.currentTime + sec);
-				
-				if( target < 0 )
-					target = 0;
-				else if( target > player.duration )
-					return;
-				
-				console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-				// Set position
-				player.currentTime = target;
-			} catch(e){
-				console.log("error seeking: " + e.description);
-			}
+			Monitor.videoError( errorMessage );
+		} catch(e){
+			console.log("error reading video error code");
+			console.log(e.description);
+		}
+	} );
+	
+	player.addEventListener('play', function(){ 
+		console.log("video play event triggered");
+	} );
+	
+	player.seektimer = null;
+	player.addEventListener('seeked', function(){
+		console.log("Seeked");
+		player.play();
+	});
+	
+	var canplay = false;
+	player.addEventListener('canplay', function(){
+		canplay = true;
+		console.log("canplay");
+		var playPreroll = false;
+		// check prerolls on first start
+		if( self.adBreaks ){
+			$.each( self.adBreaks, function(n, adBreak){
+				if( !adBreak.played && adBreak.position == "preroll" ){
+					console.log("play preroll");
+					adBreak.played = true;
+					playPreroll = true;
+					self.getAds( adBreak );
+					return false;
+				}
+			});
 		}
 		
-		return true;
-	}
+		// if preroll is not found, move on to content video
+		if( !playPreroll ){
+			player.play();
+		}
+		
+	} );
+	
+	player.addEventListener('loadedmetadata', function(){
+		console.log("loadedmetadata");
+	} );
+	
+	player.addEventListener('loadstart', function(){
+		console.log("loadstart");
+		self.setLoading(true);
+	} );
+	
+	addEventListeners( player, "waiting", function(e){ 
+		console.log( e.type );
+		self.setLoading(true);
+	} );
+	
+	addEventListeners( player, "waiting stalled suspend", function(e){ 
+		console.log( e.type );
+	} );
+	
+	addEventListeners( player, 'playing pause emptied', function(e){
+		self.setLoading(false);
+		console.log( e.type );
+	} );
+	
+	
+	player.addEventListener('ended emptied error', function(){
+		self.setLoading(false);
+		Monitor.videoEnded(console.log);
+	} );
+	
+	player.addEventListener('progress', function( e ){
+		//Monitor.videoBuffering(); 
+		//var load = this.buffered.end(0) / this.duration;
+		//console.log( this.buffered, load + "%", " load in seconds: " + this.buffered.end(0) );
+	} );
+	
+	player.addEventListener('pause', function(){
+		Monitor.videoPaused(); 
+		self.setLoading(false);
+		$("#ppauseplay").removeClass("pause").addClass("play");
+	} );
+	
+	player.addEventListener('playing', function(){
+		if( self.firstPlay ){
+			// set out-of-band subtitles
+			self.setSubtitles();
+			// set TextTrackCue listeners
+			self.setTextTrackCues();
+			self.firstPlay = false;
+		}
+		Monitor.videoPlaying();
+		self.setLoading(false);
+		$("#ppauseplay").removeClass("play").addClass("pause");
+	} );
+	
+	
+	player.addEventListener('timeupdate', function(){
+		self.updateProgressBar();
+		self.checkAds();
+	} );
+	
+	player.seek = function( sec, absolute ){
+		try{
+			var target = ( absolute? sec : player.currentTime + sec);
+			
+			if( target < 0 )
+				target = 0;
+			else if( target > player.duration )
+				return;
+			
+			console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
+			// Set position
+			player.currentTime = target;
+		} catch(e){
+			console.log("error seeking: " + e.description);
+		}
+	};
+	
 	return true;
 }
 
@@ -434,17 +399,6 @@ VideoPlayerHTML5.prototype.setTextTrackCues = function(){
 	});
 };
 
-/*
-TODO: Add analytics
-Monitor.videoConnecting(); // playstate 3
-Monitor.videoStopped(callback); // käyttäjä  painaa back/stop tms // callbackkiin funkkari joka kutsutaan kun kaikki tulokset on lähetetty ja palataan takaisin videon toistosta
-Monitor.switchAudio(lang); // code of language track
-Monitor.switchSubtitle(lang); // annetaan valitun raidan kielikoodi
-*/
-
-// TODO: outband subtitles handling: https://developer.mozilla.org/en-US/Apps/Fundamentals/Audio_and_video_delivery/Adding_captions_and_subtitles_to_HTML5_video
-
-
 
 VideoPlayerHTML5.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
@@ -478,6 +432,12 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 VideoPlayerHTML5.prototype.checkAds = function(){
 	//console.log("checkAds");
 	if( this.adBreaks ){
+		
+		if( this.video == null ){
+			// video has stopped just before new ad checking. exit player
+			this.clearVideo();
+			return;
+		}
 		
 		var position =  Math.floor( this.video.currentTime );
 		var self = this;
@@ -527,6 +487,11 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 			player.addClass("hide"); // hide ad video
 			$("#adInfo").removeClass("show");
 			
+			if( self.video == null ){
+				// video has stopped during ads. exit
+				self.clearVideo();
+				return;
+			}
 			self.video.play();
 			$(self.video).removeClass("hide"); // show content video
 		}
@@ -571,7 +536,6 @@ VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 	console.log("get ads breaks=" + adBreak.ads);
 	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
 		self.adBuffer = ads;
-		//self.adCount = ads.length;
 		console.log( "Got " + ads.length + " ads");
 		
 		self.prepareAdPlayers();
@@ -611,11 +575,11 @@ VideoPlayerHTML5.prototype.playAds = function(){
 
 VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
 	if( !breaks){
-		this.breaks = null;
+		this.adBreaks = null;
 	}
 	else{
 		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = breaks;
+		this.adBreaks = Object.assign({}, breaks ); // deep copy
 	}
 };
 
@@ -1004,7 +968,33 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 		console.log("Error at clearVideo()");
 		console.log(e.description);
 	}
+	this.clearAds();
 	this.subtitles = null;
+};
+VideoPlayerHTML5.prototype.clearAds = function(){
+	try{
+		if( self.adPlayer ){
+			self.adPlayer[0].stop();
+			self.adPlayer[1].stop();
+			$( self.adPlayer[0] ).addClass("hide");
+			$( self.adPlayer[1] ).addClass("hide");
+			self.adPlayer[0].src = "";
+			self.adPlayer[1].src = "";
+			
+			self.adPlayer = null;
+			self.onAdBreak = false;
+			self.adBreaks = null;
+			self.adBuffer = null;
+			self.adCount = 0;
+		}
+		$( "#ad1" ).remove(); // clear from dom
+		$( "#ad2" ).remove(); // clear from dom
+		$( "#adInfo" ).remove(); // clear from dom
+	}
+	catch(e){
+		console.log("Error at clearVideo()");
+		console.log(e.description);
+	}
 };
 
 VideoPlayerHTML5.prototype.isFullscreen = function(){
@@ -1092,7 +1082,6 @@ VideoPlayerHTML5.prototype.setFullscreen = function(fs){
 	else{
 		this.element.removeClass("fullscreen");
 		this.setDisplay( menu.focus.element ); // sets video player object to child of focused tile element
-		//this.controls.hide();
 		$("#player").removeClass("show");
 	}
 

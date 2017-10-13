@@ -278,8 +278,6 @@ Menu.prototype.prepareVideoStart = function(){
 		}
 		*/
 		
-		vplayer.setURL( self.focus.url );
-		
 		if( self.focus.adBreaks ){
 			vplayer.setAdBreaks( self.focus.adBreaks );
 		}
@@ -287,11 +285,28 @@ Menu.prototype.prepareVideoStart = function(){
 			vplayer.setAdBreaks( null ); // no ads
 		}
 		
-		if( self.focus.la_url ){
-			vplayer.setDRM( self.focus.drm, self.focus.la_url );
+		
+		if( profile.version == "mse-eme" ){
+			if( self.focus.la_url ){
+				vplayer.setDRM( self.focus.drm, self.focus.la_url );
+				vplayer.sendLicenseRequest();
+			}
+			else{
+				vplayer.setDRM( false );
+			}
+			
+			vplayer.player.initialize( vplayer.video, null, false);
+			
+			vplayer.setURL( self.focus.url );
 		}
 		else{
-			vplayer.setDRM( false );
+			vplayer.setURL( self.focus.url );
+			if( self.focus.la_url ){
+				vplayer.setDRM( self.focus.drm, self.focus.la_url );
+			}
+			else{
+				vplayer.setDRM( false );
+			}
 		}
 		//vplayer.video.data = self.focus.url;
 	} catch(e){

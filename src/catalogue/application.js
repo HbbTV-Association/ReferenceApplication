@@ -20,17 +20,25 @@ function init()
 		for(var i = 0; i < main.items.length; i++){
 			if(main.items[i].submenu){
 				var submenu = config[main.items[i].submenu];
-				var submenuItems = [];
-				$.each( submenu.items, function(i, item){
-					// add asset items that has no profile specified or if has, it corresponds to current app profile
-					if( !item.profile || item.profile.includes( profile.version ) ){
-						submenuItems.push( item );
-					}
-					else{
-						console.log("dropped non suitable asset away from config ", item);
-					}
-				});
-				new_config.push({"items": submenuItems, "title":main.items[i].title});
+				//new_config.push({"items":submenu.items, "title":main.items[i].title});
+                try{
+					var submenuItems = [];
+					$.each( submenu.items, function(nth, item){
+						console.log( item );
+						// add asset items that has no profile specified or if has, it corresponds to current app profile
+						if( !item.profile || ( Array.isArray( item.profile ) && item.profile.indexOf( profile.version ) >= 0 ) ){
+							submenuItems.push( item );
+						}
+						else{
+							console.log("dropped non suitable asset away from config ", item);
+						}
+					});
+					new_config.push({"items": submenuItems, "title":main.items[i].title});
+				} catch( e ){
+					// no drop offs, it error happens
+					new_config.push({"items":submenu.items, "title":main.items[i].title});
+				}
+				
 			}
 		}
 

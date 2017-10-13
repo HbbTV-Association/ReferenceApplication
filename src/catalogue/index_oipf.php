@@ -1,8 +1,8 @@
 <?php
 	date_default_timezone_set("Europe/Helsinki");
 	
-	error_reporting(E_ALL);
-	ini_set('display_errors', 1);
+	//error_reporting(E_ALL);
+	//ini_set('display_errors', 1);
 	
 	header( "Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 	header( "Cache-Control: no-cache, must-revalidate" );
@@ -29,6 +29,7 @@
 	</script>
 	<!-- List all css and js resource files or minified and combined resource files -->
 	<?php 
+		$profileResources = "oipf"; // additional resources
 		include("resources.php"); 
 	?>
 	

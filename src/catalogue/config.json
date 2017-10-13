@@ -57,7 +57,7 @@
                     },
                     {
                         "code" : "fi",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fi.xml"
+                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fin.xml"
                     }]
                 },
                 {
@@ -84,7 +84,7 @@
                 {
                     "title": "In-band events",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/manifest_evtib.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "img": "icons/icons_1x1_in-band-events.png",
                     "app": 6,
 					"desc": "TextTrack cues in inband tracks"
                 }				
@@ -127,7 +127,7 @@
                     },
                     {
                         "code" : "fi",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fi.xml"
+                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fin.xml"
                     }]					
                 },
                 {
@@ -238,7 +238,8 @@
                     "title": "Delete cookies",
                     "eval": "deleteAllCookies(true);",
                     "app": 0,
-                    "img": "icons/icons_1x1_delete.png" 
+                    "img": "icons/icons_1x1_delete.png" ,
+					"desc": "Use this function carefully. It may affect on test results / analytics if the device is recognized by a cookie"
                 },
                 {
                     "title": "Do a funny trick",

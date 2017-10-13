@@ -20,7 +20,6 @@
 	<meta http-equiv="content-type" content="Content-Type: application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
 	<script type="application/javascript" language="javascript">
 	
-	
 	var profile = { hbbtv : "2.0", video : "html5", version : "html5"};
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
 	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
@@ -37,14 +36,11 @@
 	var main 		= null;
 
 	function onLoad(){
-		
-		
-		
+		console.log("onLoad");
 		showApplication();
 		init();
 		registerKeys(1);
 		registerKeyListener();
-		
 	}
 	</script>
 	
@@ -53,6 +49,7 @@
 		print all resource files with url-parameter version=filemtime 
 		to ensure device is not using cache when file is modified
 		***/
+		$profileResources = "html5"; // additional resources
 		include("resources.php"); 
 	?>
 </head>

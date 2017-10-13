@@ -22,8 +22,6 @@ $resources = array(
 	"menu.js",
 	"topmenu.js",
 	"topmenuitem.js",
-	"../videoplayer/videoplayer_oipf.js",
-	"../videoplayer/videoplayer_html5.js",
 	"../debugscreen.js",
 	"../keycodes.js",
 	"navigation.js", 
@@ -31,11 +29,29 @@ $resources = array(
 	"../videoplayer/monitor/monitor.js" /* Monitor implementation is not included to reference application */
 );
 
+if( isset( $profileResources ) ){
+	echo "<!-- " . $profileResources. " -->\n";
+	if( $profileResources == "mse-eme" ){
+		$resources[] = "../videoplayer/dash.all.min.js";
+		$resources[] = "../videoplayer/videoplayer_mse-eme.js";
+	}
+	else if( $profileResources == "html5" ){
+		$resources[] = "../videoplayer/videoplayer_html5.js";
+	}
+	else if( $profileResources == "oipf" ){
+		$resources[] = "../videoplayer/videoplayer_oipf.js";
+	}
+}
+else{
+	echo "<!-- No correct videoplayer version found guess HbbTV 1.5 -->\n";
+	$resources[] = "../videoplayer/videoplayer_oipf.js";
+}
+
 
 // do not modify below
 
-// 1. Do not use minified version on mhp if not set optimize=1.
-// 2. Do not use minified if it does not exist. run first minify.php
+
+// Do not use minified if it does not exist. run first minify.php
 if( !file_exists( "app.min.js" ) || ( !$optimizeDefault && !isset( $_GET["optimize"] ) ) ){ // min-file not found or not set to optimize
 	$useMinified = false;
 }

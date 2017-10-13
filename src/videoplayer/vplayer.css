@@ -25,19 +25,25 @@
 #adInfo{
 	display: block;
 	position: absolute;
-	top: 0px;
-	left: 0px;
-	width: 1280px;
-	height: 0px;
 	z-index: 99;
 	opacity:0.0;
 	transition: all 0.5s;
 	background-color: rgba(0,0,0,0.7);
 	color:white;
-	text-align: center ;
+	text-align: left ;
+    vertical-align: middle;
+    padding: 10px;
+    width: 260px;
+    height: 0px;
+    left: 1100px;
+    top: 550px;
+    line-height: 50px;
+    border-radius: 10px 0px 0px 10px;
+    font-size: 21px;
+    text-shadow: 2px 2px 4px #000;
 }
 #adInfo.show{
-	height: 40px !important;
+	height: 50px !important;
 	opacity:1.0 !important;
 }
 
@@ -54,7 +60,7 @@
 	display: none !important;
 }
 
-
+/*
 #loadingImage {
 	background: rgba(0, 0, 0, 0) url("images/loading.gif") repeat scroll 0 0;
 	display: block;
@@ -65,6 +71,7 @@
 	width: 56px;
 	z-index: 20;
 }
+*/
 .hidden:not(#player_buttons){
 	opacity : 0.0;
 }
@@ -354,3 +361,50 @@
 #fullscreen_icon, #fullscreen_icon.focused, #fullscreen_icon.selected {
 	background-position: -200px -4px;
 }
+
+/* Loading */
+#loadingImage {
+  width: 60px;
+  height: 60px;
+  background: url("images/loading_anim.png") left center;
+  
+   -webkit-animation: play_loading 1.8s steps(13) infinite;
+  -moz-animation: play_loading 1.8s steps(13) infinite;
+  -o-animation: play_loading 1.8s steps(13) infinite;
+  animation: play_loading 1.8s steps(13)  infinite;
+  
+     position: absolute;
+    top: 50%;
+    left: 50%;
+	z-index: 1001; 
+	margin-left: -30px;
+	margin-top: -30px;
+}
+
+@-webkit-keyframes play_loading {
+   from { background-position:    0px; }
+     to { background-position: -780px; }
+}
+
+@-moz-keyframes play_loading {
+   from { background-position:    0px; }
+     to { background-position: -780px; }
+}
+
+@-ms-keyframes play_loading {
+   from { background-position:    0px; }
+     to { background-position: -780px; }
+}
+
+@-o-keyframes play_loading {
+   from { background-position:    0px; }
+     to { background-position: -780px; }
+}
+
+@keyframes play_loading {
+   from { background-position:    0px; }
+     to { background-position: -780px; }
+}
+
+
+/* END loading */

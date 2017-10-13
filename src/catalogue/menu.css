@@ -8,7 +8,7 @@ body {
     font-family: Tiresias, TiresiasScreenfont, sans-serif;
 }
 div, span {
-	_border: 1px solid red;	
+
 }
 
 	#wrapper{
@@ -29,7 +29,7 @@ div, span {
 			left: 0px;
 			overflow: visible;
 			position: absolute;
-			top: 45px;
+			top: 43px;
 			white-space: nowrap;
 			width: 1280px;
 			-moz-transition: 0.5s left cubic-bezier(0.42,0,0.58,1);
@@ -112,8 +112,10 @@ div, span {
 					display: inline-block;
 					height: 520px;
 					margin-top: 6px;
-					overflow: hidden;
-					vertical-align: top;
+					/*
+                    overflow: hidden;
+					*/
+                    vertical-align: top;
 				}
 				.gridColumn:first-child{
 					margin-left: 12px;
@@ -160,7 +162,7 @@ div, span {
 						-moz-background-clip: content;     /* Firefox 3.6 */
 						-webkit-background-clip: content;  /* Safari 4? Chrome 6? */
 						background-clip: content-box;
-					
+					    
 					}
 					.gridViewBox_1x1 {
 						width: 284px;
@@ -182,11 +184,12 @@ div, span {
 					}
 			
 					.gridViewBox:first-child {
-						_margin-top: 6px;	
+						
 					}
 					
 					.gridViewBox.focused{
 						border: 5px solid #f7921e;
+                        z-index: 3;
 					}
 					/* Chrome, Safari, Opera */
 					@-webkit-keyframes focusBorderColorChange {

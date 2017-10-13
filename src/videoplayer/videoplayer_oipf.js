@@ -350,11 +350,11 @@ VideoPlayer.prototype.playAds = function(){
 
 VideoPlayer.prototype.setAdBreaks = function( breaks ){
 	if( !breaks){
-		this.breaks = null;
+		this.adBreaks = null;
 	}
 	else{
 		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = breaks;
+		this.adBreaks = Object.assign({}, breaks ); // deep copy
 	}
 };
 

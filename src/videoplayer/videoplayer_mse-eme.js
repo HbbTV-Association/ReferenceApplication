@@ -10,12 +10,6 @@ function VideoPlayerEME(element_id, profile, width, height){
 		MPEG:1,
 		DASH:2
 	};
-	this.DRMTYPES = {
-		NONE:0,
-		PLAYREADY:1,
-		MARLIN:2,
-		WIDEVINE:3
-	};
 	this.element_id = element_id;
 	this.element = document.getElementById(element_id);
 	if(!this.element){
@@ -35,11 +29,6 @@ function VideoPlayerEME(element_id, profile, width, height){
 	this.progressUpdateInterval = null;
 	this.hidePlayerTimer = null;
 
-	this.init();
-}
-
-VideoPlayerEME.prototype.init = function(){
-	var self = this;
 }
 
 VideoPlayerEME.prototype.populate = function(){
@@ -83,6 +72,7 @@ VideoPlayerEME.prototype.navigate = function(key){
 
 		case VK_BACK:
 		case VK_STOP:
+		case 8: // for edge backspace button
 			console.log("call: stop()");
 			self.stop();
 		break;
@@ -149,21 +139,7 @@ VideoPlayerEME.prototype.navigate = function(key){
 }
 
 VideoPlayerEME.prototype.getStreamComponents = function(){
-	/*
-	try {
-		if(typeof this.video.getComponents == 'function') {
-			comps_a = vidobj.getComponents(vidobj.COMPONENT_TYPE_AUDIO);
-			if (comps_a.length > 1) {
-				showInfo("Found "+comps_a.length+" audio track(s)");
-				$('#paudio').show();
-			}
-		} else {
-			showInfo("Switching audio components not supported");
-		}
-	} catch (e) {
-		showInfo("Switching audio components not supported");
-	}
-	*/
+
 }
 
 VideoPlayerEME.prototype.setDisplay = function( container ){
@@ -197,408 +173,295 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		console.log("Add player component");
 	}
 
-	if( this.profile.hbbtv == false ){
+	try{
+		this.video = $("<video id='video' data-dashjs-player></video>")[0];
+		this.element.appendChild( this.video );
+		this.player = dashjs.MediaPlayer().create();
+		console.log( "video object created ", this.player );
+	} catch( e ){
+		console.log("Error creating dashjs video object ", e.description );
+	}
+	
+	var player = this.video;
+	
+	addEventListeners( player, 'ended abort', function(e){
+		console.log( e.type );
+		self.stop();
+	} );
+	
+	player.addEventListener('error', function(e){
+		self.setLoading(false);
+		if( !self.video ){
+			return;
+		}
 		try{
-			this.video = $("<video id='video' data-dashjs-player></video>")[0];
-			this.element.appendChild( this.video );
-			this.player = dashjs.MediaPlayer().create();
-			console.log( "video object created ", this.player );
-		} catch( e ){
-			console.log("Error creating dashjs video object ", e.description );
+			var errorMessage = "undefined";
+			switch( self.video.error.code ){
+				case 1: /* MEDIA_ERR_ABORTED */ 
+					errorMessage = "fetching process aborted by user";
+					break;
+				case 2: /* MEDIA_ERR_NETWORK */
+					errorMessage = "error occurred when downloading";
+					break;
+				case 3: /* = MEDIA_ERR_DECODE */ 
+					errorMessage = "error occurred when decoding";
+					break;
+				case 4: /* MEDIA_ERR_SRC_NOT_SUPPORTED */ 
+					errorMessage = "audio/video not supported";
+					break;
+			}
+			showInfo( "MediaError: " + errorMessage );
+			
+			Monitor.videoError( errorMessage );
+		} catch(e){
+			console.log("error reading video error code");
+			console.log(e.description);
 		}
-		
-		var player = this.video;
-		
-		addEventListeners( player, 'ended abort', function(e){
-			console.log( e.type );
-			self.stop();
-		} );
-		
-		var canplay = false;
-		player.addEventListener('canplay', function(){
-			canplay = true;
-			console.log("canplay");
-			
-			var playPreroll = false;
-			// check prerolls on first start
-			if( self.adBreaks ){
-				console.log("has ads");
-				
-				$.each( self.adBreaks, function(n, adBreak){
-					if( !adBreak.played && adBreak.position == "preroll" ){
-						console.log("found preroll ad");
-						console.log("play preroll");
-						adBreak.played = true;
-						playPreroll = true;
-						self.getAds( adBreak );
-						return false;
-					}
-				});
-				
-			}
-			
-			if( !playPreroll ){
-				player.play();
-			}
-			
-		} );
-		
-		player.addEventListener('loadedmetadata', function(){
-			console.log("loadedmetadata");
-			try{
-				console.log( typeof self.setSubtitles );
-				self.setSubtitles(); // set subtitles AFTER metadata load
-				
-				
-			
-			} catch( e ){
-				console.log( e.description );
-			}
-		} );
-		
-		addEventListeners( player, "waiting", function(e){ 
-			console.log( e.type );
-			self.setLoading(true);
-		} );
-		
-		addEventListeners( player, "waiting stalled suspend", function(e){ 
-			console.log( e.type );
-		} );
-		
-		addEventListeners( player, 'playing pause emptied', function(e){
-			self.setLoading(false);
-			console.log( e.type );
-		} );
-		
-		
-		player.addEventListener('ended emptied error', function(){
-			self.setLoading(false);
-			Monitor.videoEnded(console.log);
-		} );
-		
-		player.addEventListener('progress', function(){
-			//Monitor.videoBuffering(); 
-			self.setLoading(false);
-		} );
-		
-		player.addEventListener('pause', function(){
-			Monitor.videoPaused(); 
-			self.setLoading(false);
-		} );
-		
-		player.addEventListener('playing', function(){
-			Monitor.videoPlaying();
-			self.setLoading(false);
-			
-			// set up inband cue events listeners
-			console.log("set up cuechange listeners");
-			$.each( player.textTracks, function( i, track ){
-				
-				console.log("text track " + i);
-				track.oncuechange = function(evt) {
-					
-					showInfo("cuechange! kind=" + this.kind);
-					try{
-						console.log( this.id );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.data );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.track );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.track.activeCues );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						
-						var myTrack = this.track;             // track element is "this" 
-						var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
-						if (myCues.length > 0) {              
-							console.log( myCues[0].getCueAsSource() ); 
-						}
-					} catch(e){
-						console.log("error", e.message );
-					}
-				};
-				track.mode = "showing";
-				//console.log( JSON.stringify( track ) );
-				/*
-				$(track).on("cuechange", function(evt) {
-					showInfo("cuechange!");
-					console.log( JSON.stringify( evt ) );
-				});
-				*/
-			});
-			
-		} );
-		
-		
-		player.addEventListener('timeupdate', function(){
-			self.updateProgressBar();
-			self.checkAds();
-		} );
-		
-		player.seek = function( sec, absolute ){
-			try{
-				var target = ( absolute? sec : player.currentTime + sec);
-				
-				if( target < 0 )
-					target = 0;
-				else if( target > player.duration )
-					return;
-				
-				console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-				// Set position
-				player.currentTime = target;
-			} catch(e){
-				console.log("error seeking: " + e.description);
-			}
-		}
-		
-	}
-	else if( this.profile.hbbtv == "1.5" ){
-		this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
-		this.element.appendChild( this.video );
-	}
-	else if( this.profile.hbbtv == "2.0" ){
-		this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
-		this.element.appendChild( this.video );
-		var player = this.video;
-		
-		console.log("html5 video object created");
-		
-		addEventListeners( player, 'ended abort', function(e){
-			console.log( e.type );
-			self.stop();
-		} );
-		
-		player.addEventListener('error', function(e){
-			self.setLoading(false);
-			if( !self.video ){
-				return;
-			}
-			try{
-				var errorMessage = "undefined";
-				switch( self.video.error.code ){
-					case 1: /* MEDIA_ERR_ABORTED */ 
-						errorMessage = "fetching process aborted by user";
-						break;
-					case 2: /* MEDIA_ERR_NETWORK */
-						errorMessage = "error occurred when downloading";
-						break;
-					case 3: /* = MEDIA_ERR_DECODE */ 
-						errorMessage = "error occurred when decoding";
-						break;
-					case 4: /* MEDIA_ERR_SRC_NOT_SUPPORTED */ 
-						errorMessage = "audio/video not supported";
-						break;
+	} );
+	var canplay = false;
+	player.addEventListener('canplay', function(){
+		canplay = true;
+		console.log("canplay");
+		var playPreroll = false;
+		// check prerolls on first start
+		if( self.adBreaks ){
+			$.each( self.adBreaks, function(n, adBreak){
+				if( !adBreak.played && adBreak.position == "preroll" ){
+					console.log("play preroll");
+					adBreak.played = true;
+					playPreroll = true;
+					self.getAds( adBreak );
+					return false;
 				}
-				showInfo( "MediaError: " + errorMessage );
-				
-				Monitor.videoError( errorMessage );
-			} catch(e){
-				console.log("error reading video error code");
-				console.log(e.description);
-			}
-		} );
+			});
+		}
 		
-		player.addEventListener('play', function(){ 
-			console.log("video play event triggered");
-		} );
-		
-		player.seektimer = null;
-		player.addEventListener('seeked', function(){
-			console.log("Seeked");
+		// if preroll is not found, move on to content video
+		if( !playPreroll ){
 			player.play();
+		}
+		
+	} );
+	
+	player.addEventListener('loadedmetadata', function(){
+		console.log("loadedmetadata");
+		try{
+			console.log( typeof self.setSubtitles );
+			self.setSubtitles(); // set subtitles AFTER metadata load
+			
+		} catch( e ){
+			console.log( e.description );
+		}
+	} );
+	
+	addEventListeners( player, "waiting", function(e){ 
+		console.log( e.type );
+		self.setLoading(true);
+	} );
+	
+	addEventListeners( player, "waiting stalled suspend", function(e){ 
+		console.log( e.type );
+	} );
+	
+	addEventListeners( player, 'playing pause emptied', function(e){
+		self.setLoading(false);
+		console.log( e.type );
+	} );
+	
+	
+	player.addEventListener('ended emptied error', function(){
+		self.setLoading(false);
+		Monitor.videoEnded(console.log);
+	} );
+	
+	player.addEventListener('progress', function(){
+		//Monitor.videoBuffering(); 
+		//self.setLoading(false);
+	} );
+	
+	player.addEventListener('pause', function(){
+		Monitor.videoPaused(); 
+		self.setLoading(false);
+		$("#ppauseplay").removeClass("pause").addClass("play");
+	} );
+	
+	player.addEventListener('addtrack', function(){
+		
+		// set up inband cue events listeners
+		console.log("set up cuechange listeners");
+		$.each( player.textTracks, function( i, track ){
+			
+			console.log("text track " + i);
+			track.oncuechange = function(evt) {
+				
+				showInfo("cuechange! kind=" + this.kind);
+				try{
+					console.log( this.id );
+				} catch(e){
+					console.log("error", e.message );
+				}
+				try{
+					console.log( this.data );
+				} catch(e){
+					console.log("error", e.message );
+				}
+				try{
+					console.log( this.track );
+				} catch(e){
+					console.log("error", e.message );
+				}
+				try{
+					console.log( this.track.activeCues );
+				} catch(e){
+					console.log("error", e.message );
+				}
+				try{
+					
+					var myTrack = this.track;             // track element is "this" 
+					var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
+					if (myCues.length > 0) {              
+						console.log( myCues[0].getCueAsSource() ); 
+					}
+				} catch(e){
+					console.log("error", e.message );
+				}
+			};
+			track.mode = "showing";
+			//console.log( JSON.stringify( track ) );
+			/*
+			$(track).on("cuechange", function(evt) {
+				showInfo("cuechange!");
+				console.log( JSON.stringify( evt ) );
+			});
+			*/
 		});
 		
-		var canplay = false;
-		player.addEventListener('canplay', function(){
-			canplay = true;
-			console.log("canplay");
-			// check prerolls on first start
-			if( self.adBreaks ){
-				console.log("has ads");
-				var playPreroll = false;
-				$.each( self.adBreaks, function(n, adBreak){
-					if( !adBreak.played && adBreak.position == "preroll" ){
-						console.log("found preroll ad");
-						console.log("play preroll");
-						adBreak.played = true;
-						playPreroll = true;
-						self.getAds( adBreak );
-						return false;
-					}
-				});
-				
-			}
-			
-			if( !playPreroll ){
-				player.play();
-			}
-			
-		} );
-		
-		player.addEventListener('loadedmetadata', function(){
-			console.log("loadedmetadata");
-			try{
-				console.log( typeof self.setSubtitles );
-				self.setSubtitles(); // set subtitles AFTER metadata load
-				
-				
-			
-			} catch( e ){
-				console.log( e.description );
-			}
-		} );
-		
-		addEventListeners( player, "waiting", function(e){ 
-			console.log( e.type );
-			self.setLoading(true);
-		} );
-		
-		addEventListeners( player, "waiting stalled suspend", function(e){ 
-			console.log( e.type );
-		} );
-		
-		addEventListeners( player, 'playing pause emptied', function(e){
-			self.setLoading(false);
-			console.log( e.type );
-		} );
-		
-		
-		player.addEventListener('ended emptied error', function(){
-			self.setLoading(false);
-			Monitor.videoEnded(console.log);
-		} );
-		
-		player.addEventListener('progress', function(){
-			//Monitor.videoBuffering(); 
-			self.setLoading(false);
-		} );
-		
-		player.addEventListener('pause', function(){
-			Monitor.videoPaused(); 
-			self.setLoading(false);
-		} );
-		
-		player.addEventListener('playing', function(){
-			Monitor.videoPlaying();
-			self.setLoading(false);
-			var tracks = self.video.videoTracks.length;
-			console.log("Video tracks: " + tracks );
-			
-			// set up inband cue events listeners
-			console.log("set up cuechange listeners");
-			$.each( player.textTracks, function( i, track ){
-				
-				console.log("text track " + i);
-				track.oncuechange = function(evt) {
-					
-					showInfo("cuechange! kind=" + this.kind);
-					try{
-						console.log( this.id );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.data );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.track );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						console.log( this.track.activeCues );
-					} catch(e){
-						console.log("error", e.message );
-					}
-					try{
-						
-						var myTrack = this.track;             // track element is "this" 
-						var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
-						if (myCues.length > 0) {              
-							console.log( myCues[0].getCueAsSource() ); 
-						}
-					} catch(e){
-						console.log("error", e.message );
-					}
-				};
-				track.mode = "showing";
-				//console.log( JSON.stringify( track ) );
-				/*
-				$(track).on("cuechange", function(evt) {
-					showInfo("cuechange!");
-					console.log( JSON.stringify( evt ) );
-				});
-				*/
-			});
-			
-		} );
-		
-		
-		player.addEventListener('timeupdate', function(){
-			self.updateProgressBar();
-			self.checkAds();
-		} );
-		
-		player.seek = function( sec, absolute ){
-			try{
-				var target = ( absolute? sec : player.currentTime + sec);
-				
-				if( target < 0 )
-					target = 0;
-				else if( target > player.duration )
-					return;
-				
-				console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-				// Set position
-				player.currentTime = target;
-			} catch(e){
-				console.log("error seeking: " + e.description);
-			}
+	} );
+	
+	player.addEventListener('playing', function(){
+		if( self.firstPlay ){
+			// set out-of-band subtitles
+			self.setSubtitles();
+			// set TextTrackCue listeners
+			self.setTextTrackCues();
+			self.firstPlay = false;
 		}
+		Monitor.videoPlaying();
+		self.setLoading(false);
+		$("#ppauseplay").removeClass("play").addClass("pause");
+	} );
+	
+	
+	player.addEventListener('timeupdate', function(){
+		self.updateProgressBar();
+		self.checkAds();
+	} );
+	
+	player.seek = function( sec, absolute ){
+		try{
+			var target = ( absolute? sec : player.currentTime + sec);
+			
+			if( target < 0 )
+				target = 0;
+			else if( target > player.duration )
+				return;
+			
+			console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
+			// Set position
+			player.currentTime = target;
+		} catch(e){
+			console.log("error seeking: " + e.description);
+		}
+	};
 		
-		return true;
-	}
+		
 	return true;
 }
-
-/*
-TODO: Add analytics
-Monitor.videoConnecting(); // playstate 3
-Monitor.videoStopped(callback); // käyttäjä  painaa back/stop tms // callbackkiin funkkari joka kutsutaan kun kaikki tulokset on lähetetty ja palataan takaisin videon toistosta
-Monitor.switchAudio(lang); // code of language track
-Monitor.switchSubtitle(lang); // annetaan valitun raidan kielikoodi
-*/
-
-// TODO: outband subtitles handling: https://developer.mozilla.org/en-US/Apps/Fundamentals/Audio_and_video_delivery/Adding_captions_and_subtitles_to_HTML5_video
-
-
+VideoPlayerEME.prototype.setTextTrackCues = function(){
+	
+	// set up inband cue events listeners
+	console.log("set up cuechange listeners");
+	function arrayBufferToString(buffer){
+		var arr = new Uint8Array(buffer);
+		var str = String.fromCharCode.apply(String, arr);
+		if(/[\u0080-\uffff]/.test(str)){
+			throw new Error("this string seems to contain (still encoded) multibytes");
+		}
+		return str;
+	}
+	
+	var player = this.video;
+	
+	if( !player.textTracks ){
+		console.log("No textTracks");
+		return;
+	}
+	
+	
+	
+	$.each( player.textTracks, function( i, track ){
+		
+		console.log("text track " + i);
+	
+		track.oncuechange = function(evt) {
+			
+			
+			try{
+				console.log( "cue 0 "+ this.cues[0].id + " data=" + arrayBufferToString( this.cues[0].data ) );
+			} catch(e){
+				console.log("error arrayBufferToString ", e.message );
+			}
+			try{                                                    
+				if ( this.cues && this.cues.length > 0) {              
+					console.log("cue keys: ",  Object.keys( this.cues[0] ) ); 
+					$.each( this.cues, function(c, cue){
+						var cueValue = arrayBufferToString( cue.data );
+						console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
+						console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime );
+						showInfo( "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime );
+						// Testing:
+						/*
+						cue.onenter = function(){
+							console.log( "cue " + cue.id + ": " + cueValue);
+							showInfo( "cue " + cue.id + ": " + cueValue);
+						};
+						
+						$.each( cue , function(name, value){
+							try{
+								console.log( "cues["+c+"]."+name+" ("+ value.constructor.name+") = " );
+								console.log( value );
+							} catch(e){
+								console.log( "error reading cue attribute: " + name );
+							}
+						} );
+						*/
+					} );
+				}
+			} catch(e){
+				console.log("error Reading cues", e.message );
+			}
+		};
+		track.mode = "showing";
+		
+	});
+};
 
 VideoPlayerEME.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
-	
-	
-    this.player.initialize( this.video , url, true);
+	console.log("player.attachSource(url)");
+	this.player.attachSource(url);
 	return;
 };
 
 VideoPlayerEME.prototype.checkAds = function(){
 	//console.log("checkAds");
 	if( this.adBreaks ){
+		
+		if( this.video == null ){
+			// video has stopped just before new ad checking. exit player
+			this.clearVideo();
+			return;
+		}
 		
 		var position =  Math.floor( this.video.currentTime );
 		var self = this;
@@ -648,27 +511,24 @@ VideoPlayerEME.prototype.prepareAdPlayers = function(){
 			player.addClass("hide"); // hide ad video
 			$("#adInfo").removeClass("show");
 			
+			if( self.video == null ){
+				// video has stopped during ads. exit
+				self.clearVideo();
+				return;
+			}
 			self.video.play();
 			$(self.video).removeClass("hide"); // show content video
 		}
 		
 	};
 	
-	var onAdPlay = function(){ 
-		//console.log("ad play event triggered");
-		
-		//$("#adInfo").html("");
-	};
+	var onAdPlay = function(){};
 	
-	var onAdProgress = function(e){ 
-		//console.log( e.type );
-	};
+	var onAdProgress = function(e){};
 	
 	var onAdTimeupdate = function(){
-		//self.updateProgressBar();
 		var timeLeft = Math.floor( this.duration - this.currentTime )
 		if( timeLeft != NaN ){
-			//console.log( timeLeft );
 			$("#adInfo").addClass("show");
 			$("#adInfo").html("Ad " + self.adCount + "/" + self.adBuffer.length + " (" + timeLeft + "s)" );
 		}
@@ -692,13 +552,9 @@ VideoPlayerEME.prototype.getAds = function( adBreak ){
 	console.log("get ads breaks=" + adBreak.ads);
 	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
 		self.adBuffer = ads;
-		//self.adCount = ads.length;
 		console.log( "Got " + ads.length + " ads");
-		
 		self.prepareAdPlayers();
-		
 		self.playAds();
-		
 	}, "json" );
 };
 
@@ -732,11 +588,11 @@ VideoPlayerEME.prototype.playAds = function(){
 
 VideoPlayerEME.prototype.setAdBreaks = function( breaks ){
 	if( !breaks){
-		this.breaks = null;
+		this.adBreaks = null;
 	}
 	else{
 		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = breaks;
+		this.adBreaks = Object.assign({}, breaks ); // deep copy
 	}
 };
 
@@ -745,7 +601,7 @@ VideoPlayerEME.prototype.setDRM = function( system, la_url){
 		this.drm = null;
 	}
 	else{
-		console.log("setDRM(",la_url,")");
+		console.log("setDRM(", system ,", ",la_url,")");
 		this.drm = { la_url : la_url, system : system, ready : false, error : null};
 	}
 };
@@ -769,105 +625,27 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	/***
 		Create DRM object and container for it
 	***/
-	if( !$("#drm")[0] ){
-		$("body").append("<div id='drm'></div>");
-	}
-	$("#drm").html('<object id="oipfDrm" type="application/oipfDrmAgent" width="0" height="0"></object>');
-	this.oipfDrm = $("#oipfDrm")[0];
+
 	this.drm.successCallback = callback;
 	var self = this;
 	// Case Playready
 	// TODO: other DRMs
 	if( this.drm.system == "playready" ){
-		var msgType = "application/vnd.ms-playready.initiator+xml";
-		var xmlLicenceAcquisition =
-		'<?xml version="1.0" encoding="utf-8"?>' +
-		'<PlayReadyInitiator xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols/">' +
-		  '<LicenseServerUriOverride>' +
-			'<LA_URL>' +
-				this.drm.la_url +
-			'</LA_URL>' +
-		  '</LicenseServerUriOverride>' +
-		'</PlayReadyInitiator>';
-		var DRMSysID = "urn:dvb:casystemid:19219";
-		
+		self.player.setProtectionData({
+			"com.microsoft.playready": { "serverURL": self.drm.la_url }
+			});
 	}
 	else if( this.drm.system == "marlin" ){
-		var msgType = "application/vnd.marlin.drm.actiontoken+xml";
-		var xmlLicenceAcquisition =
-		'<?xml version="1.0" encoding="utf-8"?>' +
-		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ this.drm.la_url +'</URL></RightsIssuer></RightsURL></Marlin>';
-		var DRMSysID = "urn:dvb:casystemid:19188";
+		// todo?
 	}
 	
-	try {
-		this.oipfDrm.onDRMMessageResult = drmMsgHandler;
-	} catch (e) {
-		console.log("sendLicenseRequest Error 1: " + e.message );
-	}
-	try {
-		this.oipfDrm.onDRMRightsError = drmRightsErrorHandler;
-	} catch (e) {
-		console.log("sendLicenseRequest Error 2: " + e.message );
-	}
-	try {
-		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-	} catch (e) {
-		console.log("sendLicenseRequest Error 3: " + e.message );
-	}
+	self.drm.ready = true;
 	
-	
-	
-	function drmMsgHandler(msgID, resultMsg, resultCode) {
-		showInfo("msgID, resultMsg, resultCode: " + msgID +","+  resultMsg +","+ resultCode);
-		var errorMessage = "";
-		switch (resultCode) {
-			case 0:
-				self.drm.ready = true;
-				console.log("call self.drm.successCallback()");
-				self.drm.successCallback();
-			break;
-			case 1:
-				errorMessage = ("DRM: Unspecified error");
-			break;
-			case 2:
-				errorMessage = ("DRM: Cannot process request");
-			break;
-			case 3:
-				errorMessage = ("DRM: Wrong format");
-			break;
-			case 4:
-				errorMessage = ("DRM: User Consent Needed");
-			break;
-			case 5:
-				errorMessage = ("DRM: Unknown DRM system");
-			break;
-		}
-		
-		if( resultCode > 0 ){
-			showInfo( errorMessage );
-			Monitor.drmError(errorMessage);
-		}
+	if( callback ){
+		callback();
 	}
-
-	function drmRightsErrorHandler(resultCode, id, systemid, issuer) {
-		var errorMessage = "";
-		switch (resultCode) {
-			case 0:
-				errorMessage = ("DRM: No license error");
-			break;
-			case 1:
-				errorMessage = ("DRM: Invalid license error");
-			break;
-			case 2:
-				errorMessage = ("license valid");
-			break;
-		}
-		showInfo( errorMessage );
-		Monitor.drmError(errorMessage);
-	}
-	
-
+	// try delay
+	//setTimeout( callback, 2000);
 };
 
 VideoPlayerEME.prototype.setSubtitles = function(){
@@ -922,7 +700,7 @@ VideoPlayerEME.prototype.setSubtitles = function(){
 			console.log( "no subs" );
 		}
 	} catch(e){
-		console.log("r:582  " + e.description );
+		console.log("Error: setSubtitles: " + e.description );
 	}
 };
 
@@ -950,40 +728,9 @@ VideoPlayerEME.prototype.showSubtitleTrack = function(nth){
 VideoPlayerEME.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
 	
-	try{
-		var broadcast = $("#broadcast")[0];
-		if( !broadcast ){
-			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
-		}
-		broadcast = $("#broadcast")[0];
-		broadcast.bindToCurrentChannel();
-		broadcast.stop();
-		console.log("broadcast stopped");
-	}
-	catch(e){
-		console.log("error stopping broadcast");
-	}
-	
 	var self = this;
-	
-	if( this.drm && this.drm.ready == false ){
-		console.log("Send DRM License aquistion");
-		this.sendLicenseRequest( function( response ){
-			console.log("license ready ", self.drm);
-			if( self.drm.ready ){
-				self.startVideo( fullscreen );
-			}
-			else if( self.drm.error ){
-				showInfo( "Error: " + self.drm.error );
-			}
-			else{
-				showInfo( "Unknown DRM error! " + JSON.stringify( response ));
-			}
-			//self.startVideo( fullscreen );
-		} );
-		return;
-	}
-	
+	this.onAdBreak = false;
+	this.firstPlay = true;
 	
 	try{
 		if( !self.video ){
@@ -1120,11 +867,38 @@ VideoPlayerEME.prototype.clearVideo = function(){
 	}
 	catch(e){
 		console.log("Error at clearVideo()");
-		console.log(e.description);
+		console.log( e.description );
 	}
+	
+	this.clearAds();
+	
 	this.subtitles = null;
 };
-
+VideoPlayerEME.prototype.clearAds = function(){
+	try{
+		if( self.adPlayer ){
+			self.adPlayer[0].stop();
+			self.adPlayer[1].stop();
+			$( self.adPlayer[0] ).addClass("hide");
+			$( self.adPlayer[1] ).addClass("hide");
+			self.adPlayer[0].src = "";
+			self.adPlayer[1].src = "";
+			
+			self.adPlayer = null;
+			self.onAdBreak = false;
+			self.adBreaks = null;
+			self.adBuffer = null;
+			self.adCount = 0;
+		}
+		$( "#ad1" ).remove(); // clear from dom
+		$( "#ad2" ).remove(); // clear from dom
+		$( "#adInfo" ).remove(); // clear from dom
+	}
+	catch(e){
+		console.log("Error at clearVideo()");
+		console.log(e.description);
+	}
+};
 VideoPlayerEME.prototype.isFullscreen = function(){
 	var self = this;
 	return self.fullscreen;

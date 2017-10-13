@@ -25,7 +25,7 @@
 		else if( (int)$matches['version'] == 2 ){
 			$profile = $profiles['HbbTV1.5'];
 		}
-		else if( (int)$matches['version'] == 4 ){ // 1.4.1 is hbbtv 2.0.1
+		else if( (int)$matches['version'] == 4 || (int)$matches['version'] == 3 ){ // 1.4.1 is hbbtv 2.0.1 / 1.3.1 = 2.0.0
 			$profile = $profiles['HbbTV2.0'];
 		}
 		else if( (int)$matches['version'] == 1 ){
@@ -79,6 +79,7 @@
 	</script>
 	<!-- List all css and js resource files or minified and combined resource files -->
 	<?php 
+		$profileResources = $profile['version'];
 		include("resources.php"); 
 	?>
 	

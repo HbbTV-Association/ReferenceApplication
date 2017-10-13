@@ -4,16 +4,13 @@
 	header( "Cache-Control: no-cache, must-revalidate" );
 	header( "Pragma: no-cache" );
 	header( "Content-Type: text/html;charset=utf-8" );
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>HbbTV Reference Video Application</title>
-
 	<meta http-equiv="content-type" content="Content-Type: text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<script type="application/javascript" language="javascript">
-	
 	
 	var profile = { hbbtv : false, video : "dashjs", version : "mse-eme"};
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
@@ -43,17 +40,15 @@
 		print all resource files with url-parameter version=filemtime 
 		to ensure device is not using cache when file is modified
 		***/
+		$profileResources = "mse-eme"; // additional resources
 		include("resources.php"); 
 	?>
-	
-	<!-- mse-eme additions to resources -->
-	<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-	<script src="../videoplayer/videoplayer_mse-eme.js" ></script>
+
 </head>
 <body onload="onLoad();">
 	<div style="visibility:hidden;width:0px;height:0px;">
-		<object id="appmgr" type="application/oipfApplicationManager"></object>
-		<object id="oipfcfg" type="application/oipfConfiguration"></object>
+		<!-- object id="appmgr" type="application/oipfApplicationManager"></object>
+		<object id="oipfcfg" type="application/oipfConfiguration"></object -->
 	</div>
 	<div id="videodiv"></div>
 	
