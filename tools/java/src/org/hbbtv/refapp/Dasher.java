@@ -203,6 +203,9 @@ public class Dasher {
 				val=drm.createMarlinMPDElement();
 				if (!val.isEmpty())
 					manifest.addContentProtectionElement(val);
+				val=drm.createClearKeyMPDElement();
+				if (!val.isEmpty())
+					manifest.addContentProtectionElement(val);
 				if (Utils.getString(params, "drm.cenc", "0", true).equals("0"))
 					manifest.removeContentProtectionElement("cenc");
 

@@ -146,10 +146,11 @@ public class DashManifest {
 	public void removeContentProtectionElement(String drmName) {
 		// remove <ContentProtection> element by schemeIdUri value
 		String tag;
-		if (drmName.equals("cenc")) tag="urn:mpeg:dash:mp4protection:2011";
-		else if (drmName.equals("playready")) tag="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95";
-		else if (drmName.equals("widevine")) tag="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
-		else if (drmName.equals("marlin")) tag="urn:uuid:5e629af5-38da-4063-8977-97ffbd9902d4";
+		if (drmName.equals("cenc")) 			tag="urn:mpeg:dash:mp4protection:2011";
+		else if (drmName.equals("playready")) 	tag="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95";
+		else if (drmName.equals("widevine")) 	tag="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
+		else if (drmName.equals("marlin")) 		tag="urn:uuid:5e629af5-38da-4063-8977-97ffbd9902d4";
+		else if (drmName.equals("clearkey")) 	tag="urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
 		else return;
 		//tag = tag.toLowerCase(Locale.US);
 		

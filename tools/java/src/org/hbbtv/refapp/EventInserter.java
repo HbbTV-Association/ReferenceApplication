@@ -16,10 +16,10 @@ import org.mp4parser.Box;
  * Remove all EMSG boxes from segment file:
  *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input=dash/v1_1.m4s scheme=""
  *   
- * Insert InbandEventStream element to mpd manifest 
- *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter mode=mpd input="dash/manifest.mpd" scheme="urn:my:scheme" value="1"
+ * Insert InbandEventStream element to mpd manifest
+ *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter input="dash/manifest.mpd" scheme="urn:my:scheme" value="1"
  * Remove all InbandEventStream elements from mpd manifest 
- *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter mode=mpd input="dash/manifest.mpd" scheme=""
+ *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter input="dash/manifest.mpd" scheme=""
  */
 public class EventInserter {
 
@@ -31,11 +31,14 @@ public class EventInserter {
             throw new FileNotFoundException(videoFile.getAbsolutePath() + " not found");
 
 		String mode = Utils.getString(params, "mode", "", true);
+		if (mode.isEmpty() && videoFile.getName().endsWith(".mpd")) 
+			mode = "mpd";
+		
 		if (mode.equalsIgnoreCase("mpd")) {
 			// add <InbandEventStream..> to manifest, or delete from manifest
 			doMPD(videoFile, params);
 			return;
-		}
+		} // else mode=seg
         
 		// mode=emsg (EMSG inserter, EMSG delete)
 		
