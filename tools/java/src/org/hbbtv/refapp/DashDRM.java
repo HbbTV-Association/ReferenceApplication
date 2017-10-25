@@ -102,6 +102,10 @@ public class DashDRM {
 			buf.append("</DRMInfo>"+Dasher.NL);
 		}
 
+		// Write CLEARKEY(0,1), use CENC table so make sure it's enabled. 
+		val = Utils.getString(params, "drm.clearkey", "0", true);
+		if (!val.equals("0"))  params.put("drm.cenc", "1");
+		
 		// Write CENC(0,1)
 		val = Utils.getString(params, "drm.cenc", "0", true);
 		if (!val.equals("0")) {
@@ -171,7 +175,21 @@ public class DashDRM {
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();		
 	}
-	
+
+	public String createClearKeyMPDElement() throws Exception {
+		String opt = Utils.getString(params, "drm.clearkey", "0", true);
+		if (opt.equals("0")) return ""; // do not create element
+		
+		String scheme = "1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
+		String kid = Utils.getString(params, "drm.kid", "", true);
+		
+		StringBuilder buf = new StringBuilder();
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+scheme+"\">"+Dasher.NL);
+		buf.append("  <cenc:pssh>"+createPSSHv1(scheme.replace("-", ""), kid)+"</cenc:pssh>"+Dasher.NL);
+		buf.append("</ContentProtection>"+Dasher.NL);
+		return buf.toString();
+	}
+
 	private String createPlayreadyXML(String kid, String key) throws Exception {
 		byte[] kidbuf = Utils.hexToBytes(kid);
 		byte[] keybuf = Utils.hexToBytes(key);
@@ -252,6 +270,25 @@ public class DashDRM {
 		baos.write(pssh); // payload
 		
 		return Utils.base64Encode(baos.toByteArray());
+	}
+
+	private String createPSSHv1(String scheme, String kid) throws IOException {
+		// create VERSION1 <cenc:pssh>BgIAAE..<cenc:pssh> value for <ContentProtection> element
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(64);
+
+		baos.write(new byte[4]);   // packet lenght placeholder, value is written at the end
+		baos.write(new byte[]{ 'p','s','s','h' }); // table identifier
+		
+		baos.write(new byte[] { (byte)0x01,(byte)0x00,(byte)0x00,(byte)0x00 }); // version=1
+		baos.write(Utils.hexToBytes(scheme) ); // SystemID
+		
+		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01 }); // KID count(1)
+		baos.write( Utils.hexToBytes(kid) );
+		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00 }); // Data length(0)
+		
+		byte[] psshBytes = baos.toByteArray();
+		System.arraycopy(Utils.toIntArray(psshBytes.length), 0, psshBytes, 0, 4); // packet length(00,00,00,34)		
+		return Utils.base64Encode(psshBytes);
 	}
 	
 	private byte[] randomizeBytes(int len) {

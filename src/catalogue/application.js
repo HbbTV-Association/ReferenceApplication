@@ -24,8 +24,7 @@ function init()
                 try{
 					var submenuItems = [];
 					$.each( submenu.items, function(nth, item){
-						console.log( item );
-						// add asset items that has no profile specified or if has, it corresponds to current app profile
+						// if asset is not se to be relevant to current app profile, set it disabled. It can still be tried to launch if user wish to test
 						item.disabled = !( !item.profile || ( Array.isArray( item.profile ) && item.profile.indexOf( profile.version ) >= 0 ) );
 						submenuItems.push( item );
 					});
@@ -63,7 +62,7 @@ function init()
 			$("#wrapper").append("<div id='appversion'>HbbTV 2.0.1</div>");
 		}
 		vplayer.populate();
-		
+		vplayer.clearVideo();
 	} catch(e){
 		console.log( e.message );
 	}
