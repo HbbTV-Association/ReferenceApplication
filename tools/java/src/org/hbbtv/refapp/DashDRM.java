@@ -78,8 +78,7 @@ public class DashDRM {
 			buf.append("</DRMInfo>"+Dasher.NL);
 		}
 
-		// Write Widevine(0,1)
-		//FIXME: Use widevine protobuffer generator?
+		// Write Widevine(0,1), this does not use a protobuf generator for now.
 		val = Utils.getString(params, "drm.widevine", "0", true);
 		if (!val.equals("0")) {
 			buf.append(Dasher.NL);
@@ -102,21 +101,25 @@ public class DashDRM {
 			buf.append("</DRMInfo>"+Dasher.NL);
 		}
 
-		// Write CLEARKEY(0,1), use CENC table so make sure it's enabled. 
-		val = Utils.getString(params, "drm.clearkey", "0", true);
-		if (!val.equals("0"))  params.put("drm.cenc", "1");
+		// Write EME-CENC|CLEARKEY(0,1) init/PSSH(v1) + manifest_clearkey.mpd/1077ef*cenc:pssh(v1)
+		boolean writeCenc=false;
+		writeCenc = writeCenc || !Utils.getString(params, "drm.clearkey", "0", true).equals("0");		
+
+		// Write MPEG-CENC(0,1) init/PSSH(v1) + "urn:mpeg:dash:mp4protection:2011" <ContentProtection>
+		writeCenc = writeCenc || !Utils.getString(params, "drm.cenc", "0", true).equals("0");
 		
-		// Write CENC(0,1)
-		val = Utils.getString(params, "drm.cenc", "0", true);
-		if (!val.equals("0")) {
+		if (writeCenc) {
+			int ver = 1; // use version=1 for cenc PSSH object
 			buf.append(Dasher.NL);
 			buf.append("<!-- CENC -->"+Dasher.NL);
-			buf.append("<DRMInfo type=\"pssh\" version=\"0\">"+Dasher.NL);
+			buf.append("<DRMInfo type=\"pssh\" version=\""+ver+"\">"+Dasher.NL);
 			buf.append("  <BS ID128=\"1077efecc0b24d02ace33c1e52e2fb4b\"/>"+Dasher.NL); // SystemID
 			buf.append("  <BS bits=\"32\" value=\"1\"/>"+Dasher.NL); // KIDCount
 			buf.append("  <BS ID128=\"" + kid.substring(2)+ "\"/>"+Dasher.NL); // kid
 			buf.append("</DRMInfo>"+Dasher.NL);
 		}
+
+		// pending: ADOBE_PRIMETIME "f239e769efa348509c16a903c6932efb", "urn:uuid:F239E769-EFA3-4850-9C16-A903C6932EFB"
 		
 		// write encryption keys, supports one KEY for now
 		buf.append(Dasher.NL);
@@ -179,7 +182,7 @@ public class DashDRM {
 	public String createClearKeyMPDElement() throws Exception {
 		String opt = Utils.getString(params, "drm.clearkey", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
-		
+
 		String scheme = "1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
 		String kid = Utils.getString(params, "drm.kid", "", true);
 		
@@ -219,7 +222,7 @@ public class DashDRM {
 		// create <cenc:pssh>BgIAAE..<cenc:pssh> value for <ContentProtection> element
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(xmlBytes.length+42);
 
-		baos.write(new byte[4]);   // packet lenght placeholder, value is written at the end
+		baos.write(new byte[4]);   // packet length placeholder, value is written at the end
 		baos.write(new byte[]{ 'p','s','s','h' }); // table identifier
 		
 		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00 }); // PSSH version=0
@@ -272,11 +275,31 @@ public class DashDRM {
 		return Utils.base64Encode(baos.toByteArray());
 	}
 
+	@SuppressWarnings("unused")
+	private String createPSSHv0(String scheme, String kid) throws IOException {
+		// create VERSION0 <cenc:pssh>BgIAAE..<cenc:pssh> value for <ContentProtection> element
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(64);
+
+		baos.write(new byte[4]);   // packet length placeholder, value is written at the end
+		baos.write(new byte[]{ 'p','s','s','h' }); // table identifier
+		
+		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00 }); // version=0
+		baos.write(Utils.hexToBytes(scheme) ); // SystemID
+		
+		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x14 }); // length of KIDs
+		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01 }); // KID count(1)
+		baos.write( Utils.hexToBytes(kid) );
+		
+		byte[] psshBytes = baos.toByteArray();
+		System.arraycopy(Utils.toIntArray(psshBytes.length), 0, psshBytes, 0, 4); // packet length(00,00,00,34)		
+		return Utils.base64Encode(psshBytes);
+	}
+		
 	private String createPSSHv1(String scheme, String kid) throws IOException {
 		// create VERSION1 <cenc:pssh>BgIAAE..<cenc:pssh> value for <ContentProtection> element
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(64);
 
-		baos.write(new byte[4]);   // packet lenght placeholder, value is written at the end
+		baos.write(new byte[4]);   // packet length placeholder, value is written at the end
 		baos.write(new byte[]{ 'p','s','s','h' }); // table identifier
 		
 		baos.write(new byte[] { (byte)0x01,(byte)0x00,(byte)0x00,(byte)0x00 }); // version=1

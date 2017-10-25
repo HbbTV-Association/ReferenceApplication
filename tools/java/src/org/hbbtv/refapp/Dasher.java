@@ -77,7 +77,11 @@ public class Dasher {
 			logger.println("");			
 			for(int idx=1; ; idx++) {
 				val = Utils.getString(params, "video."+idx, "", true);
-				if (val.isEmpty()) break;
+				if (val.isEmpty()) {
+					if (idx<=5) continue; // try video.1..5 then give up.
+					else break; // end of video.X array  
+				}
+				
 				boolean isDisabled = val.endsWith("disable");
 				String[] valopts = val.split(" ");
 				StreamSpec spec = new StreamSpec();
@@ -193,24 +197,31 @@ public class Dasher {
 				manifest.fixContent(mode);
 				manifest.addNamespaces();
 				
-				// add <ContentProtection> elements, remove CENC element if was disabled
-				val=drm.createPlayreadyMPDElement();
+				// add <ContentProtection> elements, remove MPEG-CENC element if was disabled
+				val=drm.createPlayreadyMPDElement(); 	// "playready"
 				if (!val.isEmpty())
 					manifest.addContentProtectionElement(val);
-				val=drm.createWidevineMPDElement();
+				val=drm.createWidevineMPDElement();		// "widevine"
 				if (!val.isEmpty())
 					manifest.addContentProtectionElement(val);
-				val=drm.createMarlinMPDElement();
-				if (!val.isEmpty())
-					manifest.addContentProtectionElement(val);
-				val=drm.createClearKeyMPDElement();
+				val=drm.createMarlinMPDElement();		// "marlin"
 				if (!val.isEmpty())
 					manifest.addContentProtectionElement(val);
 				if (Utils.getString(params, "drm.cenc", "0", true).equals("0"))
 					manifest.removeContentProtectionElement("cenc");
 
 				manifest.save( new File(outputFolder, "drm/manifest.mpd") );
-				
+
+				// write separate clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements
+				val=drm.createClearKeyMPDElement();
+				if (!val.isEmpty()) {
+					manifest.addContentProtectionElement(val);
+					manifest.removeContentProtectionElement("playready");
+					manifest.removeContentProtectionElement("widevine");
+					manifest.removeContentProtectionElement("marlin");
+					manifest.save( new File(outputFolder, "drm/manifest_clearkey.mpd") );
+				}
+
 				if (Utils.getBoolean(params, "deletetempfiles", true)) {
 					specFile.delete();
 					for(StreamSpec spec : specs)

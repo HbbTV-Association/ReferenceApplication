@@ -38,7 +38,7 @@ public class Utils {
 		// read commandline arguments
 		Map<String,String> params = new HashMap<>();
 		for(int idx=0; idx<args.length; idx++) {
-			int pos = args[idx].indexOf('=');
+			int pos = args[idx].indexOf('=');			
 			if (pos>0)
 				params.put( args[idx].substring(0, pos).trim(), args[idx].substring(pos+1).trim() );
 			else if (pos==0)

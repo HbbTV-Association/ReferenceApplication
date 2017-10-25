@@ -89,8 +89,10 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
-2017-10-23:
+2017-10-25:
 - added drm.clearkey DRM system
+- fixed CENC pssh version=1 field
+- write drm/manifest_clearkey.mpd file
 2017-09-12:
 - add <InbandEventStream..> to manifest.mpd
 2017-09-01:
