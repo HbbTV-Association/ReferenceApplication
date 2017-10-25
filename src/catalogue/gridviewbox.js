@@ -14,16 +14,17 @@ GridViewBox.prototype.populate = function(){
 	self.element.addClass(self.imageSizeClass.class);
 	if(self.focused){ self.element.addClass("focused"); }
 	if(self.visible){ self.element.addClass("visible"); }
+	if(self.disabled){ 
+		$(self.element).append("<div class='disabled "+self.imageSizeClass.class+"'>Not Supported</div>");
+	}
 	if(self.img && self.img.length > 0){
 		var img = new Image();
 		img.onload = function(){
 			var imgtag = document.createElement("img");
-			//imgtag.src = location.href.substring(0, location.href.lastIndexOf("/")) + "/" + self.img;
 			imgtag.src = self.img;
 			imgtag.alt = "";
 			self.element.appendChild(imgtag);
 		}(img.src);
-		//img.src = location.href.substring(0, location.href.lastIndexOf("/")) + "/" + self.img;
 		
 		if( !self.img.match(/^http/) ){
 			self.img = location.href.substring(0, location.href.lastIndexOf("/")) + "/" + self.img;
@@ -65,7 +66,4 @@ GridViewBox.prototype.setVisible = function(visible){
 GridViewBox.prototype.addVideo = function(video){
 	var self = this;
 	self.video = video;
-	//vplayer.video.data = self.url;
-	//vplayer.startVideo(false);
-	//self.populate();
 }

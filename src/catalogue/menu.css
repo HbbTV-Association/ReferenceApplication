@@ -168,6 +168,9 @@ div, span {
 						width: 284px;
 						height: 160px;	
 					}					
+					.gridViewBox_1x1.disabled {
+                        opacity: 0.5;
+					}
 					.gridViewBox_2x2 {
 						width: 578px;
 						height: 330px;	
@@ -191,6 +194,8 @@ div, span {
 						border: 5px solid #f7921e;
                         z-index: 3;
 					}
+					
+					
 					/* Chrome, Safari, Opera */
 					@-webkit-keyframes focusBorderColorChange {
 					    0% {border-color: #f7921e;}
@@ -247,8 +252,6 @@ div, span {
 	animation:         fromLeft 2s; /* IE 10+, Fx 29+ */
 }
 
-
-
 #logo1 {
 	top: 0px;
 	left: 55px;
@@ -270,6 +273,27 @@ div, span {
     -webkit-animation-fill-mode: forwards;
     animation-fill-mode: forwards;
     */
+}
+
+#appversion {
+    position: absolute;
+    left: 75px;
+    height: 30px;
+    width: 100px;
+    color: white;
+    top: 135px;
+    color: gray;
+    z-index: 10;
+    text-shadow: 1px 1px black;
+    text-transform: uppercase;
+	animation: fadein 3s;
+    -moz-animation: fadein 3s;
+    -webkit-animation: fadein 3s;
+}
+
+@keyframes fadein {
+    from { opacity:0; }
+    to { opacity:1; }
 }
 
 @keyframes slidedown {

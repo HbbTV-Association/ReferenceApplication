@@ -4,6 +4,7 @@
 
 
 function VideoPlayer(element_id, profile, width, height){
+	
 	this.FILETYPES = {
 		MP4:0,
 		MPEG:1,
@@ -38,8 +39,7 @@ function VideoPlayer(element_id, profile, width, height){
 }
 
 VideoPlayer.prototype.init = function(){
-	var self = this;
-	
+	var self = this;	
 }
 
 VideoPlayer.prototype.populate = function(){
@@ -49,9 +49,9 @@ VideoPlayer.prototype.populate = function(){
 	this.loadingImage.setAttribute("id", "loadingImage");
 	this.loadingImage.addClass("hidden");
 	this.element.appendChild(this.loadingImage);
-	//this.element.appendChild(this.controls.element);
 	this.setFullscreen(true);
 }
+
 
 VideoPlayer.prototype.displayPlayer = function( sec ){
 	clearTimeout( this.hidePlayerTimer );
@@ -63,6 +63,8 @@ VideoPlayer.prototype.displayPlayer = function( sec ){
 		}, sec * 1000);
 	}
 }
+
+
 
 VideoPlayer.prototype.navigate = function(key){
 	var self = this;
@@ -354,7 +356,7 @@ VideoPlayer.prototype.setAdBreaks = function( breaks ){
 	}
 	else{
 		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = Object.assign({}, breaks ); // deep copy
+		this.adBreaks = $.extend(true, {}, breaks);
 	}
 };
 
@@ -610,7 +612,7 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 		var player = this.video;
 		this.subtitles = player.textTracks;
 		
-		console.log( JSON.stringify( this.subtitles ) );
+		//console.log( JSON.stringify( this.subtitles ) );
 		
 		if( true ){
 			console.log("set subs")

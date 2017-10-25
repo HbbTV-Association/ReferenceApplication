@@ -1,3 +1,17 @@
+/* 
+	original console.log is replaced by function that saves all arguments passed to console.log and then passes them forward to original console.log
+*/
+
+var applog = [];
+var originalLog = console.log;
+console.log = function(){ 
+	if( arguments[0][0] == "[" ) return;
+	applog.push( Array.apply(this, arguments) ); 
+	originalLog.apply( this, arguments ); 
+	debug( arguments );
+};
+
+
 
 function debug(){
 	if( !$("#debugScreen")[0] ){
@@ -18,7 +32,22 @@ function toggleDebug(){
 	}
 	else{
 		$("#debugScreen").show();
-		console.log = debug;
 	}
 		
 }
+
+function displayDebugButton( display, buttonText ){
+	if( !$("#debugButton")[0] ){
+		$("body").append('<div id="debugButton"><div id="debugButtonText">Debug</div></div>');
+	}
+	if(buttonText){
+		$("#debugButtonText").html( buttonText );
+	}
+	if( display ){
+		$("#debugButton").show();
+	}
+	else{
+		$("#debugButton").hide();
+	}
+}
+

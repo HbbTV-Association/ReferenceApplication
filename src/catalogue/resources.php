@@ -25,6 +25,7 @@ $resources = array(
 	"../debugscreen.js",
 	"../keycodes.js",
 	"navigation.js", 
+	"../videoplayer/videoplayer_oipf.js",
 	"../videoplayer/monitor/monitor-base.js", /* Monitor interface is and must be included and present */
 	"../videoplayer/monitor/monitor.js" /* Monitor implementation is not included to reference application */
 );
@@ -39,7 +40,7 @@ if( isset( $profileResources ) ){
 		$resources[] = "../videoplayer/videoplayer_html5.js";
 	}
 	else if( $profileResources == "oipf" ){
-		$resources[] = "../videoplayer/videoplayer_oipf.js";
+		//$resources[] = "../videoplayer/videoplayer_oipf.js";
 	}
 }
 else{

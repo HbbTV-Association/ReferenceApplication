@@ -30,15 +30,16 @@ function onKey(keycode){
 	
 	if( keycode == VK_BLUE ){
 		toggleDebug();
-		return;
+		return true;
 	}
 	
 	
     if(!animating && !loading){
         if(vplayer.isVisible() && vplayer.isFullscreen()){
             vplayer.navigate(keycode);
-            return;
+            return true;
         }
         menu.navigate(keycode);
     }
+	return true;
 }

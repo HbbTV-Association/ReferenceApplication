@@ -285,6 +285,11 @@ Menu.prototype.prepareVideoStart = function(){
 			vplayer.setAdBreaks( null ); // no ads
 		}
 		
+		// set out-of-band subtitles
+		if( self.focus.subtitles ){
+			vplayer.setSubtitles( self.focus.subtitles );
+		}
+		
 		
 		if( profile.version == "mse-eme" ){
 			if( self.focus.la_url ){

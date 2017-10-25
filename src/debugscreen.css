@@ -14,3 +14,21 @@
 	bottom:0px;
 	color:white;
 }
+#debugButton {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    background-color: blue;
+    border-radius: 25px;
+    height: 25px;
+    width: 140px;
+}
+#debugButtonText {
+    position: absolute;
+    left: 15px;
+    color: white;
+    width: 130px;
+	height: 25px;
+    background-color: black;
+    text-align: center;
+}
