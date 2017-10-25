@@ -42,9 +42,6 @@ Menu.prototype.setActiveItem = function(item){
 	var self = this;
 	clearTimeout(self.startBoxVideoTimeout);
 	
-	// clear video if previous video is playing
-	vplayer.clearVideo();
-	
 	if(item != null && typeof(item.setFocus) == "function"){
 		var old = self.focus;
 		if(self.focus && typeof(self.focus.unsetFocus) == "function"){
@@ -113,7 +110,7 @@ Menu.prototype.navigate = function(key){
 					else if(self.focus.url && self.focus.url.length > 0){
 						console.log(self.focus.url);
 						if( self.focus.url.match(/\.mpd$/) || self.focus.url.match(/\.mp4$/) ){
-							
+							/*
 							// if profile changed, to 1.5 use VideoPlayer
 							if( profile.hbbtv == "1.5" && !(vplayer instanceof VideoPlayer ) ){
 								vplayer = new VideoPlayer("videodiv", profile);
@@ -123,6 +120,7 @@ Menu.prototype.navigate = function(key){
 								vplayer = new VideoPlayerHTML5("videodiv", profile);
 								vplayer.populate();
 							}
+							*/
 							
 							// if video has not autostarted, start it
 							if( !vplayer.isPlaying() ){
@@ -283,6 +281,11 @@ Menu.prototype.prepareVideoStart = function(){
 		}
 		else{
 			vplayer.setAdBreaks( null ); // no ads
+		}
+		
+		// set out-of-band subtitles
+		if( self.focus.subtitles ){
+			vplayer.setSubtitles( self.focus.subtitles );
 		}
 		
 		

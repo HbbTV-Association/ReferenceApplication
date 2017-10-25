@@ -268,4 +268,12 @@ function addZeroPrefix(n){
 	return ("0" + n).slice(-2);
 }
 
+function arrayBufferToString(buffer){
+	var arr = new Uint8Array(buffer);
+	var str = String.fromCharCode.apply(String, arr);
+	if(/[\u0080-\uffff]/.test(str)){
+		throw new Error("this string seems to contain (still encoded) multibytes");
+	}
+	return str;
+}
 
