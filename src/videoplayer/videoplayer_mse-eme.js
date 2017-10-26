@@ -676,7 +676,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	else if( this.drm.system == "marlin" ){
 		// Not supported
 	}
-	else if( false ){
+	else if( this.drm.system == "clearkey" ){
 		self.player.setProtectionData({
 			"org.w3.clearkey": { "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } }
 		});
