@@ -666,15 +666,20 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 
 	this.drm.successCallback = callback;
 	var self = this;
+	
 	// Case Playready
-	// TODO: other DRMs
 	if( this.drm.system == "playready" ){
 		self.player.setProtectionData({
 			"com.microsoft.playready": { "serverURL": self.drm.la_url }
-			});
+		});
 	}
 	else if( this.drm.system == "marlin" ){
-		// todo?
+		// Not supported
+	}
+	else if( false ){
+		self.player.setProtectionData({
+			"org.w3.clearkey": { "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } }
+		});
 	}
 	
 	self.drm.ready = true;
