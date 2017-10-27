@@ -8,7 +8,8 @@
 
 
 
-	This application is implemented to be a reference video catalogue and player application for DASH content on HbbTV 1.5 and 2.0.1 devices, with various DRM and subtitle tests. 
+	This application is implemented to be a reference video catalogue and player application 
+	for DASH content on HbbTV 1.5 and 2.0.1 devices, with various DRM and subtitle tests. 
 
 	The software is under continuous development.
 
@@ -29,6 +30,10 @@ C) Contribute
 ### Components and modules:
 
 
+General main application to be used for all HbbTV 1.5 or 2.0.1 devices and browsers. 
+Application tries to determine HbbTV version of the device and use the preferred player.
+
+	src/catalogue/index.php
 
 HTML5 version of the application for HbbTV 2.0.1 devices:
 
@@ -57,11 +62,6 @@ MSE-EME video player component:
 	src/videoplayer/videoplayer_mse-eme.js
 	
 
-General main application to be used for all HbbTV devices. Application tries to determine HbbTV version of the device and use the preferred player.
-
-	src/catalogue/index.php
-
-
 
 Monitor module to implement analytics about use cases of video playback. Monitor can be changed but it must follow the monitor interface.
 
@@ -83,9 +83,12 @@ Navigation. Common keymapping, event listeners and navigation functionality
 
 	src/navigation.js
 
-	
+Debugscreen and debug-console saving feature. Pressing blue button applications console.log is printed on screen.
+There is action option in settings menu to send log on server. Application will inform the log name on screen if succeed.
+On reference installation, logfiles are saved to folder http://meridian.sofiadigital.fi/tvportal/referenceapp/src/catalogue/log/
+naming log<number>.json, for example log0.json and so on
 
-	
+	src/debugscreen.js
 
 
 

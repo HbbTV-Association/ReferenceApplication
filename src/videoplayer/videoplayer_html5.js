@@ -125,7 +125,9 @@ VideoPlayerHTML5.prototype.navigate = function(key){
 					$("#subtitleButtonText").html( "Subtitles: " + lang );
 					showInfo("Subtitles: " + lang);
 					
-					
+					if( lang != "off" ){
+						this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+					}
 				}
 			} catch( e ){
 				console.log( e.description );
@@ -223,7 +225,6 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	player.seektimer = null;
 	player.addEventListener('seeked', function(){
 		console.log("Seeked");
-		//player.play();
 	});
 	
 	var canplay = false;
@@ -291,10 +292,15 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	} );
 	
 	player.textTracks.addEventListener('addtrack', function(evt){
-		$("#subtitleButton").show();
+		
 		// set up inband cue events listeners for new tracks
 		var track = evt.track;
 		console.log("at addtrack nth track: " + this.length + " : set up cuechange listeners", track);
+		
+		// show subtitle button label if there is a track that is not metadata 
+		if( track.kind != "metadata" ){
+			$("#subtitleButton").show();
+		}
 		
 		// the first track is set showing
 		if( this.length == 1 ){
@@ -332,42 +338,16 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 					console.log("error Reading cues", e.message );
 				}
 				
-				/*
-				try{
-					
-					//var myTrack = this.track;             // track element is "this" 
-					var myCues = this.activeCues;      // activeCues is an array of current cues.   
-					console.log( myCues );
-					if (myCues.length > 0) {              
-						console.log( myCues[0].getCueAsSource() ); 
-					}
-					
-				} catch(e){
-					console.log("error", e.message );
-				}
-				*/
 			}
 			else{
 				console.log("cue event " + this.kind + " received");
 			}
 		};
 		console.log( "oncuechange function set" );
-			//track.mode = "showing";
-			//console.log( JSON.stringify( track ) );
-			/*
-			$(track).on("cuechange", function(evt) {
-				showInfo("cuechange!");
-				console.log( JSON.stringify( evt ) );
-			});
-			*/
-		
 	} );
+	
 	player.addEventListener('playing', function(){
 		if( self.firstPlay ){
-			// set out-of-band subtitles
-			//self.setSubtitles();
-			// set TextTrackCue listeners
-			//self.setTextTrackCues();
 			self.firstPlay = false;
 		}
 		Monitor.videoPlaying();
@@ -400,81 +380,6 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	
 	return true;
 }
-
-
-VideoPlayerHTML5.prototype.setTextTrackCues = function(){
-	
-	// set up inband cue events listeners
-	console.log("set up cuechange listeners");
-	function arrayBufferToString(buffer){
-		var arr = new Uint8Array(buffer);
-		var str = String.fromCharCode.apply(String, arr);
-		if(/[\u0080-\uffff]/.test(str)){
-			throw new Error("this string seems to contain (still encoded) multibytes");
-		}
-		return str;
-	}
-	
-	var player = this.video;
-	
-	if( !player.textTracks ){
-		console.log("No textTracks");
-		return;
-	}
-	
-	
-	
-	$.each( player.textTracks, function( i, track ){
-		
-		console.log("text track " + i);
-	
-		track.oncuechange = function(evt) {
-			
-			var cuelist = ( this.activeCues && this.activeCues.length ? this.activeCues : this.cues);
-			try{
-				console.log( "cue 0 "+ cuelist[0].id + " data=" + arrayBufferToString( cuelist[0].data ) );
-			} catch(e){
-				console.log("error arrayBufferToString ", e.message );
-			}
-			try{                                                    
-				if ( cuelist && cuelist.length > 0) {              
-					console.log("cue keys: ",  Object.keys( cuelist[0] ) ); 
-					var info = "";
-					$.each( cuelist, function(c, cue){
-						var cueValue = arrayBufferToString( cue.data );
-						console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
-						console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime );
-						info +=  "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime + "\n";
-						
-						// Testing:
-						/*
-						cue.onenter = function(){
-							console.log( "cue " + cue.id + ": " + cueValue);
-							showInfo( "cue " + cue.id + ": " + cueValue);
-						};
-						
-						$.each( cue , function(name, value){
-							try{
-								console.log( "cues["+c+"]."+name+" ("+ value.constructor.name+") = " );
-								console.log( value );
-							} catch(e){
-								console.log( "error reading cue attribute: " + name );
-							}
-						} );
-						*/
-					} );
-					
-					showInfo( info );
-				}
-			} catch(e){
-				console.log("error Reading cues", e.message );
-			}
-		};
-		//track.mode = "showing";
-		
-	});
-};
-
 
 VideoPlayerHTML5.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
@@ -1026,7 +931,7 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 	}
 	catch(e){
 		console.log("Error at clearVideo()");
-		console.log(e.description);
+		console.log( e.description );
 	}
 	
 	this.clearAds();
