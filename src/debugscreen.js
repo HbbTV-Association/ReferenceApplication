@@ -5,13 +5,33 @@
 var applog = [];
 var originalLog = console.log;
 console.log = function(){ 
-	if( arguments[0][0] == "[" ) return;
+	if( arguments[0][0] == "[" ) return; // this will erase dashjs console
 	applog.push( Array.apply(this, arguments) ); 
 	originalLog.apply( this, arguments ); 
 	debug( arguments );
 };
 
-
+function saveAppLog(){
+	if( applog.length ){
+		$.ajax({
+			type : "POST",
+			data : JSON.stringify( applog ),
+			url : "log/save.php",
+			contentType : "json",
+			success : function(response){
+				console.log(response);
+				if( response.success ){
+					showInfo("Application log has been saved to " + response.log);
+				}
+				else{
+					showInfo("Error saving log to file: " + response.message);
+				}
+			}
+		});
+	} else{
+		showInfo("App log is empty")
+	}
+}
 
 function debug(){
 	if( !$("#debugScreen")[0] ){

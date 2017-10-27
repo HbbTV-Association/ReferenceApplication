@@ -678,7 +678,10 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	}
 	else if( this.drm.system == "clearkey" ){
 		self.player.setProtectionData({
-			"org.w3.clearkey": { "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } }
+			"org.w3.clearkey": { 
+				"serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php",
+				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
+			}
 		});
 	}
 	
