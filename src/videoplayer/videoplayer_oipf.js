@@ -612,7 +612,6 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 		var player = this.video;
 		this.subtitles = player.textTracks;
 		
-		//console.log( JSON.stringify( this.subtitles ) );
 		
 		if( true ){
 			console.log("set subs")
