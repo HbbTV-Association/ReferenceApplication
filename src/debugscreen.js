@@ -6,7 +6,7 @@ var applog = [];
 var originalLog = console.log;
 console.log = function(){ 
 	if( arguments[0][0] == "[" ) return; // this will erase dashjs console
-	applog.push( Array.apply(this, arguments) ); 
+	applog.push( Array.apply(this, arguments).map( function(argument){ return XMLEscape( typeof argument == "string"? argument : JSON.stringify( argument ) ) } ) ); 
 	originalLog.apply( this, arguments ); 
 	debug( arguments );
 };
@@ -22,6 +22,7 @@ function saveAppLog(){
 				console.log(response);
 				if( response.success ){
 					showInfo("Application log has been saved to " + response.log);
+					applog = []; // empty log
 				}
 				else{
 					showInfo("Error saving log to file: " + response.message);
