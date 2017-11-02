@@ -40,8 +40,13 @@ public class Dasher {
 			logger.println(Utils.getNowAsString() + " Start dashing");
 			logger.println("input="  + Utils.normalizePath(inputFile.getAbsolutePath(), true) );
 			logger.println("output=" + Utils.normalizePath(outputFolder.getAbsolutePath(), true) );
-
 			
+			logger.println("Parameters:");
+			for(String key : new TreeSet<String>(params.keySet()) )
+				logger.println(key+"="+params.get(key));
+			logger.println("");
+
+			logger.println("Input metadata:");			
 			Map<String,String> meta = MediaTools.readMetadata(inputFile);			
 			for(String key : meta.keySet())
 				logger.println(key+"="+meta.get(key));
@@ -162,6 +167,7 @@ public class Dasher {
 				logger.println("drm.kid="+params.get("drm.kid"));
 				logger.println("drm.key="+params.get("drm.key"));
 				logger.println("drm.iv="+params.get("drm.iv"));
+				logger.println("drm.playready.laurl="+params.get("drm.playready.laurl"));
 				
 				// delete old files from output folder
 				File outputFolderDrm=new File(outputFolder, "drm/");  // write to drm/ subfolder
@@ -192,6 +198,13 @@ public class Dasher {
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
 
+				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players
+				for(StreamSpec spec : specs) {
+					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
+					if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
+						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
+				}
+				
 				// fix manifest, add missing drmsystem namespaces
 				manifest = new DashManifest(new File(outputFolder, "drm/manifest.mpd"));
 				manifest.fixContent(mode);
@@ -212,7 +225,8 @@ public class Dasher {
 
 				manifest.save( new File(outputFolder, "drm/manifest.mpd") );
 
-				// write separate clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements
+				// write separate clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements,
+				// some players don't use it if another compatible drm is signalled in a manifest.				
 				val=drm.createClearKeyMPDElement();
 				if (!val.isEmpty()) {
 					manifest.addContentProtectionElement(val);

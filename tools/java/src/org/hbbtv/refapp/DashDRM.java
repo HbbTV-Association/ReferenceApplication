@@ -32,6 +32,8 @@ public class DashDRM {
 			params.put("drm.kid", "0x"+Utils.bytesToHex(randomizeBytes(16)) );
 		if (params.get("drm.key").equals("rng"))
 			params.put("drm.key", "0x"+Utils.bytesToHex(randomizeKey(16)) );
+		if (!params.containsKey("drm.playready.laurl"))
+			params.put("drm.playready.laurl", "");
 		
 		String val = Utils.getString(params, "drm.iv", "rng", true);
 		if (val.equals("rng"))
@@ -65,7 +67,8 @@ public class DashDRM {
 		// write Playready(0,pro,pssh)
 		val = Utils.getString(params, "drm.playready", "0", true);
 		if (!val.equals("0")) {
-			byte[] wrm = createPlayreadyXML(kid, key).getBytes("UTF-16LE");
+			String laurl= Utils.getString(params, "drm.playready.laurl", "", true);			
+			byte[] wrm = createPlayreadyXML(kid, key, laurl).getBytes("UTF-16LE");
 			buf.append(Dasher.NL);
 			buf.append("<!-- Playready -->"+Dasher.NL);
 			buf.append("<DRMInfo type=\"pssh\" version=\"0\">"+Dasher.NL);
@@ -139,7 +142,8 @@ public class DashDRM {
 		
 		String kid = Utils.getString(params, "drm.kid", "", true);
 		String key = Utils.getString(params, "drm.key", "", true);
-		byte[] wrm = createPlayreadyXML(kid, key).getBytes("UTF-16LE");
+		String laurl= Utils.getString(params, "drm.playready.laurl", "", true);
+		byte[] wrm = createPlayreadyXML(kid, key, laurl).getBytes("UTF-16LE");
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95\">"+Dasher.NL);
@@ -193,7 +197,7 @@ public class DashDRM {
 		return buf.toString();
 	}
 
-	private String createPlayreadyXML(String kid, String key) throws Exception {
+	private String createPlayreadyXML(String kid, String key, String laurl) throws Exception {
 		byte[] kidbuf = Utils.hexToBytes(kid);
 		byte[] keybuf = Utils.hexToBytes(key);
 		
@@ -212,9 +216,14 @@ public class DashDRM {
         byte[] checkbuf = cipher.doFinal(kidbuf); // encrypt KID with KEY spec
         checkbuf = Arrays.copyOf(checkbuf, 8);
 
-        String val = "<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.0.0.0\"><DATA><PROTECTINFO><KEYLEN>16</KEYLEN><ALGID>AESCTR</ALGID></PROTECTINFO><KID>${kid}</KID><CHECKSUM>${check}</CHECKSUM></DATA></WRMHEADER>"
-        	.replace("${kid}", Utils.base64Encode(kidbuf))
+        String val = "<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.0.0.0\"><DATA><PROTECTINFO><KEYLEN>16</KEYLEN><ALGID>AESCTR</ALGID></PROTECTINFO><KID>${kid}</KID><CHECKSUM>${check}</CHECKSUM>"
+        			+"<LA_URL>${laurl}</LA_URL></DATA></WRMHEADER>";
+        val=val.replace("${kid}", Utils.base64Encode(kidbuf))
         	.replace("${check}", Utils.base64Encode(checkbuf));
+        val = laurl.isEmpty() ?
+        	val.replace("<LA_URL>${laurl}</LA_URL>", "") :
+        	val.replace("${laurl}", Utils.XMLEncode(laurl, true, false) );
+        
         return val;
 	}
 	

@@ -9,9 +9,11 @@
 	<property environment="env"/>
 
 	<path id="libs">
-	   <pathelement location="./lib/protobuf-java-3.3.0.jar" />
-	   <pathelement location="./lib/protobuf-java-util-3.3.0.jar" />
-	   <pathelement location="./lib/isoparser-1.9.30.jar" />
+        <pathelement location="./lib/protobuf-java-3.3.0.jar" />
+	    <pathelement location="./lib/protobuf-java-util-3.3.0.jar" />
+	    <pathelement location="./lib/isoparser-1.9.30.jar" />
+	    <pathelement location="./lib/slf4j-api-1.7.25.jar" />
+		<pathelement location="./lib/slf4j-nop-1.7.25.jar" />
 	</path>
 
 	<pathconvert property="manifest.libs" pathsep=" ">

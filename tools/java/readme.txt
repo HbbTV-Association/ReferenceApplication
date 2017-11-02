@@ -6,6 +6,7 @@ Input video file is trancoded to multiple streams (resolution, bitrate).
 Streams are dashed to an unecrypted manifest.mpd file.
 Streams are encrypted and dashed to a MultiDRM manifest.mpd file (playready,marlin,widevine,clearkey).
 Insert EventMessageBox(EMSG) to mp4 segment and manifest.mpd files.
+Remove mp4 table from the mp4 files.
 
 Best result is achieved if input file is h264,h265/aac/25fps/16:9 format.
 - AVC(h264) video codec, HEVC(h265) video codec
@@ -45,9 +46,9 @@ Use Eclipse or Ant script to build the project.
 Library is written to lib/dasher.jar file.
 
 
-Run dasher
+** Run dasher **
 ====================
-Use Java7 to run an applicatiion.
+Use Java7 to run an application.
 Trancode input file, save dash segments to output folder.
   java -jar "/refapp/lib/dasher.jar" config=dasher.properties input=/videos/video1.mp4 output=/videos/dash/video1/
 Trancode input file, save dash segments to current working folder.
@@ -66,7 +67,7 @@ Logging file should not be copied to a public web server,
 it contains sensitive data such as DRM kid,key,iv values.
 
 
-Run event inserter
+** Run event inserter **
 ===========================
 Insert EMSG to segment file.
   java -cp "/refapp/lib/*" org.hbbtv.refapp.EventInserter input=/videos/dash/video1/v1_1.m4s scheme="urn:my:scheme" value="1" ts=1 ptd=1 dur=0xFFFF id=1 msg="any payload"
@@ -76,6 +77,13 @@ Insert InbandEventStream element to mpd manifest
   java -cp "/refapp/lib/*" org.hbbtv.refapp.EventInserter input=/videos/dash/video1/manifest.mpd scheme="urn:my:scheme" value="1"
 Remove all InbandEventStream elements from mpd manifest 
   java -cp "/refapp/lib/*" org.hbbtv.refapp.EventInserter input=/videos/dash/video1/manifest.mpd scheme=""
+
+
+** Run box modifier **
+===========================
+Remove box(moov/trak/senc) from the init segment file, some of the hbbtv televisions 
+may not play dash stream if this box is found in an initialization file.
+  java -cp "/refapp/lib/*" org.hbbtv.refapp.BoxModifier input=/videos/dash/video1/v1_i.mp4 mode=remove path=moov/trak/senc
 
 
 Config file dasher.properties
@@ -89,6 +97,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2017-11-05:
+- added BoxModifier tool
 2017-10-25:
 - added drm.clearkey DRM system
 - fixed CENC pssh version=1 field
