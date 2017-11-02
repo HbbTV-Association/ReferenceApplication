@@ -171,7 +171,7 @@
             "items": [
                 {
                     "title": "Tears of Steel AVC 1080p",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnUABCQApiB_O91WSib7_0y9tUDAIBOuy-wyWcAEWbvTQKq8ib2xNjXpUXzPxEVy_2ZvmWFDyjHS7DnSq3vVWhZbA-ZKJxd1fSherdGqqem3kSdAqn7WqOOAQ8O-BUHiVndUEFFQ46X9B9aIy1_nYpyNAbZm7pB1brZJXnhiIGV9Hlv2yEk-3o2DgdxHk1O5ZQV32E1EwAAABR2l17hdV-NKTpIiVDpf9UsUa-CoQ#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmxABCDF0MkxkKkhmsoyRGBh1jxAIDeWiFU6U07rtLG71Rxu3E5yWzObsAWH3vDtlUe0XL1iMcxoKuK_wVJVRUaBgGHFVnR2afIRkz42pebbu_iyrS4NK_9cR59NSBf-WKHbAF_CzRi6a6wbMcQr8YPzgeTa9Jau4B4rXxdH9RmkflQ-EzHoVbUD_5_p5LLj-Fm-Keo_QAAABR_gjGoP2gvYpRD8mNZ1AvavB11MQ#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
 					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
@@ -180,7 +180,7 @@
                 },
                 {
                     "title": "Llama Drama HEVC 2160p",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmmABAidD_7JlefKK5aUhkSmMz1AIDH7E31IGYslV5nP-sAlRSZ7r-Dk-hlNLIIETvXcKuTk3fan047utvR878X4LzZxihgQ1QK66Cpc1KRDZz9O2xMU11dHyfvpW8qdrfpzPs5COtRfSxGGsRWo3bWfoBP6Bw6hUTjJBqJAEELQ0TB11EGICNWDUS283SVKj1LnO16_AAAABSousD8I99B3VjW277l3akIocLn2Q#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnVABBh9VVAd68xsbv0hVnv6G7EAIDkVN7m0VXBntDv5a4dGXd7-MaZzxlZrzMWXt7iApMEpnKThiBnagglcMynVAMvPT5_Evi9_Vg2Nb8rib6JbDEzfji0NrVJGg6fxe62xqM3-klhbfDSvJM7RNZi4gMzu6kDTj5IzMB9ZGF4ZWcUPBT_1w_kpACi6gf0DYX44eP8XgAAABSUoqo9NlrhBB9-AGekD_CFbfLgrw#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
@@ -191,7 +191,7 @@
                     "title": "Tears of Steel AVC 1080p",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
 					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnUABCQApiB_O91WSib7_0y9tUDAIBOuy-wyWcAEWbvTQKq8ib2xNjXpUXzPxEVy_2ZvmWFDyjHS7DnSq3vVWhZbA-ZKJxd1fSherdGqqem3kSdAqn7WqOOAQ8O-BUHiVndUEFFQ46X9B9aIy1_nYpyNAbZm7pB1brZJXnhiIGV9Hlv2yEk-3o2DgdxHk1O5ZQV32E1EwAAABR2l17hdV-NKTpIiVDpf9UsUa-CoQ",
+                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmxABCDF0MkxkKkhmsoyRGBh1jxAIDeWiFU6U07rtLG71Rxu3E5yWzObsAWH3vDtlUe0XL1iMcxoKuK_wVJVRUaBgGHFVnR2afIRkz42pebbu_iyrS4NK_9cR59NSBf-WKHbAF_CzRi6a6wbMcQr8YPzgeTa9Jau4B4rXxdH9RmkflQ-EzHoVbUD_5_p5LLj-Fm-Keo_QAAABR_gjGoP2gvYpRD8mNZ1AvavB11MQ",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "License acquisition w/ OIPF DRMAgent",
@@ -201,7 +201,7 @@
                     "title": "Llama Drama HEVC 2160p",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
-                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmmABAidD_7JlefKK5aUhkSmMz1AIDH7E31IGYslV5nP-sAlRSZ7r-Dk-hlNLIIETvXcKuTk3fan047utvR878X4LzZxihgQ1QK66Cpc1KRDZz9O2xMU11dHyfvpW8qdrfpzPs5COtRfSxGGsRWo3bWfoBP6Bw6hUTjJBqJAEELQ0TB11EGICNWDUS283SVKj1LnO16_AAAABSousD8I99B3VjW277l3akIocLn2Q",
+                    "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnVABBh9VVAd68xsbv0hVnv6G7EAIDkVN7m0VXBntDv5a4dGXd7-MaZzxlZrzMWXt7iApMEpnKThiBnagglcMynVAMvPT5_Evi9_Vg2Nb8rib6JbDEzfji0NrVJGg6fxe62xqM3-klhbfDSvJM7RNZi4gMzu6kDTj5IzMB9ZGF4ZWcUPBT_1w_kpACi6gf0DYX44eP8XgAAABSUoqo9NlrhBB9-AGekD_CFbfLgrw",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "License acquisition w/ OIPF DRMAgent",
