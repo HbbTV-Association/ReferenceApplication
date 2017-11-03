@@ -86,7 +86,7 @@ Navigation. Common keymapping, event listeners and navigation functionality
 Debugscreen and debug-console saving feature. Pressing blue button applications console.log is printed on screen.
 There is action option in settings menu to send log on server. Application will inform the log name on screen if succeed.
 On reference installation, logfiles are saved to folder http://meridian.sofiadigital.fi/tvportal/referenceapp/src/catalogue/log/
-naming log<number>.json, for example log0.json and so on
+naming log<<number>>.json, for example log0.json and so on
 
 	src/debugscreen.js
 

@@ -2,160 +2,15 @@
 	HTML5 <video> player impelmentation for HbbTV
 ***/
 
-
 function VideoPlayerHTML5(element_id, profile, width, height){
-	this.FILETYPES = {
-		MP4:0,
-		MPEG:1,
-		DASH:2
-	};
-	this.element_id = element_id;
-	this.element = document.getElementById(element_id);
-	if(!this.element){
-		this.element = document.createElement("div");
-		this.element.setAttribute("id", this.element_id);
-	}
-	$(this.element).addClass("hidden");
-	this.fullscreenElement = this.element;
-	this.width = width;
-	this.height = height;
-	this.visible = false;
-	this.url = null;
-	this.video = null;
-	this.profile = profile;
-
-	// Timers and intervals
-	this.progressUpdateInterval = null;
-	this.hidePlayerTimer = null;
-}
-
-VideoPlayerHTML5.prototype.populate = function(){
-	this.element.innerHTML = "";
-	this.video = null;
-	this.loadingImage = document.createElement("div");
-	this.loadingImage.setAttribute("id", "loadingImage");
-	this.loadingImage.addClass("hidden");
-	this.element.appendChild(this.loadingImage);
-	this.setFullscreen(true);
-}
-
-VideoPlayerHTML5.prototype.displayPlayer = function( sec ){
-	clearTimeout( this.hidePlayerTimer );
-	$("#player").removeClass("hide");
-	$("#player").addClass("show");
-	if(sec){
-		this.hidePlayerTimer = setTimeout( function(){
-			$("#player").removeClass("show");
-		}, sec * 1000);
-	}
-}
-
-VideoPlayerHTML5.prototype.navigate = function(key){
-	var self = this;
+	console.log("VideoPlayerHTML5 - Constructor");
 	
-	if( self.onAdBreak ){
-		console.log("Navigation on ad break");
-	}
+	// Call super class constructor
+	VideoPlayerBasic.call(this, element_id, profile, width, height);
 	
-	switch(key){
-		case VK_UP:
-			self.displayPlayer(5);
-		break;
-
-		case VK_DOWN:
-			self.displayPlayer(5);
-		break;
-
-		case VK_BACK:
-		case VK_STOP:
-		case 8: // for edge backspace button
-			console.log("call: stop()");
-			self.stop();
-		break;
-
-		case VK_LEFT:
-		case VK_REWIND:
-			if( !self.onAdBreak ){
-				self.rewind( 30 );
-				self.displayPlayer(5);
-			}
-			break;
-		case VK_RIGHT:
-		case VK_FAST_FWD:
-			if( !self.onAdBreak ){
-				self.forward( 30 );
-				self.displayPlayer(5);
-			}
-			break;
-		case VK_ENTER:
-		case VK_PLAY_PAUSE:
-		case VK_PAUSE:
-		case VK_PLAY:
-			if( !self.onAdBreak ){
-				if( this.isPlaying() ){
-					this.pause();
-				}
-				else{
-					this.play();
-				}
-			}
-		break;
-		case VK_YELLOW:
-			try{
-				if( this.video.textTracks ){
-					console.log("switch text Track");
-					var tracks = this.video.textTracks.length;
-					if( !tracks ){
-						showInfo("No Subtitles Available");
-						break;
-					}
-					
-					
-					console.log("Current track index " + this.subtitleTrack);
-					if( this.subtitleTrack >= tracks ){
-						this.subtitleTrack = 0; // was off, select first
-					}
-					else{
-						this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
-						this.subtitleTrack++;
-					}
-					
-					var lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].label );
-					
-					$("#subtitleButtonText").html( "Subtitles: " + lang );
-					showInfo("Subtitles: " + lang);
-					
-					if( lang != "off" ){
-						this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
-					}
-				}
-			} catch( e ){
-				console.log( e.description );
-			}
-		break;
-		default:
-		break;
-	}
+	console.log("Initialized " + this.element_id);
 }
 
-VideoPlayerHTML5.prototype.getStreamComponents = function(){
-}
-
-VideoPlayerHTML5.prototype.setDisplay = function( container ){
-	if( container ){
-		// detach from DOM
-		var element = $(this.element).detach();
-		element.addClass("hidden");
-		// append into
-		$(container).prepend( element );
-		element.removeClass("hidden");
-	}
-	else{
-		// if target not set, assume to set fullscreen
-		this.setFullscreen(true);
-	}
-};
-	
 VideoPlayerHTML5.prototype.createPlayer = function(){
 	var self = this;
 
@@ -556,16 +411,6 @@ VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
 	}
 };
 
-VideoPlayerHTML5.prototype.setDRM = function( system, la_url){
-	if( !system ){
-		this.drm = null;
-	}
-	else{
-		console.log("setDRM(", system ,", ",la_url,")");
-		this.drm = { la_url : la_url, system : system, ready : false, error : null};
-	}
-};
-
 VideoPlayerHTML5.prototype.getVideoType = function(file_extension){
 	if(file_extension == "mp4"){
 		return this.FILETYPES.MP4;
@@ -686,74 +531,6 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 };
 
-VideoPlayerHTML5.prototype.setSubtitles = function( subtitles ){
-	// out-of-band subtitles must be an array containing containing language code and source.ttml file url.
-	
-	try{
-		var player = this.video;
-		
-		console.log("set subs from active assets metadata 'subtitles'");
-		this.subtitles = subtitles;
-		
-		console.log( JSON.stringify( this.subtitles ) );
-		
-		if( this.subtitles && this.subtitles.length ){
-			
-			$.each( this.subtitles, function(i, lang){
-				//console.log( lang );
-				console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
-								
-				var track = document.createElement("track");
-				track.kind = "subtitles";
-				track.label = lang.code;
-				track.language = lang.code;
-				track.src = lang.src;
-				track.onerror = function(e){
-					console.log(e);
-					showInfo("Error with subtitles: " + e.type);
-				};
-				
-				player.appendChild(track);
-				
-			} );
-			$("#subtitleButton").show();
-			$("#subtitleButtonText").html( "Subtitles: " + player.textTracks[0].label );
-			console.log( "Text tracks: " + player.textTracks.length );
-			$.each( player.textTracks, function(i, track){
-				console.log( track );
-			} );
-			this.subtitleTrack = 0;
-			player.textTracks[0].mode = "showing";
-		}
-		else{
-			console.log( "no subs" );
-		}
-	} catch(e){
-		console.log("Error: setSubtitles: " + e.description );
-	}
-};
-/*
-VideoPlayerHTML5.prototype.showSubtitleTrack = function(nth){
-	var player = this.video;
-	if( player.textTracks.length <= nth ){
-		console.log( "No track " + nth + " available. Tracklist length is " + player.textTracks.length );
-		return;
-	}
-	// hide all tracks
-	$.each( player.textTracks, function(i, track){
-		track.mode = "hidden";
-		console.log( track );
-	} );
-	
-	// show selected
-	player.TextTracks.TextTrack[nth].mode = "showing";
-	
-	$.each( player.textTracks, function(i, track){
-		console.log( track.language + ": " + track.mode );
-	} );
-};
-*/
-
 
 VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
@@ -800,6 +577,7 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 			console.log("populate player and create video object");
 			self.populate();
 			self.createPlayer();
+			self.setEventHandlers();
 		}
 	}
 	catch(e){
@@ -821,20 +599,6 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	catch(e){
 		console.log( e.message );
 		console.log( e.description );
-	}
-};
-
-
-
-VideoPlayerHTML5.prototype.pause = function(){
-	var self = this;
-	try{
-		self.video.pause();
-		self.displayPlayer();
-		console.log("video should be playing now");
-	}
-	catch(e){
-		console.log(e);
 	}
 };
 
@@ -973,87 +737,4 @@ VideoPlayerHTML5.prototype.isPlaying = function(){
 	return ( this.video && !this.video.paused ); // return true/false
 };
 
-VideoPlayerHTML5.prototype.doPlayStateChange = function(){
-	
-};
 
-VideoPlayerHTML5.prototype.updateProgressBar = function(){
-	try{
-		var self = this;
-		var position = this.video.currentTime;
-		var duration = this.video.duration;
-		
-		//console.log("update progress bar");
-		
-		pbar = document.getElementById("progressbar");
-
-		var barWidth = Math.floor((position / duration) * 895 );
-		if(barWidth > 895){
-			barWidth = 895;
-		}
-		else if( barWidth < 0 ){
-			barWidth = 0;
-		}
-		
-		pbar.style.width = barWidth + "px";
-		
-		var play_position = barWidth;
-		
-		$("#playposition").css("left", play_position);
-		$("#progress_currentTime").css("left", play_position);
-
-
-		
-		$("#playposition").html("");
-		if(position){
-			var pp_hours = Math.floor(position / 60 / 60);
-			var pp_minutes = Math.floor((position-(pp_hours*60*60)) / 60);
-			var pp_seconds = Math.round((position-(pp_hours*60*60)-(pp_minutes*60)));
-			$("#playposition").html( addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds) );
-		}
-
-		document.getElementById("playtime").innerHTML = "";
-		if(duration){
-			var pt_hours = Math.floor(duration / 60 / 60);
-			var pt_minutes = Math.floor((duration-(pt_hours*60*60))  / 60);
-			var pt_seconds = Math.round((duration-(pt_hours*60*60)-(pt_minutes*60)) );
-			document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
-		}
-	} catch(e){
-		console.log( e.message );
-	}
-
-};
-
-
-
-VideoPlayerHTML5.prototype.setLoading = function(loading, reason){
-	this.loading = loading;
-	if(this.loading){
-		this.loadingImage.removeClass("hidden");
-	}
-	else{
-		this.loadingImage.addClass("hidden");
-	}
-	if(reason){
-		console.log(reason);
-	}
-};
-
-VideoPlayerHTML5.prototype.setFullscreen = function(fs){
-	this.fullscreen = fs;
-	if(fs){
-		this.element.addClass("fullscreen");
-		this.setDisplay( $("body")[0] ); // sets video player object to child of body
-	}
-	else{
-		this.element.removeClass("fullscreen");
-		this.setDisplay( menu.focus.element ); // sets video player object to child of focused tile element
-		$("#player").removeClass("show");
-	}
-
-};
-
-VideoPlayerHTML5.prototype.isVisible = function(fs){
-	return this.visible;
-};
