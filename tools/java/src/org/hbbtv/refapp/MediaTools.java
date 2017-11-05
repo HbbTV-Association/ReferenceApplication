@@ -218,6 +218,30 @@ public class MediaTools {
 		return args;
 	}
 
+	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile, String id) {
+		List<String> args=Arrays.asList(MP4BOX,
+				"-add", ""+subFile.getAbsolutePath()+":ext=ttml",
+				"-new", outputFile.getAbsolutePath()
+		);
+		args = new ArrayList<String>(args);
+		return args;
+	}
+
+	public static List<String> getSubIBSegmentsArgs(File subFile, String id, int segdur) {
+		List<String> args=Arrays.asList(MP4BOX,
+				"-dash", ""+(segdur*1000),
+				"-mem-frags",
+				"-profile", "dashavc264:live",
+				"-bs-switching", "no",
+				"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "1",
+				"-segment-name", "$RepresentationID$/sub_$Number$$Init=i$",
+				"-out", subFile.getAbsolutePath().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd
+				subFile.getAbsolutePath()+":id="+id	// input output/temp-sub_xxx.mp4
+		);
+		args = new ArrayList<String>(args);
+		return args;
+	}
+
 	/**
 	 * Run executable process.
 	 * @param args	first element is a command, remaining values are arguments.

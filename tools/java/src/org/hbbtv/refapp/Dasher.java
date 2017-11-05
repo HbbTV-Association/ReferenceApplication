@@ -255,10 +255,12 @@ public class Dasher {
 		}
 	}
 
-	private static int deleteOldFiles(File folder) throws IOException {
+	public static int deleteOldFiles(File folder) throws IOException {
 		int count=0;
 		String exts[] = new String[] { ".m4s", ".mp4", ".mpd", ".jpg" };
-		for(File file : folder.listFiles()) {
+		File[] files=folder.listFiles();
+		if (files==null) return 0;
+		for(File file : files) {
 			if (file.isFile()) {
 				String name = file.getName();
 				for(int idx=0; idx<exts.length; idx++) {

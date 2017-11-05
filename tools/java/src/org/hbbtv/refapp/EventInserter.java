@@ -17,9 +17,9 @@ import org.mp4parser.Box;
  *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input=dash/v1_1.m4s scheme=""
  *   
  * Insert InbandEventStream element to mpd manifest
- *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter input="dash/manifest.mpd" scheme="urn:my:scheme" value="1"
+ *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input="dash/manifest.mpd" scheme="urn:my:scheme" value="1"
  * Remove all InbandEventStream elements from mpd manifest 
- *   java -cp "../lib/*" org.hbbtv.refapp.EventInserter input="dash/manifest.mpd" scheme=""
+ *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input="dash/manifest.mpd" scheme=""
  */
 public class EventInserter {
 
