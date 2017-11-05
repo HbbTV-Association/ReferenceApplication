@@ -4,168 +4,14 @@
 
 
 function VideoPlayer(element_id, profile, width, height){
+	console.log("VideoPlayer - Constructor");
 	
-	this.FILETYPES = {
-		MP4:0,
-		MPEG:1,
-		DASH:2
-	};
-	this.DRMTYPES = {
-		NONE:0,
-		PLAYREADY:1,
-		MARLIN:2,
-		WIDEVINE:3
-	};
-	this.element_id = element_id;
-	this.element = document.getElementById(element_id);
-	if(!this.element){
-		this.element = document.createElement("div");
-		this.element.setAttribute("id", this.element_id);
-	}
-	$(this.element).addClass("hidden");
-	this.fullscreenElement = this.element;
-	this.width = width;
-	this.height = height;
-	this.visible = false;
-	this.url = null;
-	this.video = null;
-	this.profile = profile;
-
-	// Timers and intervals
-	this.progressUpdateInterval = null;
-	this.hidePlayerTimer = null;
-
-	this.init();
-}
-
-VideoPlayer.prototype.init = function(){
-	var self = this;	
-}
-
-VideoPlayer.prototype.populate = function(){
-	this.element.innerHTML = "";
-	this.video = null;
-	this.loadingImage = document.createElement("div");
-	this.loadingImage.setAttribute("id", "loadingImage");
-	this.loadingImage.addClass("hidden");
-	this.element.appendChild(this.loadingImage);
-	this.setFullscreen(true);
-}
-
-
-VideoPlayer.prototype.displayPlayer = function( sec ){
-	clearTimeout( this.hidePlayerTimer );
-	$("#player").removeClass("hide");
-	$("#player").addClass("show");
-	if(sec){
-		this.hidePlayerTimer = setTimeout( function(){
-			$("#player").removeClass("show");
-		}, sec * 1000);
-	}
-}
-
-
-
-VideoPlayer.prototype.navigate = function(key){
-	var self = this;
-	console.log("Key code pressed: " + key);
+	// Call super class constructor
+	VideoPlayerBasic.call(this, element_id, profile, width, height);
 	
-	if( self.onAdBreak ){
-		console.log("Navigation on ad break");
-	}
-	switch(key){
-		case VK_UP:
-			//self.controls.show();
-			self.displayPlayer(5);
-		break;
-
-		case VK_DOWN:
-			//self.controls.hide();
-			self.displayPlayer(5);
-		break;
-
-		case VK_BACK:
-		case VK_STOP:
-
-			self.stop();
-		break;
-
-		case VK_LEFT:
-		case VK_REWIND:
-			if( !self.onAdBreak ){
-				self.rewind( 30 );
-				self.displayPlayer(5);
-			}
-			break;
-		case VK_RIGHT:
-		case VK_FAST_FWD:
-			if( !self.onAdBreak ){
-				self.forward( 30 );
-				self.displayPlayer(5);
-			}
-			break;
-		case VK_ENTER:
-		case VK_PLAY_PAUSE:
-		case VK_PAUSE:
-		case VK_PLAY:
-			if( !self.onAdBreak ){
-				if( this.isPlaying() ){
-					this.pause();
-				}
-				else{
-					this.play();
-				}
-			}
-		break;
-		case VK_YELLOW:
-			try{
-				if( this.video.textTracks ){
-					console.log("switch text Track");
-					n = 0;
-					$.each( this.video.textTracks, function(i, lang){
-						console.log("Subtitles " + i + ": " + lang.language + " - " + lang.label + " mode: " + lang.mode);
-						lang.mode = 'hidden';
-						n++;
-					} );
-					this.subtitleTrack += 1;
-					if( this.subtitleTrack >= n )
-						this.subtitleTrack = -1;
-					if( this.subtitleTrack >= 0 ){
-						this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
-						console.log("set track " + this.subtitleTrack  + ": " + this.video.textTracks[ this.subtitleTrack ].language );
-						showInfo("Switch subtitles to language: " + this.video.textTracks[ this.subtitleTrack ].label );
-					}
-					else{
-						showInfo("Subtitles off");
-					}
-				}
-			} catch( e ){
-				console.log( e.description );
-			}
-		break;
-		default:
-			if( key >= VK_0 && key <= VK_9 ){
-				self.showSubtitleTrack( key );
-			}
-		break;
-	}
+	console.log("Initialized " + this.element_id);
 }
 
-
-VideoPlayer.prototype.setDisplay = function( container ){
-	if( container ){
-		// detach from DOM
-		var element = $(this.element).detach();
-		element.addClass("hidden");
-		// append into
-		$(container).prepend( element );
-		element.removeClass("hidden");
-	}
-	else{
-		// if target not set, assume to set fullscreen
-		this.setFullscreen(true);
-	}
-};
 VideoPlayer.prototype.createPlayer = function(){
 	
 	console.log("createPlayer()");
@@ -370,19 +216,6 @@ VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	}
 }
 
-
-VideoPlayer.prototype.setDRM = function( system, la_url){
-	if( !system ){
-		this.drm = null;
-	}
-	else{
-		console.log("setDRM(",la_url,")");
-		this.drm = { la_url : la_url, system : system, ready : false, error : null};
-	}
-}
-
-
-
 VideoPlayer.prototype.getVideoType = function( file_extension ){
 	if(file_extension == "mp4"){
 		return this.FILETYPES.MP4;
@@ -560,26 +393,6 @@ VideoPlayer.prototype.setSubtitles = function(){
 	}
 };
 
-VideoPlayer.prototype.showSubtitleTrack = function(nth){
-	var player = this.video;
-	if( player.textTracks.length <= nth ){
-		console.log( "No track " + nth + " available. Tracklist length is " + player.textTracks.length );
-		return;
-	}
-	// hide all tracks
-	$.each( player.textTracks, function(i, track){
-		track.mode = "hidden";
-		console.log( track );
-	} );
-	
-	// show selected
-	player.TextTracks.TextTrack[nth].mode = "showing";
-	
-	$.each( player.textTracks, function(i, track){
-		console.log( track.language + ": " + track.mode );
-	} );
-};
-
 
 VideoPlayer.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
@@ -607,6 +420,7 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 	try{
 		if( !self.video ){
 			self.populate();
+			self.setEventHandlers();
 		}
 		
 		var player = this.video;
@@ -642,12 +456,11 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 }
 
 VideoPlayer.prototype.pause = function(){
+	console.log("oipf player pause");
 	var self = this;
 	try{
 		self.video.play(0);
-		//self.controls.show();
 		self.displayPlayer();
-		console.log("video should be playing now");
 	}
 	catch(e){
 		console.log(e);
@@ -683,7 +496,6 @@ VideoPlayer.prototype.rewind = function(){
 		var ms = Math.max(self.video.playPosition-30000, 0);
 		self.video.seek( ms );
 		Monitor.videoSeek( Math.round( ms/1000 ) );
-		//self.controls.show();
 		self.displayPlayer(5);
 	}
 	catch(e){
@@ -806,88 +618,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
 	}
 }
 
-VideoPlayer.prototype.updateProgressBar = function(){
-	try{
-		var self = this;
-		var position = this.video.playPosition;
-		var duration = this.video.playTime;
-		
-		console.log("update progress bar");
-		
-		pbar = document.getElementById("progressbar");
-
-		var barWidth = Math.floor((position / duration) * 895 );
-		if(barWidth > 895){
-			barWidth = 895;
-		}
-		else if( barWidth < 0 ){
-			barWidth = 0;
-		}
-		
-		pbar.style.width = barWidth + "px";
-		
-		var play_position = barWidth;
-		
-		$("#playposition").css("left", play_position);
-		$("#progress_currentTime").css("left", play_position);
-
-
-		
-		$("#playposition").html("");
-		if(position){
-			var pp_hours = Math.floor(position / 1000 / 60 / 60);
-			var pp_minutes = Math.floor((position / 1000 -(pp_hours*60*60)) / 60);
-			var pp_seconds = Math.round((position / 1000 -(pp_hours*60*60)-(pp_minutes*60)));
-			$("#playposition").html( addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds) );
-		}
-
-		document.getElementById("playtime").innerHTML = "";
-		if(duration){
-			var pt_hours = Math.floor(duration / 1000 / 60 / 60);
-			var pt_minutes = Math.floor((duration / 1000-(pt_hours*60*60))  / 60);
-			var pt_seconds = Math.round((duration / 1000-(pt_hours*60*60)-(pt_minutes*60)) );
-			document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
-		}
-	} catch(e){
-		console.log( e.message );
-	}
-
-
-}
-
-VideoPlayer.prototype.setLoading = function(loading, reason){
-	this.loading = loading;
-	if(this.loading){
-		this.loadingImage.removeClass("hidden");
-	}
-	else{
-		this.loadingImage.addClass("hidden");
-	}
-	if(reason){
-		console.log(reason);
-	}
-}
-
-VideoPlayer.prototype.setFullscreen = function(fs){
-	this.fullscreen = fs;
-	if(fs){
-		this.element.addClass("fullscreen");
-		this.setDisplay( $("body")[0] );
-	}
-	else{
-		this.element.removeClass("fullscreen");
-		this.setDisplay( menu.focus.element );
-		this.controls.hide();
-	}
-
-}
-
-VideoPlayer.prototype.isVisible = function(fs){
-	return this.visible;
-}
-
 VideoPlayer.prototype.getStreamComponents = function(){
-	
 	try {
 		if(typeof this.video.getComponents == 'function') {
 			this.subtitles = vidobj.getComponents(this.video.COMPONENT_TYPE_AUDIO);

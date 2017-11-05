@@ -1,3 +1,4 @@
 *.bak
 src/videoplayer/monitor/*
 src/catalogue/log/*.json
+deploy
