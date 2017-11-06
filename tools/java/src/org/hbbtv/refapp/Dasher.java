@@ -198,11 +198,17 @@ public class Dasher {
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
 
-				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players
+				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players,
+				// create vX_i_nopssh.mp4 init without any PSSH boxes
 				for(StreamSpec spec : specs) {
 					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
 					if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
+
+					File outFile  = new File(outputFolder, "drm/"+spec.name+"_i_nopssh.mp4");					
+					if (BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
+						logger.println(String.format("Removed moov/pssh[*] from %s to %s"
+								, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
 				}
 				
 				// fix manifest, add missing drmsystem namespaces
@@ -235,6 +241,11 @@ public class Dasher {
 					manifest.removeContentProtectionElement("marlin");
 					manifest.save( new File(outputFolder, "drm/manifest_clearkey.mpd") );
 				}
+
+				// create manifest where init url points to vX_i_nopssh.mp4 files
+				String data = Utils.loadTextFile(new File(outputFolder, "drm/manifest.mpd"), "UTF-8").toString();
+				data = data.replace("initialization=\"$RepresentationID$_i.mp4\"", "initialization=\"$RepresentationID$_i_nopssh.mp4\"");
+				Utils.saveFile(new File(outputFolder, "drm/manifest_nopssh.mpd"), data.getBytes("UTF-8"));
 
 				if (Utils.getBoolean(params, "deletetempfiles", true)) {
 					specFile.delete();

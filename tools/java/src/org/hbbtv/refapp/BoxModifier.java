@@ -10,11 +10,12 @@ import org.mp4parser.Container;
 /**
  * Modify init.mp4 or seg.m4s MP4 boxes(=tables).
  *
- * Remove box:
+ * Remove SENC box:
  *   java -cp "./lib/*" org.hbbtv.refapp.BoxModifier input=dash/v1_i.mp4 mode=remove path=moov/trak/senc
+ * Remove all PSSH boxes:
+ *   java -cp "./lib/*" org.hbbtv.refapp.BoxModifier input=dash/v1_i.mp4 mode=remove path=moov/pssh[*] output=dash/v1_i_nopssh.mp4
  */
 public class BoxModifier {
-	// TODO: support syntax moov[0]/trak[0]/senc[0]
 
 	public static void main(String[] args) throws Exception {
 		Map<String,String> params = Utils.parseParams(args);
@@ -56,7 +57,10 @@ public class BoxModifier {
         	int foundBoxIdx=-1;
         	List<Box> boxes=isoFile.getBoxes(); // parent boxes
 
+        	boolean removeAll = boxPath.endsWith("[*]"); // "moov/pssh[*]" 
+        	if (removeAll) boxPath=boxPath.substring(0, boxPath.length()-3);
         	String[] path = boxPath.toLowerCase(Locale.US).split("\\/");
+        	
         	for(int idx=0; idx<path.length; idx++) {
         		Box box=null;
         		for(int idxb=0; idxb<boxes.size(); idxb++) {
@@ -82,7 +86,15 @@ public class BoxModifier {
 
         	boolean isModified=false;        	
     		if (foundBoxIdx>=0) {
-    			boxes.remove(foundBoxIdx);
+    			if (removeAll) {
+    				String type=boxes.get(foundBoxIdx).getType();
+    				for(int idx=boxes.size()-1; idx>=0; idx--) {
+    					if (boxes.get(idx).getType().equals(type))
+    						boxes.remove(idx);
+    				}
+    			} else {
+        			boxes.remove(foundBoxIdx);    				
+    			}
     			isModified=true;
     		}
 
