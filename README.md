@@ -13,7 +13,7 @@
 
 	The software is under continuous development.
 
-
+	Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com for any problems or questions
 
 ### Usage:
 

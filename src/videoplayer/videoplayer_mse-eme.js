@@ -1,8 +1,14 @@
-/***
-	HTML5 <video> player impelmentation for HbbTV
-***/
-
-
+/**
+ * HTML5 MSE-EME video player impelmentation for HbbTV
+ * Video player class definition for MSE-EME player.
+ * This version is supposed to use on PC with target browser Edge.
+ * 
+ *
+ * @class VideoPlayerEME
+ * @extends VideoPlayerBasic
+ * @constructor
+ */
+ 
 function VideoPlayerEME(element_id, profile, width, height){
 	console.log("VideoPlayerEME - Constructor");
 	
@@ -379,28 +385,6 @@ VideoPlayerEME.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayerEME.prototype.setAdBreaks = function( breaks ){
-	if( !breaks){
-		this.adBreaks = null;
-	}
-	else{
-		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = $.extend(true, {}, breaks);
-	}
-};
-
-VideoPlayerEME.prototype.getVideoType = function(file_extension){
-	if(file_extension == "mp4"){
-		return this.FILETYPES.MP4;
-	}
-	else if(["mpg", "mpeg", "ts"].indexOf(file_extension) > -1){
-		return this.FILETYPES.MPEG;
-	}
-	else if(file_extension == "mpd"){
-		return this.FILETYPES.DASH;
-	}
-	return null;
-};
 
 VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");

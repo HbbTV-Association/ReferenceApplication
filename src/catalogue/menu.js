@@ -254,11 +254,6 @@ function getOffset(element){
     return {"x":offset_x, "y":offset_y};
 }
 
-String.prototype.isVideoURL = function(){
-	var file_extension = this.substring(this.lastIndexOf(".")+1);
-	return vplayer.getVideoType(file_extension) != null;
-}
-
 Menu.prototype.prepareVideoStart = function(){
 	var self = this;
 	if( vplayer.video == null ){

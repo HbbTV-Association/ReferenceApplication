@@ -1,6 +1,11 @@
-/***
-	HTML5 <video> player impelmentation for HbbTV
-***/
+/**
+ * HTML5 video player impelmentation for HbbTV 2.0.1 capable devices
+ * 
+ * @class VideoPlayerHTML5
+ * @constructor
+ * @uses VideoPlayerBasic
+ */
+ 
 
 function VideoPlayerHTML5(element_id, profile, width, height){
 	console.log("VideoPlayerHTML5 - Constructor");
@@ -401,28 +406,6 @@ VideoPlayerHTML5.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
-	if( !breaks){
-		this.adBreaks = null;
-	}
-	else{
-		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = $.extend(true, {}, breaks);
-	}
-};
-
-VideoPlayerHTML5.prototype.getVideoType = function(file_extension){
-	if(file_extension == "mp4"){
-		return this.FILETYPES.MP4;
-	}
-	else if(["mpg", "mpeg", "ts"].indexOf(file_extension) > -1){
-		return this.FILETYPES.MPEG;
-	}
-	else if(file_extension == "mpd"){
-		return this.FILETYPES.DASH;
-	}
-	return null;
-};
 
 VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -460,6 +443,8 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ this.drm.la_url +'</URL></RightsIssuer></RightsURL></Marlin>';
 		var DRMSysID = "urn:dvb:casystemid:19188";
 	}
+	
+	console.log( xmlLicenceAcquisition );
 	
 	try {
 		this.oipfDrm.onDRMMessageResult = drmMsgHandler;
@@ -534,7 +519,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
-	
+	fullscreen = true;
 	try{
 		var broadcast = $("#broadcast")[0];
 		if( !broadcast ){
@@ -566,7 +551,6 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 			else{
 				showInfo( "Unknown DRM error! " + JSON.stringify( response ));
 			}
-			//self.startVideo( fullscreen );
 		} );
 		return;
 	}
@@ -591,10 +575,8 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 		
 		console.log("video.play()")
 		self.video.play();
-		if(fullscreen){
-			self.setFullscreen(fullscreen);
-			self.displayPlayer(5);
-		}
+		self.setFullscreen(true);
+		self.displayPlayer(5);
 	}
 	catch(e){
 		console.log( e.message );
@@ -691,6 +673,9 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 			self.video.src = "";
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
+		}
+		if( $("#broadcast")[0] ){
+			$("#broadcast")[0].bindToCurrentChannel();
 		}
 	}
 	catch(e){

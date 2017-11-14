@@ -1,6 +1,12 @@
-/***
-	OIPF AV-object player impelmentation for HbbTV
-***/
+/**
+ * OIPF AV-Object videoplayer for HbbTV 1.5 devices
+ * 
+ * 
+ *
+ * @class VideoPlayer
+ * @extends VideoPlayerBasic
+ * @constructor
+ */
 
 
 function VideoPlayer(element_id, profile, width, height){
@@ -196,15 +202,6 @@ VideoPlayer.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayer.prototype.setAdBreaks = function( breaks ){
-	if( !breaks){
-		this.adBreaks = null;
-	}
-	else{
-		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = $.extend(true, {}, breaks);
-	}
-};
 
 VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	if( subtitles ){
@@ -216,18 +213,6 @@ VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	}
 }
 
-VideoPlayer.prototype.getVideoType = function( file_extension ){
-	if(file_extension == "mp4"){
-		return this.FILETYPES.MP4;
-	}
-	else if(["mpg", "mpeg", "ts"].indexOf(file_extension) > -1){
-		return this.FILETYPES.MPEG;
-	}
-	else if(file_extension == "mpd"){
-		return this.FILETYPES.DASH;
-	}
-	return null;
-}
 
 VideoPlayer.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -397,6 +382,7 @@ VideoPlayer.prototype.setSubtitles = function(){
 VideoPlayer.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
 	var self = this;
+	fullscreen = true;
 	
 	if( this.drm && this.drm.ready == false ){
 		
@@ -444,11 +430,9 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 		self.visible = true;
 		self.video.play(1);
 		
-		if(fullscreen){
-			self.setFullscreen(fullscreen);
-			//self.controls.show();
-			self.displayPlayer(5);
-		}
+		self.setFullscreen(true);
+		self.displayPlayer(5);
+		
 	}
 	catch(e){
 		console.log(e);
@@ -509,7 +493,6 @@ VideoPlayer.prototype.forward = function(){
 		var ms = Math.min(self.video.playPosition+(30000), self.video.playTime);
 		self.video.seek( ms ); 
 		Monitor.videoSeek( Math.round( ms/1000 ) );
-		//self.controls.show();
 		self.displayPlayer(5);
 	}
 	catch(e){
@@ -527,6 +510,9 @@ VideoPlayer.prototype.clearVideo = function(){
 			self.video.stop();
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
+		}
+		if( $("#broadcast")[0] ){
+			$("#broadcast")[0].bindToCurrentChannel();
 		}
 	}
 	catch(e){

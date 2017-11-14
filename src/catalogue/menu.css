@@ -20,6 +20,7 @@ div, span {
 		left:0px;
 		background-image:url(images/bg_wrapper.png);
 		background-repeat:repeat-x;
+		z-index: 1;
 	}
 		#menu{
 

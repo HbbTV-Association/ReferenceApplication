@@ -11,7 +11,7 @@
 	width: 1280px;
 	height: 720px;
 }
-#video, #ad1, #ad2 {
+#video, #ad1, #ad2, #broadcast {
 	display: block;
 	opacity : 1.0;
 	transition: all 0.5s;
