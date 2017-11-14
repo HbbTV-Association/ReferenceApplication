@@ -14,8 +14,6 @@
 	The software is under continuous development.
 
 	Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com for any problems or questions
-	
-	Video player classes api documentation available here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
 
 ### Usage:
 
@@ -27,7 +25,7 @@ B) Download source code from git repository to your server and add your own cont
 
 C) Contribute
 
-
+Video player classes api documentation available here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
 
 ### Components and modules:
 
