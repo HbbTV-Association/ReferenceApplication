@@ -14,6 +14,8 @@
 	The software is under continuous development.
 
 	Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com for any problems or questions
+	
+	Video player classes api documentation available here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
 
 ### Usage:
 
@@ -35,6 +37,10 @@ Application tries to determine HbbTV version of the device and use the preferred
 
 	src/catalogue/index.php
 
+VideoPlayerBasic base class that shall be inherited for different videoplayer classes below:
+
+	src/videoplayer/videoplayer_basic.js
+
 HTML5 version of the application for HbbTV 2.0.1 devices:
 
 	src/catalogue/index_html5.php
@@ -43,7 +49,6 @@ HTML5 video player component:
 
 	src/videoplayer/videoplayer_html5.js
 
-	
 
 OIPF AV object version of the application for HbbTV 1.5 devices:
 

@@ -381,6 +381,21 @@ VideoPlayer.prototype.setSubtitles = function(){
 
 VideoPlayer.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
+	
+	try{
+		var broadcast = $("#broadcast")[0];
+		if( !broadcast ){
+			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+		}
+		broadcast = $("#broadcast")[0];
+		broadcast.bindToCurrentChannel();
+		broadcast.stop();
+		console.log("broadcast stopped");
+	}
+	catch(e){
+		console.log("error stopping broadcast");
+	}
+	
 	var self = this;
 	fullscreen = true;
 	
@@ -452,6 +467,7 @@ VideoPlayer.prototype.pause = function(){
 }
 
 VideoPlayer.prototype.stop = function(){
+	showInfo("Exit Video", 1);
 	var self = this;
 	try{
 		self.video.stop();
@@ -466,7 +482,6 @@ VideoPlayer.prototype.play = function(){
 	var self = this;
 	try{
 		self.video.play(1);
-		//self.controls.show();
 		self.displayPlayer(5);
 	}
 	catch(e){
@@ -501,17 +516,23 @@ VideoPlayer.prototype.forward = function(){
 }
 
 VideoPlayer.prototype.clearVideo = function(){
+	console.log("clearing video");
 	var self = this;
 	self.element.addClass("hidden");
 	self.visible = false;
+	console.log("clearInterval(self.progressUpdateInterval)");
 	clearInterval(self.progressUpdateInterval);
 	try{
 		if(self.video){
-			self.video.stop();
+			if( self.isPlaying() ){
+				self.video.stop();
+			}
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
+			console.log("video object stopped, removed from dom and VideoPlayerClass");
 		}
 		if( $("#broadcast")[0] ){
+			console.log("bindToCurrentChannel();");
 			$("#broadcast")[0].bindToCurrentChannel();
 		}
 	}
@@ -519,6 +540,7 @@ VideoPlayer.prototype.clearVideo = function(){
 		console.log( e.description );
 	}
 	this.subtitles = null;
+	console.log("clearing video completed");
 }
 
 VideoPlayer.prototype.isFullscreen = function(){

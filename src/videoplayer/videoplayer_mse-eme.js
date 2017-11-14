@@ -461,6 +461,7 @@ VideoPlayerEME.prototype.startVideo = function(fullscreen){
 
 
 VideoPlayerEME.prototype.stop = function(){
+	showInfo("Exit Video", 1);
 	var self = this;
 	this.onAdBreak = false;
 	// if video not exist
