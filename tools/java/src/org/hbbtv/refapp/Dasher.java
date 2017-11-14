@@ -198,11 +198,17 @@ public class Dasher {
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
 
-				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players
+				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players,
+				// create vX_i_nopssh.mp4 init without any PSSH boxes
 				for(StreamSpec spec : specs) {
 					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
 					if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
+
+					File outFile  = new File(outputFolder, "drm/"+spec.name+"_i_nopssh.mp4");					
+					if (BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
+						logger.println(String.format("Removed moov/pssh[*] from %s to %s"
+								, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
 				}
 				
 				// fix manifest, add missing drmsystem namespaces
@@ -236,6 +242,11 @@ public class Dasher {
 					manifest.save( new File(outputFolder, "drm/manifest_clearkey.mpd") );
 				}
 
+				// create manifest where init url points to vX_i_nopssh.mp4 files
+				String data = Utils.loadTextFile(new File(outputFolder, "drm/manifest.mpd"), "UTF-8").toString();
+				data = data.replace("initialization=\"$RepresentationID$_i.mp4\"", "initialization=\"$RepresentationID$_i_nopssh.mp4\"");
+				Utils.saveFile(new File(outputFolder, "drm/manifest_nopssh.mpd"), data.getBytes("UTF-8"));
+
 				if (Utils.getBoolean(params, "deletetempfiles", true)) {
 					specFile.delete();
 					for(StreamSpec spec : specs)
@@ -255,10 +266,12 @@ public class Dasher {
 		}
 	}
 
-	private static int deleteOldFiles(File folder) throws IOException {
+	public static int deleteOldFiles(File folder) throws IOException {
 		int count=0;
 		String exts[] = new String[] { ".m4s", ".mp4", ".mpd", ".jpg" };
-		for(File file : folder.listFiles()) {
+		File[] files=folder.listFiles();
+		if (files==null) return 0;
+		for(File file : files) {
 			if (file.isFile()) {
 				String name = file.getName();
 				for(int idx=0; idx<exts.length; idx++) {

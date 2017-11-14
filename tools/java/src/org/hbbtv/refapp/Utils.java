@@ -1,6 +1,7 @@
 package org.hbbtv.refapp;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
 import java.security.CodeSource;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -8,6 +9,7 @@ import java.util.*;
 import javax.xml.bind.DatatypeConverter;
 
 public class Utils {
+	public static final String NL = System.getProperty("line.separator", "\r\n");
 
 	public static final String getString(Map<String,String> params, String key, String defval, boolean trim) {
 		String val = params.get(key);
@@ -225,7 +227,77 @@ public class Utils {
         }
         return sb.toString();		
 	}
-	    
+
+	/**
+	 * Copy file.
+	 * @param sFile	source
+	 * @param dFile	destination
+	 * @throws IOException
+	 */
+	public static void copyFile(File sFile, File dFile) throws IOException {
+		FileInputStream fis=null;
+		FileOutputStream fos=null;
+		FileChannel fcin, fcout;
+		fcin = fcout = null;
+		try {
+			fis = new FileInputStream(sFile);
+			fcin = fis.getChannel();
+			fos = new FileOutputStream(dFile);			
+	        fcout = fos.getChannel();
+	        // http://developer.java.sun.com/developer/bugParade/bugs/4643189.html
+	        int maxCount = (64 * 1024 * 1024) - (32 * 1024);
+	        long size = fcin.size();
+	        long position = 0;
+	        while (position < size) {
+	            position += fcin.transferTo(position, maxCount, fcout);
+	        }
+		} finally {
+			try { if (fcout!=null) fcout.close(); } catch (IOException e) { }
+			try { if (fcin!=null) fcin.close(); } catch (IOException e) { }
+			try { if (fis!=null) fis.close(); } catch (IOException e) { }
+			try { if (fos!=null) fos.close(); } catch (IOException e) { }
+		}
+
+		// clone attributes
+        dFile.setReadable(sFile.canRead());
+        dFile.setWritable(true);// always writable by this user sFile.canWrite());
+        dFile.setExecutable(sFile.canExecute());
+        dFile.setLastModified(sFile.lastModified());
+	}
+	
+	public static StringBuilder loadTextFile(File file, String charset) throws IOException {
+		FileInputStream fis=new FileInputStream(file);
+		try {
+			StringBuilder sb=new StringBuilder();
+			Reader reader=new InputStreamReader(fis, charset);
+			char[] buf=new char[8*1024];
+			while(true) {
+				int read=reader.read(buf);
+				if (read<0) break;
+				sb.append(buf, 0, read);
+			}
+			reader.close();
+			return sb;
+		} finally {
+			try{ fis.close(); } catch(Exception e){}
+		}		
+	}
+	
+	public static void saveFile(File file, byte[] b) throws IOException {
+		BufferedOutputStream bos = null;
+		FileOutputStream fos = null;		
+		fos = new FileOutputStream(file, false);
+		try {
+			bos = new BufferedOutputStream(fos);
+			bos.write(b);
+			bos.flush();
+		} catch (IOException ex) {
+			throw ex;
+		} finally {
+			try { bos.close(); fos.close(); } catch (Exception e) {}
+		}		
+	}
+	
     /**
      * Returns path of given class, class must be inside jar file.
      * @param aclass
