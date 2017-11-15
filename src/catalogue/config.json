@@ -19,10 +19,15 @@
                     "app": 0,
                     "submenu": 3
                 },
+				{
+                    "title": "Clearkey",
+                    "app": 0,
+                    "submenu": 4
+                },
                 {
                     "title": "Settings",
                     "app": 0,
-                    "submenu": 4
+                    "submenu": 5
                 }
             ]
         },
@@ -90,7 +95,7 @@
                     "app": 6,
 					"desc": "TextTrack cues in inband tracks",
 					"profile" : ["html5", "mse-eme"]							
-                }								
+                }
             ]
         },
         {
@@ -255,6 +260,22 @@
                 }										
             ]
         },
+		{
+            "center": 0,
+            "title": "Clearkey DRM",
+            "items": [
+				{
+					"title": "Clearkey test",
+					"url": "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest_clearkey.mpd",
+					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
+					"app": 6,
+					"drm" : "clearkey",
+					"la_url" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php",
+					"desc": "clearkey test",
+					"profile" : ["mse-eme"]							
+				}
+			]
+		},
         {
             "center": 0,
             "title": "Settings",

@@ -83,7 +83,6 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		console.log("video play event triggered");
 	} );
 	
-	player.seektimer = null;
 	player.addEventListener('seeked', function(){
 		console.log("Seeked");
 	});
@@ -210,6 +209,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	player.addEventListener('playing', function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
+			self.displayPlayer( 5 );
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -218,8 +218,10 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('timeupdate', function(){
-		self.updateProgressBar();
-		self.checkAds();
+		if( self.seekTimer == null ){
+			self.updateProgressBar();
+			self.checkAds();
+		}
 	} );
 	
 	player.seek = function( sec, absolute ){
@@ -232,7 +234,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 				return;
 			
 			console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-			// Set position
+			// Set position 
 			player.currentTime = target;
 		} catch(e){
 			console.log("error seeking: " + e.description);
@@ -408,7 +410,8 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	else if( this.drm.system == "clearkey" ){
 		self.player.setProtectionData({
 			"org.w3.clearkey": { 
-				"serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php",
+				"serverURL": self.drm.la_url
+				/* "serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php", */
 				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
 			}
 		});
@@ -499,10 +502,24 @@ VideoPlayerEME.prototype.rewind = function( sec ){
 		if( sec > 0 ){
 			sec = -sec;
 		}
-		//sec = Math.max(self.video.currentTime+sec, 0);
+		
+		this.seekValue += sec;
+		
 		console.log("rewind video "+ sec +"s");
-		Monitor.videoSeek(sec);
-		self.video.seek(sec);
+		this.updateProgressBar( self.seekValue );
+		clearTimeout( this.seekTimer );
+		this.seekTimer = setTimeout( function(){
+			self.seekTimer = null;
+			try{
+				self.video.seek( self.seekValue );
+				Monitor.videoSeek( self.seekValue );
+			} catch(e){
+				console.log("seek failed: " + e.description);
+			}
+			
+			self.seekValue = 0;
+		}, 700);
+		
 		$("#prew").addClass("activated");
 		clearTimeout( this.seekActiveTimer );
 		this.seekActiveTimer = setTimeout( function(){

@@ -14,7 +14,7 @@ function VideoPlayer(element_id, profile, width, height){
 	
 	// Call super class constructor
 	VideoPlayerBasic.call(this, element_id, profile, width, height);
-	
+	this.timeInMilliseconds = true;
 	console.log("Initialized " + this.element_id);
 }
 
@@ -569,7 +569,10 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             self.setLoading(false);
             clearInterval(self.progressUpdateInterval);
             self.progressUpdateInterval = window.setInterval( function(){
-            	self.updateProgressBar();
+				if( self.seekTimer == null ){
+					self.updateProgressBar();
+					self.displayPlayer( 5 );
+				}
             }, 1000);
 			Monitor.videoPlaying();
             break;

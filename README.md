@@ -1,36 +1,34 @@
 # Reference Video Application
 
-
-
 ## Reference application for online video streaming.
+This application is implemented to be a reference video catalogue and player application 
+for DASH content on HbbTV 1.5 and 2.0.1 devices, with various DRM and subtitle tests. 
+
+Application prowides test cases and test material done with tools included in [tools]
+- DASH Clear content ACV / HEVC
+- DRM (Playready, Marlin, Clearkey)
+- Out-of-Band Subtitles
+- Inband subtitles
+- Inband CueData
 
 
 
-
-
-	This application is implemented to be a reference video catalogue and player application 
-	for DASH content on HbbTV 1.5 and 2.0.1 devices, with various DRM and subtitle tests. 
-
-	The software is under continuous development.
-
-	Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com for any problems or questions
+The software is under continuous development and lisenced with MIT Lisence.
+Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com
+for any problems or questions
 
 ### Usage:
 
 
 
-A) Test latest version of the application at http://meridian.sofiadigital.fi/tvportal/referenceapp/
+>A) Test latest version of the application at http://meridian.sofiadigital.fi/tvportal/referenceapp/
+>B) Download source code from git repository to your server and add your own content to configuration
+>C) Video player classes api documentation available here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
 
-B) Download source code from git repository to your server and add your own content to configuration
-
-C) Contribute
-
-Video player classes api documentation available here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
 
 ### Components and modules:
 
-
-General main application to be used for all HbbTV 1.5 or 2.0.1 devices and browsers. 
+General catalogue application to be used for all HbbTV 1.5 or 2.0.1 devices and browsers. 
 Application tries to determine HbbTV version of the device and use the preferred player.
 
 	src/catalogue/index.php
@@ -46,7 +44,6 @@ HTML5 version of the application for HbbTV 2.0.1 devices:
 HTML5 video player component:
 
 	src/videoplayer/videoplayer_html5.js
-
 
 OIPF AV object version of the application for HbbTV 1.5 devices:
 
@@ -64,7 +61,10 @@ MSE-EME video player component:
 
 	src/videoplayer/videoplayer_mse-eme.js
 	
-
+Resource file management. PHP file to be included in application index file. File will list all the needed js/css resources for the specified application profile HbbTV 1.5, HbbTv 2.0.1, MSE-EME.
+For development purposes this generator will set last modified timestamp as an version parameter for all resource files. This ensures a client device should always use a modified file instead cached.
+	
+	src/catalogue/resources.php
 
 Monitor module to implement analytics about use cases of video playback. Monitor can be changed but it must follow the monitor interface.
 
@@ -76,10 +76,11 @@ Monitor module to implement analytics about use cases of video playback. Monitor
 
 
 
-Menu module. Main functionality to maintain menu structure of the catalogue app for video content, actions and submenus
+Menu module. Main functionality to maintain menu structure of the catalogue app for video content, actions and submenus.
+Menu structure for catalogue is configured in configuration file. For real-world application configuration file may be replaced with backend api to produce similar json.
 
-	src/menu.js
-
+	src/catalogue/menu.js
+	src/catalogue/config.json
 
 
 Navigation. Common keymapping, event listeners and navigation functionality
@@ -89,7 +90,7 @@ Navigation. Common keymapping, event listeners and navigation functionality
 Debugscreen and debug-console saving feature. Pressing blue button applications console.log is printed on screen.
 There is action option in settings menu to send log on server. Application will inform the log name on screen if succeed.
 On reference installation, logfiles are saved to folder http://meridian.sofiadigital.fi/tvportal/referenceapp/src/catalogue/log/
-naming log<<number>>.json, for example log0.json and so on
+naming **log<number>.json**, for example log7.json and so on
 
 	src/debugscreen.js
 
@@ -176,3 +177,7 @@ JSON Example here is commented using extra properties with __comment__ -prefix:
 	]
 }
 ```
+
+[//]: # (references)
+
+[tools]: <https://github.com/HbbTV-Association/ReferenceApplication/tree/master/tools>

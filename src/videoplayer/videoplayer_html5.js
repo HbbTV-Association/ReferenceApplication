@@ -209,6 +209,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	player.addEventListener('playing', function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
+			self.displayPlayer( 5 );
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -217,8 +218,10 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('timeupdate', function(){
-		self.updateProgressBar();
-		self.checkAds();
+		if( self.seekTimer == null ){
+			self.updateProgressBar();
+			self.checkAds();
+		}
 	} );
 	
 	player.seek = function( sec, absolute ){
@@ -442,6 +445,15 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ this.drm.la_url +'</URL></RightsIssuer></RightsURL></Marlin>';
 		var DRMSysID = "urn:dvb:casystemid:19188";
+	}
+	else if( this.drm.system == "clearkey" ){
+		self.player.setProtectionData({
+			"org.w3.clearkey": { 
+				"serverURL": self.drm.la_url
+				/* "serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php", */
+				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
+			}
+		});
 	}
 	
 	console.log( xmlLicenceAcquisition );

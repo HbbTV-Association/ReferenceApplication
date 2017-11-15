@@ -27,10 +27,13 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	this.url = null;
 	this.video = null;
 	this.profile = profile;
+	this.timeInMilliseconds = false;
 
 	// Timers and intervals
 	this.progressUpdateInterval = null;
 	this.hidePlayerTimer = null;
+	this.seekTimer = null;
+	this.seekValue = 0;
 	
 	
 	/**
@@ -106,14 +109,14 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			case VK_LEFT:
 			case VK_REWIND:
 				if( !self.onAdBreak ){
-					self.rewind( 30 );
+					self.seek( -30 );
 					self.displayPlayer(5);
 				}
 				break;
 			case VK_RIGHT:
 			case VK_FAST_FWD:
 				if( !self.onAdBreak ){
-					self.forward( 30 );
+					self.seek( 30 );
 					self.displayPlayer(5);
 				}
 				break;
@@ -319,7 +322,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 * Updates progress bar. Progress bar is only visible when player UI is displayed, but it is always updated non-visible when this method is called
 	 * @method updateProgressBar
 	 */
-	this.updateProgressBar = function(){
+	this.updateProgressBar = function( sec ){
 		var position = 0;
 		var duration = 0;
 		var pbMaxWidth = 895; // progress bar maximum width in pixels
@@ -328,12 +331,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		try{
 			// <video> object used
 			if( this.video.duration ){
-				position = this.video.currentTime;
+				position = (sec ? sec + this.video.currentTime : this.video.currentTime);
 				duration = this.video.duration;
 			}
 			// oipf player object used. Convert milliseconds to seconds
 			else if( this.video.playTime ){
-				position = this.video.playPosition / 1000;
+				position = (sec? this.video.playPosition / 1000 + sec : this.video.playPosition / 1000);
 				duration = this.video.playTime / 1000;
 			}
 			else{
@@ -415,6 +418,85 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		else{
 			console.log("setAdBreaks(", breaks ,")");
 			this.adBreaks = $.extend(true, {}, breaks);
+		}
+	};
+	
+	this.time = function(){
+		try{
+			
+			if( this.timeInMilliseconds && this.video.playTime ){
+				return { duration : this.video.playTime/1000, position : this.video.playPosition/1000 };
+			}
+			else if( this.video.duration ){
+				return { duration : this.video.duration, position : this.video.currentTime };
+			}
+			else{
+				console.log("timedata not available")
+				return { duration : 0, position : 0 };
+			}
+			
+		} catch(e){
+			console.log("error getting playback position and duration");
+			return { duration : 0, position : 0 };
+		}
+		
+	}
+	
+	
+	this.seek = function( sec ){
+		var self = this;
+		try{
+			
+			console.log( this.time(), this.seekValue, sec );
+			// if seek value goes below zero seconds, do immediate seek
+			if( this.time().position + (this.seekValue + sec) < 0 ){
+				console.log( "seek below starting position. go to start" );
+				clearTimeout( this.seekTimer );
+				this.updateProgressBar( -this.time().position );
+				self.video.seek( -( self.timeInMilliseconds? this.time().position * 1000 : this.time().position ) );
+				self.seekValue = 0;
+				clearTimeout( this.seekTimer );
+				self.seekTimer = null;
+				return;
+			}
+			
+			// if seek value goes above playtime, do not add seek seconds
+			if( this.time().position + (this.seekValue + sec) > this.time().duration ){
+				return;
+			}
+			
+			this.seekValue += sec;
+			
+			console.log("seek video "+ this.seekValue +"s");
+			this.updateProgressBar( self.seekValue );
+			clearTimeout( this.seekTimer );
+			
+			this.seekTimer = setTimeout( function(){
+				console.log("perform seek now!");
+				self.seekTimer = null;
+				try{
+					var toSeek = (self.timeInMilliseconds? self.seekValue * 1000 : self.seekValue);
+					self.video.seek( toSeek );
+					Monitor.videoSeek( self.seekValue );
+					console.log("seek completed to " + toSeek);
+				} catch(e){
+					console.log("seek failed: " + e.description);
+				}
+				
+				self.seekValue = 0;
+			}, 700);
+			
+			var buttonActivated = ( sec < 0? "prew" : "pff" );
+			$("#prew, #pff" ).removeClass("activated");
+			$("#" + buttonActivated ).addClass("activated");
+			clearTimeout( this.seekActiveTimer );
+			this.seekActiveTimer = setTimeout( function(){
+				$("#prew, #pff" ).removeClass("activated");
+			}, 700);
+		}
+		catch(e){
+			console.log(e.message);
+			console.log(e.description);
 		}
 	};
 }
