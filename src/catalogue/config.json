@@ -104,7 +104,7 @@
             "items": [
 			    {
                     "title": "Tears of Steel AVC 1080p",
-                    "url": "https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
 					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
                     "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
                     "drm": "playready",

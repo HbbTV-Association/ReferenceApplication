@@ -4,7 +4,6 @@
  * @module Application
  */
 
-
 function showApplication() {
   try {
 	var app = document.getElementById('appmgr').getOwnerApplication(document);
