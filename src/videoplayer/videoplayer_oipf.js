@@ -379,7 +379,7 @@ VideoPlayer.prototype.setSubtitles = function(){
 };
 
 
-VideoPlayer.prototype.startVideo = function(fullscreen){
+VideoPlayer.prototype.startVideo = function(){
 	console.log("startVideo()");
 	
 	try{
@@ -397,14 +397,13 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 	}
 	
 	var self = this;
-	fullscreen = true;
 	
 	if( this.drm && this.drm.ready == false ){
 		
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo( fullscreen );
+				self.startVideo();
 			}
 			else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );
@@ -412,7 +411,6 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 			else{
 				showInfo( "Unknown DRM error! " + JSON.stringify( response ));
 			}
-			//self.startVideo( fullscreen );
 		} );
 		return;
 	}
@@ -482,32 +480,6 @@ VideoPlayer.prototype.play = function(){
 	var self = this;
 	try{
 		self.video.play(1);
-		self.displayPlayer(5);
-	}
-	catch(e){
-		console.log(e);
-	}
-}
-
-VideoPlayer.prototype.rewind = function(){
-	var self = this;
-	try{
-		var ms = Math.max(self.video.playPosition-30000, 0);
-		self.video.seek( ms );
-		Monitor.videoSeek( Math.round( ms/1000 ) );
-		self.displayPlayer(5);
-	}
-	catch(e){
-		console.log(e);
-	}
-}
-
-VideoPlayer.prototype.forward = function(){
-	var self = this;
-	try{
-		var ms = Math.min(self.video.playPosition+(30000), self.video.playTime);
-		self.video.seek( ms ); 
-		Monitor.videoSeek( Math.round( ms/1000 ) );
 		self.displayPlayer(5);
 	}
 	catch(e){

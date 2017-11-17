@@ -425,7 +425,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerEME.prototype.startVideo = function(fullscreen){
+VideoPlayerEME.prototype.startVideo = function(){
 	console.log("startVideo()");
 	
 	var self = this;
@@ -451,10 +451,10 @@ VideoPlayerEME.prototype.startVideo = function(fullscreen){
 		
 		console.log("video.play()")
 		self.video.play();
-		if(fullscreen){
-			self.setFullscreen(fullscreen);
-			self.displayPlayer(5);
-		}
+
+		self.setFullscreen(true);
+		self.displayPlayer(5);
+		
 	}
 	catch(e){
 		console.log( e.message );
@@ -489,65 +489,6 @@ VideoPlayerEME.prototype.play = function(){
 	try{
 		self.video.play();
 		self.displayPlayer(5);
-	}
-	catch(e){
-		console.log(e);
-	}
-};
-
-VideoPlayerEME.prototype.rewind = function( sec ){
-	var self = this;
-	try{
-		sec = sec || -30;
-		if( sec > 0 ){
-			sec = -sec;
-		}
-		
-		this.seekValue += sec;
-		
-		console.log("rewind video "+ sec +"s");
-		this.updateProgressBar( self.seekValue );
-		clearTimeout( this.seekTimer );
-		this.seekTimer = setTimeout( function(){
-			self.seekTimer = null;
-			try{
-				self.video.seek( self.seekValue );
-				Monitor.videoSeek( self.seekValue );
-			} catch(e){
-				console.log("seek failed: " + e.description);
-			}
-			
-			self.seekValue = 0;
-		}, 700);
-		
-		$("#prew").addClass("activated");
-		clearTimeout( this.seekActiveTimer );
-		this.seekActiveTimer = setTimeout( function(){
-			$("#prew").removeClass("activated");
-		}, 700);
-	}
-	catch(e){
-		console.log(e.message);
-		console.log(e.description);
-	}
-};
-
-VideoPlayerEME.prototype.forward = function( sec ){
-	var self = this;
-	try{
-		sec = sec || 30;
-		
-		if( self.video.duration > self.video.currentTime + sec ){
-			Monitor.videoSeek(sec);
-			self.video.seek(sec);
-			console.log("forward video "+sec+"s");
-			self.displayPlayer(5);
-			$("#pff").addClass("activated");
-			clearTimeout( this.seekActiveTimer );
-			this.seekActiveTimer = setTimeout( function(){
-				$("#pff").removeClass("activated");
-			}, 700);
-		}
 	}
 	catch(e){
 		console.log(e);

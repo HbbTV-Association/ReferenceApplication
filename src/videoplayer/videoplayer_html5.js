@@ -628,51 +628,6 @@ VideoPlayerHTML5.prototype.play = function(){
 	}
 };
 
-VideoPlayerHTML5.prototype.rewind = function( sec ){
-	var self = this;
-	try{
-		sec = sec || -30;
-		if( sec > 0 ){
-			sec = -sec;
-		}
-		//sec = Math.max(self.video.currentTime+sec, 0);
-		console.log("rewind video "+ sec +"s");
-		Monitor.videoSeek(sec);
-		self.video.seek(sec);
-		$("#prew").addClass("activated");
-		clearTimeout( this.seekActiveTimer );
-		this.seekActiveTimer = setTimeout( function(){
-			$("#prew").removeClass("activated");
-		}, 700);
-	}
-	catch(e){
-		console.log(e.message);
-		console.log(e.description);
-	}
-};
-
-VideoPlayerHTML5.prototype.forward = function( sec ){
-	var self = this;
-	try{
-		sec = sec || 30;
-		
-		if( self.video.duration > self.video.currentTime + sec ){
-			Monitor.videoSeek(sec);
-			self.video.seek(sec);
-			console.log("forward video "+sec+"s");
-			self.displayPlayer(5);
-			$("#pff").addClass("activated");
-			clearTimeout( this.seekActiveTimer );
-			this.seekActiveTimer = setTimeout( function(){
-				$("#pff").removeClass("activated");
-			}, 700);
-		}
-	}
-	catch(e){
-		console.log(e);
-	}
-};
-
 VideoPlayerHTML5.prototype.clearVideo = function(){
 	
 	var self = this;

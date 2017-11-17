@@ -421,6 +421,13 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		}
 	};
 	
+	
+	/**
+	 * Return players playback position and duration as an object with duration and position value.
+	 * Times are represented in seconds for all players
+	 * @method time
+	 * @returns (Object) { duration : \d+, position : \d+ }
+	 */
 	this.time = function(){
 		try{
 			
@@ -442,7 +449,14 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		
 	}
 	
-	
+	/**
+	 * Perform seek operation. To be called when user presses seek button. 
+	 * Timeout is set to wait for continious seek operations before actual seeking
+	 * If this is called multiple times the value to be seeked is added up.
+	 * After delay of 700ms the seek is performed
+	 * @method seek
+	 * @param (Int) sec: How many seconds is seeked. Positiove integer for forward, negative for rewind.
+	 */
 	this.seek = function( sec ){
 		var self = this;
 		try{
