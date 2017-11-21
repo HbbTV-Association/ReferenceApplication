@@ -156,12 +156,13 @@ public class Dasher {
 			DashManifest manifest = new DashManifest(new File(outputFolder, "manifest.mpd"));
 			manifest.fixContent(mode);
 			manifest.save( new File(outputFolder, "manifest.mpd") );
-			
+
 			// DASH: write encrypted segments+manifest if KID+KEY values are found
 			if (!Utils.getString(params, "drm.kid", "", true).isEmpty() &&
 					!Utils.getString(params, "drm.key", "", true).isEmpty()) {
 				DashDRM drm = new DashDRM();
 				drm.initParams(params);
+				params.put("drm.created","1");
 				
 				logger.println("");
 				logger.println("drm.kid="+params.get("drm.kid"));
@@ -212,7 +213,8 @@ public class Dasher {
 				}
 				
 				// fix manifest, add missing drmsystem namespaces
-				manifest = new DashManifest(new File(outputFolder, "drm/manifest.mpd"));
+				File manifestFile=new File(outputFolder, "drm/manifest.mpd");
+				manifest = new DashManifest(manifestFile);
 				manifest.fixContent(mode);
 				manifest.addNamespaces();
 				
@@ -229,7 +231,7 @@ public class Dasher {
 				if (Utils.getString(params, "drm.cenc", "0", true).equals("0"))
 					manifest.removeContentProtectionElement("cenc");
 
-				manifest.save( new File(outputFolder, "drm/manifest.mpd") );
+				manifest.save(manifestFile);
 
 				// write separate clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements,
 				// some players don't use it if another compatible drm is signalled in a manifest.				
@@ -243,10 +245,10 @@ public class Dasher {
 				}
 
 				// create manifest where init url points to vX_i_nopssh.mp4 files
-				String data = Utils.loadTextFile(new File(outputFolder, "drm/manifest.mpd"), "UTF-8").toString();
+				String data = Utils.loadTextFile(manifestFile, "UTF-8").toString();
 				data = data.replace("initialization=\"$RepresentationID$_i.mp4\"", "initialization=\"$RepresentationID$_i_nopssh.mp4\"");
 				Utils.saveFile(new File(outputFolder, "drm/manifest_nopssh.mpd"), data.getBytes("UTF-8"));
-
+				
 				if (Utils.getBoolean(params, "deletetempfiles", true)) {
 					specFile.delete();
 					for(StreamSpec spec : specs)
@@ -257,6 +259,23 @@ public class Dasher {
 			if (Utils.getBoolean(params, "deletetempfiles", true)) {
 				for(StreamSpec spec : specs)
 					new File(outputFolder, "temp-"+spec.name+".mp4").delete();
+			}
+
+			// create subtitles(inband,outband), first call creates segment files
+			// and DRM manifests points to the sub files.
+			createSubtitlesInband(params, new File(outputFolder, "manifest.mpd"), 
+					new File(outputFolder, "manifest_subib.mpd"), 
+					true, "");
+			createSubtitlesOutband(params, new File(outputFolder, "manifest.mpd"), 
+					new File(outputFolder, "manifest_subob.mpd"), 
+					true, "");			
+			if (Utils.getBoolean(params, "drm.created", false)) {
+				createSubtitlesInband(params, new File(outputFolder, "drm/manifest.mpd"), 
+					new File(outputFolder, "drm/manifest_subib.mpd"), 
+					false, "../");
+				createSubtitlesOutband(params, new File(outputFolder, "drm/manifest.mpd"), 
+						new File(outputFolder, "drm/manifest_subob.mpd"), 
+						false, "../");				
 			}
 			
 			logger.println("");			
@@ -283,6 +302,58 @@ public class Dasher {
 			}
 		}
 		return count;
+	}
+
+	private static void createSubtitlesInband(Map<String,String> params, File manifestFile, File manifestOutput,
+				boolean splitSegments, String urlPrefix) throws Exception {
+		// parse subib.X=sub_fin fin sub_fin.xml
+		boolean isFirstSub=true;
+		for(int idx=1; ; idx++) {
+			String val = Utils.getString(params, "subib."+idx, "", true);
+			if (val.isEmpty()) {
+				if (idx<=5) continue; // try 1..5 then give up.
+				else break;  
+			}
+			if (val.endsWith("disable")) continue;
+			String[] valopts = val.split(" ");
+
+			logger.println("Create subtitles(inband) "+val);			
+			SubtitleInserter.insertIB(new File(valopts[2].trim()),	// input "sub_fin.xml" file path 
+					isFirstSub?manifestFile:manifestOutput, 
+					manifestOutput, 
+					valopts[1].trim(),	// lang "fin"
+					valopts[0].trim(),  // repId "sub_fin"
+					splitSegments, // split xml file to sub_fin/sub_1.m4s segment files
+					(int)Utils.getLong(params, "segdur", 6),
+					Utils.getBoolean(params, "deletetempfiles", true), 
+					urlPrefix);
+			isFirstSub=false;			
+		}
+	}
+
+	private static void createSubtitlesOutband(Map<String,String> params, File manifestFile, File manifestOutput,
+			boolean copySubFile, String urlPrefix) throws Exception {
+		// parse subob.X=sub_fin fin sub_fin.xml
+		boolean isFirstSub=true;
+		for(int idx=1; ; idx++) {
+			String val = Utils.getString(params, "subob."+idx, "", true);
+			if (val.isEmpty()) {
+				if (idx<=5) continue; // try 1..5 then give up.
+				else break;  
+			}
+			if (val.endsWith("disable")) continue;
+			String[] valopts = val.split(" ");
+	
+			logger.println("Create subtitles(outband) "+val);			
+			SubtitleInserter.insertOB(new File(valopts[2].trim()),	// input "sub_fin.xml" file path 
+					isFirstSub?manifestFile:manifestOutput, 
+					manifestOutput, 
+					valopts[1].trim(),	// lang "fin"
+					valopts[0].trim(),  // repId "sub_fin"
+					copySubFile, // split xml file to sub_fin/sub_1.m4s segment files
+					urlPrefix);
+			isFirstSub=false;
+		}
 	}
 	
 }
