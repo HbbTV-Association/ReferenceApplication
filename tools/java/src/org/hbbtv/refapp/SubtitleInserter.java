@@ -32,7 +32,10 @@ public class SubtitleInserter {
 			insertOB(
 				subFile, manifestFile, outputFile,
 				params.get("lang"), // fin,eng,..
-				Utils.getBoolean(params, "copyinput", false) );
+				"sub_"+params.get("lang"), // "sub_fin" representation id				
+				Utils.getBoolean(params, "copyinput", false),
+				""
+				);
 		} else if (mode.equalsIgnoreCase("ib")) {
 			// inband requires config=config.properties input parameter,
 			// xml file is splitted to segment files.
@@ -40,6 +43,7 @@ public class SubtitleInserter {
 			insertIB(
 				subFile, manifestFile, outputFile,
 				params.get("lang"),  // fin,eng,..
+				"sub_"+params.get("lang"), // "sub_fin" representation id
 				Utils.getBoolean(params, "copyinput", false), // split ttml.xml to segment files
 				(int)Utils.getLong(params, "segdur", 6) ,
 				Utils.getBoolean(params, "deletetempfiles", true),
@@ -53,20 +57,21 @@ public class SubtitleInserter {
 	 * @param manifestFile	manifest to be modified
 	 * @param outputFile	output manifest
 	 * @param lang			adaptationset.lang attribute value (eng,fin,swe,..)
+	 * @param repId			representation id sub_eng
 	 * @param copyInput		copy subtitle file to manifest output folder
+	 * @param urlPrefix		segment template init+media templates (../ for drm manifest.mpd file)
 	 * @throws Exception
 	 */
-	private static void insertOB(File subFile, File manifestFile, File outputFile,
-			String lang, boolean copyInput) throws Exception {
-		String filename=subFile.getName(); // sub_fin.xml
-		String id = filename.substring(0, filename.lastIndexOf('.')); // sub_fin
-
+	public static void insertOB(File subFile, File manifestFile, File outputFile,
+			String lang, String repId, boolean copyInput, String urlPrefix) throws Exception {
+		String filename=repId+".xml";
 		if (copyInput) {
 			if (!subFile.exists())
 				throw new FileNotFoundException(subFile.getAbsolutePath() + " not found");
-			Utils.copyFile(subFile, new File(outputFile.getParentFile(), filename) );
-		} else {
-			filename = subFile.getPath().replace('\\', '/'); // use "../sub_fin.xml" as-is
+			File subFileOut=new File(outputFile.getParentFile(), filename);
+			if (!subFile.getCanonicalFile().equals(subFileOut))
+				Utils.copyFile(subFile, subFileOut);
+			filename = subFileOut.getName();
 		}
 
 		String template=Utils.NL+Utils.NL+"  <AdaptationSet contentType=\"text\" mimeType=\"application/ttml+xml\" lang=\"${lang}\">"+Utils.NL
@@ -75,8 +80,8 @@ public class SubtitleInserter {
 			+"<BaseURL>${file}</BaseURL></Representation>"+Utils.NL
 			+"  </AdaptationSet>"+Utils.NL;  
 		template=template.replace("${lang}", lang)
-				.replace("${id}", id)
-				.replace("${file}", filename);
+				.replace("${id}", repId)
+				.replace("${file}", urlPrefix+filename);
 		
 		StringBuilder data = Utils.loadTextFile(manifestFile, "UTF-8"); 
 		int startIdx = data.lastIndexOf("</AdaptationSet>");
@@ -92,6 +97,7 @@ public class SubtitleInserter {
 	 * @param manifestFile	manifest to be modified
 	 * @param outputFile	output manifest
 	 * @param lang			adaptationset.lang attribute value (eng,fin,swe,..)
+	 * @param repId			representation id sub_eng
 	 * @param createSegs	create sub_lang/sub_x.m4s segment files
 	 * @param segdur		segment duration (seconds)
 	 * @param deletetempfiles  delete temporary files
@@ -99,34 +105,29 @@ public class SubtitleInserter {
 	 * @param
 	 * @throws Exception
 	 */
-	private static void insertIB(File subFile, File manifestFile, File outputFile,
-			String lang, boolean createSegs, int segdur,
+	public static void insertIB(File subFile, File manifestFile, File outputFile,
+			String lang, String repId, boolean createSegs, int segdur,
 			boolean deletetempfiles, String urlPrefix) throws Exception {
-		String filename=subFile.getName(); // sub_fin.xml
-		String id = filename.substring(0, filename.lastIndexOf('.')); // sub_fin
-
 		if (createSegs) {
 			if (!subFile.exists())
 				throw new FileNotFoundException(subFile.getAbsolutePath() + " not found");
-		} else {
-			filename = subFile.getPath().replace('\\', '/'); // use "../sub_fin.xml" as-is
 		}
 
 		if (createSegs) {
 			File outputFolder = outputFile.getParentFile();
 
 			// delete old files from output folder (output/sub_xxx/*)
-			Dasher.deleteOldFiles(new File(outputFolder, id+"/") );
-			File tempOutput=new File(outputFolder, "temp-"+id+".mp4");
+			Dasher.deleteOldFiles(new File(outputFolder, repId+"/") );
+			File tempOutput=new File(outputFolder, "temp-"+repId+".mp4");
 			tempOutput.delete();
 			
 			// create fragmented output/temp-sub_xxx.mp4 from sub_xxx.xml text file
-			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, id); 
+			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, repId); 
 			MediaTools.executeProcess(args, outputFolder);
-			new File(outputFolder, id+"/").mkdir();
+			new File(outputFolder, repId+"/").mkdir();
 			// create output/sub_xxx/sub_x.m4s segment files
-			args=MediaTools.getSubIBSegmentsArgs(tempOutput, id, segdur);
-			MediaTools.executeProcess(args, new File(outputFolder, id+"/") );
+			args=MediaTools.getSubIBSegmentsArgs(tempOutput, repId, segdur);
+			MediaTools.executeProcess(args, new File(outputFolder, repId+"/") );
 		}
 		
 		String template=Utils.NL+Utils.NL+"  <AdaptationSet segmentAlignment=\"true\" lang=\"${lang}\" contentType=\"text\" mimeType=\"application/mp4\">"+Utils.NL
@@ -135,7 +136,7 @@ public class SubtitleInserter {
 			+"    <Representation id=\"${id}\" startWithSAP=\"1\" bandwidth=\"6000\" codecs=\"stpp\"></Representation>"+Utils.NL
 			+"  </AdaptationSet>"+Utils.NL;
 		template=template.replace("${lang}", lang)
-				.replace("${id}", id)
+				.replace("${id}", repId)
 				.replace("${file}", urlPrefix)
 				.replace("${dur}", ""+(segdur*1000));
 		
@@ -148,8 +149,8 @@ public class SubtitleInserter {
 		
 		if (createSegs && deletetempfiles) {
 			File outputFolder = outputFile.getParentFile();
-			new File(outputFolder, "temp-"+id+".mpd").delete();
-			new File(outputFolder, "temp-"+id+".mp4").delete();
+			new File(outputFolder, "temp-"+repId+".mpd").delete();
+			new File(outputFolder, "temp-"+repId+".mp4").delete();
 		}		
 	}
 			

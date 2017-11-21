@@ -7,6 +7,7 @@ Streams are dashed to an unecrypted manifest.mpd file.
 Streams are encrypted and dashed to a MultiDRM manifest.mpd file (playready,marlin,widevine,clearkey).
 Insert EventMessageBox(EMSG) to mp4 segment and manifest.mpd files.
 Remove mp4 table from the mp4 files.
+Add ttml.xml subtitles (in-band, out-of-band).
 
 Best result is achieved if input file is h264,h265/aac/25fps/16:9 format.
 - AVC(h264) video codec, HEVC(h265) video codec
@@ -97,6 +98,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2017-11-19:
+- added subib.* and subob.* subtitling property keys
 2017-11-05:
 - added BoxModifier tool
 2017-10-25:
