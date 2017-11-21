@@ -1,6 +1,11 @@
-/***
-	HTML5 <video> player impelmentation for HbbTV
-***/
+/**
+ * HTML5 video player impelmentation for HbbTV 2.0.1 capable devices
+ * 
+ * @class VideoPlayerHTML5
+ * @constructor
+ * @uses VideoPlayerBasic
+ */
+ 
 
 function VideoPlayerHTML5(element_id, profile, width, height){
 	console.log("VideoPlayerHTML5 - Constructor");
@@ -204,6 +209,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	player.addEventListener('playing', function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
+			self.displayPlayer( 5 );
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -212,8 +218,10 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('timeupdate', function(){
-		self.updateProgressBar();
-		self.checkAds();
+		if( self.seekTimer == null ){
+			self.updateProgressBar();
+			self.checkAds();
+		}
 	} );
 	
 	player.seek = function( sec, absolute ){
@@ -401,28 +409,6 @@ VideoPlayerHTML5.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayerHTML5.prototype.setAdBreaks = function( breaks ){
-	if( !breaks){
-		this.adBreaks = null;
-	}
-	else{
-		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = $.extend(true, {}, breaks);
-	}
-};
-
-VideoPlayerHTML5.prototype.getVideoType = function(file_extension){
-	if(file_extension == "mp4"){
-		return this.FILETYPES.MP4;
-	}
-	else if(["mpg", "mpeg", "ts"].indexOf(file_extension) > -1){
-		return this.FILETYPES.MPEG;
-	}
-	else if(file_extension == "mpd"){
-		return this.FILETYPES.DASH;
-	}
-	return null;
-};
 
 VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -460,6 +446,17 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ this.drm.la_url +'</URL></RightsIssuer></RightsURL></Marlin>';
 		var DRMSysID = "urn:dvb:casystemid:19188";
 	}
+	else if( this.drm.system == "clearkey" ){
+		self.player.setProtectionData({
+			"org.w3.clearkey": { 
+				"serverURL": self.drm.la_url
+				/* "serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php", */
+				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
+			}
+		});
+	}
+	
+	console.log( xmlLicenceAcquisition );
 	
 	try {
 		this.oipfDrm.onDRMMessageResult = drmMsgHandler;
@@ -534,7 +531,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 	console.log("startVideo()");
-	
+	fullscreen = true;
 	try{
 		var broadcast = $("#broadcast")[0];
 		if( !broadcast ){
@@ -566,7 +563,6 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 			else{
 				showInfo( "Unknown DRM error! " + JSON.stringify( response ));
 			}
-			//self.startVideo( fullscreen );
 		} );
 		return;
 	}
@@ -591,10 +587,8 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 		
 		console.log("video.play()")
 		self.video.play();
-		if(fullscreen){
-			self.setFullscreen(fullscreen);
-			self.displayPlayer(5);
-		}
+		self.setFullscreen(true);
+		self.displayPlayer(5);
 	}
 	catch(e){
 		console.log( e.message );
@@ -634,51 +628,6 @@ VideoPlayerHTML5.prototype.play = function(){
 	}
 };
 
-VideoPlayerHTML5.prototype.rewind = function( sec ){
-	var self = this;
-	try{
-		sec = sec || -30;
-		if( sec > 0 ){
-			sec = -sec;
-		}
-		//sec = Math.max(self.video.currentTime+sec, 0);
-		console.log("rewind video "+ sec +"s");
-		Monitor.videoSeek(sec);
-		self.video.seek(sec);
-		$("#prew").addClass("activated");
-		clearTimeout( this.seekActiveTimer );
-		this.seekActiveTimer = setTimeout( function(){
-			$("#prew").removeClass("activated");
-		}, 700);
-	}
-	catch(e){
-		console.log(e.message);
-		console.log(e.description);
-	}
-};
-
-VideoPlayerHTML5.prototype.forward = function( sec ){
-	var self = this;
-	try{
-		sec = sec || 30;
-		
-		if( self.video.duration > self.video.currentTime + sec ){
-			Monitor.videoSeek(sec);
-			self.video.seek(sec);
-			console.log("forward video "+sec+"s");
-			self.displayPlayer(5);
-			$("#pff").addClass("activated");
-			clearTimeout( this.seekActiveTimer );
-			this.seekActiveTimer = setTimeout( function(){
-				$("#pff").removeClass("activated");
-			}, 700);
-		}
-	}
-	catch(e){
-		console.log(e);
-	}
-};
-
 VideoPlayerHTML5.prototype.clearVideo = function(){
 	
 	var self = this;
@@ -691,6 +640,9 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 			self.video.src = "";
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
+		}
+		if( $("#broadcast")[0] ){
+			$("#broadcast")[0].bindToCurrentChannel();
 		}
 	}
 	catch(e){

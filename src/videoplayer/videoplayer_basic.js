@@ -1,8 +1,11 @@
-/***
-	videoplayer common superclass impelmentation for all inherited versions. Common interface that can be extended and specified
-***/
-
-
+/**
+ * Videoplayer common superclass impelmentation for all inherited versions. Common interface that can be extended and specified
+ * 
+ * 
+ *
+ * @class VideoPlayerBasic
+ * @constructor
+ */
 function VideoPlayerBasic(element_id, profile, width, height){
 	console.log("VideoPlayerBasic - Constructor");
 	this.FILETYPES = {
@@ -24,11 +27,26 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	this.url = null;
 	this.video = null;
 	this.profile = profile;
+	this.timeInMilliseconds = false;
 
 	// Timers and intervals
 	this.progressUpdateInterval = null;
 	this.hidePlayerTimer = null;
+	this.seekTimer = null;
+	this.seekValue = 0;
 	
+	
+	/**
+	 * Creates player component and sets up event listeners
+	 * Basic version is left empty and inherited players must define this method for all different players creation
+	 * @method createPlayer
+	**/
+	this.createPlayer = this.__proto__.createPlayer;
+	
+	/**
+	 * Basic video player populate method to initialize player html elements ready for setting up
+	 * @method populate
+	**/
 	this.populate = function(){
 		console.log("VideoPlayerBasic - populate");
 		this.element.innerHTML = "";
@@ -40,6 +58,14 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		this.setFullscreen(true);
 	};
 	
+	 	
+	 	
+
+	/**
+	 * Displays player over video. Player shows current play position, duration and buttons that can be used
+	 * @param {Int} sec. seconds player is displayed on screen and hidden after. If sec is not defined player remains on screen and is not hidden.
+	 * @method displayPlayer
+	 */
 	this.displayPlayer = function( sec ){
 		console.log("VideoPlayerBasic - displayPlayer");
 		clearTimeout( this.hidePlayerTimer );
@@ -52,7 +78,11 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		}
 	};
 	
-	
+	/**
+	 * Handles navigation during video playback. This super class method may be re-defined on inherited class
+	 * @param {Int} key. keycode of pressed key. Keycodes are defined in keycodes.js file
+	 * @method navigate
+	 */
 	/* Use inherited basic method or player specified */
 	this.navigate = this.__proto__.navigate || function(key){
 		var self = this;
@@ -79,14 +109,14 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			case VK_LEFT:
 			case VK_REWIND:
 				if( !self.onAdBreak ){
-					self.rewind( 30 );
+					self.seek( -30 );
 					self.displayPlayer(5);
 				}
 				break;
 			case VK_RIGHT:
 			case VK_FAST_FWD:
 				if( !self.onAdBreak ){
-					self.forward( 30 );
+					self.seek( 30 );
 					self.displayPlayer(5);
 				}
 				break;
@@ -115,7 +145,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 							if( this.video.textTracks[i].kind != "metadata" )
 								tracks++;
 						}
-						//var tracks = this.video.textTracks.map( function(track){ return track.kind != "metadata" } ).length;
+						
 						console.log("text tracks " + tracks );
 						if( !tracks ){
 							showInfo("No Subtitles Available");
@@ -150,7 +180,13 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		}
 	};
 	
+	/**
+	 * 
+	 * @param {HTML Element} container. Container for video display. Video will be set inside the container 
+	 * @method setDisplay
+	 */
 	this.setDisplay = function( container ){
+		/*
 		if( container ){
 			// detach from DOM
 			var element = $(this.element).detach();
@@ -163,8 +199,15 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			// if target not set, assume to set fullscreen
 			this.setFullscreen(true);
 		}
+		*/
 	};
 	
+	
+	/**
+	 * 
+	 * @param {Object} subtitles. Creates HTML track objects for Out-Of-Band subtitle files
+	 * @method setSubtitles
+	 */
 	this.setSubtitles = this.__proto__.setSubtitles || function( subtitles ){
 		// out-of-band subtitles must be an array containing containing language code and source.xml file url.
 		try{
@@ -210,7 +253,11 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			console.log("Error: setSubtitles: " + e.description );
 		}
 	};
-	
+	/**
+	 * 
+	 * Pause video playback and display player on screen
+	 * @method pause
+	 */
 	this.pause = this.__proto__.pause || function(){
 		console.log("VideoPlayerBasic pause");
 		var self = this;
@@ -223,6 +270,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		}
 	};
 	
+	/**
+	 * 
+	 * @param {bool} loading. Sets player's loading indicator visible if true, and hides if false
+	 * @param {String} reason. logs reason for loading if specified
+	 * @method setLoading
+	 */
 	this.setLoading = function(loading, reason){
 		this.loading = loading;
 		if(this.loading){
@@ -235,26 +288,41 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			console.log(reason);
 		}
 	};
-
+	
+	/**
+	 * 
+	 * @param {bool} fs. Set video fullscreen if true, and to the active asset box if false
+	 * @method setFullscreen
+	 */
 	this.setFullscreen = function(fs){
+		
 		this.fullscreen = fs;
 		if(fs){
 			this.element.addClass("fullscreen");
-			this.setDisplay( $("body")[0] ); // sets video player object to child of body
+			//this.setDisplay( $("body")[0] ); // sets video player object to child of body
 		}
 		else{
 			this.element.removeClass("fullscreen");
-			this.setDisplay( menu.focus.element ); // sets video player object to child of focused tile element
+			//this.setDisplay( menu.focus.element ); // sets video player object to child of focused tile element
 			$("#player").removeClass("show");
 		}
-
 	};
-
+	
+	/**
+	 * 
+	 * returns true if player is visible
+	 * @method isVisible
+	 */
 	this.isVisible = function(fs){
 		return this.visible;
 	};
 	
-	this.updateProgressBar = function(){
+	/**
+	 * 
+	 * Updates progress bar. Progress bar is only visible when player UI is displayed, but it is always updated non-visible when this method is called
+	 * @method updateProgressBar
+	 */
+	this.updateProgressBar = function( sec ){
 		var position = 0;
 		var duration = 0;
 		var pbMaxWidth = 895; // progress bar maximum width in pixels
@@ -263,12 +331,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		try{
 			// <video> object used
 			if( this.video.duration ){
-				position = this.video.currentTime;
+				position = (sec ? sec + this.video.currentTime : this.video.currentTime);
 				duration = this.video.duration;
 			}
 			// oipf player object used. Convert milliseconds to seconds
 			else if( this.video.playTime ){
-				position = this.video.playPosition / 1000;
+				position = (sec? this.video.playPosition / 1000 + sec : this.video.playPosition / 1000);
 				duration = this.video.playTime / 1000;
 			}
 			else{
@@ -322,6 +390,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 
 	};
 	
+	/**
+	 * 
+	 * @param {String} system. Specifies DRM system to be used as a string value (for example playeready or marlin)
+	 * @param {String} la_url. DRM lisence url
+	 * @method setDRM
+	 */
 	this.setDRM = function( system, la_url){
 		if( !system ){
 			this.drm = null;
@@ -331,7 +405,122 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			this.drm = { la_url : la_url, system : system, ready : false, error : null};
 		}
 	};
+	
+	/**
+	 * 
+	 * @param {Object} breaks. Sets ad break positions, and ad amount to be requested as a list of objects with needed attributes
+	 * @method setAdBreaks
+	 */
+	this.setAdBreaks = function( breaks ){
+		if( !breaks){
+			this.adBreaks = null;
+		}
+		else{
+			console.log("setAdBreaks(", breaks ,")");
+			this.adBreaks = $.extend(true, {}, breaks);
+		}
+	};
+	
+	
+	/**
+	 * Return players playback position and duration as an object with duration and position value.
+	 * Times are represented in seconds for all players
+	 * @method time
+	 * @returns (Object) { duration : \d+, position : \d+ }
+	 */
+	this.time = function(){
+		try{
+			
+			if( this.timeInMilliseconds && this.video.playTime ){
+				return { duration : this.video.playTime/1000, position : this.video.playPosition/1000 };
+			}
+			else if( this.video.duration ){
+				return { duration : this.video.duration, position : this.video.currentTime };
+			}
+			else{
+				console.log("timedata not available")
+				return { duration : 0, position : 0 };
+			}
+			
+		} catch(e){
+			console.log("error getting playback position and duration");
+			return { duration : 0, position : 0 };
+		}
+		
+	}
+	
+	/**
+	 * Perform seek operation. To be called when user presses seek button. 
+	 * Timeout is set to wait for continious seek operations before actual seeking
+	 * If this is called multiple times the value to be seeked is added up.
+	 * After delay of 700ms the seek is performed
+	 * @method seek
+	 * @param (Int) sec: How many seconds is seeked. Positiove integer for forward, negative for rewind.
+	 */
+	this.seek = function( sec ){
+		var self = this;
+		try{
+			
+			console.log( this.time(), this.seekValue, sec );
+			// if seek value goes below zero seconds, do immediate seek
+			if( this.time().position + (this.seekValue + sec) < 0 ){
+				console.log( "seek below starting position. go to start" );
+				clearTimeout( this.seekTimer );
+				this.updateProgressBar( -this.time().position );
+				self.video.seek( -( self.timeInMilliseconds? this.time().position * 1000 : this.time().position ) );
+				self.seekValue = 0;
+				clearTimeout( this.seekTimer );
+				self.seekTimer = null;
+				return;
+			}
+			
+			// if seek value goes above playtime, do not add seek seconds
+			if( this.time().position + (this.seekValue + sec) > this.time().duration ){
+				return;
+			}
+			
+			this.seekValue += sec;
+			
+			console.log("seek video "+ this.seekValue +"s");
+			this.updateProgressBar( self.seekValue );
+			clearTimeout( this.seekTimer );
+			
+			this.seekTimer = setTimeout( function(){
+				console.log("perform seek now!");
+				self.seekTimer = null;
+				try{
+					var toSeek = (self.timeInMilliseconds? self.seekValue * 1000 : self.seekValue);
+					self.video.seek( toSeek );
+					Monitor.videoSeek( self.seekValue );
+					console.log("seek completed to " + toSeek);
+				} catch(e){
+					console.log("seek failed: " + e.description);
+				}
+				
+				self.seekValue = 0;
+			}, 700);
+			
+			var buttonActivated = ( sec < 0? "prew" : "pff" );
+			$("#prew, #pff" ).removeClass("activated");
+			$("#" + buttonActivated ).addClass("activated");
+			clearTimeout( this.seekActiveTimer );
+			this.seekActiveTimer = setTimeout( function(){
+				$("#prew, #pff" ).removeClass("activated");
+			}, 700);
+		}
+		catch(e){
+			console.log(e.message);
+			console.log(e.description);
+		}
+	};
 }
+
+
+
+
+
+
+
 
 
 

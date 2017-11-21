@@ -1,3 +1,9 @@
+/**
+ * Application initaion methods. Inits catalogue menu, HbbTV Application Manager, Monitor module and selects VideoPlayer to be used
+ *
+ * @module Application
+ */
+
 function showApplication() {
   try {
 	var app = document.getElementById('appmgr').getOwnerApplication(document);

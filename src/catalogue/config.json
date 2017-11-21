@@ -19,10 +19,15 @@
                     "app": 0,
                     "submenu": 3
                 },
+				{
+                    "title": "Clearkey",
+                    "app": 0,
+                    "submenu": 4
+                },
                 {
                     "title": "Settings",
                     "app": 0,
-                    "submenu": 4
+                    "submenu": 5
                 }
             ]
         },
@@ -90,7 +95,7 @@
                     "app": 6,
 					"desc": "TextTrack cues in inband tracks",
 					"profile" : ["html5", "mse-eme"]							
-                }								
+                }
             ]
         },
         {
@@ -104,7 +109,14 @@
                     "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
                     "drm": "playready",
                     "app": 6,
-					"desc": "init.mp4 pr,cenc,mrl PSSH tables"
+					"desc": "License URL override method"
+                },
+				{
+                    "title": "Caminandes 2 AVC 1080p",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest.mpd",
+					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "app": 6,
+					"desc": "License URL in manifest"
                 },
                 {
                     "title": "Llama Drama HEVC 2160p",
@@ -113,8 +125,9 @@
                     "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNQ==)",
                     "drm": "playready",
                     "app": 6,
-					"desc": "init.mp4 pr,cenc,mrl PSSH tables"					
+					"desc": "License URL override method"					
                 },
+				
                 {
                     "title": "Out of band subtitles",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
@@ -247,6 +260,22 @@
                 }										
             ]
         },
+		{
+            "center": 0,
+            "title": "Clearkey DRM",
+            "items": [
+				{
+					"title": "Clearkey test",
+					"url": "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest_clearkey.mpd",
+					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
+					"app": 6,
+					"drm" : "clearkey",
+					"la_url" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php",
+					"desc": "clearkey test",
+					"profile" : ["mse-eme"]							
+				}
+			]
+		},
         {
             "center": 0,
             "title": "Settings",

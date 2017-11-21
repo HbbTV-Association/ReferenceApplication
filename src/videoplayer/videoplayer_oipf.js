@@ -1,6 +1,12 @@
-/***
-	OIPF AV-object player impelmentation for HbbTV
-***/
+/**
+ * OIPF AV-Object videoplayer for HbbTV 1.5 devices
+ * 
+ * 
+ *
+ * @class VideoPlayer
+ * @extends VideoPlayerBasic
+ * @constructor
+ */
 
 
 function VideoPlayer(element_id, profile, width, height){
@@ -8,7 +14,7 @@ function VideoPlayer(element_id, profile, width, height){
 	
 	// Call super class constructor
 	VideoPlayerBasic.call(this, element_id, profile, width, height);
-	
+	this.timeInMilliseconds = true;
 	console.log("Initialized " + this.element_id);
 }
 
@@ -196,15 +202,6 @@ VideoPlayer.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayer.prototype.setAdBreaks = function( breaks ){
-	if( !breaks){
-		this.adBreaks = null;
-	}
-	else{
-		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = $.extend(true, {}, breaks);
-	}
-};
 
 VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	if( subtitles ){
@@ -216,18 +213,6 @@ VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	}
 }
 
-VideoPlayer.prototype.getVideoType = function( file_extension ){
-	if(file_extension == "mp4"){
-		return this.FILETYPES.MP4;
-	}
-	else if(["mpg", "mpeg", "ts"].indexOf(file_extension) > -1){
-		return this.FILETYPES.MPEG;
-	}
-	else if(file_extension == "mpd"){
-		return this.FILETYPES.DASH;
-	}
-	return null;
-}
 
 VideoPlayer.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -394,8 +379,23 @@ VideoPlayer.prototype.setSubtitles = function(){
 };
 
 
-VideoPlayer.prototype.startVideo = function(fullscreen){
+VideoPlayer.prototype.startVideo = function(){
 	console.log("startVideo()");
+	
+	try{
+		var broadcast = $("#broadcast")[0];
+		if( !broadcast ){
+			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+		}
+		broadcast = $("#broadcast")[0];
+		broadcast.bindToCurrentChannel();
+		broadcast.stop();
+		console.log("broadcast stopped");
+	}
+	catch(e){
+		console.log("error stopping broadcast");
+	}
+	
 	var self = this;
 	
 	if( this.drm && this.drm.ready == false ){
@@ -403,7 +403,7 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo( fullscreen );
+				self.startVideo();
 			}
 			else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );
@@ -411,7 +411,6 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 			else{
 				showInfo( "Unknown DRM error! " + JSON.stringify( response ));
 			}
-			//self.startVideo( fullscreen );
 		} );
 		return;
 	}
@@ -444,11 +443,9 @@ VideoPlayer.prototype.startVideo = function(fullscreen){
 		self.visible = true;
 		self.video.play(1);
 		
-		if(fullscreen){
-			self.setFullscreen(fullscreen);
-			//self.controls.show();
-			self.displayPlayer(5);
-		}
+		self.setFullscreen(true);
+		self.displayPlayer(5);
+		
 	}
 	catch(e){
 		console.log(e);
@@ -468,6 +465,7 @@ VideoPlayer.prototype.pause = function(){
 }
 
 VideoPlayer.prototype.stop = function(){
+	showInfo("Exit Video", 1);
 	var self = this;
 	try{
 		self.video.stop();
@@ -482,34 +480,6 @@ VideoPlayer.prototype.play = function(){
 	var self = this;
 	try{
 		self.video.play(1);
-		//self.controls.show();
-		self.displayPlayer(5);
-	}
-	catch(e){
-		console.log(e);
-	}
-}
-
-VideoPlayer.prototype.rewind = function(){
-	var self = this;
-	try{
-		var ms = Math.max(self.video.playPosition-30000, 0);
-		self.video.seek( ms );
-		Monitor.videoSeek( Math.round( ms/1000 ) );
-		self.displayPlayer(5);
-	}
-	catch(e){
-		console.log(e);
-	}
-}
-
-VideoPlayer.prototype.forward = function(){
-	var self = this;
-	try{
-		var ms = Math.min(self.video.playPosition+(30000), self.video.playTime);
-		self.video.seek( ms ); 
-		Monitor.videoSeek( Math.round( ms/1000 ) );
-		//self.controls.show();
 		self.displayPlayer(5);
 	}
 	catch(e){
@@ -518,21 +488,31 @@ VideoPlayer.prototype.forward = function(){
 }
 
 VideoPlayer.prototype.clearVideo = function(){
+	console.log("clearing video");
 	var self = this;
 	self.element.addClass("hidden");
 	self.visible = false;
+	console.log("clearInterval(self.progressUpdateInterval)");
 	clearInterval(self.progressUpdateInterval);
 	try{
 		if(self.video){
-			self.video.stop();
+			if( self.isPlaying() ){
+				self.video.stop();
+			}
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
+			console.log("video object stopped, removed from dom and VideoPlayerClass");
+		}
+		if( $("#broadcast")[0] ){
+			console.log("bindToCurrentChannel();");
+			$("#broadcast")[0].bindToCurrentChannel();
 		}
 	}
 	catch(e){
 		console.log( e.description );
 	}
 	this.subtitles = null;
+	console.log("clearing video completed");
 }
 
 VideoPlayer.prototype.isFullscreen = function(){
@@ -561,7 +541,10 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             self.setLoading(false);
             clearInterval(self.progressUpdateInterval);
             self.progressUpdateInterval = window.setInterval( function(){
-            	self.updateProgressBar();
+				if( self.seekTimer == null ){
+					self.updateProgressBar();
+					self.displayPlayer( 5 );
+				}
             }, 1000);
 			Monitor.videoPlaying();
             break;

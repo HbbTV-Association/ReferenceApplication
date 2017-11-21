@@ -8,11 +8,17 @@ try{
 	$files = array_values( array_diff(scandir("./", 1), array('.', '..', 'save.php')) );
 	$nth = 0;
 	if( count( $files ) ){
-		$m;
-		preg_match('/log(?P<number>\d+).json/', $files[0], $m);
-		if( isset( $m['number'] ) ){
-			$nth = (int)$m['number'] + 1;
+		$numbers = array();
+		// finc out the last file number
+		foreach( $files as $filename ){
+			$m;
+			preg_match('/log(?P<number>\d+).json/', $filename, $m);
+			if( isset( $m['number'] ) ){
+				$numbers[] = (int)$m['number'];
+			}
 		}
+		rsort($numbers);
+		$nth = $numbers[0] + 1; // the greatest number plus one
 	}
 	$filename = "log".$nth.".json";
 

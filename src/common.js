@@ -1,3 +1,10 @@
+/**
+ * Common helpers to be used in catalogue or videoplayers
+ *
+ * @module Common
+ */
+
+
 /***
 	Time/Date helpers
 ***/
@@ -29,7 +36,13 @@ Date.prototype.getMonthString = function(){
 	return months[this.getMonth()];
 }
 
-
+/**
+ * Extends Array to support sortBy, which sorts an array of objects by given attributes
+ * If secondary or more attributes are given and previous attribute comparison is equal, the next attribute is compared in given priority sorting order
+ * If an attribute is given with - prefix, the sort order is DESC.
+ * @method Array.prototype.sortBy
+ * @for Common
+**/
 Array.prototype.sortBy = function(){
 
 	var fields = arguments;
@@ -58,6 +71,13 @@ Array.prototype.last = function(){
 	return this[this.length - 1];
 };
 
+/**
+ * greps off matching regular expression from a string. If there is more capturing blocs, return an array of strings.
+ * @method String.prototype.grep
+ * @param needle: the regular expression to perform for the string
+ * @param nomatch: default return value if string does not match to regex
+ * @param bytes: Additional regex bytes as a string.
+**/
 String.prototype.grep = function( needle, nomatch, bytes ){
 	var match = this.match( new RegExp(needle, bytes) );
 	return ( match? ( match.length == 2? match[1] : ( match.length==1? match[0] : match.slice(1)) ) : nomatch );
@@ -82,7 +102,6 @@ function showInfo( msg, timeout, inMs )
 			msg = JSON.stringify( msg );
 		}
 		$("#info").html( XMLEscape( msg ) );
-		//console.log( msg  );
 	}
 	catch(e){
 		console.log( "error in show info function: " + e.message );
@@ -220,29 +239,38 @@ function stripTags( str ){
 }
 
 function XMLEscape(sValue, bUseApos) {
-  var sval="";
-  if(!sValue) return "";
-  sValue = stripTags( sValue );
+	try{
+		var sval="";
+		if(!sValue) return "";
+		sValue = stripTags( sValue );
 
-  if (sValue.search("&lt;") != -1 || sValue.search("&gt;") != -1  || sValue.search("&amp;") != -1  || sValue.search("&quot;") != -1  || sValue.search("&apos;") != -1  || sValue.search("&#39;") != -1  || sValue.search("&#x2F;") != -1 ){
-	  return sValue;
-  }
-  for(var idx=0; idx < sValue.length; idx++) {
-    var c = sValue.charAt(idx);
-	if      (c == '<') sval += "&lt;";
-	else if (c == '>') sval += "&gt;";
-	else if (c == '&') sval += "&amp;";
-	else if (c == '"') sval += "&quot;";
-	else if (c == '/') sval += "&#x2F;";
-	else if (c == '\'') sval += (bUseApos ? "&apos;" : "&#39;");
-	else sval += c;
-  }
-  return sval;
+		if (sValue.search("&lt;") != -1 || sValue.search("&gt;") != -1  || sValue.search("&amp;") != -1  || sValue.search("&quot;") != -1  || sValue.search("&apos;") != -1  || sValue.search("&#39;") != -1  || sValue.search("&#x2F;") != -1 ){
+			return sValue;
+		}
+		for(var idx=0; idx < sValue.length; idx++) {
+			var c = sValue.charAt(idx);
+			if      (c == '<') sval += "&lt;";
+			else if (c == '>') sval += "&gt;";
+			else if (c == '&') sval += "&amp;";
+			else if (c == '"') sval += "&quot;";
+			else if (c == '/') sval += "&#x2F;";
+			else if (c == '\'') sval += (bUseApos ? "&apos;" : "&#39;");
+			else sval += c;
+		}
+		return sval;
+	} catch(e){
+		console.log("Error: XMLEscape: " + e.description);
+		return "";
+	}
 }
 
 window.onerror = function(message, url, lineNumber) { 
 	//showInfo( message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10 );
-    console.log(message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10);
+	try{
+		console.log(message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10);
+	} catch(e){
+		console.log("Error: onerror: " + e.description);
+	}
 	return false; // when false, print it also to js console
 };
 

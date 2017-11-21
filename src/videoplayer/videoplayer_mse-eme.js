@@ -1,8 +1,14 @@
-/***
-	HTML5 <video> player impelmentation for HbbTV
-***/
-
-
+/**
+ * HTML5 MSE-EME video player impelmentation for HbbTV
+ * Video player class definition for MSE-EME player.
+ * This version is supposed to use on PC with target browser Edge.
+ * 
+ *
+ * @class VideoPlayerEME
+ * @extends VideoPlayerBasic
+ * @constructor
+ */
+ 
 function VideoPlayerEME(element_id, profile, width, height){
 	console.log("VideoPlayerEME - Constructor");
 	
@@ -77,7 +83,6 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		console.log("video play event triggered");
 	} );
 	
-	player.seektimer = null;
 	player.addEventListener('seeked', function(){
 		console.log("Seeked");
 	});
@@ -204,6 +209,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	player.addEventListener('playing', function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
+			self.displayPlayer( 5 );
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -212,8 +218,10 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('timeupdate', function(){
-		self.updateProgressBar();
-		self.checkAds();
+		if( self.seekTimer == null ){
+			self.updateProgressBar();
+			self.checkAds();
+		}
 	} );
 	
 	player.seek = function( sec, absolute ){
@@ -226,7 +234,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 				return;
 			
 			console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-			// Set position
+			// Set position 
 			player.currentTime = target;
 		} catch(e){
 			console.log("error seeking: " + e.description);
@@ -379,28 +387,6 @@ VideoPlayerEME.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
-VideoPlayerEME.prototype.setAdBreaks = function( breaks ){
-	if( !breaks){
-		this.adBreaks = null;
-	}
-	else{
-		console.log("setAdBreaks(", breaks ,")");
-		this.adBreaks = $.extend(true, {}, breaks);
-	}
-};
-
-VideoPlayerEME.prototype.getVideoType = function(file_extension){
-	if(file_extension == "mp4"){
-		return this.FILETYPES.MP4;
-	}
-	else if(["mpg", "mpeg", "ts"].indexOf(file_extension) > -1){
-		return this.FILETYPES.MPEG;
-	}
-	else if(file_extension == "mpd"){
-		return this.FILETYPES.DASH;
-	}
-	return null;
-};
 
 VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -424,7 +410,8 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	else if( this.drm.system == "clearkey" ){
 		self.player.setProtectionData({
 			"org.w3.clearkey": { 
-				"serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php",
+				"serverURL": self.drm.la_url
+				/* "serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php", */
 				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
 			}
 		});
@@ -438,7 +425,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerEME.prototype.startVideo = function(fullscreen){
+VideoPlayerEME.prototype.startVideo = function(){
 	console.log("startVideo()");
 	
 	var self = this;
@@ -464,10 +451,10 @@ VideoPlayerEME.prototype.startVideo = function(fullscreen){
 		
 		console.log("video.play()")
 		self.video.play();
-		if(fullscreen){
-			self.setFullscreen(fullscreen);
-			self.displayPlayer(5);
-		}
+
+		self.setFullscreen(true);
+		self.displayPlayer(5);
+		
 	}
 	catch(e){
 		console.log( e.message );
@@ -477,6 +464,7 @@ VideoPlayerEME.prototype.startVideo = function(fullscreen){
 
 
 VideoPlayerEME.prototype.stop = function(){
+	showInfo("Exit Video", 1);
 	var self = this;
 	this.onAdBreak = false;
 	// if video not exist
@@ -501,51 +489,6 @@ VideoPlayerEME.prototype.play = function(){
 	try{
 		self.video.play();
 		self.displayPlayer(5);
-	}
-	catch(e){
-		console.log(e);
-	}
-};
-
-VideoPlayerEME.prototype.rewind = function( sec ){
-	var self = this;
-	try{
-		sec = sec || -30;
-		if( sec > 0 ){
-			sec = -sec;
-		}
-		//sec = Math.max(self.video.currentTime+sec, 0);
-		console.log("rewind video "+ sec +"s");
-		Monitor.videoSeek(sec);
-		self.video.seek(sec);
-		$("#prew").addClass("activated");
-		clearTimeout( this.seekActiveTimer );
-		this.seekActiveTimer = setTimeout( function(){
-			$("#prew").removeClass("activated");
-		}, 700);
-	}
-	catch(e){
-		console.log(e.message);
-		console.log(e.description);
-	}
-};
-
-VideoPlayerEME.prototype.forward = function( sec ){
-	var self = this;
-	try{
-		sec = sec || 30;
-		
-		if( self.video.duration > self.video.currentTime + sec ){
-			Monitor.videoSeek(sec);
-			self.video.seek(sec);
-			console.log("forward video "+sec+"s");
-			self.displayPlayer(5);
-			$("#pff").addClass("activated");
-			clearTimeout( this.seekActiveTimer );
-			this.seekActiveTimer = setTimeout( function(){
-				$("#pff").removeClass("activated");
-			}, 700);
-		}
 	}
 	catch(e){
 		console.log(e);
