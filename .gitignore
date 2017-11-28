@@ -3,3 +3,4 @@ src/videoplayer/monitor/*
 src/catalogue/log/*.json
 deploy
 out
+videos

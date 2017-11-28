@@ -1,3 +1,7 @@
+/**
+
+*/
+
 function GridScrollView(element_id, items){
 	this.element_id = element_id;
 	this.activeGrid = null;

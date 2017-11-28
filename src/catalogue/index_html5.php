@@ -17,8 +17,8 @@
 <head>
 	<title>HbbTV Reference Video Application</title>
 
-	<meta http-equiv="content-type" content="Content-Type: application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
-	<script type="application/javascript" language="javascript">
+	<meta http-equiv="content-type" content="application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
+	<script type="application/javascript">
 	
 	var profile = { hbbtv : "2.0", video : "html5", version : "html5"};
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
