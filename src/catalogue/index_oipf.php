@@ -15,8 +15,8 @@
 <head>
 	<title>HbbTV Reference Video Application</title>
 
-	<meta http-equiv="content-type" content="Content-Type: application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
-	<script type="text/javascript" language="javascript">
+	<meta http-equiv="content-type" content="application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
+	<script type="text/javascript">
 	
 	/***
 		Settings

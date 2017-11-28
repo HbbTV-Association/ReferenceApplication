@@ -8,9 +8,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>HbbTV Reference Video Application</title>
-	<meta http-equiv="content-type" content="Content-Type: text/html; charset=UTF-8" />
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<script type="application/javascript" language="javascript">
+	<script type="application/javascript">
 	
 	var profile = { hbbtv : false, video : "dashjs", version : "mse-eme"};
 	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected

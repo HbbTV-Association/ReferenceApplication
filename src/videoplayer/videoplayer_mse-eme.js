@@ -155,6 +155,36 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		
 		// set up inband cue events listeners for new tracks
 		var track = evt.track;
+		
+		// TODO: First check if same language code exist, do not add duplicates. 
+		// (may occur if subtitles are served both inband and out-of-band)
+		try{
+			/*
+			$.each( $(player).find("track"), function(olderTrack){
+				if( olderTrack.label == track.language ){
+					console.log("Language " + track.language + " text track already exists. Skip");
+					$(player)
+					return;
+				}
+			} );
+			*/
+			var found = false;
+			$.each( player.textTracks, function(olderTrack){
+				if( olderTrack.label == track.language ){
+					console.log("Language " + track.language + " text track already exists. Skip");
+					delete track;
+					found = true;
+					return false;
+				}
+			} );
+			if(found){
+				return;
+			}
+		} catch( e ){
+			console.log( "error checking tracks: " + e.description );
+		}
+		
+		
 		console.log("at addtrack nth track: " + this.length + " : set up cuechange listeners", track);
 		
 		// show subtitle button label if there is a track that is not metadata 

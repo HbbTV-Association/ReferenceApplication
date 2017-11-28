@@ -65,8 +65,8 @@
 <head>
 	<title>HbbTV Reference Video Application</title>
 
-	<meta http-equiv="content-type" content="Content-Type: <?php echo $profile['contentType']; ?>; charset=UTF-8" />
-	<script type="text/javascript" language="javascript">
+	<meta http-equiv="content-type" content="<?php echo $profile['contentType']; ?>; charset=UTF-8" />
+	<script type="text/javascript">
 	
 	/***
 		Settings
@@ -83,7 +83,7 @@
 		include("resources.php"); 
 	?>
 	
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
 
 console.log("Application Start");
 
