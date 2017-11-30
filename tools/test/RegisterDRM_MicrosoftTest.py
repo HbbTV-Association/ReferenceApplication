@@ -2,9 +2,10 @@
 ## Create Microsoft Test Server DRM keys, parse LAURL array
 ##  python.exe RegisterDRM_MicrosoftTest.py > keys_microsofttest.json
 ## Aki Nieminen/Sofia Digital
+## 2017-11-30/Aki: changed hexdecode to python3
 ## 2017-08-21/Aki: initial release
 
-import sys, os, time, datetime, json, urllib2, base64
+import sys, os, time, datetime, json, base64
 from optparse import OptionParser
 
 def registerPlayready(drmType, auth, kid, enckey):
@@ -13,7 +14,8 @@ def registerPlayready(drmType, auth, kid, enckey):
 	params = "cfg=(kid:header,sl:2000,persist:false,firstexp:%s,contentkey:%s)" % (
 		60*1,  ##expiration(seconds) on first play
 		##now.strftime('%Y%m%d%H%M%S'), ##expiration:20170921000000
-		base64.b64encode(enckey.decode('hex'))
+		#base64.b64encode(enckey.decode('hex'))
+		base64.b64encode(bytearray.fromhex(enckey)).decode("ISO-8859-1")
 	)
 	return url + "?" + params
 	
@@ -50,7 +52,7 @@ def main():
 	obj["Test1238"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341238", "12341234123412341234123412341238")
 
 	obj = json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=False)
-	print obj
+	print (obj)
 
 if __name__ == "__main__":
 	main()
