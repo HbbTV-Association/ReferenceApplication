@@ -52,6 +52,8 @@ public class MediaTools {
 			"-level", spec.level.isEmpty()?"4.0":spec.level,
 			"-s:v", spec.size, 		// resolution 1920x1080
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
+			//"-maxrate:v", spec.bitrate,
+			//"-bufsize:v", spec.bitrate,
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
@@ -89,6 +91,8 @@ public class MediaTools {
 			"-level", level,// profile=main(8bit) is given in x265-params
 			"-s:v", spec.size, 		// resolution 3840x2160
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
+			//"-maxrate:v", spec.bitrate,
+			//"-bufsize:v", spec.bitrate,
 			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
@@ -136,13 +140,16 @@ public class MediaTools {
 	}
 	
 	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur) {
+		// Use MDP.minBufferTime=segdur*2 to make validator happy, default 1.5sec-3sec 
+		// value most likely gives "buffer underrun" warnings.
+		//    http://dashif.org/conformance.html
 		List<String> args=Arrays.asList(MP4BOX,
 			"-dash", ""+(segdur*1000), 	// segment duration 6sec*1000
 			"-frag", ""+(segdur*1000),
 			"-mem-frags", "-rap",
 			"-profile", "dashavc264:live",
 			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012",
-			"-min-buffer", "3000", // MDP.minBufferTime value
+			"-min-buffer", ""+(segdur*1000*2), //  "3000", // MDP.minBufferTime value
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
 			"-bs-switching", "no",
 			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "1", // SIDX table with 1 fragment

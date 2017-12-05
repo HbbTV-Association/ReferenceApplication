@@ -2,9 +2,10 @@
 ## Register ExpressPlay DRM keys, parse LAURL array (test and production)
 ##  python.exe RegisterDRM_ExpressPlay.py --authprod="5050,5555" --authtest="4040,4444" > keys_expressplay.json
 ## Aki Nieminen/Sofia Digital
+## 2017-11-30/Aki: changed urllib2(Python2) to urllib(Python3)
 ## 2017-08-21/Aki: initial release
 
-import sys, os, time, datetime, json, urllib2
+import sys, os, time, datetime, json, urllib.request
 from optparse import OptionParser
 
 def registerPlayready(drmType, auth, kid, enckey):
@@ -17,7 +18,8 @@ def registerPlayready(drmType, auth, kid, enckey):
 		"00000000"		##flags: 00000000=non-persistent, 00000001=persistent
 	)
 
-	buf = urllib2.urlopen(url + "?" + params).read()
+	##buf = urllib2.urlopen(url + "?" + params).read()
+	buf = urllib.request.urlopen(url + "?" + params).read()
 	obj = json.loads(buf)
 	buf = obj["licenseAcquisitionUrl"] + "?ExpressPlayToken=" + obj["token"]
 	##buf = buf.encode("latin-1")	
@@ -39,7 +41,8 @@ def registerWidevine(drmType, auth, kid, enckey):
 	##hdcpOutputControl=0..5 (0*=NONE,1=V1,2=V2,3=V2.1,4=V2.2,5=HDCPNODIGITALOUT)
 	##licenseDuration=default infinite or seconds to start first playback
 	##playbackDuration=default infinite or seconds viewing duration			
-	buf=urllib2.urlopen(url + "?" + params).read()
+	#buf=urllib2.urlopen(url + "?" + params).read()
+	buf = urllib.request.urlopen(url + "?" + params).read().decode("ISO-8859-1")
 	return buf
 
 def registerMarlinMS3(drmType, auth, kid, enckey):
@@ -52,7 +55,8 @@ def registerMarlinMS3(drmType, auth, kid, enckey):
 		"wudo&extensionCriticalFlag=false&extensionPayload=AAAAAA==",  ## extension to lift 520k resolution limit
 		"http://myserver.com/myvideo/drm/manifest.mpd"  ## this is replaced by player at runtime
 	)
-	buf=urllib2.urlopen(url + "?" + params).read()
+	#buf=urllib2.urlopen(url + "?" + params).read()
+	buf = urllib.request.urlopen(url + "?" + params).read().decode("ISO-8859-1")
 	return buf
 	
 def register(drmType, auth, kid, enckey):
@@ -95,8 +99,9 @@ def main():
 	obj["Prod1236"]=register(DRM_TYPE.PROD, options.authprod, "43215678123412341234123412341236", "12341234123412341234123412341236")
 	obj["Prod1237"]=register(DRM_TYPE.PROD, options.authprod, "43215678123412341234123412341237", "12341234123412341234123412341237")
 	obj["Prod1238"]=register(DRM_TYPE.PROD, options.authprod, "43215678123412341234123412341238", "12341234123412341234123412341238")
+	
 	obj = json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=False)
-	print obj
+	print (obj)
 
 if __name__ == "__main__":
 	main()
