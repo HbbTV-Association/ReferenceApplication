@@ -153,6 +153,8 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	
 	player.textTracks.addEventListener('addtrack', function(evt){
 		
+		
+		
 		// set up inband cue events listeners for new tracks
 		var track = evt.track;
 		
@@ -168,6 +170,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 				}
 			} );
 			*/
+			/*
 			var found = false;
 			$.each( player.textTracks, function(olderTrack){
 				if( olderTrack.label == track.language ){
@@ -180,8 +183,18 @@ VideoPlayerEME.prototype.createPlayer = function(){
 			if(found){
 				return;
 			}
+			*/
 		} catch( e ){
 			console.log( "error checking tracks: " + e.description );
+		}
+		
+		
+		track.onerror = function(){
+			console.log("track error: ", arguments );
+		}
+		
+		track.onload = function(){
+			console.log("track loaded: ", arguments );
 		}
 		
 		
@@ -192,14 +205,22 @@ VideoPlayerEME.prototype.createPlayer = function(){
 			$("#subtitleButton").show();
 		}
 		
+		/*
 		// the first track is set showing
-		if( this.length == 1 ){
+		if( self.subtitleTrack === false ){
 			track.mode = "showing";
 			self.subtitleTrack = 0;
 			console.log("set showing track ", track.language, track.label);
 			$("#subtitleButtonText").html("Subtitles: " + track.language );
 		}
-		console.log("text track " + track);
+		else{
+			track.mode = "hidden";
+		}
+		self.subtitleTrack = 0;
+		*/
+		
+		
+		console.log("text track ", track);
 		track.oncuechange = function(evt) {
 			
 			if( this.kind == "metadata" ){
@@ -212,9 +233,15 @@ VideoPlayerEME.prototype.createPlayer = function(){
 						console.log("cue keys: ",  Object.keys( cuelist[0] ) ); 
 						var info = "";
 						$.each( cuelist, function(c, cue){
+							
+							// try read text attribute
+							if( cue.text ){
+								showInfo( cue.text );
+							}
+							
 							var cueValue = arrayBufferToString( cue.data );
-							console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
-							console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime );
+							//console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
+							console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime + " Data: " + cueValue );
 							info +=  "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime + "<br/>";
 							
 						} );
@@ -233,13 +260,35 @@ VideoPlayerEME.prototype.createPlayer = function(){
 				console.log("cue event " + this.kind + " received");
 			}
 		};
+		
 		console.log( "oncuechange function set" );
 	} );
+	
+	
 	
 	player.addEventListener('playing', function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
 			self.displayPlayer( 5 );
+			
+			// TODO: Set the first subtitle track active if any exists.
+			if( self.video.textTracks && self.video.textTracks.length ){
+				var defaultSub = -1;
+				$.each( self.video.textTracks, function(i, track){
+					if( defaultSub < 0 && track.kind != "metadata" ) {
+						track.mode = "showing";
+						defaultSub = i;
+						$("#subtitleButtonText").html("Subtitles: " + track.language );
+					} else if( track.kind != "metadata" ){
+						track.mode = "hidden";
+					}
+				} );
+				if( defaultSub >= 0 ){
+					console.log("Found default subtitle track: " + defaultSub);
+					self.subtitleTrack = defaultSub;
+					console.log( self.video.textTracks[ defaultSub ] );
+				}
+			}
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -457,7 +506,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 
 VideoPlayerEME.prototype.startVideo = function(){
 	console.log("startVideo()");
-	
+	this.subtitleTrack = false;
 	var self = this;
 	this.onAdBreak = false;
 	this.firstPlay = true;

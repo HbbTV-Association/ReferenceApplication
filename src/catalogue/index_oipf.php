@@ -14,7 +14,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>HbbTV Reference Video Application</title>
-
+	
 	<meta http-equiv="content-type" content="application/vnd.hbbtv.xhtml+xml; charset=UTF-8" />
 	<script type="text/javascript">
 	

@@ -195,7 +195,7 @@
 	background-color: #f7921d;
 	top: 33px;
 	left: 234px;
-	width: 895px;
+	width: 0px;
 	height: 8px;
 }
 #progress_currentTime {
@@ -204,7 +204,7 @@
 	height: 18px;
 	position: absolute;
 	top: 28px;
-	left: 234px;
+	left: 0px;
 	margin-left: 234px;
 	z-index: 100;
 }

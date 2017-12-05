@@ -264,16 +264,38 @@ function XMLEscape(sValue, bUseApos) {
 	}
 }
 
+
+/*
 window.onerror = function(message, url, lineNumber) { 
 	//showInfo( message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10 );
 	try{
-		console.log(message + " url: " + url + " line: " + lineNumber + "<br>" + (new Error()).stack, 10);
+		console.log(message + " url: " + url + " line: " + lineNumber ); // + " " + (new Error()).stack);
 	} catch(e){
 		console.log("Error: onerror: " + e.description);
 	}
 	return false; // when false, print it also to js console
 };
+*/
 
+window.onerror = function (msg, url, lineNo, columnNo, error) {
+    var string = msg.toLowerCase();
+    var substring = "script error";
+    if (string.indexOf(substring) > -1){
+		
+    } else {
+        var message = [
+            'Message: ' + msg,
+            'URL: ' + url,
+            'Line: ' + lineNo,
+            'Column: ' + columnNo,
+            'Error object: ' + JSON.stringify(error)
+        ].join(' - ');
+		console.log( message );
+        showInfo(message);
+    }
+
+    return false;
+};
 
 	
 function updateOnlineStatus(event) {

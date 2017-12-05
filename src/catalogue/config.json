@@ -49,19 +49,35 @@
                     "app": 6,
 					"desc": "video=4*h265, audio=1*aac, fps=25, gop=75, segdur=6sec"
                 },
-                {
-                    "title": "Out of band subtitles",
+				{
+                    "title": "Out-of-Band Subtitles",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/manifest.mpd",
                     "img": "icons/icons_1x1_out-of-band-subtitle.png",
                     "app": 6,
-					"desc": "TTML subtitles",
+					"desc": "TTML subtitles, from external source file",
 					"subtitles" : [{
-                        "code" : "en",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_en.xml"
+                        "code" : "eng",
+                        "src" : "https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_eng.xml"
                     },
                     {
                         "code" : "fin",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
+                        "src" : "https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
+                    }],
+					"profile" : ["html5", "mse-eme"]					
+                },
+                {
+                    "title": "OoB subtitles via sub-proxy",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/manifest.mpd",
+                    "img": "icons/icons_1x1_out-of-band-subtitle.png",
+                    "app": 6,
+					"desc": "TTML subtitles. Subtitle files are loaded via origin server proxy to avoid possible CORS problems",
+					"subtitles" : [{
+                        "code" : "eng",
+                        "src" : "../getSubs.php?file=https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_eng.xml"
+                    },
+                    {
+                        "code" : "fin",
+                        "src" : "../getSubs.php?file=https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
                     }],
 					"profile" : ["html5", "mse-eme"]					
                 },
@@ -71,6 +87,14 @@
                     "img": "icons/icons_1x1_in-band-subtitle.png",
                     "app": 6,
 					"desc": "In-band subtitles",
+					"profile" : ["html5", "mse-eme"]							
+                },
+				{
+                    "title": "In-band subtitles and events",
+                    "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/manifest_subib_evtib.mpd",
+                    "img": "icons/icons_1x1_in-band-subtitle.png",
+                    "app": 6,
+					"desc": "In-band subtitles and inband events",
 					"profile" : ["html5", "mse-eme"]							
                 },
                 {
@@ -137,12 +161,12 @@
                     "app": 6,
 					"desc": "TTML subtitles",
 					"subtitles" : [{
-                        "code" : "en",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_en.xml"
+                        "code" : "eng",
+                        "src" : "../getSubs.php?file=https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_eng.xml"
                     },
                     {
-                        "code" : "fi",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
+                        "code" : "fin",
+                        "src" : "../getSubs.php?file=https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
                     }],
 					"profile" : ["html5", "mse-eme"]					
                 },
@@ -177,7 +201,7 @@
                     "title": "In-band events",
                     "url": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest_evtib.mpd",
                     "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-					"la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNA==)",
+					"la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
 					"drm": "playready",
                     "app": 6,
 					"desc": "TextTrack cues in inband tracks",
@@ -191,43 +215,43 @@
             "items": [
                 {
                     "title": "Tears of Steel AVC 1080p",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmxABCDF0MkxkKkhmsoyRGBh1jxAIDeWiFU6U07rtLG71Rxu3E5yWzObsAWH3vDtlUe0XL1iMcxoKuK_wVJVRUaBgGHFVnR2afIRkz42pebbu_iyrS4NK_9cR59NSBf-WKHbAF_CzRi6a6wbMcQr8YPzgeTa9Jau4B4rXxdH9RmkflQ-EzHoVbUD_5_p5LLj-Fm-Keo_QAAABR_gjGoP2gvYpRD8mNZ1AvavB11MQ#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/drm/manifest.mpd",
-					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6s/image_320x180.jpg",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnkABDn3q3Bia_3LV7ZNTD8Xz0kAIAqWsdmO-LRsWh4QGl-nc6Vx9hSyc9MB1qHUkYFPzrtnjrUZLojKigtKC_F9L3UwCGb_LR-3Tpy_hrmf6q1I6qKbFNEP4hdPI3XP-cFiPhigyxaY9boJnSz3LIsiFDyIFXNC-4u0mGMbeblhGUVU9I_uVkFRgBK4Y_CsJllcJ_l3QAAABTK1abCcibW_7ly2_xZaW584fNOdw#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6sv2/drm/manifest.mpd",
+					"img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/tears_of_steel_1080p_25f75g6sv2/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (expires 2017-12-01)",
+					"desc": "MS3 compound URL (expires 2017-12-30)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
                     "title": "Llama Drama HEVC 2160p",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnVABBh9VVAd68xsbv0hVnv6G7EAIDkVN7m0VXBntDv5a4dGXd7-MaZzxlZrzMWXt7iApMEpnKThiBnagglcMynVAMvPT5_Evi9_Vg2Nb8rib6JbDEzfji0NrVJGg6fxe62xqM3-klhbfDSvJM7RNZi4gMzu6kDTj5IzMB9ZGF4ZWcUPBT_1w_kpACi6gf0DYX44eP8XgAAABSUoqo9NlrhBB9-AGekD_CFbfLgrw#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/drm/manifest.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6s/image_320x180.jpg",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCmmABB7bZqUNPJD52RT5Abq7S0oAIDJ3LdMA3nY-Eqy6-sitgINWdcAH2TwZCXHc9RHDDLnuWzwkr-t3QXqtfaFjaOyz39jZpZHhd_E9l9S8loB6-atlA8s8u02KS5aW1X4t5WJWw0f8HAg_Di0dCya895OYsxWJp9-cv0AZ9fb5mqC0gca921tfTDKt4dUw_qZGAC50gAAABSIolKOIbdPTJbFJuzHOdEloF1szA#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6sv2/drm/manifest.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/01_llama_drama_2160p_25f75g6sv2/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (expires 2017-12-01)",
+					"desc": "MS3 compound URL (expires 2017-12-30)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
                     "title": "Out of band subtitles",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnjABBvYWX6fiPIiXjvMSFU5GP2AIC9Q6FfM45DFnvEdu0gCG-lNdynpL58AZG9A4iizl4cjpKkANRw8ECAn6UNVdFMbReIwhYa2a8yHOEaSpFsF19hMNaKcXDHbDzANYmQPNBnY8ciF6eYomSPKT13ifh4Kl6YCMxdqY8pDaUEbCLxN9YrIC97GSwHhN1FmSviyu6FQgAAABTjOxn8kUDGiLD96kRvMXo-dGrlpg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnoABCu-VWTQ716QqdCyBetjMDYAIDgfIumKv0HO4azGySfkjIbFCfOLfaELU0iWMP8zl8pDubF1Vi_IuyC6ODSsFkBVMYSuI17-ARQLnKzAnYbEYGPUAJe7DhQLj4ArHJ-lF68bknTIz7KQXWR0ORcS7exUze4Pgd2PtbRo1zisp7N-bsWse9Z-RR4Mw1h6ahPVfZW1wAAABSaEsk80otNmI8ZzllpyaXmwKTdJg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "TTML subtitles",
 					"subtitles" : [{
-                        "code" : "en",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_en.xml"
+                        "code" : "eng",
+                        "src" : "../getSubs.php?file=http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_en.xml"
                     },
                     {
-                        "code" : "fi",
-                        "src" : "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fin.xml"
+                        "code" : "fin",
+                        "src" : "../getSubs.php?file=http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/sub_fin.xml"
                     }],
 					"profile" : ["html5"]					
                 },
 				{
                     "title": "In-band subtitles",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnjABBvYWX6fiPIiXjvMSFU5GP2AIC9Q6FfM45DFnvEdu0gCG-lNdynpL58AZG9A4iizl4cjpKkANRw8ECAn6UNVdFMbReIwhYa2a8yHOEaSpFsF19hMNaKcXDHbDzANYmQPNBnY8ciF6eYomSPKT13ifh4Kl6YCMxdqY8pDaUEbCLxN9YrIC97GSwHhN1FmSviyu6FQgAAABTjOxn8kUDGiLD96kRvMXo-dGrlpg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest_subib.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnoABCu-VWTQ716QqdCyBetjMDYAIDgfIumKv0HO4azGySfkjIbFCfOLfaELU0iWMP8zl8pDubF1Vi_IuyC6ODSsFkBVMYSuI17-ARQLnKzAnYbEYGPUAJe7DhQLj4ArHJ-lF68bknTIz7KQXWR0ORcS7exUze4Pgd2PtbRo1zisp7N-bsWse9Z-RR4Mw1h6ahPVfZW1wAAABSaEsk80otNmI8ZzllpyaXmwKTdJg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest_subib.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "In-band subtitles",
@@ -235,8 +259,8 @@
                 },
                 {
                     "title": "Linear advert insertion",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnjABBvYWX6fiPIiXjvMSFU5GP2AIC9Q6FfM45DFnvEdu0gCG-lNdynpL58AZG9A4iizl4cjpKkANRw8ECAn6UNVdFMbReIwhYa2a8yHOEaSpFsF19hMNaKcXDHbDzANYmQPNBnY8ciF6eYomSPKT13ifh4Kl6YCMxdqY8pDaUEbCLxN9YrIC97GSwHhN1FmSviyu6FQgAAABTjOxn8kUDGiLD96kRvMXo-dGrlpg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/drm/manifest.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnoABCu-VWTQ716QqdCyBetjMDYAIDgfIumKv0HO4azGySfkjIbFCfOLfaELU0iWMP8zl8pDubF1Vi_IuyC6ODSsFkBVMYSuI17-ARQLnKzAnYbEYGPUAJe7DhQLj4ArHJ-lF68bknTIz7KQXWR0ORcS7exUze4Pgd2PtbRo1zisp7N-bsWse9Z-RR4Mw1h6ahPVfZW1wAAABSaEsk80otNmI8ZzllpyaXmwKTdJg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/image_320x180.jpg",
                     "drm": "marlin",
                     "app": 6,
 					"desc": "Ads delivered from any ad-server on ad-event time",
@@ -251,8 +275,8 @@
                 },
                 {
                     "title": "In-band events",
-                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnAABDdj2BA_89sR2he1xHdCLT5AIDhsJtiWbUxGIfvkkyyK5NnBKUi6ltpeScCcN-QAv9_QTABemzY-CF4plJO8X6agPbgZQi1rwvN-O2U1W40RjEM1q2gBKd-unBD5nugAdR4s6LZZ18lj5TWdIrj3fjVhjF5FpgbXdMqUW-wBMs-DILOT6Z_dRonubE5MoOVkA_WzQAAABRQ5uTDbbD8UoOFWC-06zIUjVHvFA#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/dasherh264_evtib/drm/manifest_evtib.mpd",
-                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+                    "url": "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABYABAAAFzYADHJlZmVyZW5jZWFwcCnoABCu-VWTQ716QqdCyBetjMDYAIDgfIumKv0HO4azGySfkjIbFCfOLfaELU0iWMP8zl8pDubF1Vi_IuyC6ODSsFkBVMYSuI17-ARQLnKzAnYbEYGPUAJe7DhQLj4ArHJ-lF68bknTIz7KQXWR0ORcS7exUze4Pgd2PtbRo1zisp7N-bsWse9Z-RR4Mw1h6ahPVfZW1wAAABSaEsk80otNmI8ZzllpyaXmwKTdJg#http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest_evtib.mpd",
+                    "img": "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/image_320x180.jpg",
 					"drm": "marlin",
                     "app": 6,
 					"desc": "TextTrack cues in inband tracks",

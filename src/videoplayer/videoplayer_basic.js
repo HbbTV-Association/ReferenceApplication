@@ -152,7 +152,10 @@ function VideoPlayerBasic(element_id, profile, width, height){
 							break;
 						}
 						
-						
+						if( this.subtitleTrack === false )
+						{
+							this.subtitleTrack = 0;
+						}
 						console.log("Current track index " + this.subtitleTrack);
 						if( this.subtitleTrack >= tracks ){
 							this.subtitleTrack = 0; // was off, select first
@@ -162,7 +165,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 							this.subtitleTrack++;
 						}
 						
-						var lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].label );
+						var lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].language );
 						
 						$("#subtitleButtonText").html( "Subtitles: " + lang );
 						showInfo("Subtitles: " + lang);
@@ -210,6 +213,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 */
 	this.setSubtitles = this.__proto__.setSubtitles || function( subtitles ){
 		// out-of-band subtitles must be an array containing containing language code and source.xml file url.
+		var self = this;
 		try{
 			var player = this.video;
 			
@@ -228,10 +232,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 					track.kind = "subtitles";
 					track.label = lang.code;
 					track.language = lang.code;
+					track.srclang = lang.code;
 					track.src = lang.src;
 					track.onerror = function(e){
+						self.lastError = e;
 						console.log(e);
-						showInfo("Error with subtitles: " + e.type);
+						showInfo("Error getting subtitle file");
 					};
 					
 					player.appendChild(track);
