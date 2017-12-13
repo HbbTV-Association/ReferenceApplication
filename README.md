@@ -17,88 +17,22 @@ The software is under continuous development and lisenced with MIT Lisence.
 Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com
 for any problems or questions
 
-### Usage:
-
-
+### Usage, testing, installation, integration:
 
 >A) Test latest version of the application at http://meridian.sofiadigital.fi/tvportal/referenceapp/
->B) Download source code from git repository to your server and add your own content to configuration
->C) Video player classes api documentation available here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
+>B) Follow [installation] guide to get source and set up local version
+>C) Read API documentation: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
+>D) Follow [integration] guide to integrate videoplayer and/or components to different application
 
 
 ### Components and modules:
 
-General catalogue application to be used for all HbbTV 1.5 or 2.0.1 devices and browsers. 
-Application tries to determine HbbTV version of the device and use the preferred player.
-
-	src/catalogue/index.php
-
-VideoPlayerBasic base class that shall be inherited for different videoplayer classes below:
-
-	src/videoplayer/videoplayer_basic.js
-
-HTML5 version of the application for HbbTV 2.0.1 devices:
-
-	src/catalogue/index_html5.php
-
-HTML5 video player component:
-
-	src/videoplayer/videoplayer_html5.js
-
-OIPF AV object version of the application for HbbTV 1.5 devices:
-
-	src/catalogue/index_oipf.php
-
-OIPF AV object video player component:
-
-	src/videoplayer/videoplayer_oipf.js
-
-MSE-EME version of the application for target browser Edge:
-
-	src/catalogue/index_mse-eme.php
-
-MSE-EME video player component:
-
-	src/videoplayer/videoplayer_mse-eme.js
-	
-Resource file management. PHP file to be included in application index file. File will list all the needed js/css resources for the specified application profile HbbTV 1.5, HbbTv 2.0.1, MSE-EME.
-For development purposes this generator will set last modified timestamp as an version parameter for all resource files. This ensures a client device should always use a modified file instead cached.
-	
-	src/catalogue/resources.php
-
-Monitor module to implement analytics about use cases of video playback. Monitor can be changed but it must follow the monitor interface.
-
-	Interface included:
-	src/videoplayer/monitor/monitor-base.js
-	
-	Implementation (excluded but may be implemented for differeent analytics systems):
-	src/videoplayer/monitor/monitor.js
-
-
-
-Menu module. Main functionality to maintain menu structure of the catalogue app for video content, actions and submenus.
-Menu structure for catalogue is configured in configuration file. For real-world application configuration file may be replaced with backend api to produce similar json.
-
-	src/catalogue/menu.js
-	src/catalogue/config.json
-
-
-Navigation. Common keymapping, event listeners and navigation functionality
-
-	src/navigation.js
-
-Debugscreen and debug-console saving feature. Pressing blue button applications console.log is printed on screen.
-There is action option in settings menu to send log on server. Application will inform the log name on screen if succeed.
-On reference installation, logfiles are saved to folder http://meridian.sofiadigital.fi/tvportal/referenceapp/src/catalogue/log/
-naming **log<number>.json**, for example log7.json and so on
-
-	src/debugscreen.js
-
+See components and modules listing at [integration] guide
 
 
 ### Catalogue menu structure:
 
-Mainmenu, submenus, assets and actions are configured in config.json file. 
+Mainmenu, submenus, assets and actions are configured in __[config.json]__ file. 
 
 The file can be changed to any endpoint for data to make static menu dynamic.
 
@@ -106,78 +40,128 @@ Menu structure for the catalogue app should respect used json structure that
 is designed to represent a vod catalogue build by mainmenu and submenus. 
 JSON Example here is commented using extra properties with __comment__ -prefix:
 
+#### Overall menu structure
 
+JSON Attribute | Definition
+------------ | -------------
+menus | Array containing all the possible menus. menus[0] is always the main menu
+menus[0] | First menu is always the main menu. It defines all accessible submenus
+menus[i].center | Default focused item index in specific menu
+menus[i].title | Title of the menu. (In mainmenu this is displayed as menu title)
+menus[i].items | Array containing submenu entries, assets and actions
+menus[i].items[j].title | Title of submenu entry, asset, or action
+menus[i].items[j].app | item type. 6=DASH content, other values are obsolote/deprecated
+menus[i].items[j].submenu | submenu entry (index of subemnu. if submenu is 1 this entry opens menu menus[1] )
 
 ```json
-
 {
-	"__comment__menus": " menus is an array containing all the possible menus. menus[0] is always the main menu ",
-	"menus": [
-		{
-			"__comment__center": " center attribute is the index of initially focused item in specified menu",
-			"center": 0,
-			"__comment__title": " title is the title of the menu, that can be displayed in UI",
-			"title": "Main",
-			"__comment__items": " items is an array to contain all asset/submenu entries / actions in specified menu",
-			"items": [
-				{
-					"__comment__title": "As these items are mainmenu items (menus[0]), these titles are displayed in top bar",
-					"title": "NoDRM",
-					"__comment__app": "Specifies app type or video type. Obsolote for submenu entries",
-					"app": 0,
-					"__comment__submenu": "submenu index tell which gridview menu will open when this entry is selected",
-					"submenu": 1,
-					"__comment__profile" : [ "list of versions of the app this asset is available" ],
-					"profile" : ["html5", "oipf", "mse-eme"]
-				},
-				{
-					"title": "PlayReady",
-					"app": 0,
-					"submenu": 2
-				}
-			]
-		},
-		{
-			"center": 0,
-			"title": "DASH NoDRM",
-			"__comment__items": "assets or actions in grid view menu",
-			"items": [
-				{
-					"__comment__title": " Title of the video asset in video asset menu",
-					"title": "Llama Drama AVC 1080p",
-					"__comment__desc": "Description of the asset",
-					"desc": "AVC 1080p clear dash video asset",
-					"__comment__url": "URL of the video",
-					"url": "videos/01_llama_drama_1080p_25f75g6s/manifest.mpd",
-					"__comment__img": " Video asset poster in grid menu",
-					"img": "videos/01_llama_drama_1080p_25f75g6s/image_320x180.jpg",
-					"__comment__app": " app, link or video type. 6 = DASH video",
-					"app": 6
-				},
-				{
-					"title": "Gran Dillama AVC 1080p(ob,playready)",
-					"url": "videos/02_gran_dillama_1080p_25f75g6s/drm/manifest_subob.mpd",
-					"img": "videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
-					"__comment__la_url": "License Acquisition url",
-					"la_url": "http://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=AQAAABc2N30AAABgBn4lJkOh7rGbzg8FAGA__5dMOL2dJWxTSTq2STx0DnBWAmske8JU1azAR0-__zPnMWvyKTqVh3ZtHJCPiwT7mu3BCzm3X7U1utgGfcZ97n6CClFjsUdHVQ70IqMuDkRUvIDi2BpU8VEn64kE56r1Evy0wFM",
-					"__comment__drm": "DRM system used for the video. Values: [empty], 'playready', 'marlin'",
-					"drm": "playready",
-					"app": 6,
-					"__comment__adBreaks" : "A list of ad break positions. The list contains objects that shall have ad break (position) in seconds or named 'preroll' or 'postroll' and number of (ads) in specified break",
-					"adBreaks" : [
-						{ "position" : "preroll", "ads" : 1 },
-						{ "position" : 10, "ads" : 3 },
-						{ "position" : 30, "ads" : 1 },
-						{ "position" : 60, "ads" : 3 },
-						{ "position" : "postroll", "ads" : 1 }
-					]
-				}
-			]					
-		}
-	]
+    "menus": [
+        {
+            "center": 1, 
+            "title": "Main",
+            "items": [
+                {
+                    "title": "NoDRM",
+                    "app": 0,
+                    "submenu": 1
+                },
+```
+
+#### Video asset common attributes and DRM
+
+JSON Attribute | Definition
+------------ | -------------
+menus[i].items[j].url | Url of playable DASH content
+menus[i].items[j].img | Poster image of asset/action item
+menus[i].items[j].la_url | License acquisition URL (for DRM content only)
+menus[i].items[j].drm | DRM system (playready/marlin/clearkey). (not defined for Clear content)
+menus[i].items[j].app | 6= always for DASH content
+menus[i].items[j].desc | Description of the asset or action displayed when menu item is focused
+menus[i].items[j].profile | Array of profiles in which specific item is supported. Possible values are "html5", "mse-eme" and "oipf". If this is not set, all profiles are supported
+
+at menus[i].items:
+```json
+{
+"center": 0,
+"title": "DASH PlayReady",
+"items": [
+    {
+        "title": "Linear advert insertion",
+        "url": "videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest.mpd",
+        "img": "videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+        "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+        "drm": "playready",
+        "app": 6,
+		"desc": "Ads delivered from any ad-server on ad-event time",
+		"profile" : ["html5", "mse-eme"]					
+    }
+]
 }
+```
+#### Ad Breaks definition
+
+JSON Attribute | Definition
+------------ | -------------
+menus[i].items[j].adBreaks | If set, tells ad insertion positions. For each ad break mandatory attributes are __position__ and __ads__
+menus[i].items[j].adBreaks[k].position | Ad break position in seconds for midroll ad insertion. Special values are __preroll__ and __postroll__ to define adbreak before the content and after the content
+menus[i].items[j].adBreaks[k].ads | Number of ads shown on specific ad break
+
+at menus[i].items:
+```json
+{
+"center": 0,
+"title": "DASH PlayReady",
+"items": [
+    {
+        "title": "Linear advert insertion",
+        "url": "videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest.mpd",
+        "img": "videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+        "app": 6,
+		"desc": "Ads delivered from any ad-server on ad-event time",
+		"adBreaks" : [
+			{ "position" : "preroll", "ads" : 1 },
+			{ "position" : 20, "ads" : 3 },
+			{ "position" : 40, "ads" : 1 },
+			{ "position" : 60, "ads" : 3 },
+			{ "position" : "postroll", "ads" : 1 }
+		],
+		"profile" : ["html5", "mse-eme"]					
+    }
+]
+}
+```
+
+
+#### Out-of-Band subtitle files
+JSON Attribute | Definition
+------------ | -------------
+menus[i].items[j].subtitles | Array containing Out-of-Band subtitles
+menus[i].items[j].subtitles[k].code | Subtitle language code ISO 639‑2
+menus[i].items[j].subtitles[k].src | Source url for subtitling file. getAds.php may be used to prevent possible CORS issues when fetching XML -files from cross domain location
+
+```json
+{
+    "title": "Out of band subtitles",
+    "url": "videos/02_gran_dillama_1080p_25f75g6sv2/drm/manifest.mpd",
+    "img": "videos/02_gran_dillama_1080p_25f75g6s/image_320x180.jpg",
+    "app": 6,
+	"desc": "TTML subtitles",
+	"subtitles" : [{
+        "code" : "eng",
+        "src" : "../getSubs.php?file=https://meridian.sofiadigital.fi/tvportal/referenceapp/videos/02_gran_dillama_1080p_25f75g6sv2/sub_eng.xml"
+    },
+    {
+        "code" : "fin",
+        "src" : "videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
+    }],
+	"profile" : ["html5", "mse-eme"]					
+}
+
 ```
 
 [//]: # (references)
 
 [tools]: <https://github.com/HbbTV-Association/ReferenceApplication/tree/master/tools>
+[integration]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/integration.md>
+[installation]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/installation_testing.md>
+[config.json]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/src/catalogue/config.json>

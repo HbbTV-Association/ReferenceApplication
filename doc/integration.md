@@ -75,19 +75,32 @@ naming **log<number>.json**, for example log7.json and so on
 
 ### Integration
 
+##### Use real-world backend with catalogue app, code changes to integrate
+
+* In **src/catalogue/application.js**, replace **src/config.json** with dynamic backend that produces similar menu structure. 
+Existing video library backend may be integrated implementing *getter proxy* between client and actual backend, 
+which shall format the data to be compliant with the cataloque structure
+* use **src/getAds.php?breaks=<breaks amount>** to use test ad videos, or replace real-world ad-insertion backend to Videoplayer class `getAds()` -method
+* use **src/getSubs.php=file<sub.xml-url>** to fetch cross domain subtitling files 
+
 ##### Using videoplayer component in different application
 
 Dependencies: Include to the application
- * src/videoplayer/videoplayer_basic.js *(Mandatory always)*
- * src/videoplayer/videoplayer_oipf.js *(If needed for HbbTV 1.5)*
- * src/videoplayer/videoplayer_html5.js *(If needed for HbbTV 2.0.1)*
- * src/videoplayer/videoplayer_mse-eme.js *(If needed for EME application)*
-     * src/videoplayer/dash.all.js *(If mse-eme is used, include also dash-js library)*
- * src/videoplayer/monitor/monitor-base.js *(Mandatory to be included. may be extended)*
- * src/videoplayer/vplayer.css *(Common styles for all player versions)*
+ * **src/videoplayer/videoplayer_basic.js** *(Mandatory always)*
+ * **src/videoplayer/videoplayer_oipf.js** *(If needed for HbbTV 1.5)*
+ * **src/videoplayer/videoplayer_html5.js** *(If needed for HbbTV 2.0.1)*
+ * **src/videoplayer/videoplayer_mse-eme.js** *(If needed for EME application)*
+     * **src/videoplayer/dash.all.js** *(If mse-eme is used, include also dash-js library)*
+ * **src/videoplayer/monitor/monitor-base.js** *(Mandatory to be included. may be extended)*
+ * **src/videoplayer/vplayer.css** *(Common styles for all player versions)*
 
-resources.php may be used to include selected resources in different application
+Hint: **src/resources.php** may be used to include selected resources in different application
+
 
 ##### Video player API
+
+API documentation here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
+
+
 
 
