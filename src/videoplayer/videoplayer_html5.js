@@ -250,7 +250,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			}
 			else{
 				console.log("cue event " + this.kind + " received");
-				console.log("cue keys " + Object.keys( this.activeCues[0] ) + " received");
+				if( this.activeCues.length ){
+					console.log("cue keys " + Object.keys( this.activeCues[0] ) + " received");
+				}
 			}
 		};
 		console.log( "oncuechange function set" );

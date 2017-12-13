@@ -142,8 +142,10 @@ function VideoPlayerBasic(element_id, profile, width, height){
 						// count all tracks except metadata
 						var tracks = 0;
 						for( var i = 0; i < this.video.textTracks.length; ++i ){
-							if( this.video.textTracks[i].kind != "metadata" )
+							if( this.video.textTracks[i].kind != "metadata" ){
 								tracks++;
+								this.video.textTracks[i].mode = 'hidden'; // hide all
+							}
 						}
 						
 						console.log("text tracks " + tracks );
@@ -161,7 +163,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 							this.subtitleTrack = 0; // was off, select first
 						}
 						else{
-							this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
+							//this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
 							this.subtitleTrack++;
 						}
 						
@@ -171,6 +173,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 						showInfo("Subtitles: " + lang);
 						
 						if( lang != "off" ){
+							console.log("Set textTrack["+ this.subtitleTrack +"] Showing: " + lang);
 							this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
 						}
 					}
