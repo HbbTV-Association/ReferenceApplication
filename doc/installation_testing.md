@@ -26,7 +26,7 @@ Config.json file has menustructure, which includes mainmenu and submenus that pr
 In each grid-box menu you can add assets or actions in array "items". 
 
 Example format for ad insertion: Attribute adBreaks shall contain a list of objects, representing individual adBreak. Each adBreak representation shall have *position* in second or special word "preroll" or "postroll" to be set the break in the beginning or in the end of content video. Each adBreak also shall have attribute *ads* to tell how many ads are inserted to specific break
-```
+```json
 {
 	"title": "Linear advert insertion",
 	"url": "videos/manifest.mpd",
@@ -45,7 +45,7 @@ Example format for ad insertion: Attribute adBreaks shall contain a list of obje
 ```
 
 *Example format for DRM test. "drm" value may be playready/marlin/clearkey*
-```
+```json
 {
 	"title": "Tears of Steel AVC 1080p",
 	"url": "videos/drm/manifest.mpd",
@@ -58,7 +58,7 @@ Example format for ad insertion: Attribute adBreaks shall contain a list of obje
 ```
 
 Example action item: Clear javascript commands can be set to be evaluated with attribute *eval*
-```
+```json
 {
     "title": "Check Internet Connection",
     "eval": "showInfo( (navigator.onLine )); ",
@@ -68,7 +68,7 @@ Example action item: Clear javascript commands can be set to be evaluated with a
 ```
 
 Example Out of band subtitles. Mandatory fields for *subtitle* array objects are *code* (language code for file) and *src* (file location). getSubs.php -subtitle proxy is preferred to use if the subtitle file is retreived from different origin server due to CORS issues with video player. 
-```
+```json
 {
     "title": "Out of band subtitles",
     "url": "manifest.mpd",

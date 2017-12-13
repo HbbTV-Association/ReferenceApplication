@@ -19,10 +19,10 @@ for any problems or questions
 
 ### Usage, testing, installation, integration:
 
->A) Test latest version of the application at http://meridian.sofiadigital.fi/tvportal/referenceapp/
->B) Follow [installation] guide to get source and set up local version
->C) Read API documentation: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
->D) Follow [integration] guide to integrate videoplayer and/or components to different application
+ - Test latest version of the application at http://meridian.sofiadigital.fi/tvportal/referenceapp/
+ - Follow [installation] guide to get source and set up local version
+ - Read API documentation: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
+ - Follow [integration] guide to integrate videoplayer and/or components to different application
 
 
 ### Components and modules:
@@ -92,8 +92,8 @@ at menus[i].items:
         "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,firstexp:60,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
         "drm": "playready",
         "app": 6,
-		"desc": "Ads delivered from any ad-server on ad-event time",
-		"profile" : ["html5", "mse-eme"]					
+        "desc": "Ads delivered from any ad-server on ad-event time",
+        "profile" : ["html5", "mse-eme"]					
     }
 ]
 }
@@ -154,7 +154,7 @@ menus[i].items[j].subtitles[k].src | Source url for subtitling file. getAds.php 
         "code" : "fin",
         "src" : "videos/02_gran_dillama_1080p_25f75g6sv2/sub_fin.xml"
     }],
-	"profile" : ["html5", "mse-eme"]					
+    "profile" : ["html5", "mse-eme"]					
 }
 
 ```
