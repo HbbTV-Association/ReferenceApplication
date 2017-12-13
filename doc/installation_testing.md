@@ -1,4 +1,4 @@
-# Reference DASH-DRM Video Application
+# Reference DASH-DRM Video Application - Installation and testing
 
 ## Installation
 
