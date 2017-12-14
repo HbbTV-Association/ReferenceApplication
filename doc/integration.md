@@ -97,10 +97,22 @@ Dependencies: Include to the application
 Hint: **src/resources.php** may be used to include selected resources in different application
 
 
-##### Video player API
+#### Video player API
 
 API documentation here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
 
+##### method sequence in different player
 
+There is some notable differences in player initiation sequence between mse-eme and HbbTV -versions.
+Reference application has function `prepareVideoStart()` in **src/catalogue/menu.js** where this sequence is implemented different in case of the player type:
 
-
+MSE-EME | HbbTV 1.5 / HbbTV 2.0.1 | Notes
+------------ | ------------- | -------
+.createPlayer(); | .createPlayer(); |
+.setAdBreaks(breaks); | .setAdBreaks(breaks); | param *breaks* shall contain a list of ads or set false if no ads used
+.setSubtitles(subs); | .setSubtitles(subs); | param *subs* shall contain a list of OOB subtitles or set null if no OOB subtitles are used
+.setDRM( drmsystem, la_url );|  | if No DRM, call .setDRM( false );
+.sendLicenseRequest(); | | For HbbTV players this is called explicitly later
+.player.initialize( <video object>, null, false); | | *player* is the dashjs player instance and <video object> is the html5 element
+.setURL( url ); |  .setURL( url ); |
+|  | .setDRM( drmsystem, la_url ); | if No DRM, call .setDRM( false );
