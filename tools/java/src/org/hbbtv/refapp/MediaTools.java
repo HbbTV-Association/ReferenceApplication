@@ -127,7 +127,7 @@ public class MediaTools {
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4",
-			"-c:v", "aac", "-strict", "experimental",
+			"-c:a", "aac", "-strict", "experimental",
 			"-b:a", spec.bitrate, 		// audio bitrate 128k
 			"-maxrate:a", spec.bitrate, "-bufsize:a", spec.bitrate,
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
