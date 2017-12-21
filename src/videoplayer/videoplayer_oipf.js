@@ -426,8 +426,8 @@ VideoPlayer.prototype.startVideo = function(){
 		this.subtitles = player.textTracks;
 		
 		
-		if( true ){
-			console.log("set subs")
+		if( menu.focus.subtitles ){
+			console.log("set OIPF OOB subs")
 			this.subtitles = menu.focus.subtitles;
 		}
 		
@@ -435,6 +435,7 @@ VideoPlayer.prototype.startVideo = function(){
 		if( this.subtitles ){
 			$.each( this.subtitles, function(i, lang){
 				$(this.video).append("<param name='subtitles' value='srclang:"+ lang.code +" src: " + lang.src + "' />");
+				console.log("Set subtitle " + lang.code);
 			} );
 		}
 		
@@ -448,7 +449,7 @@ VideoPlayer.prototype.startVideo = function(){
 		
 	}
 	catch(e){
-		console.log(e);
+		console.log("error setting subs: " + e);
 	}
 }
 
@@ -543,7 +544,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             self.progressUpdateInterval = window.setInterval( function(){
 				if( self.seekTimer == null ){
 					self.updateProgressBar();
-					self.displayPlayer( 5 );
+					//self.displayPlayer( 5 );
 				}
             }, 1000);
 			Monitor.videoPlaying();
@@ -615,4 +616,40 @@ VideoPlayer.prototype.getStreamComponents = function(){
 		showInfo("Switching audio components not supported");
 	}
 	
+}
+
+
+VideoPlayer.prototype.enableSubtitles = function( next ) {
+	console.log("enableSubtitles("+ next +")");
+	try{
+		if( next != null ){
+			this.subtitleTrack++;
+		}
+		switch ( this.video.playState) {
+			case 1:
+				// components can be accessed only in PLAYING state
+				var avSubtitleComponent = this.video.getComponents( this.video.COMPONENT_TYPE_SUBTITLE);
+				if( this.subtitleTrack >= avSubtitleComponent.length){
+					this.subtitleTrack = 0;
+				}
+				console.log("Video has " + avSubtitleComponent.length + " subtitle tracks");
+				for (var i=0; i<avSubtitleComponent.length; i++){
+					if ( this.subtitleTrack == i ) {
+						this.video.selectComponent(avSubtitleComponent[i]);
+						showInfo("selected subtitleTrack " + i);
+					} else {
+						this.video.unselectComponent(avSubtitleComponent[i]);
+					}
+				}
+				
+			break;
+			case 6:
+				/*ERROR*/
+				showInfo("Error has occured");
+				break; 
+		}
+    } catch(e){
+		console.log("enableSubtitles - Error: " + e.description);
+	}
+
 }

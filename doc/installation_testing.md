@@ -98,3 +98,7 @@ Start application and run tests added to configuration. With blue button you can
 [//]: # (references)
 
 [tools]: <https://github.com/HbbTV-Association/ReferenceApplication/tree/master/tools>
+[integration]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/integration.md>
+[installation]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/installation_testing.md>
+[datamodel]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/datamodel.md>
+[config.json]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/src/catalogue/config.json>

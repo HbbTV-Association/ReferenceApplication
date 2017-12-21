@@ -51,11 +51,11 @@ Monitor module to implement analytics about use cases of video playback. Monitor
 
 
 
-Menu module. Main functionality to maintain menu structure of the catalogue app for video content, actions and submenus.
+Menu module. Main functionality to maintain menu structure of the catalogue app for video content, actions and submenus. Here is structure [datamodel] documented.
 Menu structure for catalogue is configured in configuration file. For real-world application configuration file may be replaced with backend api to produce similar json.
 
 	src/catalogue/menu.js
-	src/catalogue/config.json
+	src/catalogue/[config.json]
 
 
 Navigation. Common keymapping, event listeners and navigation functionality
@@ -103,7 +103,7 @@ API documentation here: http://meridian.sofiadigital.fi/tvportal/referenceapp/do
 
 ##### method sequence in different player
 
-There is some notable differences in player initiation sequence between mse-eme and HbbTV -versions.
+There is some notable differences in player initiation sequence between mse-eme and HbbTV -versions due to dashjs library needs its own sequence to work properly.
 Reference application has function `prepareVideoStart()` in **src/catalogue/menu.js** where this sequence is implemented different in case of the player type:
 
 MSE-EME | HbbTV 1.5 / HbbTV 2.0.1 | Notes
@@ -116,3 +116,16 @@ MSE-EME | HbbTV 1.5 / HbbTV 2.0.1 | Notes
 .player.initialize( <video object>, null, false); | | *player* is the dashjs player instance and <video object> is the html5 element
 .setURL( url ); |  .setURL( url ); |
 |  | .setDRM( drmsystem, la_url ); | if No DRM, call .setDRM( false );
+| .startVideo(); | .startVideo(); | after this players can handle DRM/subtitles/events/ads properly and playback should start soon
+
+
+[//]: # (references)
+
+[tools]: <https://github.com/HbbTV-Association/ReferenceApplication/tree/master/tools>
+[integration]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/integration.md>
+[installation]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/installation_testing.md>
+[datamodel]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/datamodel.md>
+[config.json]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/src/catalogue/config.json>
+
+
+

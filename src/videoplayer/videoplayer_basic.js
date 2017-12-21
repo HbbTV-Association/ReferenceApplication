@@ -177,6 +177,9 @@ function VideoPlayerBasic(element_id, profile, width, height){
 							this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
 						}
 					}
+					else if( typeof this.enableSubtitles  == "function" ){
+						this.enableSubtitles(true);
+					}
 				} catch( e ){
 					console.log( e.description );
 				}
