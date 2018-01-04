@@ -605,7 +605,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
 VideoPlayer.prototype.getStreamComponents = function(){
 	try {
 		if(typeof this.video.getComponents == 'function') {
-			this.subtitles = vidobj.getComponents(this.video.COMPONENT_TYPE_AUDIO);
+			this.subtitles = vidobj.getComponents( 1 ); // 1= audio
 			if (this.subtitles.length > 1) {
 				showInfo("Found "+this.subtitles.length+" audio track(s)");
 			}
@@ -622,23 +622,45 @@ VideoPlayer.prototype.getStreamComponents = function(){
 VideoPlayer.prototype.enableSubtitles = function( next ) {
 	console.log("enableSubtitles("+ next +")");
 	try{
-		if( next != null ){
-			this.subtitleTrack++;
+		if( next ){
+			console.log("current track: " + this.subtitleTrack  );
+			if( this.subtitleTrack == undefined || this.subtitleTrack == NaN ){
+				console.log("Change NaN to 0"  );
+				this.subtitleTrack = 0;
+			}
+			if( this.subtitleTrack === false ){
+				this.subtitleTrack = 0;
+			}
+			else{
+				this.subtitleTrack++;
+			}
+			
+			console.log("switched track: " + this.subtitleTrack  );
 		}
 		switch ( this.video.playState) {
 			case 1:
 				// components can be accessed only in PLAYING state
-				var avSubtitleComponent = this.video.getComponents( this.video.COMPONENT_TYPE_SUBTITLE);
+				//ref 7.16.5.1.1 OIPF-DAE
+				/*
+				COMPONENT_TYPE_VIDEO: 0,
+				COMPONENT_TYPE_AUDIO: 1,
+				COMPONENT_TYPE_SUBTITLE: 2
+				*/
+				var avSubtitleComponent = this.video.getComponents( 2 );
 				if( this.subtitleTrack >= avSubtitleComponent.length){
 					this.subtitleTrack = 0;
 				}
-				console.log("Video has " + avSubtitleComponent.length + " subtitle tracks");
+				console.log("Video has " + avSubtitleComponent.length + " subtitle tracks. selected track is: " + this.subtitleTrack );
 				for (var i=0; i<avSubtitleComponent.length; i++){
 					if ( this.subtitleTrack == i ) {
+						showInfo("select subtitleTrack " + i);
+						console.log("select subtitleTrack " + i);
 						this.video.selectComponent(avSubtitleComponent[i]);
-						showInfo("selected subtitleTrack " + i);
+						console.log("READY");
 					} else {
+						console.log("unselect subtitleTrack " + i);
 						this.video.unselectComponent(avSubtitleComponent[i]);
+						console.log("READY");
 					}
 				}
 				
