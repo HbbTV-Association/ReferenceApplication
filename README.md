@@ -24,6 +24,7 @@ for any problems or questions
  - Read API documentation: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
  - Follow [integration] guide to integrate videoplayer and/or components to different application
  - Follow [dasher] guide to use dasher tool to create dash media files
+ - See [tests] report
 
 
 ### Components and modules:
@@ -53,3 +54,4 @@ Overall menu structure or datamodel is documented here: [datamodel]
 [datamodel]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/datamodel.md>
 [config.json]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/src/catalogue/config.json>
 [dasher]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/dasher.md>
+[tests]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/refapp_test.txt>
