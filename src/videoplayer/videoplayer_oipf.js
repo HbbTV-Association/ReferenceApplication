@@ -379,8 +379,15 @@ VideoPlayer.prototype.setSubtitles = function(){
 };
 
 
-VideoPlayer.prototype.startVideo = function(){
+VideoPlayer.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
+	var self = this;
+	if( isLive ){
+		self.live = true;
+	}
+	else{
+		self.live = false;
+	}
 	
 	try{
 		var broadcast = $("#broadcast")[0];
@@ -403,7 +410,7 @@ VideoPlayer.prototype.startVideo = function(){
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo();
+				self.startVideo( isLive );
 			}
 			else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );

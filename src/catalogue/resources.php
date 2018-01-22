@@ -33,7 +33,8 @@ $resources = array(
 if( isset( $profileResources ) ){
 	echo "<!-- " . $profileResources. " -->\n";
 	if( $profileResources == "mse-eme" ){
-		$resources[] = "../videoplayer/dash.all.min.js";
+		//$resources[] = "../videoplayer/dash.all.min.js";
+		$resources[] = "http://cdn.dashjs.org/latest/dash.all.min.js";
 		$resources[] = "../videoplayer/videoplayer_mse-eme.js";
 	}
 	else if( $profileResources == "html5" ){

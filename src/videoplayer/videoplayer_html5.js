@@ -599,9 +599,16 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
+VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
-	fullscreen = true;
+	var self = this;
+	if( isLive ){
+		self.live = true;
+	}
+	else{
+		self.live = false;
+	}
+	
 	if( !this.subtitles ){
 		this.subtitleTrack = false;
 	}
@@ -628,7 +635,7 @@ VideoPlayerHTML5.prototype.startVideo = function(fullscreen){
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo( fullscreen );
+				self.startVideo( isLive );
 			}
 			else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );

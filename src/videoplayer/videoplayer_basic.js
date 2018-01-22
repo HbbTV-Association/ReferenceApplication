@@ -341,19 +341,26 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		
 		// first try get time out of player and decide which player is used
 		try{
-			// <video> object used
-			if( this.video.duration ){
-				position = (sec ? sec + this.video.currentTime : this.video.currentTime);
-				duration = this.video.duration;
-			}
-			// oipf player object used. Convert milliseconds to seconds
-			else if( this.video.playTime ){
-				position = (sec? this.video.playPosition / 1000 + sec : this.video.playPosition / 1000);
-				duration = this.video.playTime / 1000;
+			
+			if( this.live ){
+				duration = 100;
+				position = 100;
 			}
 			else{
-				console.log("Videoplayer not ready. Can not get position or duration");
-				return;
+				// <video> object used
+				if( this.video.duration ){
+					position = (sec ? sec + this.video.currentTime : this.video.currentTime);
+					duration = this.video.duration;
+				}
+				// oipf player object used. Convert milliseconds to seconds
+				else if( this.video.playTime ){
+					position = (sec? this.video.playPosition / 1000 + sec : this.video.playPosition / 1000);
+					duration = this.video.playTime / 1000;
+				}
+				else{
+					console.log("Videoplayer not ready. Can not get position or duration");
+					return;
+				}
 			}
 		} catch(e){
 			console.log( e.message );
@@ -376,6 +383,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			var play_position = barWidth;
 			
+			console.log(  play_position, position, duration );
+			
 			$("#playposition").css("left", play_position);
 			$("#progress_currentTime").css("left", play_position);
 
@@ -391,10 +400,15 @@ function VideoPlayerBasic(element_id, profile, width, height){
 
 			document.getElementById("playtime").innerHTML = "";
 			if(duration){
-				var pt_hours = Math.floor(duration / 60 / 60);
-				var pt_minutes = Math.floor((duration-(pt_hours*60*60))  / 60);
-				var pt_seconds = Math.round((duration-(pt_hours*60*60)-(pt_minutes*60)) );
-				document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
+				if( duration == Infinity || self.live ){
+					document.getElementById("playtime").innerHTML = "LIVE";
+				}
+				else{
+					var pt_hours = Math.floor(duration / 60 / 60);
+					var pt_minutes = Math.floor((duration-(pt_hours*60*60))  / 60);
+					var pt_seconds = Math.round((duration-(pt_hours*60*60)-(pt_minutes*60)) );
+					document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
+				}
 			}
 		} catch(e){
 			console.log( e.message );
@@ -483,6 +497,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				self.seekValue = 0;
 				clearTimeout( this.seekTimer );
 				self.seekTimer = null;
+				
+				
 				return;
 			}
 			
@@ -505,6 +521,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 					self.video.seek( toSeek );
 					Monitor.videoSeek( self.seekValue );
 					console.log("seek completed to " + toSeek);
+					
+					
 				} catch(e){
 					console.log("seek failed: " + e.description);
 				}

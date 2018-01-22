@@ -43,6 +43,9 @@
 		$profileResources = "mse-eme"; // additional resources
 		include("resources.php"); 
 	?>
+	
+	<!-- yobora integration test -->
+	<script type="text/javascript" src="http://smartplugin.youbora.com/v5/javascript/hbbtv-html5/5.3.0/sp.min.js" youbora-debug="4"></script>
 
 </head>
 <body onload="onLoad();">

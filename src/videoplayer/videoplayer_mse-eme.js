@@ -42,6 +42,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		console.log("Error creating dashjs video object ", e.description );
 	}
 	
+	
 	var player = this.video;
 	
 	addEventListeners( player, 'ended abort', function(e){
@@ -504,12 +505,19 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerEME.prototype.startVideo = function(){
+VideoPlayerEME.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
 	this.subtitleTrack = false;
 	var self = this;
 	this.onAdBreak = false;
 	this.firstPlay = true;
+	
+	if( isLive ){
+		self.live = true;
+	}
+	else{
+		self.live = false;
+	}
 	
 	try{
 		if( !self.video ){
@@ -543,8 +551,10 @@ VideoPlayerEME.prototype.startVideo = function(){
 
 
 VideoPlayerEME.prototype.stop = function(){
-	showInfo("Exit Video", 1);
 	var self = this;
+	
+	showInfo("Exit Video", 1);
+
 	this.onAdBreak = false;
 	// if video not exist
 	if( !self.video ){

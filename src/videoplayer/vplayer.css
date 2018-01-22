@@ -257,25 +257,38 @@
 	width: 24px;
 	background-image:url(../icons/vcrbtns_active.png);
 }
-
-#subtitleButton{
+@keyframes fromRight {
+  0%   { right: 0px; }
+  100% { right: 250px; }
+}
+#subtitleButton, 
+#debugButton_temp {
     position: absolute;
     bottom: 40px;
-    right: 40px;
-    background-color: yellow;
-    border-radius: 25px;
-    height: 25px;
-    width: 140px;
-	display: none;
+	display: none;    
+    background-image: url(../catalogue/images/icons.png);
+    background-position: -60px 0px;
+    width: 30px;
+    height: 30px;
+    right: 250px;
+    -webkit-animation: fromRight 1s;
+    -moz-animation: fromRight 1s;
+    -o-animation: fromRight 1s;
+    animation: fromRight 1s;
 }
-#subtitleButtonText {
+#debugButton_temp {
+    background-position: -90px 0px;
+}
+#subtitleButtonText,
+#debugButtonText_temp {
     position: absolute;
-    left: 15px;
-    color: white;
+    left: 30px;
+    color: #fff;
     width: 130px;
-	height: 25px;
-    background-color: black;
-    text-align: center;
+	height: 30px;
+    line-height: 30px;
+    text-align: left;
+    font-size: 21px;
 }
 
 /* Player controls */
@@ -427,3 +440,9 @@
 
 
 /* END loading */
+/* subtitle */
+.subtitle {
+    position: absolute;
+    bottom: 60px;
+}
+/* END subtitle */

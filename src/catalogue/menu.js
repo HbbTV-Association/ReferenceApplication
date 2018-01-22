@@ -24,7 +24,6 @@ Menu.prototype.init = function(element_id, config){
 }
 
 Menu.prototype.populate = function(){
-	//console.log("Menu.populate()");
 	var self = this;
 	self.element.innerHTML = "";
 	self.topmenu.populate();
@@ -108,7 +107,6 @@ Menu.prototype.navigate = function(key){
 						eval( self.focus.eval );
 					}
 					else if(self.focus.url && self.focus.url.length > 0){
-						//console.log(self.focus.url);
 						if( self.focus.url.match(/\.mpd$/) || self.focus.url.match(/\.mp4$/) ){
 							/*
 							// if profile changed, to 1.5 use VideoPlayer
@@ -128,7 +126,7 @@ Menu.prototype.navigate = function(key){
 								Monitor.initSession( self.focus.url, 6, profile.video, function(){
 									Monitor.videoStart();
 									self.prepareVideoStart();
-									vplayer.startVideo();
+									vplayer.startVideo( self.focus.live == true );
 								}); 
 							}
 							// change to fullscreen mode
@@ -237,9 +235,6 @@ Menu.prototype.navigate = function(key){
 			break;
 			
 			case VK_BACK:
-			
-				//console.log("Back pressed");
-
 			break;
 		}
 	}
