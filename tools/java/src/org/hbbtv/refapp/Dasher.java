@@ -94,6 +94,7 @@ public class Dasher {
 				spec.name = valopts[0].trim();
 				spec.size = valopts[1].toLowerCase(Locale.US).trim();
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
+				spec.enabled = !isDisabled;
 
 				val = Utils.getString(params, "video."+idx+".profile", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "video.profile", "", true);
@@ -138,12 +139,31 @@ public class Dasher {
 				spec.sampleRate = Integer.parseInt(valopts[1].trim());
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
 				spec.channels = Integer.parseInt(valopts[3].trim());
+				spec.enabled = !isDisabled;
 				specs.add(spec);
 				
 				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				if (!isDisabled)
 					MediaTools.executeProcess(args, outputFolder);
+			}
+			
+			// transcode secondary audio inputs, append new spec to StreamSpec list
+			logger.println("");		
+			for(int idxI=1, specCount=specs.size(); ; idxI++) {
+				val = Utils.getString(params, "input."+idxI, "", true);
+				if (val.isEmpty()) break;
+				File inputFileSec = new File(val);
+				for(int idx=0; idx<specCount; idx++) {
+					StreamSpec spec = specs.get(idx);
+					if (spec.type != StreamSpec.TYPE.AUDIO_AAC || !spec.enabled) continue;
+					spec = (StreamSpec)spec.clone();
+					spec.name = spec.name+"-"+idxI;
+					specs.add(spec);
+					List<String> args=MediaTools.getTranscodeAACArgs(inputFileSec, spec);
+					logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
+					MediaTools.executeProcess(args, outputFolder);
+				}
 			}
 			
 			// DASH: write unencypted segments+manifest
@@ -189,6 +209,7 @@ public class Dasher {
 				// encrypt temp-v1.mp4 to drm/temp-v1.mp4
 				logger.println("");				
 				for(StreamSpec spec : specs) {
+					if (!spec.enabled) continue;
 					args=MediaTools.getDashCryptArgs(specFile, outputFolderDrm, spec); 
 					logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 					MediaTools.executeProcess(args, outputFolder); // run in workdir folder
@@ -202,6 +223,7 @@ public class Dasher {
 				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players,
 				// create vX_i_nopssh.mp4 init without any PSSH boxes
 				for(StreamSpec spec : specs) {
+					if (!spec.enabled) continue;
 					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
 					if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
