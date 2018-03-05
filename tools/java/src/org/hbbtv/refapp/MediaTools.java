@@ -159,6 +159,7 @@ public class MediaTools {
 		args = new ArrayList<String>(args);
 		
 		for(StreamSpec spec : specs) {
+			if (!spec.enabled) continue;
 			String arg="temp-${name}.mp4#trackID=1:id=${name}:period=p0";
 			arg = arg.replace("${name}", spec.name);
 			args.add(arg);
