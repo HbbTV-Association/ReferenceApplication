@@ -107,7 +107,7 @@ Menu.prototype.navigate = function(key){
 						eval( self.focus.eval );
 					}
 					else if(self.focus.url && self.focus.url.length > 0){
-						if( self.focus.url.match(/\.mpd$/) || self.focus.url.match(/\.mp4$/) ){
+						if( self.focus.url.match(/\.mpd$/) || self.focus.url.match(/\.mp4$/) || self.focus.app == 6 ){
 							/*
 							// if profile changed, to 1.5 use VideoPlayer
 							if( profile.hbbtv == "1.5" && !(vplayer instanceof VideoPlayer ) ){

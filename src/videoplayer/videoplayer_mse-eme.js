@@ -92,24 +92,6 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	player.addEventListener('canplay', function(){
 		canplay = true;
 		console.log("canplay");
-		var playPreroll = false;
-		// check prerolls on first start
-		if( self.adBreaks ){
-			$.each( self.adBreaks, function(n, adBreak){
-				if( !adBreak.played && adBreak.position == "preroll" ){
-					console.log("play preroll");
-					adBreak.played = true;
-					playPreroll = true;
-					self.getAds( adBreak );
-					return false;
-				}
-			});
-		}
-		
-		// if preroll is not found, move on to content video
-		if( !playPreroll ){
-			player.play();
-		}
 		
 	} );
 	
@@ -328,6 +310,7 @@ VideoPlayerEME.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
 	console.log("player.attachSource(url)");
 	this.player.attachSource(url);
+	this.player.load();
 	return;
 };
 
@@ -394,13 +377,22 @@ VideoPlayerEME.prototype.prepareAdPlayers = function(){
 				self.clearVideo();
 				return;
 			}
-			self.video.play();
+			
+			if( self.firstPlay ){
+				self.startVideo( self.live );
+			}
+			else{
+				self.video.play();
+			}
 			$(self.video).removeClass("hide"); // show content video
 		}
 		
 	};
 	
-	var onAdPlay = function(){};
+	var onAdPlay = function(){
+		console.log("ad playing");
+		self.setLoading(false);
+	};
 	
 	var onAdProgress = function(e){};
 	
@@ -412,20 +404,22 @@ VideoPlayerEME.prototype.prepareAdPlayers = function(){
 		}
 	};
 	
-	addEventListeners( self.adPlayer[0], 'ended', adEnd );
-	addEventListeners( self.adPlayer[1], 'ended', adEnd );
-	addEventListeners( self.adPlayer[0], 'playing', onAdPlay );
-	addEventListeners( self.adPlayer[1], 'playing', onAdPlay );
-	addEventListeners( self.adPlayer[0], 'timeupdate', onAdTimeupdate );
-	addEventListeners( self.adPlayer[1], 'timeupdate', onAdTimeupdate );
-	addEventListeners( self.adPlayer[0], 'progress', onAdProgress );
-	addEventListeners( self.adPlayer[1], 'progress', onAdProgress );
+	$.each( self.adPlayer, function(i, player){
+		addEventListeners( player, 'ended', adEnd );
+		addEventListeners( player, 'playing', onAdPlay );
+		addEventListeners( player, 'timeupdate', onAdTimeupdate );
+		addEventListeners( player, 'progress', onAdProgress );
+	} );
 };
 
 VideoPlayerEME.prototype.getAds = function( adBreak ){
 	this.onAdBreak = true; // disable seeking
 	this.adCount = 0;
-	this.video.pause();
+	try{
+		this.video.pause();
+	} catch(e){
+		console.log("content video pause failed. May be not initialized yet (prerolls)");
+	}
 	var self = this;
 	console.log("get ads breaks=" + adBreak.ads);
 	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
@@ -441,7 +435,11 @@ VideoPlayerEME.prototype.getAds = function( adBreak ){
 
 VideoPlayerEME.prototype.playAds = function(){
 	this.onAdBreak = true; // disable seeking
-	this.video.pause();
+	try{
+		this.video.pause();
+	} catch(e){
+		console.log("content video pause failed. May be not initialized yet (prerolls)");
+	}
 	$(this.video).addClass("hide");
 	
 	var self = this;
@@ -519,6 +517,9 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		self.live = false;
 	}
 	
+	if( !this.subtitles ){
+		this.subtitleTrack = false;
+	}
 	try{
 		if( !self.video ){
 			console.log("populate player and create video object");
@@ -531,17 +532,34 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		console.log( e.message );
 		console.log( e.description );
 	}
+
+	self.element.removeClass("hidden");
+	self.visible = true;
+	self.setFullscreen(true);
+
 	
-	try{	
-		self.element.removeClass("hidden");
-		self.visible = true;
-		
+	// first play preroll if present
+	var playPreroll = false;
+	// check prerolls on first start
+	if( self.adBreaks ){
+		$.each( self.adBreaks, function(n, adBreak){
+			if( !adBreak.played && adBreak.position == "preroll" ){
+				console.log("play preroll");
+				adBreak.played = true;
+				playPreroll = true;
+				self.getAds( adBreak );
+				return false;
+			}
+		});
+		if( playPreroll ){
+			return; // return startVideo(). after prerolls this is called again
+		}
+	}
+	
+	try{
 		console.log("video.play()")
 		self.video.play();
-
-		self.setFullscreen(true);
 		self.displayPlayer(5);
-		
 	}
 	catch(e){
 		console.log( e.message );

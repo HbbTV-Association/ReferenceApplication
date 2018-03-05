@@ -4,7 +4,11 @@
 
 var applog = [];
 var originalLog = console.log;
-console.log = function(){ 
+console.log = function(){
+	if( !arguments[0] ){ // ??
+		originalLog.apply( this, arguments );
+		return;
+	}
 	if( arguments[0][0] == "[" ) return; // this will erase dashjs console
 	applog.push( Array.apply(this, arguments).map( function(argument){ return XMLEscape( typeof argument == "string"? argument : JSON.stringify( argument ) ) } ) ); 
 	originalLog.apply( this, arguments ); 

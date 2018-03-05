@@ -91,24 +91,6 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	player.addEventListener('canplay', function(){
 		canplay = true;
 		console.log("canplay");
-		var playPreroll = false;
-		// check prerolls on first start
-		if( self.adBreaks ){
-			$.each( self.adBreaks, function(n, adBreak){
-				if( !adBreak.played && adBreak.position == "preroll" ){
-					console.log("play preroll");
-					adBreak.played = true;
-					playPreroll = true;
-					self.getAds( adBreak );
-					return false;
-				}
-			});
-		}
-		
-		// if preroll is not found, move on to content video
-		if( !playPreroll ){
-			player.play();
-		}
 		
 	} );
 	
@@ -259,6 +241,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	} );
 	
 	player.addEventListener('playing', function(){
+		console.log("video playing");
 		if( self.firstPlay ){
 			self.firstPlay = false;
 			self.displayPlayer( 5 );
@@ -334,6 +317,7 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 	try{
 		//this.url = url;
 		this.video.src = url;
+		this.video.load();
 	} catch( e ){
 		console.log( e.message );
 	}
@@ -406,13 +390,22 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 				self.clearVideo();
 				return;
 			}
-			self.video.play();
+			
+			if( self.firstPlay ){
+				self.startVideo( self.live );
+			}
+			else{
+				self.video.play();
+			}
 			$(self.video).removeClass("hide"); // show content video
 		}
 		
 	};
 	
-	var onAdPlay = function(){};
+	var onAdPlay = function(){
+		console.log("ad playing");
+		self.setLoading(false);
+	};
 	
 	var onAdProgress = function(e){};
 	
@@ -424,20 +417,22 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 		}
 	};
 	
-	addEventListeners( self.adPlayer[0], 'ended', adEnd );
-	addEventListeners( self.adPlayer[1], 'ended', adEnd );
-	addEventListeners( self.adPlayer[0], 'playing', onAdPlay );
-	addEventListeners( self.adPlayer[1], 'playing', onAdPlay );
-	addEventListeners( self.adPlayer[0], 'timeupdate', onAdTimeupdate );
-	addEventListeners( self.adPlayer[1], 'timeupdate', onAdTimeupdate );
-	addEventListeners( self.adPlayer[0], 'progress', onAdProgress );
-	addEventListeners( self.adPlayer[1], 'progress', onAdProgress );
+	$.each( self.adPlayer, function(i, player){
+		addEventListeners( player, 'ended', adEnd );
+		addEventListeners( player, 'playing', onAdPlay );
+		addEventListeners( player, 'timeupdate', onAdTimeupdate );
+		addEventListeners( player, 'progress', onAdProgress );
+	} );
 };
 
 VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 	this.onAdBreak = true; // disable seeking
 	this.adCount = 0;
-	this.video.pause();
+	try{
+		this.video.pause();
+	} catch(e){
+		console.log("content video pause failed. May be not initialized yet (prerolls)");
+	}
 	var self = this;
 	console.log("get ads breaks=" + adBreak.ads);
 	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
@@ -453,7 +448,11 @@ VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 
 VideoPlayerHTML5.prototype.playAds = function(){
 	this.onAdBreak = true; // disable seeking
-	this.video.pause();
+	try{
+		this.video.pause();
+	} catch(e){
+		console.log("content video pause failed. May be not initialized yet (prerolls)");
+	}
 	$(this.video).addClass("hide");
 	
 	var self = this;
@@ -601,7 +600,11 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 
 VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
+	this.subtitleTrack = false
 	var self = this;
+	this.onAdBreak = false;
+	this.firstPlay = true;
+	
 	if( isLive ){
 		self.live = true;
 	}
@@ -630,6 +633,43 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 	this.onAdBreak = false;
 	this.firstPlay = true;
 	
+	try{
+		if( !self.video ){
+			console.log("populate player and create video object");
+			self.populate();
+			self.createPlayer();
+			self.setEventHandlers();
+		}
+	}
+	catch(e){
+		console.log( e.message );
+		console.log( e.description );
+	}
+		
+	self.element.removeClass("hidden");
+	self.visible = true;
+	self.setFullscreen(true);
+
+	
+	// first play preroll if present
+	var playPreroll = false;
+	// check prerolls on first start
+	if( self.adBreaks ){
+		$.each( self.adBreaks, function(n, adBreak){
+			if( !adBreak.played && adBreak.position == "preroll" ){
+				console.log("play preroll");
+				adBreak.played = true;
+				playPreroll = true;
+				self.getAds( adBreak );
+				return false;
+			}
+		});
+		if( playPreroll ){
+			return; // return startVideo(). after prerolls this is called again
+		}
+	}
+	
+	
 	if( this.drm && this.drm.ready == false ){
 		console.log("Send DRM License aquistion");
 		this.sendLicenseRequest( function( response ){
@@ -648,26 +688,9 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 	}
 	
 	
-	try{
-		if( !self.video ){
-			console.log("populate player and create video object");
-			self.populate();
-			self.createPlayer();
-			self.setEventHandlers();
-		}
-	}
-	catch(e){
-		console.log( e.message );
-		console.log( e.description );
-	}
-	
 	try{	
-		self.element.removeClass("hidden");
-		self.visible = true;
-		
 		console.log("video.play()")
 		self.video.play();
-		self.setFullscreen(true);
 		self.displayPlayer(5);
 	}
 	catch(e){
