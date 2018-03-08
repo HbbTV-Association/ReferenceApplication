@@ -57,13 +57,15 @@ public class EventInserter {
         	
         	boolean isModified=false;
 
-        	// find index of MOOF and first EMSG box
+        	// find index of SIDX,MOOF and first EMSG box
         	List<Box> boxes=isoFile.getBoxes();
-        	int moofIdx=-1, emsgIdx=-1;
+        	int moofIdx=-1, emsgIdx=-1, sidxIdx=-1;
         	for(int idx=0; idx<boxes.size(); idx++) {
         		Box box = boxes.get(idx);
         		if (box.getType().equals("moof")) {
         			moofIdx=idx;
+        		} else if (box.getType().equals("sidx")) {
+        			sidxIdx=idx;
         		} else if (emsgIdx<0 && box.getType().equals("emsg")) {
         			emsgIdx=idx;
         		}
@@ -81,7 +83,7 @@ public class EventInserter {
         		}
         	}
 
-        	// insert new box before MOOF box, if scheme="" then do not add EMSG box,
+        	// insert new box before SIDX,MOOF box, if scheme="" then do not add EMSG box,
         	// params may use a hexstring (0x646566) or plain string format
         	
         	val = Utils.getString(params, "scheme", "", true); // same as <InbandEventStream value="x"..>
@@ -118,7 +120,7 @@ public class EventInserter {
             	emsg.setMessageData( val.startsWith("0x") ?
             		Utils.hexToBytes(val) : val.getBytes("UTF-8") );
             	
-        		boxes.add(moofIdx, emsg);
+        		boxes.add(sidxIdx>-1?sidxIdx:moofIdx, emsg);
         		isoFile.setBoxes(boxes);
         		isModified=true;        		
         	}
