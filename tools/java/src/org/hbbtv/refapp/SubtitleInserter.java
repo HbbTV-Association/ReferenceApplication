@@ -75,7 +75,7 @@ public class SubtitleInserter {
 		}
 
 		String template=Utils.NL+Utils.NL+"  <AdaptationSet contentType=\"text\" mimeType=\"application/ttml+xml\" lang=\"${lang}\">"+Utils.NL
-			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"subtitle\"/>"+Utils.NL 
+			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL  // subtitle,captions,main
 			+"    <Representation id=\"${id}\" bandwidth=\"3000\">"
 			+"<BaseURL>${file}</BaseURL></Representation>"+Utils.NL
 			+"  </AdaptationSet>"+Utils.NL;  
@@ -131,7 +131,7 @@ public class SubtitleInserter {
 		}
 		
 		String template=Utils.NL+Utils.NL+"  <AdaptationSet segmentAlignment=\"true\" lang=\"${lang}\" contentType=\"text\" mimeType=\"application/mp4\">"+Utils.NL
-			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"subtitle\"/>"+Utils.NL
+			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL  // subtitle,captions,main
 			+"    <SegmentTemplate initialization=\"${file}$RepresentationID$/sub_i.mp4\" media=\"${file}$RepresentationID$/sub_$Number$.m4s\" timescale=\"1000\" startNumber=\"1\" duration=\"${dur}\"/>"+Utils.NL
 			+"    <Representation id=\"${id}\" startWithSAP=\"1\" bandwidth=\"6000\" codecs=\"stpp\"></Representation>"+Utils.NL
 			+"  </AdaptationSet>"+Utils.NL;
