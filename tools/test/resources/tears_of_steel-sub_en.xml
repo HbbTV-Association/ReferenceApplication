@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml"
+	xmlns:tt="http://www.w3.org/ns/ttml"
+    xmlns:ttp="http://www.w3.org/ns/ttml#parameter"
+    xmlns:tts="http://www.w3.org/ns/ttml#styling"
+	xmlns:ttm="http://www.w3.org/ns/ttml#metadata"
+	xmlns:ebuttm="urn:ebu:tt:metadata"
+	xmlns:ebutts="urn:ebu:tt:style"
+    ttp:timeBase="media"
+    ttp:cellResolution="50 30"
+    xml:lang="en" xml:space="default">
+<head>
+	<styling>
+		<style xml:id="textStyle" 
+			tts:fontStyle="normal" tts:fontFamily="sansSerif"
+			tts:fontSize="100%"
+			tts:lineHeight="125%"
+			tts:color="#ffffff" tts:backgroundColor="#000000b4"
+			tts:textAlign="left"/>
+	</styling>
+	<layout>
+		<region xml:id="bottom" tts:origin="10% 85%" tts:extent="80% 10%"
+			tts:displayAlign="after"/>
+	</layout>
+</head>
+<body>
+
+<div style="textStyle" region="bottom">
+	<p begin="00:00:23.000" end="00:00:24.500" xml:id="sub1">You're a jerk, Thom.</p>
+	<p begin="00:00:25.000" end="00:00:27.000" xml:id="sub2">Look Celia, we have to follow our passions;</p>
+	<p begin="00:00:27.000" end="00:00:30.500" xml:id="sub3">...you have your robotics, and I<br/>just want to be awesome in space.</p>
+	<p begin="00:00:30.800" end="00:00:34.000" xml:id="sub4">Why don't you just admit that<br/>you're freaked out by my robot hand?</p>
+	<p begin="00:00:34.500" end="00:00:36.000" xml:id="sub5">I'm not freaked out by- it's...</p>
+	<p begin="00:00:37.000" end="00:00:38.000" xml:id="sub6">...alright! Fine!</p>
+	<p begin="00:00:38.000" end="00:00:41.000" xml:id="sub7">I'm freaked out! I have nightmares<br/>that I'm being chased...</p>
+	<p begin="00:00:41.000" end="00:00:42.000" xml:id="sub8">...by these giant robotic claws of death...</p>
+	<p begin="00:00:42.200" end="00:00:45.000" xml:id="sub9">"Fourty years later"<br/>Whatever, Thom. We're done.</p>
+	<p begin="00:00:50.000" end="00:00:53.500" xml:id="sub10">Robot's memory synced and locked!</p>
+	<p begin="00:01:01.000" end="00:01:03.000" xml:id="sub11">This is pretty freaky.</p>
+	<p begin="00:01:57.000" end="00:01:59.000" xml:id="sub12">Shouldn't you be down there?</p>
+	<p begin="00:02:11.000" end="00:02:13.000" xml:id="sub13">I heard you guys talking last night.</p>
+	<p begin="00:02:16.000" end="00:02:18.000" xml:id="sub14">It's not my fault, you know.</p>
+	<p begin="00:03:11.000" end="00:03:12.000" xml:id="sub15">Are you ready?</p>
+	<p begin="00:03:13.000" end="00:03:15.000" xml:id="sub16">Of course you're ready, you're a rockstar.</p>
+	<p begin="00:03:17.000" end="00:03:18.000" xml:id="sub17">How's it looking, Barley?</p>
+	<p begin="00:03:19.000" end="00:03:21.000" xml:id="sub18">We should have about ten minutes...</p>
+	<p begin="00:03:21.500" end="00:03:23.000" xml:id="sub19">Well that's perfect.</p>
+	<p begin="00:03:23.500" end="00:03:26.500" xml:id="sub20">We're on in one! All systems go!<br/>Yeah you, go!</p>
+	<p begin="00:03:28.000" end="00:03:32.000" xml:id="sub21">Go! Move your asses! Go go go! </p>
+	<p begin="00:03:33.000" end="00:03:37.000" xml:id="sub22">I love it! Come on, go!</p>
+	<p begin="00:03:43.000" end="00:03:44.000" xml:id="sub23">That's nice.</p>
+	<p begin="00:03:44.500" end="00:03:45.700" xml:id="sub24">Nothing to worry about.</p>
+	<p begin="00:03:46.000" end="00:03:47.000" xml:id="sub25">Thom.</p>
+	<p begin="00:03:51.000" end="00:03:53.000" xml:id="sub26">There she is.</p>
+	<p begin="00:03:53.500" end="00:03:54.500" xml:id="sub27">Now.</p>
+	<p begin="00:03:55.000" end="00:03:56.000" xml:id="sub28">You love her.</p>
+	<p begin="00:03:57.000" end="00:03:58.500" xml:id="sub29">She is your passion! </p>
+	<p begin="00:04:00.000" end="00:04:01.000" xml:id="sub30">Be tender to her. </p>
+	<p begin="00:04:01.500" end="00:04:04.500" xml:id="sub31">Be honest! Eh- be tender.</p>
+	<p begin="00:04:05.000" end="00:04:08.000" xml:id="sub32">Remind her what love is.</p>
+	<p begin="00:04:52.000" end="00:04:55.000" xml:id="sub33">...and, action!</p>
+	<p begin="00:04:56.500" end="00:04:58.000" xml:id="sub34">Memory overwrite in progress!</p>
+	<p begin="00:04:59.000" end="00:05:01.000" xml:id="sub35">You're a jerk, Thom!</p>
+	<p begin="00:05:02.500" end="00:05:05.000" xml:id="sub36">Ohp- Sorry! Sorry.</p>
+	<p begin="00:05:16.000" end="00:05:17.000" xml:id="sub37">Look Celia.</p>
+	<p begin="00:05:18.000" end="00:05:20.000" xml:id="sub38">We have to follow our passions.</p>
+	<p begin="00:05:21.000" end="00:05:23.000" xml:id="sub39">You have your robotics...</p>
+	<p begin="00:05:25.000" end="00:05:28.000" xml:id="sub40">...and I just want to be awesome in space.</p>
+	<p begin="00:05:39.000" end="00:05:41.000" xml:id="sub41">Okay, they're coming. Two minutes left!</p>
+	<p begin="00:05:43.000" end="00:05:44.000" xml:id="sub42">Speed it up, Thom! </p>
+	<p begin="00:05:45.000" end="00:05:46.000" xml:id="sub43">Vivacissimo!</p>
+	<p begin="00:05:47.000" end="00:05:50.000" xml:id="sub44">Why don't you just admit that you're<br/>freaked out by my robot hand?</p>
+	<p begin="00:05:56.000" end="00:05:59.000" xml:id="sub45">Listen Celia, I was young...</p>
+	<p begin="00:05:59.500" end="00:06:01.000" xml:id="sub46">...and a dick.</p>
+	<p begin="00:06:01.000" end="00:06:03.000" xml:id="sub47">But that's no reason to<br/>destroy the world.</p>
+	<p begin="00:06:05.000" end="00:06:06.000" xml:id="sub48">Why does he do this?</p>
+	<p begin="00:06:06.500" end="00:06:08.500" xml:id="sub49">We already tried that one!</p>
+	<p begin="00:06:11.500" end="00:06:12.500" xml:id="sub50">Abort!</p>
+	<p begin="00:06:13.000" end="00:06:14.000" xml:id="sub51">Cut!</p>
+	<p begin="00:06:14.000" end="00:06:15.000" xml:id="sub52">Whoaaa!</p>
+	<p begin="00:06:19.000" end="00:06:20.000" xml:id="sub53">Whoaaa!</p>
+	<p begin="00:06:21.000" end="00:06:23.000" xml:id="sub54">Nooooo!</p>
+	<p begin="00:06:23.000" end="00:06:25.000" xml:id="sub55">You broke my heart.</p>
+	<p begin="00:06:26.000" end="00:06:27.000" xml:id="sub56">I know.</p>
+	<p begin="00:06:27.000" end="00:06:29.000" xml:id="sub57">You forgot me on earth.</p>
+	<p begin="00:06:29.000" end="00:06:30.000" xml:id="sub58">I know.</p>
+	<p begin="00:06:30.500" end="00:06:33.000" xml:id="sub59">I should just crush you.</p>
+	<p begin="00:06:36.000" end="00:06:37.000" xml:id="sub60">I'm-</p>
+	<p begin="00:06:47.000" end="00:06:48.000" xml:id="sub61">I'm sorry.</p>
+	<p begin="00:06:50.000" end="00:06:51.000" xml:id="sub62">Good ad-lib.</p>
+	<p begin="00:06:59.000" end="00:07:00.500" xml:id="sub63">Not my fault!</p>
+	<p begin="00:07:02.000" end="00:07:03.000" xml:id="sub64">This time.</p>
+	<p begin="00:07:08.000" end="00:07:09.500" xml:id="sub65">Quiet on set!</p>
+	<p begin="00:07:10.000" end="00:07:11.000" xml:id="sub66">We're out of time!</p>
+	<p begin="00:08:13.000" end="00:08:14.000" xml:id="sub67">Come on!</p>
+	<p begin="00:08:22.000" end="00:08:24.000" xml:id="sub68">RAAAAAAAAH!</p>
+	<p begin="00:08:24.000" end="00:08:25.000" xml:id="sub69">Memory overwrite, 90%.</p>
+	<p begin="00:08:26.000" end="00:08:28.000" xml:id="sub70">Captain! We have to abort!</p>
+	<p begin="00:08:38.000" end="00:08:40.000" xml:id="sub71">The world's changed, Celia...</p>
+	<p begin="00:08:54.000" end="00:08:56.000" xml:id="sub72">...maybe we can too.</p>
+	<p begin="00:08:58.000" end="00:08:59.000" xml:id="sub73">Memory overwrite complete!</p>
+	<p begin="00:09:19.000" end="00:09:20.000" xml:id="sub74">You know.</p>
+	<p begin="00:09:22.000" end="00:09:24.000" xml:id="sub75">There's a lesson to be learned from this.</p>
+	<p begin="00:09:26.000" end="00:09:27.000" xml:id="sub76">Could'a gone worse.</p>
+</div>
+
+</body>
+</tt>

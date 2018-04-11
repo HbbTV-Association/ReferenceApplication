@@ -4,6 +4,8 @@
 ##    mkdir /videos
 ##    cd /videos
 ##    sh /refapp/tools/test/download-testvideos.sh
+## Copy additional resources to videos folder:
+##    cp /refapp/tools/test/resources/* /videos/
 
 BASEDIR=$(dirname $0)
 
