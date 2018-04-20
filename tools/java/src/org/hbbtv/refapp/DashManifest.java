@@ -1,11 +1,11 @@
 package org.hbbtv.refapp;
 
 import java.util.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -185,7 +185,8 @@ public class DashManifest {
 				continue; // not given mimeType="video/mp4", "audio/mp4"
 
 			modified=true;
-			elem = elems.get(0); // first Representation element
+			//elem = elems.get(0); // first Representation element
+			elem = XMLUtil.getChildElement(elemAS, null);
 			elemAS.insertBefore( doc.importNode(newElem, true), elem);
 			break;
 		}

@@ -49,13 +49,19 @@ public class XMLUtil {
 	/**
 	 * Get first child element by nodename.
 	 * @param parent
-	 * @param name
+	 * @param name	name of element or NULL to return first element
 	 * @return	element or null
 	 */
 	public static Element getChildElement(Element parent, String name) {
 		for (Node child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
-			if (child instanceof Element && name.equals(child.getNodeName()))
-				return (Element)child;
+			if (child instanceof Element) {
+				if (name!=null) {
+					if (name.equals(child.getNodeName()))
+						return (Element)child;
+				} else {
+					return (Element)child;
+				}
+			}
 	    }
 	    return null;
 	}

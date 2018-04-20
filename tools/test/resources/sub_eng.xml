@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter"
+    xmlns:tts="http://www.w3.org/ns/ttml#styling"
+    ttp:timeBase="media"
+    ttp:cellResolution="50 30"
+    xml:lang="en" xmlns="http://www.w3.org/ns/ttml">
+      <head>
+            <styling>
+				<style xml:id="defaultStyle"
+				tts:fontStyle="normal" tts:fontFamily="sansSerif"
+                tts:fontSize="160%"
+                tts:lineHeight="125%"
+                tts:color="#ffffff"
+                tts:backgroundColor="#000000c2"
+                tts:textAlign="center"/>
+            </styling>
+            <layout>
+                  <region xml:id="bottom" tts:origin="25% 85%" tts:extent="65% 10%"
+                 tts:displayAlign="after"/>
+            </layout>
+      </head>
+      <body>
+            <div style="defaultStyle">
+                  <p begin="00:00:00.000" end="00:00:05.000" region="bottom" xml:id="sub1">Subtitle: 0:00 – 0:05(eng)</p>
+                  <p begin="00:00:05.000" end="00:00:10.000" region="bottom" xml:id="sub2">Subtitle: 0:05 – 0:10(eng)</p>
+                  <p begin="00:00:10.000" end="00:00:15.000" region="bottom" xml:id="sub3">Subtitle: 0:10 – 0:15(eng)</p>
+                  <p begin="00:00:15.000" end="00:00:20.000" region="bottom" xml:id="sub4">Subtitle: 0:15 – 0:20(eng)</p>
+                  <p begin="00:00:20.000" end="00:00:25.000" region="bottom" xml:id="sub5">Subtitle: 0:20 – 0:25(eng)</p>
+                  <p begin="00:00:25.000" end="00:00:30.000" region="bottom" xml:id="sub6">Subtitle: 0:25 – 0:30(eng)</p>
+                  <p begin="00:00:30.000" end="00:00:35.000" region="bottom" xml:id="sub7">Subtitle: 0:30 – 0:35(eng)</p>
+                  <p begin="00:00:35.000" end="00:00:40.000" region="bottom" xml:id="sub8">Subtitle: 0:35 – 0:40(eng)</p>
+                  <p begin="00:00:40.000" end="00:00:45.000" region="bottom" xml:id="sub9">Subtitle: 0:40 – 0:45(eng)</p>
+                  <p begin="00:00:45.000" end="00:00:50.000" region="bottom" xml:id="sub10">Subtitle: 0:45 – 0:50(eng)</p>
+                  <p begin="00:00:50.000" end="00:00:55.000" region="bottom" xml:id="sub11">Subtitle: 0:50 – 0:55(eng)</p>
+                  <p begin="00:00:55.000" end="00:01:00.000" region="bottom" xml:id="sub12">Subtitle: 0:55 – 1:00(eng)</p>
+                  <p begin="00:01:00.000" end="00:01:05.000" region="bottom" xml:id="sub13">Subtitle: 1:00 – 1:05(eng)</p>
+                  <p begin="00:01:05.000" end="00:01:10.000" region="bottom" xml:id="sub14">Subtitle: 1:05 – 1:10(eng)</p>
+                  <p begin="00:01:10.000" end="00:01:15.000" region="bottom" xml:id="sub15">Subtitle: 1:10 – 1:15(eng)</p>
+                  <p begin="00:01:15.000" end="00:01:20.000" region="bottom" xml:id="sub16">Subtitle: 1:15 – 1:20(eng)</p>
+                  <p begin="00:01:20.000" end="00:01:25.000" region="bottom" xml:id="sub17">Subtitle: 1:20 – 1:25(eng)</p>
+                  <p begin="00:01:25.000" end="00:01:30.000" region="bottom" xml:id="sub18">Subtitle: 1:25 – 1:30(eng)</p>
+                  <p begin="00:01:30.000" end="00:01:35.000" region="bottom" xml:id="sub19">Subtitle: 1:30 – 1:35(eng)</p>
+                  <p begin="00:01:35.000" end="00:01:40.000" region="bottom" xml:id="sub20">Subtitle: 1:35 – 1:40(eng)</p>
+                  <p begin="00:01:40.000" end="00:01:45.000" region="bottom" xml:id="sub21">Subtitle: 1:40 – 1:45(eng)</p>
+                  <p begin="00:01:45.000" end="00:01:50.000" region="bottom" xml:id="sub22">Subtitle: 1:45 – 1:50(eng)</p>
+                  <p begin="00:01:50.000" end="00:01:55.000" region="bottom" xml:id="sub23">Subtitle: 1:50 – 1:55(eng)</p>
+                  <p begin="00:01:55.000" end="00:02:00.000" region="bottom" xml:id="sub24">Subtitle: 1:55 – 2:00(eng)</p>
+                  <p begin="00:02:00.000" end="00:02:05.000" region="bottom" xml:id="sub25">Subtitle: 2:00 – 2:05(eng)</p>
+                  <p begin="00:02:05.000" end="00:02:10.000" region="bottom" xml:id="sub26">Subtitle: 2:05 – 2:10(eng)</p>
+                  <p begin="00:02:10.000" end="00:02:15.000" region="bottom" xml:id="sub27">Subtitle: 2:10 – 2:15(eng)</p>
+                  <p begin="00:02:15.000" end="00:02:20.000" region="bottom" xml:id="sub28">Subtitle: 2:15 – 2:20(eng)</p>
+                  <p begin="00:02:20.000" end="00:02:25.000" region="bottom" xml:id="sub29">Subtitle: 2:20 – 2:25(eng)</p>
+                  <p begin="00:02:25.000" end="00:02:30.000" region="bottom" xml:id="sub30">Subtitle: 2:25 – 2:30(eng)</p>
+                  <p begin="00:02:30.000" end="00:02:35.000" region="bottom" xml:id="sub31">Subtitle: 2:30 – 2:35(eng)</p>
+                  <p begin="00:02:35.000" end="00:02:40.000" region="bottom" xml:id="sub32">Subtitle: 2:35 – 2:40(eng)</p>
+                  <p begin="00:02:40.000" end="00:02:45.000" region="bottom" xml:id="sub33">Subtitle: 2:40 – 2:45(eng)</p>
+                  <p begin="00:02:45.000" end="00:02:50.000" region="bottom" xml:id="sub34">Subtitle: 2:45 – 2:50(eng)</p>
+                  <p begin="00:02:50.000" end="00:02:55.000" region="bottom" xml:id="sub35">Subtitle: 2:50 – 2:55(eng)</p>
+                  <p begin="00:02:55.000" end="00:03:00.000" region="bottom" xml:id="sub36">Subtitle: 2:55 – 3:00(eng)</p>
+                  <p begin="00:03:00.000" end="00:03:05.000" region="bottom" xml:id="sub37">Subtitle: 3:00 – 3:05(eng)</p>
+                  <p begin="00:03:05.000" end="00:03:10.000" region="bottom" xml:id="sub38">Subtitle: 3:05 – 3:10(eng)</p>
+                  <p begin="00:03:10.000" end="00:03:15.000" region="bottom" xml:id="sub39">Subtitle: 3:10 – 3:15(eng)</p>
+                  <p begin="00:03:15.000" end="00:03:20.000" region="bottom" xml:id="sub40">Subtitle: 3:15 – 3:20(eng)</p>
+                  <p begin="00:03:20.000" end="00:03:25.000" region="bottom" xml:id="sub41">Subtitle: 3:20 – 3:25(eng)</p>
+                  <p begin="00:03:25.000" end="00:03:30.000" region="bottom" xml:id="sub42">Subtitle: 3:25 – 3:30(eng)</p>
+                  <p begin="00:03:30.000" end="00:03:35.000" region="bottom" xml:id="sub43">Subtitle: 3:30 – 3:35(eng)</p>
+                  <p begin="00:03:35.000" end="00:03:40.000" region="bottom" xml:id="sub44">Subtitle: 3:35 – 3:40(eng)</p>
+                  <p begin="00:03:40.000" end="00:03:45.000" region="bottom" xml:id="sub45">Subtitle: 3:40 – 3:45(eng)</p>
+                  <p begin="00:03:45.000" end="00:03:50.000" region="bottom" xml:id="sub46">Subtitle: 3:45 – 3:50(eng)</p>
+                  <p begin="00:03:50.000" end="00:03:55.000" region="bottom" xml:id="sub47">Subtitle: 3:50 – 3:55(eng)</p>
+                  <p begin="00:03:55.000" end="00:04:00.000" region="bottom" xml:id="sub48">Subtitle: 3:55 – 4:00(eng)</p>
+                  <p begin="00:04:00.000" end="00:04:05.000" region="bottom" xml:id="sub49">Subtitle: 4:00 – 4:05(eng)</p>
+                  <p begin="00:04:05.000" end="00:04:10.000" region="bottom" xml:id="sub50">Subtitle: 4:05 – 4:10(eng)</p>
+                  <p begin="00:04:10.000" end="00:04:15.000" region="bottom" xml:id="sub51">Subtitle: 4:10 – 4:15(eng)</p>
+                  <p begin="00:04:15.000" end="00:04:20.000" region="bottom" xml:id="sub52">Subtitle: 4:15 – 4:20(eng)</p>
+                  <p begin="00:04:20.000" end="00:04:25.000" region="bottom" xml:id="sub53">Subtitle: 4:20 – 4:25(eng)</p>
+                  <p begin="00:04:25.000" end="00:04:30.000" region="bottom" xml:id="sub54">Subtitle: 4:25 – 4:30(eng)</p>
+                  <p begin="00:04:30.000" end="00:04:35.000" region="bottom" xml:id="sub55">Subtitle: 4:30 – 4:35(eng)</p>
+                  <p begin="00:04:35.000" end="00:04:40.000" region="bottom" xml:id="sub56">Subtitle: 4:35 – 4:40(eng)</p>
+                  <p begin="00:04:40.000" end="00:04:45.000" region="bottom" xml:id="sub57">Subtitle: 4:40 – 4:45(eng)</p>
+                  <p begin="00:04:45.000" end="00:04:50.000" region="bottom" xml:id="sub58">Subtitle: 4:45 – 4:50(eng)</p>
+                  <p begin="00:04:50.000" end="00:04:55.000" region="bottom" xml:id="sub59">Subtitle: 4:50 – 4:55(eng)</p>
+                  <p begin="00:04:55.000" end="00:05:00.000" region="bottom" xml:id="sub60">Subtitle: 4:55 – 5:00(eng)</p>
+            </div>
+      </body>
+</tt>

@@ -153,6 +153,7 @@ public class MediaTools {
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
 			"-bs-switching", "no",
 			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "1", // SIDX table with 1 fragment
+			//"-last-dynamic",  // insert lmsg brand to the last segment(MDP.type=dynamic)
 			"-segment-name", "$RepresentationID$_$Number$$Init=i$", "-segment-timeline",
 			"-out", "manifest.mpd"	// output file
 		);
