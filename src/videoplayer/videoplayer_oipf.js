@@ -625,6 +625,73 @@ VideoPlayer.prototype.getStreamComponents = function(){
 	
 }
 
+VideoPlayer.prototype.changeAVcomponent = function( component ) {
+	console.log("changeAVcomponent("+ component +")");
+	var self = this;
+	try{
+	
+		var track = ( component == self.AVCOMPONENTS.AUDIO? self.audioTrack : self.subtitleTrack );
+	
+	
+
+		console.log("current track: " + track  );
+		if( track == undefined || track == NaN || track === false ){
+			console.log("Change to 0"  );
+			track = 0;
+		}
+		track++;
+		
+		console.log("switched track: " + track );
+		
+		switch ( this.video.playState) {
+			case 1:
+				// components can be accessed only in PLAYING state
+				//ref 7.16.5.1.1 OIPF-DAE
+				/*
+				COMPONENT_TYPE_VIDEO: 0,
+				COMPONENT_TYPE_AUDIO: 1,
+				COMPONENT_TYPE_SUBTITLE: 2
+				*/
+				var avComponent = this.video.getComponents( component );
+				if( track >= avComponent.length){
+					track = 0;
+				}
+				
+				if( component == self.AVCOMPONENTS.AUDIO ){
+					self.audioTrack = track;
+					console.log("Updated audioTrack value to: " + self.audioTrack);
+				}
+				else{
+					self.subtitleTrack = track;
+					console.log("Updated subtitleTrack value to: " + self.subtitleTrack);
+				}
+				
+				console.log("Video has " + avComponent.length + " "+ ["video","audio","subtitle"][component] +" tracks. selected track is: " + track );
+				
+				// unselect all
+				for (var i=0; i<avComponent.length; i++){
+					console.log( "track " + i + ": " + avComponent[i].language );
+					this.video.unselectComponent(avComponent[i]);
+				}
+				
+				showInfo("select track " + track);
+				console.log("select track " + track);
+				this.video.selectComponent(avComponent[track]);
+				console.log("READY");
+				console.log( avComponent[track].language, avComponent[track].label || "label undefined" );
+				
+			break;
+			case 6:
+				/*ERROR*/
+				showInfo("Error has occured");
+				break; 
+		}
+    } catch(e){
+		console.log("enableSubtitles - Error: " + e.description);
+	}
+
+}
+
 
 VideoPlayer.prototype.enableSubtitles = function( next ) {
 	console.log("enableSubtitles("+ next +")");

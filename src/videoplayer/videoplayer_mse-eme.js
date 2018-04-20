@@ -310,7 +310,6 @@ VideoPlayerEME.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
 	console.log("player.attachSource(url)");
 	this.player.attachSource(url);
-	this.player.load();
 	return;
 };
 

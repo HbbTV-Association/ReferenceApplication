@@ -317,7 +317,7 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 	try{
 		//this.url = url;
 		this.video.src = url;
-		this.video.load();
+		//this.video.load();
 	} catch( e ){
 		console.log( e.message );
 	}
@@ -598,7 +598,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerHTML5.prototype.startVideo = function( isLive ){
+VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 	console.log("startVideo()");
 	this.subtitleTrack = false
 	var self = this;
@@ -615,18 +615,21 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 	if( !this.subtitles ){
 		this.subtitleTrack = false;
 	}
-	try{
-		var broadcast = $("#broadcast")[0];
-		if( !broadcast ){
-			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+	if( nthCall && nthCall > 0 ){
+		try{
+			var broadcast = $("#broadcast")[0];
+			if( !broadcast ){
+				$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+			}
+			broadcast = $("#broadcast")[0];
+			console.log( broadcast );
+			broadcast.bindToCurrentChannel();
+			broadcast.stop();
+			console.log("broadcast stopped");
 		}
-		broadcast = $("#broadcast")[0];
-		broadcast.bindToCurrentChannel();
-		broadcast.stop();
-		console.log("broadcast stopped");
-	}
-	catch(e){
-		console.log("error stopping broadcast");
+		catch(e){
+			console.log("error stopping broadcast");
+		}
 	}
 	
 	var self = this;
@@ -675,7 +678,7 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo( isLive );
+				self.startVideo( isLive, 2 );
 			}
 			else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );

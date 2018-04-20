@@ -13,6 +13,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		MPEG:1,
 		DASH:2
 	};
+	this.AVCOMPONENTS = {
+		VIDEO : 0,
+		AUDIO : 1,
+		SUBTITLE : 2
+	};
+	
 	this.element_id = element_id;
 	this.element = document.getElementById(element_id);
 	if(!this.element){
@@ -178,12 +184,22 @@ function VideoPlayerBasic(element_id, profile, width, height){
 						}
 					}
 					else if( typeof this.enableSubtitles  == "function" ){
-						this.enableSubtitles(true);
+						this.changeAVcomponent( this.AVCOMPONENTS.SUBTITLE );
+						//this.enableSubtitles(true);
 					}
 				} catch( e ){
 					console.log( e.description );
 				}
 			break;
+			
+			case VK_GREEN:
+				try{
+					if( typeof this.enableSubtitles  == "function" ){
+						this.changeAVcomponent( this.AVCOMPONENTS.AUDIO );
+					}
+				} catch( e ){
+					console.log( e.description );
+				}
 			default:
 			break;
 		}
@@ -497,8 +513,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				self.seekValue = 0;
 				clearTimeout( this.seekTimer );
 				self.seekTimer = null;
-				
-				
 				return;
 			}
 			
@@ -521,8 +535,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 					self.video.seek( toSeek );
 					Monitor.videoSeek( self.seekValue );
 					console.log("seek completed to " + toSeek);
-					
-					
 				} catch(e){
 					console.log("seek failed: " + e.description);
 				}
