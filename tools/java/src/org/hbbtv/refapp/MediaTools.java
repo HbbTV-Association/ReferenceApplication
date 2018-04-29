@@ -34,7 +34,7 @@ public class MediaTools {
 	}
 
 	public static List<String> getTranscodeH264Args(File file, StreamSpec spec, 
-				int fps, int gopdur, String overlayOpt) {
+				int fps, int gopdur, String overlayOpt, long timeLimit) {
 		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
 		String libFolder = Utils.getLibraryFolder(MediaTools.class);
 		libFolder = Utils.normalizePath(libFolder, true);
@@ -63,16 +63,19 @@ public class MediaTools {
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
-			"-an", "-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+			"-an",
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
 		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);		
 		return args;
 	}
 
 	public static List<String> getTranscodeH265Args(File file, StreamSpec spec, 
-			int fps, int gopdur, String overlayOpt) {
+			int fps, int gopdur, String overlayOpt, long timeLimit) {
 		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
 		String libFolder = Utils.getLibraryFolder(MediaTools.class);
 		libFolder = Utils.normalizePath(libFolder, true);
@@ -103,7 +106,9 @@ public class MediaTools {
 			"-sc_threshold", "0",	// disable Scenecut
 			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${fps}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
-			"-an", "-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+			"-an", 
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
@@ -115,12 +120,13 @@ public class MediaTools {
 				.replace("${gop}", ""+gop)
 				.replace("${bitrate}", spec.bitrate)
 				);
-		
+
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
 		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);
 		return args;
 	}
 	
-	public static List<String> getTranscodeAACArgs(File file, StreamSpec spec) {
+	public static List<String> getTranscodeAACArgs(File file, StreamSpec spec, long timeLimit) {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
 		
 		List<String> args=Arrays.asList(FFMPEG, 
@@ -133,9 +139,13 @@ public class MediaTools {
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
 			"-ar", ""+spec.sampleRate,
 			"-ac", ""+spec.channels,	// channel count 2..n
-			"-vn", "-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
+			"-vn",
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
 		);
 		args = new ArrayList<String>(args);
+		
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
 		return args;
 	}
 	
@@ -463,6 +473,21 @@ public class MediaTools {
 			}
 		}
 		return argIdx;
+	}
+	
+	private static int updateOpt(List<String> args, String key, String value, boolean setToKeyPos) {
+		// update [ "-somekey", "${someval}" ] element,
+		// find by -somekey or ${someval}, delete elements if value is NULL.
+		int idx=args.indexOf(key);
+		if (idx>=0) {
+			if (value!=null) {
+				args.set(setToKeyPos ? idx : idx+1, value);
+			} else { 
+				args.remove(idx);
+				args.remove(setToKeyPos ? idx-1 : idx); 
+			}
+		}
+		return idx;
 	}
 	
 }

@@ -163,10 +163,10 @@ public class EventInserter {
     	if (!scheme.isEmpty()) {
     		// add element to AdaptationSet(video) block 
     		manifest.addInbandEventStreamElement(scheme, val, "video");
-    		manifest.save(outputFile);
+    		manifest.save(outputFile, false);
     	} else {
     		manifest.removeInbandEventStreamElement(null, null);
-    		manifest.save(outputFile);
+    		manifest.save(outputFile, false);
     	}
 	}
 

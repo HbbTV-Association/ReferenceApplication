@@ -14,16 +14,12 @@ import org.w3c.dom.Element;
  * Modify manifest elements, save new manifest.mpd file.
  */
 public class DashManifest {
-	private File file;
+	//private File file;
 	private Document doc;
 	private boolean modified;
 	
 	public DashManifest(File file) throws IOException {
-		this.file=file;
-		readInputFile();
-	}
-
-	private void readInputFile() throws IOException {
+		//this.file=file;
 		FileInputStream fis = new FileInputStream(file);
 		try {
 			doc = XMLUtil.createDocument(fis);
@@ -31,7 +27,11 @@ public class DashManifest {
 			try { fis.close(); } catch(Exception ex){}
 		}		
 	}
-	
+
+	public DashManifest(String xmlData) throws IOException {
+		doc = XMLUtil.createDocument(xmlData);
+	}
+
 	/**
 	 * Fix manifest formatting issues.
 	 * @param mode	h264,h265
@@ -106,6 +106,51 @@ public class DashManifest {
 					elemRE.removeAttribute("startWithSAP");
 			}			
 		}
+		
+		// consider all videos are always progressive,
+		// update AdaptationSet.contentType attribute
+		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
+		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			String mime=null; 
+			for(Element elemRE : XMLUtil.getChildElements(elemAS, "Representation")) {
+				mime = elemRE.getAttribute("mimeType");
+				if (mime.isEmpty()) mime = elemAS.getAttribute("mimeType");
+				if (mime.startsWith("video/")) {
+					if (elemRE.getAttribute("scanType").isEmpty()) {
+						modified=true;
+						elemRE.setAttribute("scanType", "progressive");
+					}
+				}
+			}
+			
+			if (mime!=null && elemAS.getAttribute("contentType").isEmpty()) {
+				mime = mime.startsWith("video/") ? "video" :
+					   mime.startsWith("audio/") ? "audio" :
+					   "";
+				if (!mime.isEmpty())
+					elemAS.setAttribute("contentType", mime);
+			}
+		}
+		
+		// Add Role=main to first audio adaptationset (TODO: what to put additional audios?, video?)
+		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
+		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			elem = XMLUtil.getChildElement(elemAS, "Role");
+			if (elem!=null) continue;
+			elem = XMLUtil.getChildElement(elemAS, "Representation");
+			if (elem==null) continue;
+			String mime = elem.getAttribute("mimeType");
+			if (mime.isEmpty()) mime = elemAS.getAttribute("mimeType");
+			if (mime.startsWith("audio/")) {
+				modified=true;
+				String xml="<Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>";
+				Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
+				elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
+				elemAS.insertBefore( doc.importNode(newElem, true), elem);
+				break;
+			}
+		}
+		
 	}
 	
 	public void addNamespaces() {
@@ -147,18 +192,17 @@ public class DashManifest {
 		// remove <ContentProtection> element by schemeIdUri value
 		String tag;
 		if (drmName.equals("cenc")) 			tag="urn:mpeg:dash:mp4protection:2011";
-		else if (drmName.equals("playready")) 	tag="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95";
-		else if (drmName.equals("widevine")) 	tag="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
-		else if (drmName.equals("marlin")) 		tag="urn:uuid:5e629af5-38da-4063-8977-97ffbd9902d4";
+		else if (drmName.equals("playready")) 	tag="urn:uuid:"+DashDRM.GUID_PLAYREADY;
+		else if (drmName.equals("widevine")) 	tag="urn:uuid:"+DashDRM.GUID_WIDEVINE;
+		else if (drmName.equals("marlin")) 		tag="urn:uuid:"+DashDRM.GUID_MARLIN;
 		else if (drmName.equals("clearkey") || drmName.equals("emecenc") ) 	
-												tag="urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
+												tag="urn:uuid:"+DashDRM.GUID_CENC;
 		else return;
-		//tag = tag.toLowerCase(Locale.US);
 		
 		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
 			for(Element elemCP : XMLUtil.getChildElements(elemAS, "ContentProtection")) {
-				if (tag.equals(elemCP.getAttribute("schemeIdUri").toLowerCase(Locale.US))) {
+				if (tag.equalsIgnoreCase(elemCP.getAttribute("schemeIdUri"))) {
 					modified=true;
 					elemCP.getParentNode().removeChild(elemCP);
 				}
@@ -185,8 +229,9 @@ public class DashManifest {
 				continue; // not given mimeType="video/mp4", "audio/mp4"
 
 			modified=true;
-			//elem = elems.get(0); // first Representation element
-			elem = XMLUtil.getChildElement(elemAS, null);
+			elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
+			//elem = elems.get(0); // first REP
+			//elem = XMLUtil.getChildElement(elemAS, null); // first child of AS
 			elemAS.insertBefore( doc.importNode(newElem, true), elem);
 			break;
 		}
@@ -206,16 +251,26 @@ public class DashManifest {
 	/**
 	 * Save manifest.mpd if content was modified.
 	 * @param outputFile
+	 * @param forceSave
 	 * @throws Exception
 	 */
-	public void save(File outputFile) throws Exception {
-		if (!modified) return;
+	public void save(File outputFile, boolean forceSave) throws Exception {
+		if (!modified && !forceSave) return;
 		String val = XMLUtil.createXML(doc.getDocumentElement());
 		FileOutputStream fos = new FileOutputStream(outputFile);
 		try {
 			fos.write(val.getBytes("UTF-8"));
 		} finally {
 			fos.close();
+		}
+	}
+	
+	public String toString() {
+		try {
+			return XMLUtil.createXML(doc.getDocumentElement());
+		} catch(Exception ex) {
+			if (ex instanceof IllegalArgumentException) throw (IllegalArgumentException)ex;
+			else throw new IllegalArgumentException(ex);
 		}
 	}
 	

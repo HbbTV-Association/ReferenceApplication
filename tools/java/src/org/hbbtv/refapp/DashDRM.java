@@ -18,6 +18,16 @@ import com.google.protobuf.ByteString;
  * Systems: playready, widevine, marlin, cenc 
  */
 public class DashDRM {
+	// http://dashif.org/identifiers/protection/
+	public static final String SYSID_PLAYREADY= "9A04F07998404286AB92E65BE0885F95";     // PSSH SystemId
+	public static final String GUID_PLAYREADY = "9a04f079-9840-4286-ab92-e65be0885f95"; // SchemeId GUID
+	public static final String SYSID_MARLIN   = "69f908af481646ea910ccd5dcccb0a3a";     // SysId and GUID does not
+	public static final String GUID_MARLIN    = "5e629af5-38da-4063-8977-97ffbd9902d4"; // equal for Marlin.
+	public static final String SYSID_WIDEVINE = "EDEF8BA979D64ACEA3C827DCD51D21ED";
+	public static final String GUID_WIDEVINE  = "edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
+	public static final String SYSID_CENC     = "1077efecc0b24d02ace33c1e52e2fb4b";
+	public static final String GUID_CENC      = "1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
+	
 	private SecureRandom rand = new SecureRandom();
 	private Map<String,String> params;
 
@@ -72,7 +82,7 @@ public class DashDRM {
 			buf.append(Dasher.NL);
 			buf.append("<!-- Playready -->"+Dasher.NL);
 			buf.append("<DRMInfo type=\"pssh\" version=\"0\">"+Dasher.NL);
-			buf.append("  <BS ID128=\"9A04F07998404286AB92E65BE0885F95\"/>"+Dasher.NL); // SystemID
+			buf.append("  <BS ID128=\""+SYSID_PLAYREADY+"\"/>"+Dasher.NL); // SystemID
 			buf.append("  <BS bits=\"32\" endian=\"little\" value=\"" +(wrm.length+10)+ "\"/>"+Dasher.NL); // SizeOfPRO table
 			buf.append("  <BS bits=\"16\" endian=\"little\" value=\"1\"/>"+Dasher.NL); // one key supported only for now
 			buf.append("  <BS bits=\"16\" endian=\"little\" value=\"1\"/>"+Dasher.NL);
@@ -87,7 +97,7 @@ public class DashDRM {
 			buf.append(Dasher.NL);
 			buf.append("<!-- Widevine -->"+Dasher.NL);
 			buf.append("<DRMInfo type=\"pssh\" version=\"0\">"+Dasher.NL);
-			buf.append("  <BS ID128=\"EDEF8BA979D64ACEA3C827DCD51D21ED\"/>"+Dasher.NL); // SystemID
+			buf.append("  <BS ID128=\""+SYSID_WIDEVINE+"\"/>"+Dasher.NL); // SystemID
 			buf.append("  <BS data=\"0x08011210\"/>"+Dasher.NL); // protobuf field prefix
 			buf.append("  <BS ID128=\"" + kid.substring(2)+ "\"/>"+Dasher.NL); // kid
 			buf.append("</DRMInfo>"+Dasher.NL);
@@ -99,7 +109,7 @@ public class DashDRM {
 			buf.append(Dasher.NL);
 			buf.append("<!-- Marlin -->"+Dasher.NL);
 			buf.append("<DRMInfo type=\"pssh\" version=\"0\">"+Dasher.NL);
-			buf.append("  <BS ID128=\"69f908af481646ea910ccd5dcccb0a3a\"/>"+Dasher.NL); // SystemID
+			buf.append("  <BS ID128=\""+SYSID_MARLIN+"\"/>"+Dasher.NL); // SystemID
 			buf.append("  <BS data=\"0x000000186d61726c000000106d6b69640000000000000000\"/>"+Dasher.NL); // 0x18, "marl", 0x10, "mkid", emptyKID
 			buf.append("</DRMInfo>"+Dasher.NL);
 		}
@@ -116,7 +126,7 @@ public class DashDRM {
 			buf.append(Dasher.NL);
 			buf.append("<!-- CENC -->"+Dasher.NL);
 			buf.append("<DRMInfo type=\"pssh\" version=\""+ver+"\">"+Dasher.NL);
-			buf.append("  <BS ID128=\"1077efecc0b24d02ace33c1e52e2fb4b\"/>"+Dasher.NL); // SystemID
+			buf.append("  <BS ID128=\""+SYSID_CENC+"\"/>"+Dasher.NL); // SystemID
 			buf.append("  <BS bits=\"32\" value=\"1\"/>"+Dasher.NL); // KIDCount
 			buf.append("  <BS ID128=\"" + kid.substring(2)+ "\"/>"+Dasher.NL); // kid
 			buf.append("</DRMInfo>"+Dasher.NL);
@@ -146,7 +156,7 @@ public class DashDRM {
 		byte[] wrm = createPlayreadyXML(kid, key, laurl).getBytes("UTF-16LE");
 		
 		StringBuilder buf = new StringBuilder();
-		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95\">"+Dasher.NL);
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_PLAYREADY+"\">"+Dasher.NL);
 		for(String optTag : opt.split(",")) {
 			if (optTag.equals("pro"))
 				buf.append("  <mspr:pro>"+createPlayreadyPRO(wrm)+"</mspr:pro>"+Dasher.NL);
@@ -163,7 +173,7 @@ public class DashDRM {
 		
 		String kid = Utils.getString(params, "drm.kid", "", true);		
 		StringBuilder buf = new StringBuilder();
-		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed\">"+Dasher.NL);
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_WIDEVINE+"\">"+Dasher.NL);
 		buf.append("  <cenc:pssh>"+ createWidevinePSSH(kid) +"</cenc:pssh>"+Dasher.NL);		
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();		
@@ -187,7 +197,7 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.clearkey", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String scheme = "1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
+		String scheme = GUID_CENC;
 		String kid = Utils.getString(params, "drm.kid", "", true);
 		
 		StringBuilder buf = new StringBuilder();
@@ -235,7 +245,7 @@ public class DashDRM {
 		baos.write(new byte[]{ 'p','s','s','h' }); // table identifier
 		
 		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00 }); // PSSH version=0
-		baos.write(Utils.hexToBytes("9A04F07998404286AB92E65BE0885F95") ); // PSSH PlayReadySystemID
+		baos.write(Utils.hexToBytes(SYSID_PLAYREADY) ); // PSSH PlayReadySystemID
 		baos.write(new byte[4]);   // placeholder length of PSSH payload(bytes+4 byte len field), bigEndian
 		baos.write(new byte[4]);   // -"- littleEndian
 		
@@ -277,7 +287,7 @@ public class DashDRM {
 		baos.write(Utils.toIntArray(32+pssh.length)); // length, fixed 32-bytes prefix in PSSH box
 		baos.write(new byte[]{ 'p','s','s','h' }); // boxId
 		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00 }); // PSSH version=0
-		baos.write(Utils.hexToBytes("EDEF8BA979D64ACEA3C827DCD51D21ED") ); // SystemId 16-bytes
+		baos.write(Utils.hexToBytes(SYSID_WIDEVINE)); // SystemId 16-bytes
 		baos.write(Utils.toIntArray(pssh.length)); // payload length, not including this length field
 		baos.write(pssh); // payload
 		

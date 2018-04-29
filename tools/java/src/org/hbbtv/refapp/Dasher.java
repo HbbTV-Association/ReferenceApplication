@@ -74,7 +74,8 @@ public class Dasher {
 						MediaTools.executeProcess(args, outputFolder);				
 				}
 			}
-			
+
+			long timeLimit = Utils.getLong(params, "timelimit", -1); // read X seconds from start
 			List<StreamSpec> specs=new ArrayList<StreamSpec>();
 
 			// transcode video.1,video.2,.. output streams
@@ -105,10 +106,10 @@ public class Dasher {
 				spec.level=val;
 
 				specs.add(spec);
-
+				
 				List<String> args = spec.type==StreamSpec.TYPE.VIDEO_H265 ?
-						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt) :
-						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt);
+						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit) :
+						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				
 				if (!isDisabled) {
@@ -142,7 +143,7 @@ public class Dasher {
 				spec.enabled = !isDisabled;
 				specs.add(spec);
 				
-				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec);
+				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec, timeLimit);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				if (!isDisabled)
 					MediaTools.executeProcess(args, outputFolder);
@@ -160,7 +161,7 @@ public class Dasher {
 					spec = (StreamSpec)spec.clone();
 					spec.name = spec.name+"-"+idxI;
 					specs.add(spec);
-					List<String> args=MediaTools.getTranscodeAACArgs(inputFileSec, spec);
+					List<String> args=MediaTools.getTranscodeAACArgs(inputFileSec, spec, timeLimit);
 					logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 					MediaTools.executeProcess(args, outputFolder);
 				}
@@ -172,10 +173,10 @@ public class Dasher {
 			logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, outputFolder);
 			
-			// Fix some of the common manifest problems after mp4box tool
+			// Fix some of the common manifest problems after mp4box tool and missing fields
 			DashManifest manifest = new DashManifest(new File(outputFolder, "manifest.mpd"));
 			manifest.fixContent(mode);
-			manifest.save( new File(outputFolder, "manifest.mpd") );
+			manifest.save(new File(outputFolder, "manifest.mpd"), false);
 
 			// DASH: write encrypted segments+manifest if KID+KEY values are found
 			if (!Utils.getString(params, "drm.kid", "", true).isEmpty() &&
@@ -221,7 +222,7 @@ public class Dasher {
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
 
 				// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players,
-				// create vX_i_nopssh.mp4 init without any PSSH boxes
+				// create init.mp without any PSSH boxes, only Playready/Marlin/..
 				for(StreamSpec spec : specs) {
 					if (!spec.enabled) continue;
 					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
@@ -232,6 +233,16 @@ public class Dasher {
 					if (BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
 						logger.println(String.format("Removed moov/pssh[*] from %s to %s"
 								, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
+
+					for(String sysId : new String[] { "playready", "widevine", "marlin", "clearkey" } ) {
+						if (!Utils.getString(params, "drm."+sysId, "0", true).equals("0")) {
+							outFile  = new File(outputFolder, String.format("drm/%s_i_%s.mp4", spec.name, sysId));
+							if (BoxModifier.keepPSSH(initFile, outFile, sysId))
+								logger.println(String.format("Written moov/pssh[%s] from %s to %s"
+									, sysId
+									, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );						
+						}
+					}
 				}
 				
 				// fix manifest, add missing drmsystem namespaces
@@ -253,23 +264,38 @@ public class Dasher {
 				if (Utils.getString(params, "drm.cenc", "0", true).equals("0"))
 					manifest.removeContentProtectionElement("cenc");
 
-				manifest.save(manifestFile);
+				manifest.save(manifestFile, false);
 
 				// write separate clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements,
-				// some players don't use it if another compatible drm is signalled in a manifest.				
+				// some players don't use it if another compatible drm was signalled in a manifest.				
 				val=drm.createClearKeyMPDElement();
 				if (!val.isEmpty()) {
 					manifest.addContentProtectionElement(val);
 					manifest.removeContentProtectionElement("playready");
 					manifest.removeContentProtectionElement("widevine");
 					manifest.removeContentProtectionElement("marlin");
-					manifest.save( new File(outputFolder, "drm/manifest_clearkey.mpd") );
+					String data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
+								"initialization=\"$RepresentationID$_i_clearkey.mp4\"");
+					Utils.saveFile(new File(outputFolder, "drm/manifest_clearkey.mpd"), data.getBytes("UTF-8") );
 				}
 
+				String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
+
 				// create manifest where init url points to vX_i_nopssh.mp4 files
-				String data = Utils.loadTextFile(manifestFile, "UTF-8").toString();
-				data = data.replace("initialization=\"$RepresentationID$_i.mp4\"", "initialization=\"$RepresentationID$_i_nopssh.mp4\"");
+				String data = manifestData.replace("initialization=\"$RepresentationID$_i.mp4\"", 
+							"initialization=\"$RepresentationID$_i_nopssh.mp4\"");
 				Utils.saveFile(new File(outputFolder, "drm/manifest_nopssh.mpd"), data.getBytes("UTF-8"));
+
+				// create single DRM manifests
+				for(String sysId : new String[] { "playready", "widevine", "marlin" } ) {
+					manifest = new DashManifest(manifestData);
+					if (!sysId.equals("playready")) manifest.removeContentProtectionElement("playready");
+					if (!sysId.equals("widevine"))  manifest.removeContentProtectionElement("widevine");
+					if (!sysId.equals("marlin"))    manifest.removeContentProtectionElement("marlin");
+					data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
+								"initialization=\"$RepresentationID$_i_"+sysId+".mp4\"");
+					Utils.saveFile(new File(outputFolder, "drm/manifest_"+sysId+".mpd"), data.getBytes("UTF-8"));					
+				}
 				
 				if (Utils.getBoolean(params, "deletetempfiles", true)) {
 					specFile.delete();
