@@ -176,8 +176,9 @@ public class Dasher {
 			// Fix some of the common manifest problems after mp4box tool and missing fields
 			DashManifest manifest = new DashManifest(new File(outputFolder, "manifest.mpd"));
 			manifest.fixContent(mode);
+			manifest.setProfile(Utils.getString(params, "profile", "hbbtv15", true));
 			manifest.save(new File(outputFolder, "manifest.mpd"), false);
-
+			
 			// DASH: write encrypted segments+manifest if KID+KEY values are found
 			if (!Utils.getString(params, "drm.kid", "", true).isEmpty() &&
 					!Utils.getString(params, "drm.key", "", true).isEmpty()) {
@@ -249,6 +250,7 @@ public class Dasher {
 				File manifestFile=new File(outputFolder, "drm/manifest.mpd");
 				manifest = new DashManifest(manifestFile);
 				manifest.fixContent(mode);
+				manifest.setProfile(Utils.getString(params, "profile", "hbbtv15", true));
 				manifest.addNamespaces();
 				
 				// add <ContentProtection> elements, remove MPEG-CENC element if was disabled

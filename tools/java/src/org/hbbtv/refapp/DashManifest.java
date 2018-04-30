@@ -51,16 +51,14 @@ public class DashManifest {
 			}
 		}
 		
-		if (mode==StreamSpec.TYPE.VIDEO_H265) {
-			// drop dash264 profile tag
-			// profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264,urn:hbbtv:dash:profile:isoff-live:2012"
-			val = doc.getDocumentElement().getAttribute("profiles");
-			int idx=val.indexOf("http://dashif.org/guidelines/dash264");
-			if (idx>=0) {
-				modified=true;
-				val = val.replace( (idx>0?",":"")+"http://dashif.org/guidelines/dash264", "");
-				doc.getDocumentElement().setAttribute("profiles", val);
-			}
+		// drop dash264 profile tag
+		// profiles="urn:mpeg:dash:profile:isoff-live:2011,http://dashif.org/guidelines/dash264,urn:hbbtv:dash:profile:isoff-live:2012"
+		val = doc.getDocumentElement().getAttribute("profiles");
+		int idx=val.indexOf("http://dashif.org/guidelines/dash264");
+		if (idx>=0) {
+			modified=true;
+			val = val.replace( (idx>0?",":"")+"http://dashif.org/guidelines/dash264", "");
+			doc.getDocumentElement().setAttribute("profiles", val);
 		}
 
 		// remove <ProgramInformation> element
@@ -169,6 +167,16 @@ public class DashManifest {
 			}
 		}
 	}
+	
+	public void setProfile(String profile) {
+		if ("hbbtv15".equalsIgnoreCase(profile))
+			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:hbbtv:dash:profile:isoff-live:2012";
+		else if  ("hbbtv20".equalsIgnoreCase(profile))
+			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:dvb:dash:profile:dvb-dash:2014";
+		else if  ("hbbtv15_20".equalsIgnoreCase(profile))
+			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:dvb:dash:profile:dvb-dash:2014,urn:hbbtv:dash:profile:isoff-live:2012";
+		doc.getDocumentElement().setAttribute("profiles", profile);
+	}
 
 	public void addContentProtectionElement(String xml) {
 		// add CP element after existing ContentProtection elements
@@ -256,7 +264,7 @@ public class DashManifest {
 	 */
 	public void save(File outputFile, boolean forceSave) throws Exception {
 		if (!modified && !forceSave) return;
-		String val = XMLUtil.createXML(doc.getDocumentElement());
+		String val = this.toString();
 		FileOutputStream fos = new FileOutputStream(outputFile);
 		try {
 			fos.write(val.getBytes("UTF-8"));
@@ -265,6 +273,9 @@ public class DashManifest {
 		}
 	}
 	
+	/**
+	 * Returns manifest string.
+	 */
 	public String toString() {
 		try {
 			return XMLUtil.createXML(doc.getDocumentElement());

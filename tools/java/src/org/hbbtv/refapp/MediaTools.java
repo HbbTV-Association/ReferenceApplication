@@ -158,7 +158,7 @@ public class MediaTools {
 			"-frag", ""+(segdur*1000),
 			"-mem-frags", "-rap",
 			"-profile", "dashavc264:live",
-			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012",
+			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012", // hbbtv1.5
 			"-min-buffer", ""+(segdur*1000*2), //  "3000", // MDP.minBufferTime value
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
 			"-bs-switching", "no",
