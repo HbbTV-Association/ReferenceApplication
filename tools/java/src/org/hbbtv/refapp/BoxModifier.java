@@ -8,10 +8,12 @@ import org.mp4parser.Box;
 import org.mp4parser.Container;
 
 /**
- * Modify init.mp4 or seg.m4s MP4 boxes(=tables).
+ * Modify init.mp4 or seg.m4s MP4 boxes(=atom,tables).
  *
  * Remove SENC box:
  *   java -cp "./lib/*" org.hbbtv.refapp.BoxModifier input=dash/v1_i.mp4 mode=remove path=moov/trak/senc
+ * Remove UDTA user-defined metadata box:
+ *   java -cp "./lib/*" org.hbbtv.refapp.BoxModifier input=dash/v1_i.mp4 mode=remove path=moov/udta
  * Remove all PSSH boxes:
  *   java -cp "./lib/*" org.hbbtv.refapp.BoxModifier input=dash/v1_i.mp4 mode=remove path=moov/pssh[*] output=dash/v1_i_nopssh.mp4
  */
@@ -52,6 +54,9 @@ public class BoxModifier {
         FileInputStream fis = new FileInputStream(videoFile);
         FileOutputStream fos = null;
         IsoFile isoFile = new IsoFile(fis.getChannel());
+        
+        
+        
         try {
         	// loop box tree and find target box, remember parent boxlist
         	int foundBoxIdx=-1;

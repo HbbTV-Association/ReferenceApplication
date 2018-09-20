@@ -178,6 +178,15 @@ public class Dasher {
 			manifest.fixContent(mode);
 			manifest.setProfile(Utils.getString(params, "profile", "hbbtv15", true));
 			manifest.save(new File(outputFolder, "manifest.mpd"), false);
+
+			// some dash validators give a warning of an unknown atom 'udta', 
+			// we don't need this user-defined-meta box.
+			for(StreamSpec spec : specs) {
+				if (!spec.enabled) continue;
+				File initFile = new File(outputFolder, spec.name+"_i.mp4");
+				if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
+					logger.println("Removed moov/udta from " + initFile.getAbsolutePath() );
+			}
 			
 			// DASH: write encrypted segments+manifest if KID+KEY values are found
 			if (!Utils.getString(params, "drm.kid", "", true).isEmpty() &&
@@ -229,7 +238,9 @@ public class Dasher {
 					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
 					if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
-
+					if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
+						logger.println("Removed moov/udta from " + initFile.getAbsolutePath() );
+					
 					File outFile  = new File(outputFolder, "drm/"+spec.name+"_i_nopssh.mp4");					
 					if (BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
 						logger.println(String.format("Removed moov/pssh[*] from %s to %s"
@@ -305,7 +316,7 @@ public class Dasher {
 						new File(outputFolder, "drm/temp-"+spec.name+".mp4").delete();
 				}
 			}
-
+			
 			if (Utils.getBoolean(params, "deletetempfiles", true)) {
 				for(StreamSpec spec : specs)
 					new File(outputFolder, "temp-"+spec.name+".mp4").delete();
