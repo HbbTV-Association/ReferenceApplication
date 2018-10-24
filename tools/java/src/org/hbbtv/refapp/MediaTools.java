@@ -1,7 +1,14 @@
 package org.hbbtv.refapp;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utilify functions for executable tools used by dasher (ffmpeg,ffprobe,mp4box).
@@ -140,7 +147,7 @@ public class MediaTools {
 			"-ar", ""+spec.sampleRate,
 			"-ac", ""+spec.channels,	// channel count 2..n
 			"-vn",
-			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
 			"-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
 		);
 		args = new ArrayList<String>(args);
@@ -149,22 +156,40 @@ public class MediaTools {
 		return args;
 	}
 	
-	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur) {
+	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, boolean useIdFolder, int ver) {
 		// Use MDP.minBufferTime=segdur*2 to make validator happy, default 1.5sec-3sec 
 		// value most likely gives "buffer underrun" warnings.
-		//    http://dashif.org/conformance.html
+		//    https://conformance.dashif.org/
+		// ver(version):
+		//    1=write SIDX table (1 fragment), segtimeline
+		//    2=NO SIDX table, no segtimeline, use audioSampleRate scale
+		int scale=-1;
+		if (ver==2) {
+			for(StreamSpec spec : specs) {
+				if (spec.enabled && spec.type==StreamSpec.TYPE.AUDIO_AAC) {
+					scale = spec.sampleRate; // 44100, 48000
+					break;
+				}
+			}
+		}
+		
 		List<String> args=Arrays.asList(MP4BOX,
-			"-dash", ""+(segdur*1000), 	// segment duration 6sec*1000
-			"-frag", ""+(segdur*1000),
+			"-dash", ""+(scale>0?segdur*scale : segdur*1000), // segment duration 6sec*1000 or use audioRate
+			"-frag", ""+(scale>0?segdur*scale : segdur*1000), // for better seg alignment (important for 44.1KHz)
+			scale>0?"-dash-scale":"", scale>0?""+scale:"",
+			ver==1?"":"-bound", 	// force seg duration, last segment may be shorter (video=146sec, segdur=6sec -> 24*6sec + 1*2sec segments)
 			"-mem-frags", "-rap",
 			"-profile", "dashavc264:live",
 			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012", // hbbtv1.5
 			"-min-buffer", ""+(segdur*1000*2), //  "3000", // MDP.minBufferTime value
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
 			"-bs-switching", "no",
-			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "1", // SIDX table with 1 fragment
+			"-sample-groups-traf",	// sgpd+sbgp atom in MOOF/TRAF(audio), IE11 fix  
+			"-single-traf", 
+			"-subsegs-per-sidx", ver==1?"1":"-1", // SIDX table with 1 fragment or no SIDX
 			//"-last-dynamic",  // insert lmsg brand to the last segment(MDP.type=dynamic)
-			"-segment-name", "$RepresentationID$_$Number$$Init=i$", "-segment-timeline",
+			"-segment-name", (useIdFolder ? "$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$_$Number$$Init=i$"), 
+			ver==1?"-segment-timeline":"",
 			"-out", "manifest.mpd"	// output file
 		);
 		args = new ArrayList<String>(args);

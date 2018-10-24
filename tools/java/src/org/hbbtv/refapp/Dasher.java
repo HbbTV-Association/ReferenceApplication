@@ -24,6 +24,8 @@ public class Dasher {
 			if (!val.endsWith("/")) val+="/";
 			File outputFolder = new File(val);
 			outputFolder.mkdirs();
+
+			boolean useIdFolder=true; // use new segments "v1/i.mp4", "v1/1.m4s" representationID subfolder
 			
 			// delete old files from output folder
 			if (Utils.getBoolean(params, "deleteoldfiles", true))
@@ -54,7 +56,8 @@ public class Dasher {
 			int fps = (int)Utils.getLong(meta, "videoFPS", 25);
 			int gopdur = (int)Utils.getLong(params, "gopdur", 3); // GOP duration in seconds
 			String overlayOpt = Utils.getString(params, "overlay", "0", true); // 1=enabled, 0=disabled
-
+			int frags  = (int)Utils.getLong(params, "frags", -1); // frags per second(multi MOOF/MDAT live content) 
+			
 			val = Utils.getString(params, "mode", "", true); // h264,h265 
 			StreamSpec.TYPE mode = val.equalsIgnoreCase("h265") ?
 					StreamSpec.TYPE.VIDEO_H265 : StreamSpec.TYPE.VIDEO_H264;
@@ -76,6 +79,10 @@ public class Dasher {
 			}
 
 			long timeLimit = Utils.getLong(params, "timelimit", -1); // read X seconds from start
+			// use an explicit timelimit for ffmpeg or use video duration for all audios (full seconds)
+			//if (timeLimit<0)
+			//	timeLimit = Utils.getLong(meta, "durationsec", timeLimit);
+			
 			List<StreamSpec> specs=new ArrayList<StreamSpec>();
 
 			// transcode video.1,video.2,.. output streams
@@ -97,6 +104,9 @@ public class Dasher {
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
 				spec.enabled = !isDisabled;
 
+				if (useIdFolder && Utils.getBoolean(params, "deleteoldfiles", true))
+					deleteOldFiles( new File(outputFolder, spec.name) );
+
 				val = Utils.getString(params, "video."+idx+".profile", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "video.profile", "", true);
 				spec.profile=val;
@@ -110,6 +120,10 @@ public class Dasher {
 				List<String> args = spec.type==StreamSpec.TYPE.VIDEO_H265 ?
 						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit) :
 						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit);
+				// create low-latency multi MOOF/MDAT pairs (dashlivesim) FIXME: works for H264Args only
+				// fps=25, gopdur=1s, segdur=2s, frags=5 -> (25fps/5->5 frags in second, 10 frags in seg1.m4s segment) 
+				if (frags>0)
+					args.set(args.indexOf("-keyint_min")+1, ""+(fps/frags) );					
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				
 				if (!isDisabled) {
@@ -143,6 +157,9 @@ public class Dasher {
 				spec.enabled = !isDisabled;
 				specs.add(spec);
 				
+				if (useIdFolder && Utils.getBoolean(params, "deleteoldfiles", true))
+					deleteOldFiles( new File(outputFolder, spec.name) );
+
 				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec, timeLimit);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				if (!isDisabled)
@@ -161,6 +178,13 @@ public class Dasher {
 					spec = (StreamSpec)spec.clone();
 					spec.name = spec.name+"-"+idxI;
 					specs.add(spec);
+					
+					if (useIdFolder && Utils.getBoolean(params, "deleteoldfiles", true)) {
+						File folder = new File(outputFolder, spec.name);
+						deleteOldFiles(folder);
+						folder.delete();
+					}
+					
 					List<String> args=MediaTools.getTranscodeAACArgs(inputFileSec, spec, timeLimit);
 					logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 					MediaTools.executeProcess(args, outputFolder);
@@ -169,7 +193,13 @@ public class Dasher {
 			
 			// DASH: write unencypted segments+manifest
 			logger.println("");
-			List<String> args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6));
+			List<String> args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), useIdFolder, 2);
+			if (frags>0) {
+				// low-latency multi MOOF/MDAT
+				val = args.get(args.indexOf("-dash-scale")+1); // 44100 (scale from audiorate)
+				args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 5 frags -> 44100/5=8820 frag interval
+			}
+			
 			logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, outputFolder);
 			
@@ -183,7 +213,9 @@ public class Dasher {
 			// we don't need this user-defined-meta box.
 			for(StreamSpec spec : specs) {
 				if (!spec.enabled) continue;
-				File initFile = new File(outputFolder, spec.name+"_i.mp4");
+				File initFile = useIdFolder ? 
+					new File(outputFolder, spec.name+"/i.mp4") :
+					new File(outputFolder, spec.name+"_i.mp4");
 				if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
 					logger.println("Removed moov/udta from " + initFile.getAbsolutePath() );
 			}
@@ -204,9 +236,13 @@ public class Dasher {
 				// delete old files from output folder
 				File outputFolderDrm=new File(outputFolder, "drm/");  // write to drm/ subfolder
 				outputFolderDrm.mkdir();
-				if (Utils.getBoolean(params, "deleteoldfiles", true))
+				if (Utils.getBoolean(params, "deleteoldfiles", true)) {
 					deleteOldFiles(outputFolderDrm);
-				else
+					if (useIdFolder) {
+						for(StreamSpec spec : specs)
+							deleteOldFiles( new File(outputFolderDrm, spec.name) );
+					}					
+				} else
 					new File(outputFolder, "drm/manifest.mpd").delete();
 
 				// create GPACDRM.xml drm specification file, write to workdir folder
@@ -227,7 +263,12 @@ public class Dasher {
 				}
 
 				// dash encrypted segments
-				args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6));
+				args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), useIdFolder, 2);
+				if (frags>0) {
+					// lowlatency multi MOOF/MDAT
+					val = args.get(args.indexOf("-dash-scale")+1); // 44100 (scale from audiorate)
+					args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 5 frags -> 44100/5=8820 frag interval
+				}			
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
 
@@ -235,20 +276,26 @@ public class Dasher {
 				// create init.mp without any PSSH boxes, only Playready/Marlin/..
 				for(StreamSpec spec : specs) {
 					if (!spec.enabled) continue;
-					File initFile = new File(outputFolder, "drm/"+spec.name+"_i.mp4");
+					File initFile = new File(outputFolder, useIdFolder ?
+							"drm/"+spec.name+"/i.mp4" :
+							"drm/"+spec.name+"_i.mp4");
 					if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
 					if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
 						logger.println("Removed moov/udta from " + initFile.getAbsolutePath() );
 					
-					File outFile  = new File(outputFolder, "drm/"+spec.name+"_i_nopssh.mp4");					
+					File outFile  = new File(outputFolder, useIdFolder ?
+							"drm/"+spec.name+"/i_nopssh.mp4" :
+							"drm/"+spec.name+"_i_nopssh.mp4");					
 					if (BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
 						logger.println(String.format("Removed moov/pssh[*] from %s to %s"
 								, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
 
 					for(String sysId : new String[] { "playready", "widevine", "marlin", "clearkey" } ) {
 						if (!Utils.getString(params, "drm."+sysId, "0", true).equals("0")) {
-							outFile  = new File(outputFolder, String.format("drm/%s_i_%s.mp4", spec.name, sysId));
+							outFile  = new File(outputFolder, useIdFolder ? 
+								String.format("drm/%s/i_%s.mp4", spec.name, sysId) :
+								String.format("drm/%s_i_%s.mp4", spec.name, sysId) );
 							if (BoxModifier.keepPSSH(initFile, outFile, sysId))
 								logger.println(String.format("Written moov/pssh[%s] from %s to %s"
 									, sysId
@@ -289,6 +336,8 @@ public class Dasher {
 					manifest.removeContentProtectionElement("marlin");
 					String data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
 								"initialization=\"$RepresentationID$_i_clearkey.mp4\"");
+					data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+							"initialization=\"$RepresentationID$/i_clearkey.mp4\"");					
 					Utils.saveFile(new File(outputFolder, "drm/manifest_clearkey.mpd"), data.getBytes("UTF-8") );
 				}
 
@@ -297,6 +346,8 @@ public class Dasher {
 				// create manifest where init url points to vX_i_nopssh.mp4 files
 				String data = manifestData.replace("initialization=\"$RepresentationID$_i.mp4\"", 
 							"initialization=\"$RepresentationID$_i_nopssh.mp4\"");
+				data = manifestData.replace("initialization=\"$RepresentationID$/i.mp4\"", 
+						"initialization=\"$RepresentationID$/i_nopssh.mp4\"");
 				Utils.saveFile(new File(outputFolder, "drm/manifest_nopssh.mpd"), data.getBytes("UTF-8"));
 
 				// create single DRM manifests
@@ -307,6 +358,8 @@ public class Dasher {
 					if (!sysId.equals("marlin"))    manifest.removeContentProtectionElement("marlin");
 					data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
 								"initialization=\"$RepresentationID$_i_"+sysId+".mp4\"");
+					data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+							"initialization=\"$RepresentationID$/i_"+sysId+".mp4\"");					
 					Utils.saveFile(new File(outputFolder, "drm/manifest_"+sysId+".mpd"), data.getBytes("UTF-8"));					
 				}
 				

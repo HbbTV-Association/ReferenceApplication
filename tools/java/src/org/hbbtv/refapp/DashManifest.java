@@ -97,7 +97,7 @@ public class DashManifest {
 				} else oldval=val;
 			}
 			
-			if (oldval!=null) {
+			if (oldval!=null && !oldval.isEmpty()) {
 				modified=true;
 				elemAS.setAttribute("startWithSAP", oldval);
 				for(Element elemRE : XMLUtil.getChildElements(elemAS, "Representation"))
@@ -169,6 +169,7 @@ public class DashManifest {
 	}
 	
 	public void setProfile(String profile) {
+		// https://dashif.org/identifiers/profiles/
 		if ("hbbtv15".equalsIgnoreCase(profile))
 			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:hbbtv:dash:profile:isoff-live:2012";
 		else if  ("hbbtv20".equalsIgnoreCase(profile))
