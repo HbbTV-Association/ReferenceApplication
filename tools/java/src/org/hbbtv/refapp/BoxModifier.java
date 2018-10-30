@@ -147,7 +147,7 @@ public class BoxModifier {
         	else if (systemId.equalsIgnoreCase("marlin")) systemId=DashDRM.SYSID_MARLIN;
         	else if (systemId.equalsIgnoreCase("widevine")) systemId=DashDRM.SYSID_WIDEVINE;
         	else if (systemId.equalsIgnoreCase("cenc"))   systemId=DashDRM.SYSID_CENC;
-        	else if (systemId.equalsIgnoreCase("clearkey")) systemId=DashDRM.SYSID_CENC;
+        	else if (systemId.equalsIgnoreCase("clearkey")) systemId=DashDRM.SYSID_CLEARKEY;
         	byte[] systemIdBytes=Utils.hexToBytes(systemId);
 
         	List<Box> boxes=isoFile.getBoxes();

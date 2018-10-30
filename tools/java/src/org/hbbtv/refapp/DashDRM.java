@@ -27,6 +27,9 @@ public class DashDRM {
 	public static final String GUID_WIDEVINE  = "edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
 	public static final String SYSID_CENC     = "1077efecc0b24d02ace33c1e52e2fb4b";
 	public static final String GUID_CENC      = "1077efec-c0b2-4d02-ace3-3c1e52e2fb4b";
+	// https://dashif.org/docs/DASH-IF-IOP-v4.2-clean.htm#_Toc511040865
+	public static final String SYSID_CLEARKEY = "e2719d58a985b3c9781ab030af78d30e";
+	public static final String GUID_CLEARKEY  = "e2719d58-a985-b3c9-781a-b030af78d30e";
 	
 	private SecureRandom rand = new SecureRandom();
 	private Map<String,String> params;
@@ -197,8 +200,23 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.clearkey", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String scheme = GUID_CENC;
-		String kid = Utils.getString(params, "drm.kid", "", true);
+		String scheme= GUID_CLEARKEY;
+		String laurl = Utils.getString(params, "drm.clearkey.laurl", "", true);
+		
+		StringBuilder buf = new StringBuilder();
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+scheme+"\" value=\"ClearKey1.0\">"+Dasher.NL);
+		if (!laurl.isEmpty())
+			buf.append("<ck:Laurl Lic_type=\"EME-1.0\">"+ Utils.XMLEncode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL);
+		buf.append("</ContentProtection>"+Dasher.NL);
+		return buf.toString();
+	}
+
+	public String createCENCMPDElement() throws Exception {
+		String opt = Utils.getString(params, "drm.cenc", "0", true);
+		if (opt.equals("0")) return ""; // do not create element
+
+		String scheme= GUID_CENC;
+		String kid   = Utils.getString(params, "drm.kid", "", true);
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+scheme+"\">"+Dasher.NL);

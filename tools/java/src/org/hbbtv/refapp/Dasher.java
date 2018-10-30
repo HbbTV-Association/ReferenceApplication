@@ -122,7 +122,7 @@ public class Dasher {
 						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit);
 				// create low-latency multi MOOF/MDAT pairs (dashlivesim) FIXME: works for H264Args only
 				// fps=25, gopdur=1s, segdur=2s, frags=5 -> (25fps/5->5 frags in second, 10 frags in seg1.m4s segment) 
-				if (frags>0)
+				if (frags>=2)
 					args.set(args.indexOf("-keyint_min")+1, ""+(fps/frags) );					
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				
@@ -194,7 +194,7 @@ public class Dasher {
 			// DASH: write unencypted segments+manifest
 			logger.println("");
 			List<String> args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), useIdFolder, 2);
-			if (frags>0) {
+			if (frags>=2) {
 				// low-latency multi MOOF/MDAT
 				val = args.get(args.indexOf("-dash-scale")+1); // 44100 (scale from audiorate)
 				args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 5 frags -> 44100/5=8820 frag interval
@@ -264,7 +264,7 @@ public class Dasher {
 
 				// dash encrypted segments
 				args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), useIdFolder, 2);
-				if (frags>0) {
+				if (frags>=2) {
 					// lowlatency multi MOOF/MDAT
 					val = args.get(args.indexOf("-dash-scale")+1); // 44100 (scale from audiorate)
 					args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 5 frags -> 44100/5=8820 frag interval
@@ -291,7 +291,7 @@ public class Dasher {
 						logger.println(String.format("Removed moov/pssh[*] from %s to %s"
 								, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
 
-					for(String sysId : new String[] { "playready", "widevine", "marlin", "clearkey" } ) {
+					for(String sysId : new String[] { "playready", "widevine", "marlin", "cenc" } ) {
 						if (!Utils.getString(params, "drm."+sysId, "0", true).equals("0")) {
 							outFile  = new File(outputFolder, useIdFolder ? 
 								String.format("drm/%s/i_%s.mp4", spec.name, sysId) :
@@ -325,23 +325,39 @@ public class Dasher {
 					manifest.removeContentProtectionElement("cenc");
 
 				manifest.save(manifestFile, false);
+				String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
 
-				// write separate clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements,
-				// some players don't use it if another compatible drm was signalled in a manifest.				
+				// write clearkey manifest.
 				val=drm.createClearKeyMPDElement();
 				if (!val.isEmpty()) {
+					manifest = new DashManifest(manifestData);
 					manifest.addContentProtectionElement(val);
 					manifest.removeContentProtectionElement("playready");
 					manifest.removeContentProtectionElement("widevine");
 					manifest.removeContentProtectionElement("marlin");
 					String data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
-								"initialization=\"$RepresentationID$_i_clearkey.mp4\"");
+								"initialization=\"$RepresentationID$_i_nopssh.mp4\"");
 					data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
-							"initialization=\"$RepresentationID$/i_clearkey.mp4\"");					
+							"initialization=\"$RepresentationID$/i_nopssh.mp4\"");					
 					Utils.saveFile(new File(outputFolder, "drm/manifest_clearkey.mpd"), data.getBytes("UTF-8") );
 				}
 
-				String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
+				// write CENC-clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements.
+				val=drm.createCENCMPDElement();
+				if (!val.isEmpty()) {
+					manifest = new DashManifest(manifestData);
+					manifest.addContentProtectionElement(val);
+					manifest.removeContentProtectionElement("playready");
+					manifest.removeContentProtectionElement("widevine");
+					manifest.removeContentProtectionElement("marlin");
+					String data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
+								"initialization=\"$RepresentationID$_i_cenc.mp4\""); // CENC pssh
+					data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+							"initialization=\"$RepresentationID$/i_cenc.mp4\"");					
+					Utils.saveFile(new File(outputFolder, "drm/manifest_cenc.mpd"), data.getBytes("UTF-8") );
+				}
+
+				//String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
 
 				// create manifest where init url points to vX_i_nopssh.mp4 files
 				String data = manifestData.replace("initialization=\"$RepresentationID$_i.mp4\"", 

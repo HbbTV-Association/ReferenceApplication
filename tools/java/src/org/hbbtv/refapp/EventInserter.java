@@ -57,13 +57,13 @@ public class EventInserter {
         	
         	boolean isModified=false;
 
-        	// find index of SIDX,MOOF and first EMSG box
+        	// find index of SIDX, (first)MOOF and first EMSG box
         	List<Box> boxes=isoFile.getBoxes();
         	int moofIdx=-1, emsgIdx=-1, sidxIdx=-1;
         	for(int idx=0; idx<boxes.size(); idx++) {
         		Box box = boxes.get(idx);
         		if (box.getType().equals("moof")) {
-        			moofIdx=idx;
+        			if (moofIdx<0) moofIdx=idx;
         		} else if (box.getType().equals("sidx")) {
         			sidxIdx=idx;
         		} else if (emsgIdx<0 && box.getType().equals("emsg")) {

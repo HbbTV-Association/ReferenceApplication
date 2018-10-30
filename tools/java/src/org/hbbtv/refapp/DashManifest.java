@@ -155,7 +155,8 @@ public class DashManifest {
 		String[] values = new String[] {
 				"xmlns:cenc", "urn:mpeg:cenc:2013",
 				"xmlns:mspr", "urn:microsoft:playready",
-				"xmlns:mas",  "urn:marlin:mas:1-0:services:schemas:mpd"
+				"xmlns:mas",  "urn:marlin:mas:1-0:services:schemas:mpd",
+				"xmlns:ck",   "http://dashif.org/guidelines/clearKey"
 		};
 		
 		Element elem = doc.getDocumentElement();
