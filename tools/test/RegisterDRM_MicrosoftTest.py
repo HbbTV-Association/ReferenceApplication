@@ -26,6 +26,8 @@ def register(drmType, auth, kid, enckey):
 	obj["kid"]=kid		
 	obj["key"]=enckey	## real production system should keep KEY value secret !!
 	obj["playready"]=registerPlayready(drmType, auth, kid, enckey)
+	obj["b64kid"]=base64.b64encode(bytearray.fromhex(kid)).decode("ISO-8859-1")
+	obj["b64key"]=base64.b64encode(bytearray.fromhex(enckey)).decode("ISO-8859-1")
 	return obj;
 
 ##############################
