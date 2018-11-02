@@ -98,6 +98,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2018-10-30:
+- added frags argument for multifragment(moof/mdat pairs)
 2017-02-12:
 - added input.* (input.1, input.2) secondary audio input files
 2017-11-19:
