@@ -171,12 +171,14 @@ public class DashManifest {
 	
 	public void setProfile(String profile) {
 		// https://dashif.org/identifiers/profiles/
-		if ("hbbtv15".equalsIgnoreCase(profile))
+		if ("hbbtv15".equalsIgnoreCase(profile)) // HBBTV profile (old)
 			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:hbbtv:dash:profile:isoff-live:2012";
-		else if  ("hbbtv20".equalsIgnoreCase(profile))
+		else if  ("hbbtv20".equalsIgnoreCase(profile)) // MPEG profile(a168_dvb-dash.pdf)
 			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:dvb:dash:profile:dvb-dash:2014";
-		else if  ("hbbtv15_20".equalsIgnoreCase(profile))
+		else if  ("hbbtv15_20".equalsIgnoreCase(profile)) // MPEG+HBBTV
 			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:dvb:dash:profile:dvb-dash:2014,urn:hbbtv:dash:profile:isoff-live:2012";
+		else if ("dvb2014".equalsIgnoreCase(profile)) // DVB (new)
+			profile="urn:dvb:dash:profile:dvb-dash:2014,urn:dvb:dash:profile:dvb-dash:isoff-ext-live:2014";
 		doc.getDocumentElement().setAttribute("profiles", profile);
 	}
 

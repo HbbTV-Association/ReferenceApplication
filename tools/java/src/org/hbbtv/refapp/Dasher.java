@@ -118,19 +118,15 @@ public class Dasher {
 				specs.add(spec);
 				
 				List<String> args = spec.type==StreamSpec.TYPE.VIDEO_H265 ?
-						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit) :
-						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit);
-				// create low-latency multi MOOF/MDAT pairs (dashlivesim) FIXME: works for H264Args only
-				// fps=25, gopdur=1s, segdur=2s, frags=5 -> (25fps/5->5 frags in second, 10 frags in seg1.m4s segment) 
-				if (frags>=2)
-					args.set(args.indexOf("-keyint_min")+1, ""+(fps/frags) );					
+						MediaTools.getTranscodeH265Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit, 2) :
+						MediaTools.getTranscodeH264Args(inputFile, spec, fps, gopdur, overlayOpt, timeLimit, 2);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				
 				if (!isDisabled) {
 					MediaTools.executeProcess(args, outputFolder);
 					if (spec.type==StreamSpec.TYPE.VIDEO_H265) {
-						// convert temp-v1.mp4(HEV1) to temp-v1.mp4(HVC1), this works better in dash devices. 
-						// TODO: create hvc1 directly in ffmpeg?
+						// convert temp-v1.mp4(HEV1) to temp-v1.mp4(HVC1), this works better in some devices. 
+						// create hvc1 directly in ffmpeg -tag:v hvc1?
 						logger.println(String.format("%s Convert HEV1 to HVC1 (name=%s)", Utils.getNowAsString(), spec.name));
 						MediaTools.convertHEV1toHVC1(outputFolder, spec);
 					}					
@@ -193,22 +189,24 @@ public class Dasher {
 			
 			// DASH: write unencypted segments+manifest
 			logger.println("");
-			List<String> args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), useIdFolder, 2);
+			List<String> args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), 
+					useIdFolder, Utils.getString(params, "init", "no", true), 2);
 			if (frags>=2) {
 				// low-latency multi MOOF/MDAT
 				val = args.get(args.indexOf("-dash-scale")+1); // 44100 (scale from audiorate)
-				args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 5 frags -> 44100/5=8820 frag interval
+				args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 4 frags -> 44100/4=11025 frag interval
 			}
 			
 			logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, outputFolder);
 			
 			// Fix some of the common manifest problems after mp4box tool and missing fields
-			DashManifest manifest = new DashManifest(new File(outputFolder, "manifest.mpd"));
+			File manifestFile = new File(outputFolder, "manifest.mpd");
+			DashManifest manifest = new DashManifest(manifestFile);
 			manifest.fixContent(mode);
 			manifest.setProfile(Utils.getString(params, "profile", "hbbtv15", true));
 			manifest.save(new File(outputFolder, "manifest.mpd"), false);
-
+			
 			// some dash validators give a warning of an unknown atom 'udta', 
 			// we don't need this user-defined-meta box.
 			for(StreamSpec spec : specs) {
@@ -218,6 +216,13 @@ public class Dasher {
 					new File(outputFolder, spec.name+"_i.mp4");
 				if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
 					logger.println("Removed moov/udta from " + initFile.getAbsolutePath() );
+
+				// create an init.mp4 for livesim use(remove total duration atom)
+				File outFile  = new File(outputFolder, useIdFolder ? 
+						String.format("%s/i_%s.mp4", spec.name, "livesim") :
+						String.format("%s_i_%s.mp4", spec.name, "livesim") );
+				if (BoxModifier.removeBox(initFile, outFile, "moov/mvex/mehd"))
+					logger.println("Removed moov/mvex/mehd from " + outFile.getAbsolutePath() );
 			}
 			
 			// DASH: write encrypted segments+manifest if KID+KEY values are found
@@ -263,11 +268,12 @@ public class Dasher {
 				}
 
 				// dash encrypted segments
-				args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6), useIdFolder, 2);
+				args=MediaTools.getDashArgs(specs, (int)Utils.getLong(params, "segdur", 6),
+						useIdFolder, Utils.getString(params, "init", "no", true), 2);
 				if (frags>=2) {
 					// lowlatency multi MOOF/MDAT
 					val = args.get(args.indexOf("-dash-scale")+1); // 44100 (scale from audiorate)
-					args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 5 frags -> 44100/5=8820 frag interval
+					args.set(args.indexOf("-frag")+1, ""+(Integer.parseInt(val)/frags) ); // 4 frags -> 44100/4=11025 frag interval
 				}			
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, outputFolderDrm); // dash drm/temp-*.mp4 files
@@ -283,8 +289,15 @@ public class Dasher {
 						logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
 					if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
 						logger.println("Removed moov/udta from " + initFile.getAbsolutePath() );
+
+					// create an init.mp4 for livesim use(remove total duration atom)
+					File outFile  = new File(outputFolder, useIdFolder ? 
+							String.format("drm/%s/i_%s.mp4", spec.name, "livesim") :
+							String.format("drm/%s_i_%s.mp4", spec.name, "livesim") );
+					if (BoxModifier.removeBox(initFile, outFile, "moov/mvex/mehd"))
+						logger.println("Removed moov/mvex/mehd from " + outFile.getAbsolutePath() );
 					
-					File outFile  = new File(outputFolder, useIdFolder ?
+					outFile  = new File(outputFolder, useIdFolder ?
 							"drm/"+spec.name+"/i_nopssh.mp4" :
 							"drm/"+spec.name+"_i_nopssh.mp4");					
 					if (BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
@@ -305,7 +318,7 @@ public class Dasher {
 				}
 				
 				// fix manifest, add missing drmsystem namespaces
-				File manifestFile=new File(outputFolder, "drm/manifest.mpd");
+				manifestFile=new File(outputFolder, "drm/manifest.mpd");
 				manifest = new DashManifest(manifestFile);
 				manifest.fixContent(mode);
 				manifest.setProfile(Utils.getString(params, "profile", "hbbtv15", true));
@@ -326,7 +339,7 @@ public class Dasher {
 
 				manifest.save(manifestFile, false);
 				String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
-
+				
 				// write clearkey manifest.
 				val=drm.createClearKeyMPDElement();
 				if (!val.isEmpty()) {
@@ -356,8 +369,6 @@ public class Dasher {
 							"initialization=\"$RepresentationID$/i_cenc.mp4\"");					
 					Utils.saveFile(new File(outputFolder, "drm/manifest_cenc.mpd"), data.getBytes("UTF-8") );
 				}
-
-				//String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
 
 				// create manifest where init url points to vX_i_nopssh.mp4 files
 				String data = manifestData.replace("initialization=\"$RepresentationID$_i.mp4\"", 

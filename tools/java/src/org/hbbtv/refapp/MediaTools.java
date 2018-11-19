@@ -41,7 +41,7 @@ public class MediaTools {
 	}
 
 	public static List<String> getTranscodeH264Args(File file, StreamSpec spec, 
-				int fps, int gopdur, String overlayOpt, long timeLimit) {
+				int fps, int gopdur, String overlayOpt, long timeLimit, int ver) {
 		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
 		String libFolder = Utils.getLibraryFolder(MediaTools.class);
 		libFolder = Utils.normalizePath(libFolder, true);
@@ -69,6 +69,7 @@ public class MediaTools {
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
+			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"", // allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit)
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
 			"-an",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
@@ -82,7 +83,7 @@ public class MediaTools {
 	}
 
 	public static List<String> getTranscodeH265Args(File file, StreamSpec spec, 
-			int fps, int gopdur, String overlayOpt, long timeLimit) {
+			int fps, int gopdur, String overlayOpt, long timeLimit, int ver) {
 		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
 		String libFolder = Utils.getLibraryFolder(MediaTools.class);
 		libFolder = Utils.normalizePath(libFolder, true);
@@ -111,6 +112,7 @@ public class MediaTools {
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
+			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"",
 			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${fps}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
 			"-an", 
@@ -156,7 +158,8 @@ public class MediaTools {
 		return args;
 	}
 	
-	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, boolean useIdFolder, int ver) {
+	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, boolean useIdFolder, 
+			String initMode, int ver) {
 		// Use MDP.minBufferTime=segdur*2 to make validator happy, default 1.5sec-3sec 
 		// value most likely gives "buffer underrun" warnings.
 		//    https://conformance.dashif.org/
@@ -183,7 +186,7 @@ public class MediaTools {
 			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012", // hbbtv1.5
 			"-min-buffer", ""+(segdur*1000*2), //  "3000", // MDP.minBufferTime value
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
-			"-bs-switching", "no",
+			"-bs-switching", initMode, // inband=AVC3_common_init, multi=AVC1_common_init_hbbtv, merge=AVC1_commonn_init, no=AVC1_separate_init (best backward comp)
 			"-sample-groups-traf",	// sgpd+sbgp atom in MOOF/TRAF(audio), IE11 fix  
 			"-single-traf", 
 			"-subsegs-per-sidx", ver==1?"1":"-1", // SIDX table with 1 fragment or no SIDX
