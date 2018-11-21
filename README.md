@@ -37,11 +37,11 @@ for any problems or questions
  - Also non-DRM streams for reference and including MSE/EME for non HbbTV browsers
  - Subtitle and audio stream selection via color buttons
  - Live and VOD DASH profiles
+ - Low latency (multi moof/mdat) Live and VOD DASH
  - available at http://refapp.hbbtv.org/production/
  
  ## Staging
  –	Intended for early access testing of new features
- - Low latency Live DASH
  - In line with github repository
  - available at http://refapp.hbbtv.org/staging/
 
