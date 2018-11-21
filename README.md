@@ -5,27 +5,45 @@ This application is implemented to be a reference video catalogue and player app
 for DASH content on HbbTV 1.5 and 2.0.1 devices, with various DRM and subtitle tests. 
 
 Application prowides test cases and test material done with tools included in [tools]
-- DASH Clear content ACV / HEVC
+- DASH Clear content AVC / HEVC
 - DRM (Playready, Marlin, Clearkey)
 - Out-of-Band Subtitles
 - Inband subtitles
 - Inband CueData
+- Audio selection
+- Ad insertion (pre-roll and mid-roll)
+- Live DASH
 
 
 
-The software is under continuous development and lisenced with MIT Lisence.
+The software is under continuous development and licensed with MIT License.
 Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com
 for any problems or questions
 
 ### Usage, testing, installation, integration:
 
- - Test latest version of the application at http://meridian.sofiadigital.fi/tvportal/referenceapp/
+ - Test latest stable version of the application at http://refapp.hbbtv.org/production (see versions for more info)
  - Follow [installation] guide to get source and set up local version
  - Read API documentation: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
  - Follow [integration] guide to integrate videoplayer and/or components to different application
  - Follow [dasher] guide to use dasher tool to create dash media files
  - See [tests] report
 
+### Versions
+
+## Production
+ - Updated in line with Test Suite, 3 times a year
+ - HbbTV 2.0.1 and 1.5 Playready and Marlin DRM streams 
+ - Also non-DRM streams for reference and including MSE/EME for non HbbTV browsers
+ - Subtitle and audio stream selection via color buttons
+ - Live and VOD DASH profiles
+ - available at http://refapp.hbbtv.org/production/
+ 
+ ## Staging
+ –	Intended for early access testing of new features
+ - Low latency Live DASH
+ - In line with github repository
+ - available at http://refapp.hbbtv.org/staging/
 
 ### Components and modules:
 
