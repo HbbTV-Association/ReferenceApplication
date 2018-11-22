@@ -129,7 +129,6 @@ public class Utils {
 			buffer.append(s);
 		}
 		return buffer.toString();
-		// return javax.xml.bind.DatatypeConverter.printHexBinary(bytes);
 	}	
 	
     public static String base64Encode(byte[] buf) {

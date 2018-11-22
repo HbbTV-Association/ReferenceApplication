@@ -14,6 +14,7 @@
 	    <pathelement location="./lib/isoparser-1.9.30.jar" />
 	    <pathelement location="./lib/slf4j-api-1.7.25.jar" />
 		<pathelement location="./lib/slf4j-nop-1.7.25.jar" />
+		<pathelement location="./lib/jaxb-api-2.3.1.jar" />
 	</path>
 
 	<pathconvert property="manifest.libs" pathsep=" ">

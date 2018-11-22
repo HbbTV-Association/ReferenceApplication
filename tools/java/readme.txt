@@ -1,4 +1,6 @@
 ReferenceApplication for Dash packager
+https://refapp.hbbtv.org/
+https://github.com/HbbTV-Association/ReferenceApplication
 
 Dasher
 ====================
@@ -44,7 +46,7 @@ Compile and Build
 Use Java7 or higher, use Ant1.9 or higher.
 Use Eclipse or Ant script to build the project.
   /apache-ant-1.9.4/bin/ant -f build.xml
-Library is written to lib/dasher.jar file.
+Library is compiled to lib/dasher.jar file.
 
 
 ** Run dasher **
@@ -85,6 +87,13 @@ Remove all InbandEventStream elements from mpd manifest
 Remove box(moov/trak/senc) from the init segment file, some of the hbbtv televisions 
 may not play dash stream if this box is found in an initialization file.
   java -cp "/refapp/lib/*" org.hbbtv.refapp.BoxModifier input=/videos/dash/video1/v1_i.mp4 mode=remove path=moov/trak/senc
+
+
+** Multiple moof/mdat pairs  **
+=================================
+Low-latency test may use multiple moof/mdat pairs, stream is splitted to small fragments within
+a segment file. Players may play the segment file while still downloading remaining bytes from network.
+Use frags=4 argument to add four fragments per second, if segdur=2 then segment file has 4*2=8 fragments.
 
 
 Config file dasher.properties
