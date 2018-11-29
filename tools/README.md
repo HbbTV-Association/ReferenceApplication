@@ -14,6 +14,11 @@ You may use files as an input file for `dasher` tool.
 ClearKey drm license server script to be used as LAURL address for dash players. 
 This script returns kid=key value pair by given kid parameter.
 
+`test/laurl_pr.php`
+
+Playready drm license proxy script to be used as LAURL address for dash players.
+This script allows debugging of soapxml request and response payloads.
+
 `RegisterDRM_MicrosoftTest.py`
 
 Generates Microsoft Playready test server license urls for kid=key value pairs.

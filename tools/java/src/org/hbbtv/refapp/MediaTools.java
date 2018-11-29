@@ -135,14 +135,18 @@ public class MediaTools {
 		return args;
 	}
 	
-	public static List<String> getTranscodeAACArgs(File file, StreamSpec spec, long timeLimit) {
+	public static List<String> getTranscodeAudioArgs(File file, StreamSpec spec, long timeLimit) {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
+		String codec = spec.type==StreamSpec.TYPE.AUDIO_AC3 ? "ac3" :
+			spec.type==StreamSpec.TYPE.AUDIO_EAC3 ? "eac3" :
+			"aac";
 		
 		List<String> args=Arrays.asList(FFMPEG, 
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4",
-			"-c:a", "aac", "-strict", "experimental",
+			"-c:a", codec, 
+			"-strict", "experimental",
 			"-b:a", spec.bitrate, 		// audio bitrate 128k
 			"-maxrate:a", spec.bitrate, "-bufsize:a", spec.bitrate,
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
@@ -169,7 +173,7 @@ public class MediaTools {
 		int scale=-1;
 		if (ver==2) {
 			for(StreamSpec spec : specs) {
-				if (spec.enabled && spec.type==StreamSpec.TYPE.AUDIO_AAC) {
+				if (spec.enabled && spec.type.isAudio()) {
 					scale = spec.sampleRate; // 44100, 48000
 					break;
 				}

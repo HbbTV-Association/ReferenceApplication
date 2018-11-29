@@ -58,9 +58,8 @@ public class Dasher {
 			String overlayOpt = Utils.getString(params, "overlay", "0", true); // 1=enabled, 0=disabled
 			int frags  = (int)Utils.getLong(params, "frags", -1); // frags per second(multi MOOF/MDAT live content) 
 			
-			val = Utils.getString(params, "mode", "", true); // h264,h265 
-			StreamSpec.TYPE mode = val.equalsIgnoreCase("h265") ?
-					StreamSpec.TYPE.VIDEO_H265 : StreamSpec.TYPE.VIDEO_H264;
+			val = Utils.getString(params, "mode", "h264", true); // VIDEO mode h264,h265 
+			StreamSpec.TYPE mode = StreamSpec.TYPE.fromString(val); 
 
 			// create preview images
 			// size: 640x360
@@ -126,7 +125,7 @@ public class Dasher {
 					MediaTools.executeProcess(args, outputFolder);
 					if (spec.type==StreamSpec.TYPE.VIDEO_H265) {
 						// convert temp-v1.mp4(HEV1) to temp-v1.mp4(HVC1), this works better in some devices. 
-						// create hvc1 directly in ffmpeg -tag:v hvc1?
+						// test: create hvc1 directly in ffmpeg -tag:v hvc1?
 						logger.println(String.format("%s Convert HEV1 to HVC1 (name=%s)", Utils.getNowAsString(), spec.name));
 						MediaTools.convertHEV1toHVC1(outputFolder, spec);
 					}					
@@ -137,26 +136,26 @@ public class Dasher {
 			}
 
 			// transcode audio.1,audio.2,.. output streams
-			// name samplerate bitrate channels: a1 48000 128k 2
+			// name samplerate bitrate channels codec: "a1 48000 128k 2 aac"
 			logger.println("");			
 			for(int idx=1; ; idx++) {
 				val = Utils.getString(params, "audio."+idx, "", true);
 				if (val.isEmpty()) break;
-				boolean isDisabled = val.endsWith("disable");				
+				boolean isDisabled = val.endsWith("disable");		
 				String[] valopts = val.split(" "); 
 				StreamSpec spec = new StreamSpec();
-				spec.type = StreamSpec.TYPE.AUDIO_AAC;
 				spec.name = valopts[0].trim();
 				spec.sampleRate = Integer.parseInt(valopts[1].trim());
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
 				spec.channels = Integer.parseInt(valopts[3].trim());
+				spec.type = StreamSpec.TYPE.fromString(valopts.length>=5 ? valopts[4] : "AAC");  
 				spec.enabled = !isDisabled;
 				specs.add(spec);
 				
 				if (useIdFolder && Utils.getBoolean(params, "deleteoldfiles", true))
 					deleteOldFiles( new File(outputFolder, spec.name) );
 
-				List<String> args=MediaTools.getTranscodeAACArgs(inputFile, spec, timeLimit);
+				List<String> args=MediaTools.getTranscodeAudioArgs(inputFile, spec, timeLimit);
 				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				if (!isDisabled)
 					MediaTools.executeProcess(args, outputFolder);
@@ -181,7 +180,7 @@ public class Dasher {
 						folder.delete();
 					}
 					
-					List<String> args=MediaTools.getTranscodeAACArgs(inputFileSec, spec, timeLimit);
+					List<String> args=MediaTools.getTranscodeAudioArgs(inputFileSec, spec, timeLimit);
 					logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 					MediaTools.executeProcess(args, outputFolder);
 				}
