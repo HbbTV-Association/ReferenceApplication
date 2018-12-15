@@ -59,8 +59,8 @@ public class MediaTools {
 			"-level", spec.level.isEmpty()?"4.0":spec.level,
 			"-s:v", spec.size, 		// resolution 1920x1080
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
-			//"-maxrate:v", spec.bitrate,
-			//"-bufsize:v", spec.bitrate,
+			//"-maxrate:v", spec.bitrate, "-minrate:v", spec.bitrate,
+			//"-bufsize:v", 1.5*spec.bitrate,
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes

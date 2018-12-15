@@ -174,10 +174,11 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.widevine", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 		
-		String kid = Utils.getString(params, "drm.kid", "", true);		
+		String kid = Utils.getString(params, "drm.kid", "", true);
+		String prov= Utils.getString(params, "drm.widevine.provider", "", true);
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_WIDEVINE+"\">"+Dasher.NL);
-		buf.append("  <cenc:pssh>"+ createWidevinePSSH(kid) +"</cenc:pssh>"+Dasher.NL);		
+		buf.append("  <cenc:pssh>"+ createWidevinePSSH(kid, prov) +"</cenc:pssh>"+Dasher.NL);		
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();		
 	}
@@ -292,12 +293,12 @@ public class DashDRM {
 		return Utils.base64Encode(psshBytes);		
 	}
 
-	private String createWidevinePSSH(String kid) throws IOException {
-		// Use ProtoBuffer builder, set ALG,KID fields only for now
+	private String createWidevinePSSH(String kid, String provider) throws IOException {
+		// Use ProtoBuffer builder, set ALG,KID,PROVIDER
 		WidevineCencHeaderProto.WidevineCencHeader.Builder psshBuilder=WidevineCencHeaderProto.WidevineCencHeader.newBuilder();
 		psshBuilder.setAlgorithm( WidevineCencHeaderProto.WidevineCencHeader.Algorithm.valueOf("AESCTR") );
 		psshBuilder.addKeyId( ByteString.copyFrom(Utils.hexToBytes(kid)) );
-		//psshBuilder.setProvider(val); // intertrust, usp-cenc, whatever, <null>		
+		if (!provider.isEmpty()) psshBuilder.setProvider(provider); // intertrust, usp-cenc, widevine_test, whatever, ..		
 		WidevineCencHeaderProto.WidevineCencHeader psshObj = psshBuilder.build();
 
 		byte[] pssh=psshObj.toByteArray(); // pssh payload
