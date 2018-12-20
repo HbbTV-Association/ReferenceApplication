@@ -190,9 +190,10 @@ public class DashDRM {
 
 		String kid = Utils.getString(params, "drm.kid", "", true);		
 		StringBuilder buf = new StringBuilder();
-		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:5e629af5-38da-4063-8977-97ffbd9902d4\">"+Dasher.NL);
+		// Marlin requires a lowercase kid, also schemeuuid UPPERCASE but it's against uuid specs(should we do it?)
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_MARLIN+"\">"+Dasher.NL);
 		buf.append("  <mas:MarlinContentIds>");
-		buf.append("<mas:MarlinContentId>urn:marlin:kid:"+ kid.substring(2) +"</mas:MarlinContentId>");
+		buf.append("<mas:MarlinContentId>urn:marlin:kid:"+ kid.substring(2).toLowerCase(Locale.US) +"</mas:MarlinContentId>");
 		buf.append("</mas:MarlinContentIds>"+Dasher.NL);
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();		

@@ -478,7 +478,6 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	this.drm.successCallback = callback;
 	var self = this;
 	
-	// Case Playready
 	if( this.drm.system == "playready" ){
 		self.player.setProtectionData({
 			"com.microsoft.playready": { "serverURL": self.drm.la_url }
@@ -491,10 +490,13 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 		self.player.setProtectionData({
 			"org.w3.clearkey": { 
 				"serverURL": self.drm.la_url
-				/* "serverURL" : "https://mhp.sofiadigital.fi/tvportal/referenceapp/videos/laurl_ck.php", */
 				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
 			}
 		});
+	} else {
+		var protData={};
+		protData[self.drm.system] = { "serverURL": self.drm.la_url };
+		self.player.setProtectionData(protData);
 	}
 	
 	self.drm.ready = true;
