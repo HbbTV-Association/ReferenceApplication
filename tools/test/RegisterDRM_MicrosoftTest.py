@@ -26,6 +26,8 @@ def register(drmType, auth, kid, enckey):
 	obj["kid"]=kid		
 	obj["key"]=enckey	## real production system should keep KEY value secret !!
 	obj["playready"]=registerPlayready(drmType, auth, kid, enckey)
+	obj["b64kid"]=base64.b64encode(bytearray.fromhex(kid)).decode("ISO-8859-1")
+	obj["b64key"]=base64.b64encode(bytearray.fromhex(enckey)).decode("ISO-8859-1")
 	return obj;
 
 ##############################
@@ -50,6 +52,9 @@ def main():
 	obj["Test1236"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341236", "12341234123412341234123412341236")
 	obj["Test1237"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341237", "12341234123412341234123412341237")
 	obj["Test1238"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341238", "12341234123412341234123412341238")
+	obj["Test1239"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341239", "12341234123412341234123412341239")
+
+	obj["Test148D"]=register(DRM_TYPE.TEST, options.authtest, "5A461E692ABF5534A30FFC45BFD7148D", "307F7B3F5579BEF53894A6D946762267")
 
 	obj = json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=False)
 	print (obj)

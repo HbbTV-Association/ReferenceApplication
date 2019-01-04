@@ -1,7 +1,14 @@
 package org.hbbtv.refapp;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utilify functions for executable tools used by dasher (ffmpeg,ffprobe,mp4box).
@@ -34,7 +41,7 @@ public class MediaTools {
 	}
 
 	public static List<String> getTranscodeH264Args(File file, StreamSpec spec, 
-				int fps, int gopdur, String overlayOpt) {
+				int fps, int gopdur, String overlayOpt, long timeLimit, int ver) {
 		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
 		String libFolder = Utils.getLibraryFolder(MediaTools.class);
 		libFolder = Utils.normalizePath(libFolder, true);
@@ -52,8 +59,8 @@ public class MediaTools {
 			"-level", spec.level.isEmpty()?"4.0":spec.level,
 			"-s:v", spec.size, 		// resolution 1920x1080
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
-			//"-maxrate:v", spec.bitrate,
-			//"-bufsize:v", spec.bitrate,
+			//"-maxrate:v", spec.bitrate, "-minrate:v", spec.bitrate,
+			//"-bufsize:v", 1.5*spec.bitrate,
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
@@ -62,17 +69,21 @@ public class MediaTools {
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
+			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"", // allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit)
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
-			"-an", "-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+			"-an",
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
 		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);		
 		return args;
 	}
 
 	public static List<String> getTranscodeH265Args(File file, StreamSpec spec, 
-			int fps, int gopdur, String overlayOpt) {
+			int fps, int gopdur, String overlayOpt, long timeLimit, int ver) {
 		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
 		String libFolder = Utils.getLibraryFolder(MediaTools.class);
 		libFolder = Utils.normalizePath(libFolder, true);
@@ -101,9 +112,12 @@ public class MediaTools {
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
+			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"",
 			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${fps}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
-			"-an", "-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+			"-an", 
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
@@ -115,46 +129,74 @@ public class MediaTools {
 				.replace("${gop}", ""+gop)
 				.replace("${bitrate}", spec.bitrate)
 				);
-		
+
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
 		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);
 		return args;
 	}
 	
-	public static List<String> getTranscodeAACArgs(File file, StreamSpec spec) {
+	public static List<String> getTranscodeAudioArgs(File file, StreamSpec spec, long timeLimit) {
 		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
+		String codec = spec.type==StreamSpec.TYPE.AUDIO_AC3 ? "ac3" :
+			spec.type==StreamSpec.TYPE.AUDIO_EAC3 ? "eac3" :
+			"aac";
 		
 		List<String> args=Arrays.asList(FFMPEG, 
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4",
-			"-c:a", "aac", "-strict", "experimental",
+			"-c:a", codec, 
+			"-strict", "experimental",
 			"-b:a", spec.bitrate, 		// audio bitrate 128k
 			"-maxrate:a", spec.bitrate, "-bufsize:a", spec.bitrate,
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
 			"-ar", ""+spec.sampleRate,
 			"-ac", ""+spec.channels,	// channel count 2..n
-			"-vn", "-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
+			"-vn",
+			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
+			"-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
 		);
 		args = new ArrayList<String>(args);
+		
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
 		return args;
 	}
 	
-	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur) {
+	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, boolean useIdFolder, 
+			String initMode, int ver) {
 		// Use MDP.minBufferTime=segdur*2 to make validator happy, default 1.5sec-3sec 
 		// value most likely gives "buffer underrun" warnings.
-		//    http://dashif.org/conformance.html
+		//    https://conformance.dashif.org/
+		// ver(version):
+		//    1=write SIDX table (1 fragment), segtimeline
+		//    2=NO SIDX table, no segtimeline, use audioSampleRate scale
+		int scale=-1;
+		if (ver==2) {
+			for(StreamSpec spec : specs) {
+				if (spec.enabled && spec.type.isAudio()) {
+					scale = spec.sampleRate; // 44100, 48000
+					break;
+				}
+			}
+		}
+		
 		List<String> args=Arrays.asList(MP4BOX,
-			"-dash", ""+(segdur*1000), 	// segment duration 6sec*1000
-			"-frag", ""+(segdur*1000),
+			"-dash", ""+(scale>0?segdur*scale : segdur*1000), // segment duration 6sec*1000 or use audioRate
+			"-frag", ""+(scale>0?segdur*scale : segdur*1000), // for better seg alignment (important for 44.1KHz)
+			scale>0?"-dash-scale":"", scale>0?""+scale:"",
+			ver==1?"":"-bound", 	// force seg duration, last segment may be shorter (video=146sec, segdur=6sec -> 24*6sec + 1*2sec segments)
 			"-mem-frags", "-rap",
 			"-profile", "dashavc264:live",
-			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012",
+			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012", // hbbtv1.5
 			"-min-buffer", ""+(segdur*1000*2), //  "3000", // MDP.minBufferTime value
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
-			"-bs-switching", "no",
-			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "1", // SIDX table with 1 fragment
+			"-bs-switching", initMode, // inband=AVC3_common_init, multi=AVC1_common_init_hbbtv, merge=AVC1_commonn_init, no=AVC1_separate_init (best backward comp)
+			"-sample-groups-traf",	// sgpd+sbgp atom in MOOF/TRAF(audio), IE11 fix  
+			"-single-traf", 
+			"-subsegs-per-sidx", ver==1?"1":"-1", // SIDX table with 1 fragment or no SIDX
 			//"-last-dynamic",  // insert lmsg brand to the last segment(MDP.type=dynamic)
-			"-segment-name", "$RepresentationID$_$Number$$Init=i$", "-segment-timeline",
+			"-segment-name", (useIdFolder ? "$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$_$Number$$Init=i$"), 
+			ver==1?"-segment-timeline":"",
 			"-out", "manifest.mpd"	// output file
 		);
 		args = new ArrayList<String>(args);
@@ -463,6 +505,21 @@ public class MediaTools {
 			}
 		}
 		return argIdx;
+	}
+	
+	private static int updateOpt(List<String> args, String key, String value, boolean setToKeyPos) {
+		// update [ "-somekey", "${someval}" ] element,
+		// find by -somekey or ${someval}, delete elements if value is NULL.
+		int idx=args.indexOf(key);
+		if (idx>=0) {
+			if (value!=null) {
+				args.set(setToKeyPos ? idx : idx+1, value);
+			} else { 
+				args.remove(idx);
+				args.remove(setToKeyPos ? idx-1 : idx); 
+			}
+		}
+		return idx;
 	}
 	
 }

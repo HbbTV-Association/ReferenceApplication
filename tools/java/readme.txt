@@ -1,4 +1,6 @@
 ReferenceApplication for Dash packager
+https://refapp.hbbtv.org/
+https://github.com/HbbTV-Association/ReferenceApplication
 
 Dasher
 ====================
@@ -44,7 +46,7 @@ Compile and Build
 Use Java7 or higher, use Ant1.9 or higher.
 Use Eclipse or Ant script to build the project.
   /apache-ant-1.9.4/bin/ant -f build.xml
-Library is written to lib/dasher.jar file.
+Library is compiled to lib/dasher.jar file.
 
 
 ** Run dasher **
@@ -87,6 +89,13 @@ may not play dash stream if this box is found in an initialization file.
   java -cp "/refapp/lib/*" org.hbbtv.refapp.BoxModifier input=/videos/dash/video1/v1_i.mp4 mode=remove path=moov/trak/senc
 
 
+** Multiple moof/mdat pairs  **
+=================================
+Low-latency test may use multiple moof/mdat pairs, stream is splitted to small fragments within
+a segment file. Players may play the segment file while still downloading remaining bytes from network.
+Use frags=4 argument to add four fragments per second, if segdur=2 then segment file has 4*2=8 fragments.
+
+
 Config file dasher.properties
 ========================================
 Use configuration file to control dasher arguments.
@@ -98,6 +107,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2018-10-30:
+- added frags argument for multifragment(moof/mdat pairs)
 2017-02-12:
 - added input.* (input.1, input.2) secondary audio input files
 2017-11-19:
