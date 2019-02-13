@@ -692,7 +692,6 @@ VideoPlayer.prototype.changeAVcomponent = function( component ) {
 
 }
 
-
 VideoPlayer.prototype.enableSubtitles = function( next ) {
 	console.log("enableSubtitles("+ next +")");
 	try{
