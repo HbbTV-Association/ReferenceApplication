@@ -126,7 +126,22 @@ public class XMLUtil {
 	    transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,"yes");
 	    transformer.setOutputProperty("http://www.oracle.com/xml/is-standalone", "yes");
 	    transformer.transform(source, result);
-	    return writer.toString();
+	    
+	    // Java10-transformer adds unecessary empty lines, remove empty lines
+	    BufferedReader reader = new BufferedReader(new StringReader(writer.toString()));
+	    StringBuilder buf = new StringBuilder();
+	    try {
+		    String line;
+		    while( (line=reader.readLine())!=null ) {
+		    	if (!line.trim().isEmpty()) {
+		    		buf.append(line); 
+		    		buf.append(Utils.NL);
+		    	}
+		    }
+	    } finally {
+	    	reader.close();
+	    }
+	    return buf.toString();  //writer.toString();
 	}
 	
 }

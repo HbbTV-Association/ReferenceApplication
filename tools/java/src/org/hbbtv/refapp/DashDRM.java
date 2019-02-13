@@ -190,8 +190,8 @@ public class DashDRM {
 
 		String kid = Utils.getString(params, "drm.kid", "", true);		
 		StringBuilder buf = new StringBuilder();
-		// Marlin requires a lowercase kid, also schemeuuid UPPERCASE but it's against uuid specs(should we do it?)
-		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_MARLIN+"\">"+Dasher.NL);
+		// Marlin must have schemeidUri UCASE(against regular specs) and kid LCASE
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+ (GUID_MARLIN.toUpperCase(Locale.US)) +"\">"+Dasher.NL);
 		buf.append("  <mas:MarlinContentIds>");
 		buf.append("<mas:MarlinContentId>urn:marlin:kid:"+ kid.substring(2).toLowerCase(Locale.US) +"</mas:MarlinContentId>");
 		buf.append("</mas:MarlinContentIds>"+Dasher.NL);
@@ -203,11 +203,9 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.clearkey", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String scheme= GUID_CLEARKEY;
-		String laurl = Utils.getString(params, "drm.clearkey.laurl", "", true);
-		
+		String laurl = Utils.getString(params, "drm.clearkey.laurl", "", true);		
 		StringBuilder buf = new StringBuilder();
-		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+scheme+"\" value=\"ClearKey1.0\">"+Dasher.NL);
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_CLEARKEY+"\" value=\"ClearKey1.0\">"+Dasher.NL);
 		if (!laurl.isEmpty())
 			buf.append("<ck:Laurl Lic_type=\"EME-1.0\">"+ Utils.XMLEncode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL);
 		buf.append("</ContentProtection>"+Dasher.NL);
@@ -218,12 +216,10 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.cenc", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String scheme= GUID_CENC;
-		String kid   = Utils.getString(params, "drm.kid", "", true);
-		
+		String kid   = Utils.getString(params, "drm.kid", "", true);		
 		StringBuilder buf = new StringBuilder();
-		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+scheme+"\">"+Dasher.NL);
-		buf.append("  <cenc:pssh>"+createPSSHv1(scheme.replace("-", ""), kid)+"</cenc:pssh>"+Dasher.NL);
+		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_CENC+"\">"+Dasher.NL);
+		buf.append("  <cenc:pssh>"+createPSSHv1(SYSID_CENC, kid)+"</cenc:pssh>"+Dasher.NL);
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();
 	}
