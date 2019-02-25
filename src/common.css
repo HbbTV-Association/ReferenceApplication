@@ -1,21 +1,33 @@
-#info {
-    background-color: rgba(0,0,0,0.7);
-    width: 400px;
-    left: 430px;
+#info, #infoBox {
     height: auto;
-    top: 300px;
     color: #fff;
     border: 2px solid #333;
     position: absolute;
     z-index: 10001;
     opacity: 1.0;
-    padding: 10px;
     border-radius: 10px;
-    font-size: 24px;
+    
     text-align: center;
     box-shadow: 0px 0px 4px #000;
 }
-#info.hide{
+#info {
+	font-size: 24px;
+	padding: 10px;
+    width: 400px;
+    left: 430px;
+	top: 300px;
+	background-color: rgba(0,0,0,0.7);
+}
+#infoBox {
+    width: 1240px;
+	height: 680px;
+    left: 20px;
+	top: 20px;
+	display: absolute;
+	background-color: rgba(0,0,0,0.4);
+}
+
+#info.hide, #infoBox.hide{
 	opacity: 0.0 !important;
 }
 #appmgr, #oipfcfg{
@@ -24,4 +36,12 @@
 	top: 0px; 
 	width: 0px; 
 	height: 0px;
+}
+
+.verticalMiddle{
+	position: relative;
+	top: 50%;
+	-webkit-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
 }

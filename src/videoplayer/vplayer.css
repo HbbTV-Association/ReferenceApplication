@@ -262,6 +262,7 @@
   100% { right: 250px; }
 }
 #subtitleButton, 
+#audioButton, 
 #debugButton_temp {
     position: absolute;
     bottom: 40px;
@@ -280,6 +281,7 @@
     background-position: -90px 0px;
 }
 #subtitleButtonText,
+#audioButtonText,
 #debugButtonText_temp {
     position: absolute;
     left: 30px;
@@ -289,6 +291,10 @@
     line-height: 30px;
     text-align: left;
     font-size: 21px;
+}
+#audioButton{
+	right: 115px !important;
+	background-position: -30px 0px !important;
 }
 
 /* Player controls */

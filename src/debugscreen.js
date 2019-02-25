@@ -10,9 +10,11 @@ console.log = function(){
 		return;
 	}
 	if( arguments[0][0] == "[" ) return; // this will erase dashjs console
+	
+	
 	applog.push( Array.apply(this, arguments).map( function(argument){ return XMLEscape( typeof argument == "string"? argument : JSON.stringify( argument ) ) } ) ); 
 	originalLog.apply( this, arguments ); 
-	debug( arguments );
+	debug( Array.from(arguments) );
 };
 
 function saveAppLog(){
@@ -38,14 +40,24 @@ function saveAppLog(){
 	}
 }
 
-function debug(){
+function debug(lines){
+	
 	if( !$("#debugScreen")[0] ){
 		$("body").append('<div id="debugScreen"><div id="debugText"></div></div>');
 	}
 	var textArea = $("#debugText");
-	$.each( arguments, function( i, object ){
-		textArea.append( XMLEscape( typeof object == "string"? object : JSON.stringify( object ) ) + "<br/>"); 
+	$.each( lines, function( i, object ){
+		var line = "";
+		
+		if( typeof object == "string" ){
+			line = "[" + performance.now() + "ms]: " + XMLEscape( object );
+		}
+		else {
+			line = "[" +performance.now() + "ms]: [obj] " + XMLEscape( JSON.stringify( object ) );
+		}
+		textArea.append( line + "<br/>");
 	} );
+	
 }
 
 function toggleDebug(){

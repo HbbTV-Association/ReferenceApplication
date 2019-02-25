@@ -32,6 +32,13 @@ function init()
 					$.each( submenu.items, function(nth, item){
 						// if asset is not se to be relevant to current app profile, set it disabled. It can still be tried to launch if user wish to test
 						item.disabled = !( !item.profile || ( Array.isArray( item.profile ) && item.profile.indexOf( profile.version ) >= 0 ) );
+						
+						// TODO: if host not production change relative urls to production endpoint
+						
+						if( !item.url.match(/http/) ){
+							item.url = item.url.replace(/.*videos/, "http://refapp.hbbtv.org/videos")
+						}
+						
 						submenuItems.push( item );
 					});
 					new_config.push({"items": submenuItems, "title":main.items[i].title});

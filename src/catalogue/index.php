@@ -119,6 +119,7 @@ function onLoad() {
 	</div>
 	
 	<div id="info" class="hide"></div>
+	<div id="infoBox" class="hide"></div>
 	
 </body>
 </html>

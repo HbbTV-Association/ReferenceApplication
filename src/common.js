@@ -12,6 +12,10 @@ function twoDigitString( number ){
 	return ('0'+number).substr(-2);
 }
 
+function toTime( s ){
+	return  twoDigitString( Math.floor(s / 60) ) + ":" + twoDigitString( Math.floor(s % 60) );
+}
+
 function timeToDate( hhmm ){
 	var t = new Date();
 	return t.getFullYear() + "-" + (t.getMonth()+1) + "-" + t.getDate() + "T" + hhmm + ":00";
@@ -107,6 +111,98 @@ function showInfo( msg, timeout, inMs )
 		console.log( "error in show info function: " + e.message );
 	}
 }
+/*
+var infoBoxVisible = false;
+
+function showInfoBox( html )
+{
+	if( html == false ){
+		$("#infoBox").addClass("hide");
+		infoBoxVisible = false;
+		return;
+	}
+	
+	try{
+		$("#infoBox").removeClass("hide");
+		$("#infoBox").html( html );
+		$("#infoBox").append( "<div style='position:absolute;top:0px;left:0px;background:rgba(0,0,0,0.9);'>Press OK to Close</div>" );
+		infoBoxVisible = true;
+	}
+	catch(e){
+		console.log( "error in show info function: " + e.message );
+	}
+}
+*/
+
+
+/***
+	Infobox scrollable box
+***/
+
+var infoBoxVisible = false;
+var infoBoxScrollable = false;
+
+function showInfoBox( html )
+{
+	if( !$("#infoBox")[0] ){
+		$("body").append("<div id='infoBox'></div>")
+	}
+	
+	if( html == false ){
+		$("#infoBox").addClass("hide");
+		infoBoxVisible = false;
+		return;
+	}
+	
+	try{
+		$("#infoBox").removeClass("hide");
+		$("#infoBox").html( html );
+		$("#infoBox").append( "<div style='position:absolute;top:0px;left:0px;background:rgba(0,0,0,0.9);'>Press OK to Close</div>" );
+		infoBoxVisible = true;
+	}
+	catch(e){
+		console.log( "error in show info function: " + e.message );
+	}
+	if( $("#infoBox > .verticalMiddle").outerHeight() > $("#infoBox").outerHeight() ){
+		// inner container is larger. Activate scrolling
+		infoBoxScrollable = true;
+	}
+	else{
+		infoBoxScrollable = false;
+	}
+}
+
+function addTableRow( table, cells ){
+	var row = $("<div style='display: table-row;background:rgba(0,0,0,0.9);'></div>");
+	$.each( cells, function (i, value){
+		row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+value+"</div>");
+	});
+	table.append( row );
+}
+
+function createTable(data){
+	var table = $("<div class='verticalMiddle'></div>");
+	$.each(data, function(name, value){
+		addTableRow( table, [ name, value ] );
+	});
+	return table;
+}
+
+
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  if( hash < 0 ){
+	  hash = -hash;
+  }
+  return hash;
+};
 
 // adds event listener (action) for multiple (events) "separated by space" for object (obj) 
 function addEventListeners( obj, events, action ){
@@ -326,4 +422,257 @@ function arrayBufferToString(buffer){
 	}
 	return str;
 }
+
+/***************
+	COOKIES
+***************/
+
+function createCookie(name, value, lifetime ) {
+	try{
+		lifetime = lifetime || (365 * 24 * 60 * 60 * 1000);
+		var date = new Date();
+		date.setTime(date.getTime() + lifetime );
+		var expires = "; expires=" + date.toGMTString();
+		
+		document.cookie = name + "=" + value + expires + "; path=/; SameSite=lax";
+	}
+	catch(e)
+	{
+		console.log("error creating cookie");
+	}
+}
+
+function readCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
+function deleteCookie(name ) {
+  document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+}
+
+/***
+	Helper functions
+***/
+
+function displayChannelList(){
+	
+	broadcast = $("#broadcast")[0];
+		
+	if( !broadcast ){
+		$("body").append('<object id="broadcast" type="video/broadcast"></object>');
+		broadcast = $("#broadcast")[0];
+	}
+	broadcast.bindToCurrentChannel();
+	try {
+		var lst = broadcast.getChannelConfig().channelList;
+		var table = $("<div class='verticalMiddle'></div>");
+		
+		
+		for (var i=0; i<lst.length; i++) {
+			var ch = lst.item(i);
+			addTableRow( table, [i, ch.name, ch.ccid, ch.onid, ch.sid, ch.tsid] );
+		}
+		showInfoBox( table );
+
+	} catch (e) {
+		showInfo('accessing channel list failed.');
+		return;
+	}
+}
+
+
+function getChannelData(){
+	try{
+		// get channel list and channel position
+		broadcast = $("#broadcast")[0];
+		
+		if( !broadcast ){
+			$("body").append('<object id="broadcast" type="video/broadcast"></object>');
+			broadcast = $("#broadcast")[0];
+			
+		}
+		broadcast.bindToCurrentChannel();
+		/*
+		if( !appmgr ){
+			$("body").append('<object id="appmgr" type="application/oipfApplicationManager"></object>');
+			appmgr = $("#appmgr")[0];
+		}
+		*/
+		
+		var chlist = broadcast.getChannelConfig().channelList;
+		//var current = broadcast.currentChannel;
+		//var current = appmgr.getOwnerApplication().privateData.currentChannel; // not available in Samsung
+		var current = null;
+		var ccid = null;
+		try {
+			ccid = broadcast.currentChannel.ccid;
+		} catch (e) {
+			ccid = null;
+		}
+		
+		try {
+			current = chlist.getChannel(ccid);
+		} catch (e) {
+			current = null;
+		}
+		
+		
+		
+		var channelPosition = -1;
+		
+		try{
+			for(var i = 0; i < chlist.length; ++i){
+				var ch = chlist.item(i);
+				console.log( ch, JSON.stringify( ch ) )
+				if( ch.ccid == ccid ){
+					channelPosition = i;
+					break;
+				}
+			}
+		}catch(e){
+			showInfo( "Channel data not readable");
+		}
+		if( current ){
+			showInfo( "Channel " + current.name + " at position " + channelPosition );
+		}else{
+			current = chlist.item(0);
+		}
+		console.log( "Chlist length " + chlist.length + " ");
+		
+		var table = $("<div class='verticalMiddle'></div>");
+		
+		addTableRow( table, [ "Channel position", channelPosition+"/"+chlist.length ]);
+		addTableRow( table, [ "Current channel CCID", ccid ]);
+		
+		var parameters = ["ccid","channelType","dsd","name","onid","sid","tsid"];
+		$.each(parameters, function(i, param){
+			try{
+				addTableRow( table, [ param, current[ param ] ] );
+			}catch(e){
+				addTableRow( table, [ param, "[Can not display data]"] );
+			}
+		});
+		showInfoBox( table );
+	} catch(e){
+		showInfo( e.message );
+	}
+}
+
+
+function readAllCookies(){
+	var cookies = document.cookie.split(';');
+	list = {};
+	$.each( cookies, function( i, cookie ){
+		var search = cookie.grep(/(\w*).?=(.*)/);
+		list[ search[0] ] = search[1];
+	} );
+	return list;
+		
+}
+
+function displayCookies(time){
+	var cookies = readAllCookies();
+	var table = $("<div class='verticalMiddle'></div>");
+	$.each(cookies, function(name, value){
+		if( value.length > 80 ){
+			var lbreak = 80;
+			while(lbreak < value.length){
+				value = value.substr(0, lbreak) + "<br/>" + value.substr( lbreak );
+				lbreak += 80;
+				console.log("added line break");
+			}
+		}
+		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+name+"</div><div style='display: table-cell;vertical-align: middle;border-bottom: 1px solid white;border-top: 1px solid white;'>"+value+"</div></div>");
+	});
+	showInfoBox( table );
+}
+
+/*****
+Capabilities
+*****/
+
+var capabilities = null;
+
+var xmlExample = "<capabilities>  <getFriends>true</getFriends>  <cacheFriends>true</cacheFriends>  <followPerson>true</followPerson>  <doNotFollowPerson>false</doNotFollowPerson>  <getActivities>true</getActivities>  <cacheActivities>false</cacheActivities>  <displayUrl>false</displayUrl>  <useLogonWebAuth>false</useLogonWebAuth>  <hideHyperlinks>false</hideHyperlinks>  <supportsAutoConfigure>false</supportsAutoConfigure>  <contactSyncRestartInterval>60</contactSyncRestartInterval>  <dynamicActivitiesLookupEx>true</dynamicActivitiesLookupEx>  <dynamicContactsLookup>false</dynamicContactsLookup>  <useLogonCached>false</useLogonCached>  <hideRememberMyPassword>false</hideRememberMyPassword>  <createAccountUrl>http://contoso.com/createAccount</createAccountUrl>  <forgotPasswordUrl>http://contoso.com/forgotPassword</forgotPasswordUrl></capabilities>";
+
+var getCapabilities = function() {
+	try {
+			var capobj = function(){
+				var object = document.getElementById("oipfcap");
+				if( !object ){
+					object = document.createElement("object");
+					object.setAttribute("id", "oipfcap");
+					object.setAttribute("type", "application/oipfCapabilities");
+					document.body.appendChild( object );
+					
+				}
+				return object;
+			}();
+			try {		
+				capabilities = capobj.xmlCapabilities;
+			} catch (e) {
+				capabilities = null;
+			}
+	} catch (e) {
+		console.log("error getting capabilities");
+	}
+	xmlstr = "";
+	if (capabilities != null) {
+		var serializer = new XMLSerializer();
+		var xmlstr = serializer.serializeToString( capabilities );
+	} else {
+		xmlstr = "<profilelist></profilelist>";
+	}
+	//xmlstr = xmlExample;
+	//console.log( "capabilities original:" ,capabilities );
+	console.log( "capabilities:" ,xmlstr );
+	var entries = xmlstr.grep(/\<(\w*)\>/g).map(function(i){return i.replace("<","").replace(">","")});
+	console.log( entries, xmlstr );
+	var table = $("<div class='verticalMiddle'></div>");
+	$.each(entries, function(i,name){
+		//var value = capabilities.getElementsByTagName(name)[0].nodeValue;
+		var value = $(xmlstr).find( name ).text();
+		console.log( value );
+		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;'>"+name+"</div><div style='display: table-cell;vertical-align: middle;border-bottom: 1px solid white;border-top: 1px solid white;'>"+value+"</div></div>");
+	});
+	showInfoBox( table );
+	//showInfoBox( xmlstr.replace(/\</, "\<").replace(/\>/, "\>") );
+	//showInfo( xmlstr );
+}
+
+
+function mediaPlaySpeeds(){
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -29,6 +29,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			+'<div id="ppauseplay" class="pause"><div class="vcrbtn"></div><span id="pauseplay"></span></div> '
 			+'<div id="pff"></div>'
 			+'<div id="subtitleButton"><div id="subtitleButtonText">Subtitles</div></div>'
+			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
 			+'</div>');
 		console.log("Add player component");
 	}
@@ -87,6 +88,13 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		console.log("Seeked");
 	});
 	
+	player.addEventListener('playing', function(){
+		console.log("playing");
+		if( dialog && dialog.open ){
+			player.pause();
+		}
+	});
+	
 	var canplay = false;
 	player.addEventListener('canplay', function(){
 		canplay = true;
@@ -133,112 +141,114 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		$("#ppauseplay").removeClass("pause").addClass("play");
 	} );
 	
-	player.textTracks.addEventListener('addtrack', function(evt){
-		
-		// set up inband cue events listeners for new tracks
-		var track = evt.track;
-		
-		// TODO: First check if same language code exist, do not add duplicates. 
-		// (may occur if subtitles are served both inband and out-of-band)
-		try{
-			/*
-			$.each( $(player).find("track"), function(olderTrack){
-				if( olderTrack.label == track.language ){
-					console.log("Language " + track.language + " text track already exists. Skip");
-					$(player)
+	if( player.textTracks ){
+		player.textTracks.addEventListener('addtrack', function(evt){
+			
+			// set up inband cue events listeners for new tracks
+			var track = evt.track;
+			
+			// TODO: First check if same language code exist, do not add duplicates. 
+			// (may occur if subtitles are served both inband and out-of-band)
+			try{
+				/*
+				$.each( $(player).find("track"), function(olderTrack){
+					if( olderTrack.label == track.language ){
+						console.log("Language " + track.language + " text track already exists. Skip");
+						$(player)
+						return;
+					}
+				} );
+				*/
+				/*
+				var found = false;
+				$.each( player.textTracks, function(olderTrack){
+					if( olderTrack.label == track.language ){
+						console.log("Language " + track.language + " text track already exists. Skip");
+						delete track;
+						found = true;
+						return false;
+					}
+				} );
+				if(found){
 					return;
 				}
-			} );
-			*/
-			/*
-			var found = false;
-			$.each( player.textTracks, function(olderTrack){
-				if( olderTrack.label == track.language ){
-					console.log("Language " + track.language + " text track already exists. Skip");
-					delete track;
-					found = true;
-					return false;
-				}
-			} );
-			if(found){
-				return;
+				*/
+			} catch( e ){
+				console.log( "error checking tracks: " + e.description );
 			}
-			*/
-		} catch( e ){
-			console.log( "error checking tracks: " + e.description );
-		}
-		
-		track.onerror = track.onload = function(){
-			console.log( arguments );
-		}
-		
-		console.log("at addtrack nth track: " + this.length + " : set up cuechange listeners", track);
-		
-		
-		// show subtitle button label if there is a track that is not metadata 
-		if( track.kind != "metadata" ){
-			$("#subtitleButton").show();
-		}
-		
-		/*
-		// the first track is set showing
-		if( self.subtitleTrack === false ){
-			track.mode = "showing";
-			self.subtitleTrack = 0;
-			console.log("set showing track ", track.language, track.label);
-			$("#subtitleButtonText").html("Subtitles: " + track.language );
-		}
-		else{
-			track.mode = "hidden";
-		}
-		*/
-		
-		track.label = track.language;
-		console.log("text track " + track);
-		track.oncuechange = function(evt) {
 			
-			if( this.kind == "metadata" ){
+			track.onerror = track.onload = function(){
+				console.log( arguments );
+			}
 			
-				showInfo("cuechange! kind=" + this.kind);
-				
-				try{
-					var cuelist = this.activeCues;
-					if ( cuelist && cuelist.length > 0) {
-						console.log("cue keys: ",  Object.keys( cuelist[0] ) ); 
-						var info = "";
-						$.each( cuelist, function(c, cue){
-							
-							// try read text attribute
-							if( cue.text ){
-								showInfo( cue.text );
-							}
-							
-							var cueValue = arrayBufferToString( cue.data );
-							//console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
-							console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime + " cueValue: " + cueValue );
-							info +=  "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime + "<br/>";
-							
-						} );
-						
-						showInfo( info, 999 );
-					}
-					else{
-						showInfo("Metadata cue exit", 1);
-					}
-				} catch(e){
-					console.log("error Reading cues", e.message );
-				}
-				
+			console.log("at addtrack nth track: " + this.length + " : set up cuechange listeners", track);
+			
+			
+			// show subtitle button label if there is a track that is not metadata 
+			if( track.kind != "metadata" ){
+				$("#subtitleButton").show();
+			}
+			
+			/*
+			// the first track is set showing
+			if( self.subtitleTrack === false ){
+				track.mode = "showing";
+				self.subtitleTrack = 0;
+				console.log("set showing track ", track.language, track.label);
+				$("#subtitleButtonText").html("Subtitles: " + track.language );
 			}
 			else{
-				console.log("cue event " + this.kind + " received");
-				if( this.activeCues.length ){
-					console.log("cue keys " + Object.keys( this.activeCues[0] ) + " received");
-				}
+				track.mode = "hidden";
 			}
-		};
-		console.log( "oncuechange function set" );
-	} );
+			*/
+			
+			track.label = track.language;
+			console.log("text track " + track);
+			track.oncuechange = function(evt) {
+				
+				if( this.kind == "metadata" ){
+				
+					showInfo("cuechange! kind=" + this.kind);
+					
+					try{
+						var cuelist = this.activeCues;
+						if ( cuelist && cuelist.length > 0) {
+							console.log("cue keys: ",  Object.keys( cuelist[0] ) ); 
+							var info = "";
+							$.each( cuelist, function(c, cue){
+								
+								// try read text attribute
+								if( cue.text ){
+									showInfo( cue.text );
+								}
+								
+								var cueValue = arrayBufferToString( cue.data );
+								//console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
+								console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime + " cueValue: " + cueValue );
+								info +=  "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime + "<br/>";
+								
+							} );
+							
+							showInfo( info, 999 );
+						}
+						else{
+							showInfo("Metadata cue exit", 1);
+						}
+					} catch(e){
+						console.log("error Reading cues", e.message );
+					}
+					
+				}
+				else{
+					console.log("cue event " + this.kind + " received");
+					if( this.activeCues.length ){
+						console.log("cue keys " + Object.keys( this.activeCues[0] ) + " received");
+					}
+				}
+			};
+			console.log( "oncuechange function set" );
+		} );
+	}
 	
 	player.addEventListener('playing', function(){
 		console.log("video playing");
@@ -263,6 +273,35 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 					console.log( self.video.textTracks[ defaultSub ] );
 				}
 			}
+			
+			if( self.getAudioTracks() ){
+				$("#audioButton").show();
+			}else{
+				$("#audioButton").hide();
+			}
+			
+			// audio tracks
+			if( self.video.audioTracks && self.video.audioTracks.length ){
+				var defaultAudio = -1;
+				$.each( self.video.audioTracks, function(i, track){
+					console.log("audiotrack " + i);
+					console.log( track );
+					if( defaultAudio < 0 && track.kind != "metadata" ) {
+						track.mode = "showing";
+						defaultAudio = i;
+						$("#audioButtonText").html("Audio: " + track.language );
+						$("#audioButton").show();
+					} else if( track.kind != "metadata" ){
+						track.mode = "hidden";
+					}
+				} );
+				if( defaultAudio >= 0 ){
+					console.log("Found default audio track: " + defaultAudio);
+					self.audioTrack = defaultAudio;
+					console.log( self.video.audioTracks[ defaultAudio ] );
+				}
+			}
+			
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -271,6 +310,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('timeupdate', function(){
+		self.watched.set( player.currentTime, player.duration, self.videoid );
 		if( self.seekTimer == null ){
 			self.updateProgressBar();
 			self.checkAds();
@@ -317,12 +357,12 @@ VideoPlayerHTML5.prototype.setURL = function(url){
 	try{
 		//this.url = url;
 		this.video.src = url;
-		//this.video.load();
 	} catch( e ){
 		console.log( e.message );
 	}
 	
-	
+	// create id for video url
+	this.videoid = url.hashCode();
 	
 	return;
 };
@@ -601,6 +641,9 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 	console.log("startVideo()");
 	this.subtitleTrack = false
+	// reset progress bar always
+	this.resetProgressBar();
+	
 	var self = this;
 	this.onAdBreak = false;
 	this.firstPlay = true;
@@ -615,6 +658,7 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 	if( !this.subtitles ){
 		this.subtitleTrack = false;
 	}
+	
 	if( nthCall && nthCall > 0 ){
 		try{
 			var broadcast = $("#broadcast")[0];
@@ -691,10 +735,50 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 	}
 	
 	
+	try{
+		if( !self.video ){
+			console.log("populate player and create video object");
+			self.populate();
+			self.createPlayer();
+			self.setEventHandlers();
+		}
+	}
+	catch(e){
+		console.log( e.message );
+		console.log( e.description );
+	}
+	
 	try{	
-		console.log("video.play()")
-		self.video.play();
-		self.displayPlayer(5);
+		self.element.removeClass("hidden");
+		self.visible = true;
+		self.watched.load();
+		var position = this.watched.get( self.videoid );
+		console.log("position", position );
+		if( position ){
+			self.video.pause();
+			console.log("video paused");
+			showDialog("Resume","Do you want to resume video at position " + toTime( position.position ) , ["Yes", "No, Start over"], function( val ){
+				if( val == 0 ){
+					self.video.play();
+					console.log("Seek to resume and play")
+					self.video.seek( position.position );
+					self.setFullscreen(true);
+					self.displayPlayer(5);
+				}
+				else{
+					console.log("video.play()")
+					self.video.play();
+					self.setFullscreen(true);
+					self.displayPlayer(5);
+				}
+			}, 0, 0, "basicInfoDialog");
+		}
+		else{
+			console.log("video.play()")
+			self.video.play();
+			self.setFullscreen(true);
+			self.displayPlayer(5);
+		}
 	}
 	catch(e){
 		console.log( e.message );
@@ -704,7 +788,9 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 
 VideoPlayerHTML5.prototype.stop = function(){
 	showInfo("Exit Video", 1);
+	
 	var self = this;
+	self.watched.save();
 	this.onAdBreak = false;
 	// if video not exist
 	if( !self.video ){
@@ -716,6 +802,7 @@ VideoPlayerHTML5.prototype.stop = function(){
 		console.log("video.pause(); succeed");
 		self.clearVideo();
 		console.log("clearVideo(); succeed");
+		self.resetProgressBar();
 	}
 	catch(e){
 		console.log("error stopping video");
@@ -794,5 +881,17 @@ VideoPlayerHTML5.prototype.isFullscreen = function(){
 VideoPlayerHTML5.prototype.isPlaying = function(){
 	return ( this.video && !this.video.paused ); // return true/false
 };
+
+VideoPlayerHTML5.prototype.getAudioTracks = function(){
+	try{
+		var tracks = this.video.audioTracks;
+		return tracks.length;
+	} catch(e){
+		console.log(e.message);
+		return 0;
+	}
+}
+
+
 
 

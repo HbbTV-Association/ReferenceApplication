@@ -50,8 +50,8 @@
 </head>
 <body onload="onLoad();">
 	<div style="visibility:hidden;width:0px;height:0px;">
-		<!-- object id="appmgr" type="application/oipfApplicationManager"></object>
-		<object id="oipfcfg" type="application/oipfConfiguration"></object -->
+		<object id="appmgr" type="application/oipfApplicationManager"></object>
+		<object id="oipfcfg" type="application/oipfConfiguration"></object>
 	</div>
 	<div id="videodiv"></div>
 	
@@ -63,6 +63,7 @@
 	</div>
 	
 	<div id="info" class="hide"></div>
+	<div id="infoBox" class="hide"></div>
 	
 </body>
 </html>

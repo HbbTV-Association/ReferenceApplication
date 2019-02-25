@@ -29,6 +29,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 			+'<div id="ppauseplay" class="pause"><div class="vcrbtn"></div><span id="pauseplay"></span></div> '
 			+'<div id="pff"></div>'
 			+'<div id="subtitleButton"><div id="subtitleButtonText">Subtitles</div></div>'
+			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
 			+'</div>');
 		console.log("Add player component");
 	}
@@ -187,6 +188,9 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		if( track.kind != "metadata" ){
 			$("#subtitleButton").show();
 		}
+		if( track.kind == "audio" ){
+			$("#audioButton").show();
+		}
 		
 		/*
 		// the first track is set showing
@@ -250,6 +254,13 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('playing', function(){
+		console.log("playing");
+		
+		if( dialog.open ){
+			player.pause();
+			return;
+		}
+		
 		if( self.firstPlay ){
 			self.firstPlay = false;
 			self.displayPlayer( 5 );
@@ -272,6 +283,25 @@ VideoPlayerEME.prototype.createPlayer = function(){
 					console.log( self.video.textTracks[ defaultSub ] );
 				}
 			}
+			
+			// audio tracks
+			if( self.video.audioTracks && self.video.audioTracks.length ){
+				var defaultAudio = -1;
+				$.each( self.video.audioTracks, function(i, track){
+					if( defaultAudio < 0 && track.kind != "metadata" ) {
+						track.mode = "showing";
+						defaultAudio = i;
+						$("#audioButtonText").html("Audio: " + track.language );
+					} else if( track.kind != "metadata" ){
+						track.mode = "hidden";
+					}
+				} );
+				if( defaultAudio >= 0 ){
+					console.log("Found default audio track: " + defaultAudio);
+					self.audioTrack = defaultAudio;
+					console.log( self.video.audioTracks[ defaultAudio ] );
+				}
+			}
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
@@ -280,6 +310,9 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	
 	
 	player.addEventListener('timeupdate', function(){
+		if( !dialog.open ){
+			self.watched.set( player.currentTime, player.duration, self.videoid );
+		}
 		if( self.seekTimer == null ){
 			self.updateProgressBar();
 			self.checkAds();
@@ -310,6 +343,8 @@ VideoPlayerEME.prototype.setURL = function(url){
 	console.log("setURL(",url,")");
 	console.log("player.attachSource(url)");
 	this.player.attachSource(url);
+	// create id for video url
+	this.videoid = url.hashCode();
 	return;
 };
 
@@ -506,6 +541,10 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 
 VideoPlayerEME.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
+	
+	// reset progress bar always
+	this.resetProgressBar();
+	
 	this.subtitleTrack = false;
 	var self = this;
 	this.onAdBreak = false;
@@ -557,10 +596,49 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		}
 	}
 	
-	try{
+	try{	/*
+		self.element.removeClass("hidden");
+		self.visible = true;
+		
 		console.log("video.play()")
 		self.video.play();
+
+		self.setFullscreen(true);
 		self.displayPlayer(5);
+		*/
+		
+		
+		
+		self.element.removeClass("hidden");
+		self.visible = true;
+		self.watched.load();
+		var position = this.watched.get( self.videoid );
+		console.log("position", position );
+		if( position ){
+			self.video.pause();
+			console.log("video paused");
+			showDialog("Resume","Do you want to resume video at position " + toTime( position.position ) , ["Yes", "No, Start over"], function( val ){
+				if( val == 0 ){
+					self.video.play(1);
+					console.log("Seek to resume and play")
+					self.video.seek( position.position );
+					self.setFullscreen(true);
+					self.displayPlayer(5);
+				}
+				else{
+					console.log("video.play()")
+					self.video.play(1);
+					self.setFullscreen(true);
+					self.displayPlayer(5);
+				}
+			}, 0, 0, "basicInfoDialog");
+		}
+		else{
+			console.log("video.play()")
+			self.video.play();
+			self.setFullscreen(true);
+			self.displayPlayer(5);
+		}
 	}
 	catch(e){
 		console.log( e.message );
@@ -571,6 +649,8 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 
 VideoPlayerEME.prototype.stop = function(){
 	var self = this;
+	
+	self.watched.save();
 	
 	showInfo("Exit Video", 1);
 
@@ -585,6 +665,7 @@ VideoPlayerEME.prototype.stop = function(){
 		console.log("video.pause(); succeed");
 		self.clearVideo();
 		console.log("clearVideo(); succeed");
+		self.resetProgressBar();
 	}
 	catch(e){
 		console.log("error stopping video");

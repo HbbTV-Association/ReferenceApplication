@@ -7,6 +7,7 @@
  * @constructor
  */
 function VideoPlayerBasic(element_id, profile, width, height){
+	
 	console.log("VideoPlayerBasic - Constructor");
 	this.FILETYPES = {
 		MP4:0,
@@ -18,6 +19,10 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		AUDIO : 1,
 		SUBTITLE : 2
 	};
+	
+	// unknown yet
+	this.audioTrack = false;
+	this.subtitleTrack = false;
 	
 	this.element_id = element_id;
 	this.element = document.getElementById(element_id);
@@ -92,6 +97,11 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	/* Use inherited basic method or player specified */
 	this.navigate = this.__proto__.navigate || function(key){
 		var self = this;
+		
+		if( dialog && dialog.open ){
+			navigateDialog( key );
+			return;
+		}
 		
 		if( self.onAdBreak ){
 			console.log("Navigation on ad break");
@@ -194,8 +204,48 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			case VK_GREEN:
 				try{
-					if( typeof this.enableSubtitles  == "function" ){
-						this.changeAVcomponent( this.AVCOMPONENTS.AUDIO );
+					if( this.getAudioTracks() > 1 ){
+						if( this.video.audioTracks ){
+							console.log("switch audio Track");
+							
+							var tracks = this.video.audioTracks.length;
+							console.log("audiotracks " + tracks );
+							
+							if( this.audioTrack === false )
+							{
+								this.audioTrack = 0;
+							}
+							console.log("Current audio track index " + this.audioTrack);
+							if( this.audioTrack >= tracks ){
+								this.audioTrack = 0; // was off, select first
+							}
+							else{
+								//this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
+								this.audioTrack++;
+							}
+							
+							for (var i = 0; i < this.video.audioTracks.length; i += 1) {
+								this.video.audioTracks[i].enabled = false;
+							}
+							var muted = ( this.audioTrack == tracks );
+							if( !muted ){
+								this.video.audioTracks[this.audioTrack].enabled = true;
+							}
+							var lang = (muted? "Muted" : this.video.audioTracks[this.audioTrack].language );
+							
+							$("#audioButtonText").html( "Audio: " + lang );
+							showInfo("Audio: " + lang);
+							
+						}
+						else{
+							this.changeAVcomponent( this.AVCOMPONENTS.AUDIO );
+						}
+					}
+					else if( this.getAudioTracks() == 1 ){
+						showInfo("Current audio track (1/1): " + this.getCurrentAudioTrack() );
+					}
+					else{
+						showInfo("No audio tracks available");
 					}
 				} catch( e ){
 					console.log( e.description );
@@ -225,6 +275,10 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			this.setFullscreen(true);
 		}
 		*/
+	};
+	
+	this.getCurrentAudioTrack = this.__proto__.getCurrentAudioTrack || function(){
+		return "default";
 	};
 	
 	
@@ -347,6 +401,34 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	
 	/**
 	 * 
+	 * Resets progressbar and time to initial state
+	 * @method resetProgressBar
+	 */
+	this.resetProgressBar = function(){
+		try{
+			var self = this;
+			$("#progressbar")[0].style.width = "0px";
+			$("#playposition").css("left", "0px");
+			$("#progress_currentTime").css("left", "0px");
+			$("#playposition").html( "00:00:00" );
+			
+
+			document.getElementById("playtime").innerHTML = "";
+			
+			if( self.live ){
+				document.getElementById("playtime").innerHTML = "LIVE";
+			}
+			else{
+				document.getElementById("playtime").innerHTML = "00:00:00";
+			}
+			
+		} catch(e){
+			console.log( e.message );
+		}
+	};
+	
+	/**
+	 * 
 	 * Updates progress bar. Progress bar is only visible when player UI is displayed, but it is always updated non-visible when this method is called
 	 * @method updateProgressBar
 	 */
@@ -361,9 +443,18 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			if( this.live ){
 				duration = 100;
 				position = 100;
+				
+				var time = this.time();
+				
+				duration = time.duration;
+				position = time.position;
 			}
 			else{
 				// <video> object used
+				
+				var time = this.time();
+				
+				
 				if( this.video.duration ){
 					position = (sec ? sec + this.video.currentTime : this.video.currentTime);
 					duration = this.video.duration;
@@ -555,6 +646,96 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			console.log(e.description);
 		}
 	};
+
+	
+	/******************************
+	MEMORY / Watched playpositions to cookies
+
+	watched object shall hold up to 5 play positions of the watched videos (latest one on each latest series).
+
+	watched.list : list of watched assets holding last play position (playtime) and timestamp (ts) when updated
+	watched.set( time, duration ) : sets play position for video (with unique id).
+	watched.get( id ) : gets play position and timestamp of a video (id), eg. { playtime : 12000, ts : 1438337491707 }
+	watched.save() : saves list to cookie
+    watched.delete() : delete watched cookie
+	
+	*******************************/
+	this.watched = {
+		list : [],
+		current : null,
+		set : function( time, duration, videoid ){
+			
+			// do not save if watched less than 10s
+			if( time < 10 )
+				return;
+			
+			var item = null;
+			if( this.current === null && videoid ){
+				console.log("acreate watched new item");
+				item = { videoid : videoid, position : time, duration : duration };
+			}
+			else if( this.current !== null ){
+				console.log("update playposition for ", this.list[ this.current ]);
+				this.list[ this.current ].position = time;
+			} else {
+				console.log( "videoid is missing" );
+				return;
+			}
+			
+			// new item was not before in the list
+			if( item ){
+				console.log("new item to first slot of the list");
+				this.list.unshift( item );
+				this.current = 0;
+				// if list is full drop off last
+				if( this.list.length > 10 ){
+					this.list.pop();
+				}
+			}
+			
+		},
+		save : function()
+		{
+			expiry = Math.round( (new Date()).getTime() + 1000 * 60 * 60 *24 * 30 );
+			createCookie( "SofiaWatched", JSON.stringify( this.list ), expiry );
+		},
+		get : function( id )
+		{
+			var found = null;
+			var self = this;
+			self.current = null;
+			$.each( self.list, function(index, value){
+				if( value.videoid == id ){
+					found = value;
+					self.list.splice(index, 1);
+					console.log("found previously watched item ", found, "removed from list", self.list);
+					// set to first
+					self.list.unshift( value );
+					console.log("and added to first item ", self.list );
+					self.current = 0; // current is first
+					return false;
+				}
+			} );
+			
+			return found;
+		},
+		load : function( successCB ){
+			
+			try{	
+				this.list = JSON.parse( readCookie("SofiaWatched") ) || [];
+			}
+			catch(e){
+				console.log( "error: " + e.message );
+				// corrupted cookie
+				this.list = [];
+
+			}
+		},
+		deleteCurrent: function() {
+			this.list.splice(this.current, 1);
+		}
+	};
+	
 }
 
 

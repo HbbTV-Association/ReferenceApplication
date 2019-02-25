@@ -1,0 +1,287 @@
+#dialog {
+    height: 720px;
+    width: 1280px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 4000;
+    text-align: center;
+    background-repeat: repeat-x;
+    background-color: #101010;
+}
+/* dialog header for catchup listmenu */
+#dialog.episodelist .dialogTitle, #dialog h1 {
+    height: 30px;
+    color: #ffffff;
+    padding: 0px 24px;
+   	margin-top: 30px;	
+}
+
+#dialog .wrapper {
+  display: block;
+  height: 540px;
+  overflow: hidden;
+  position: relative;
+  vertical-align: middle;
+  width: 1280px;
+}
+#dialogButtons {
+    display: inline-block;
+    position: unset;
+    vertical-align: middle;
+    height: inherit;
+}
+.basicInfoDialog #dialogButtons {
+	margin-top:  20px;
+}
+.dialog_btn_container {
+    height: 530px;
+    vertical-align: middle;
+    display: table-cell;
+    position: relative;
+    overflow: hidden;
+}
+.dialogButton {
+	background-color:  #474747;
+    color: #fff;
+    display: block;
+    height: 46px;
+    font-size: 26px;
+    line-height: 46px;
+    position: relative;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    vertical-align: middle;
+    border: none;
+    overflow: hidden;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-top: 4px solid #333333;
+    border-bottom: 4px solid #333333;     
+    width: auto;
+    min-width: 250px;
+
+}
+.dialogButton span:first-child {
+	width: 100%;
+	overflow: hidden;
+	white-space:nowrap;
+	display:inline-block;
+	margin-right: 30px;	
+	text-align: center; 
+	text-overflow: ellipsis;
+}
+.dialogButton:last-child{
+    margin-top: 0px;
+    _border-bottom: 4px solid #333333;    
+}
+.dialogButton.focused {
+    background-color: #f7921e;
+}
+
+
+/* Basic info dialog 
+Dialog with no checkmarks and no arrows*/
+
+/* For longer text set buttons lower */
+#dialog.basicInfoDialog.longText #dialogButtons {
+    margin-top: 75px;
+}
+
+#dialog.basicInfoDialog .dialogButton span:first-child{
+    margin-right: 0px;
+}
+
+/* No checkmarks */
+#dialog.basicInfoDialog .checkmark,
+#buttonbar_dialog.nocheckmarks .checkmark {
+
+   display: none !important;
+
+}
+/* No arrows */
+#dialog.basicInfoDialog .dialog_arrow{
+      display: none;
+}
+
+/* basicInfoDialog */
+#dialog.basicInfoDialog {
+  	text-align: left;
+  	/*
+    background-color: rgba(0,0,0,0.2);
+    */
+    background-color: #1B1B1B;
+ 	margin: 0px;
+	height:  720px;
+	width:  100%;
+	z-index: 2500;
+	display:  block;
+	position: absolute !important;
+}
+#dialog.basicInfoDialog:before {
+  content: "\00a0";
+  display: inline-block;
+  height: 550px; 
+  vertical-align: middle;
+ }
+#dialog.basicInfoDialog .wrapper {
+  overflow: hidden;
+  width: 800px;
+	
+	height:  auto;
+	display: inline-block;
+  	vertical-align: middle;
+	line-height: normal;
+}
+/* END basicInfoDialog */
+/* END settings dialog */
+/* new settings dialog */
+/*
+#dialog.dialog_signout {
+    
+}
+
+.dialogWrapper {
+    
+}
+    .dialogButtons {
+        
+    }
+        .dialogText //sama kuin detailText {
+            color: #fff;
+            font-size: 22px;
+            line-height: 32px;
+            margin-bottom: 30px;
+        }
+        .dialogButton {
+            
+        }
+
+
+ .dialogTitle, #dialogTitle  {
+    font-size: 32px;
+    height: 40px;
+    line-height: 40px; 
+    margin-top: 40px; 
+    display: inline;
+    
+ }
+#dialogText:after, .dialogText:after {
+    content:"\A"; white-space:pre;
+    display:inline; 
+}
+        .dialogText, .detailText {
+            color: #fff;
+            font-size: 22px;
+            line-height: 32px;
+            margin-bottom: 30px;
+            position:relative;
+            top: 130px;
+            display: inline;
+        }
+        #pin_entry_dialog .detailText {
+            top: 150px;
+            color: #6a6a6a;   
+        } 
+        
+       */ 
+.dialogTitle, #dialogTitle {
+  display: inline-block;
+  font-size: 54px;
+  line-height: 40px;
+margin-bottom: 30px;
+  max-height: 40px;
+   width: 100%;
+    color: #eff1ef;
+}
+#dialog.episodelist .dialogText {
+    display: none;   
+}
+.dialogText {
+  color: #eff1ef;
+  display: block;
+  font-size: 24px;
+  line-height: 30px;
+  max-height: 30px;
+}
+
+.basicInfoDialog.longText .dialogText {
+	max-height: inherit;
+}
+.dialogText .dialogRow:last-child {
+
+}
+/* LIST dialog */
+
+
+.list #dialogButtons, .episodelist #dialogButtons {
+
+	display:  table-cell;
+	width:  390px;
+	left: 445px;
+	position: relative;
+}
+
+
+.dialogControls{
+  display: inline-block;
+  vertical-align: middle;
+    margin-left: 250px;
+}
+#dialog_logo {
+    background-image: url(icons/dialog_logo.png);
+    position: absolute;
+    top: 20px;
+    left: 85px;
+    width: 165px;
+    height: 100px;
+    background-repeat:  no-repeat;
+}
+#dialog_time {
+    position: absolute;
+    top: 60px;
+    left: 260px;
+    font-size: 26px;
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+}
+/*
+.ch_149 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_101 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_151 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_155 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_153 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_154 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_102 .focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_193 .focused {
+    background-color: rgba(100,170,220,1); }
+.ch_191 .focused {
+    background-color: rgba(238,25,39,1); }
+.ch_189 .focused {
+    background-color: rgba(233,82,141,1); }
+.ch_192.focused {
+    background-color: rgba(255,255,255,1);
+    color: #000;}
+.ch_188 .focused {
+    background-color: rgba(98,165,80,1); }
+.ch_190 .focused {
+    background-color: rgba(0,153,204,1); 
+}
+*/

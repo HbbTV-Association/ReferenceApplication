@@ -14,6 +14,8 @@ $resources = array(
 	"../debugscreen.css",
 	"../jquery-1.11.3.min.js",
 	"../common.js",
+	"../dialog.js",
+	"../dialog.css",
 	"application.js",
 	"gridcolumn.js",
 	"gridview.js",
@@ -75,7 +77,11 @@ else{
 
 if( !$useMinified || !$useMinifiedCss ){
 	foreach($resources as $file){
-		$fileversion = $file . "?version=" . filemtime( $file );
+		$fileversion = $file;
+		if( substr( $file, 0,4 ) != "http" ){
+			$fileversion = $file . "?version=" . filemtime( $file );
+		}
+		
 		if( !$useMinified && substr( $file, -2 ) == "js" ){
 			//echo "<script src='$fileversion' type='text/javascript'></script>\n";
 			echo "<script src='$fileversion' type='application/javascript'></script>\n";

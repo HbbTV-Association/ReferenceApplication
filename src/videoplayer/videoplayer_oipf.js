@@ -33,6 +33,7 @@ VideoPlayer.prototype.createPlayer = function(){
 			+'<div id="prew"></div>'
 			+'<div id="ppauseplay" class="pause"><div class="vcrbtn"></div><span id="pauseplay"></span></div> '
 			+'<div id="pff"></div>'
+			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
 			+'</div>');
 		console.log("Add player component");
 	}
@@ -64,6 +65,9 @@ VideoPlayer.prototype.setURL = function(url){
 	} catch( e ){
 		console.log( e.message );
 	}
+	
+	// create id for video url
+	this.videoid = url.hashCode();
 
 	return;
 };
@@ -381,6 +385,10 @@ VideoPlayer.prototype.setSubtitles = function(){
 
 VideoPlayer.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
+	
+	// reset progress bar always
+	this.resetProgressBar();
+	
 	var self = this;
 	if( isLive ){
 		self.live = true;
@@ -449,10 +457,42 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 		self.video.onPlayStateChange = function(){ self.doPlayStateChange(); };
 		self.element.removeClass("hidden");
 		self.visible = true;
+		
+		/*
 		self.video.play(1);
 		
 		self.setFullscreen(true);
 		self.displayPlayer(5);
+		*/
+		
+		self.watched.load();
+		var position = this.watched.get( self.videoid );
+		console.log("position", position );
+		if( position ){
+			self.pause();
+			console.log("video paused");
+			showDialog("Resume","Do you want to resume video at position " + toTime( position.position ) , ["Yes", "No, Start over"], function( val ){
+				if( val == 0 ){
+					self.play();
+					console.log("Seek to resume and play")
+					self.video.seek( position.position * 1000 );
+					self.setFullscreen(true);
+					self.displayPlayer(5);
+				}
+				else{
+					console.log("video.play()")
+					self.video.play(1);
+					self.setFullscreen(true);
+					self.displayPlayer(5);
+				}
+			}, 0, 0, "basicInfoDialog");
+		}
+		else{
+			console.log("video.play()")
+			self.video.play();
+			self.setFullscreen(true);
+			self.displayPlayer(5);
+		}
 		
 	}
 	catch(e){
@@ -474,10 +514,17 @@ VideoPlayer.prototype.pause = function(){
 
 VideoPlayer.prototype.stop = function(){
 	showInfo("Exit Video", 1);
+	
 	var self = this;
+	self.watched.save();
+	
 	try{
 		self.video.stop();
+		console.log( "video stop succeed" );
 		self.clearVideo();
+		console.log( "clear video succeed" );
+		self.resetProgressBar();
+		console.log( "reset progressBar succeed" );
 	}
 	catch(e){
 		console.log(e);
@@ -545,16 +592,33 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             break;
         case 1: // playing
         	console.log("playing");
+			
+			if( dialog.open ){
+				console.log("pause on dialog");
+				self.pause();
+				return;
+			}
+			
         	self.visible = true;
             self.setLoading(false);
             clearInterval(self.progressUpdateInterval);
             self.progressUpdateInterval = window.setInterval( function(){
+				if( self.video ){
+					self.watched.set( self.video.playPosition / 1000, self.video.playTime / 1000, self.videoid );
+				}
 				if( self.seekTimer == null ){
 					self.updateProgressBar();
 					//self.displayPlayer( 5 );
 				}
             }, 1000);
 			Monitor.videoPlaying();
+			
+			if( self.getAudioTracks() > 1 ){ // if more than one audiotrack selectable show button
+				$("#audioButton").show();
+			}else{
+				$("#audioButton").hide();
+			}
+			
             break;
         case 2: // paused
             self.setLoading(false);
@@ -625,6 +689,41 @@ VideoPlayer.prototype.getStreamComponents = function(){
 	
 }
 
+VideoPlayer.prototype.getAudioTracks = function(){
+	
+	try{
+		if(typeof this.video.getComponents == 'function') {
+			var avComponent = this.video.getComponents( this.AVCOMPONENTS.AUDIO );
+			return avComponent.length;
+		}
+		else{
+			return 0;
+		}
+	} catch(e){
+		showInfo( "getComponents not available", e.message );
+	}
+	
+};
+
+VideoPlayer.prototype.getCurrentAudioTrack = function(){
+	/*
+	try{
+		if(typeof this.video.getComponents == 'function') {
+			var avComponent = this.video.getComponents( this.AVCOMPONENTS.AUDIO );
+			var track = avComponent[ self.audioTrack ];
+			return track.language;
+		}
+		else{
+			return "default";
+		}
+	} catch(e){
+		showInfo( "getComponents not available", e.message );
+		return "default";
+	}
+	*/
+};
+
+
 VideoPlayer.prototype.changeAVcomponent = function( component ) {
 	console.log("changeAVcomponent("+ component +")");
 	var self = this;
@@ -674,7 +773,7 @@ VideoPlayer.prototype.changeAVcomponent = function( component ) {
 					this.video.unselectComponent(avComponent[i]);
 				}
 				
-				showInfo("select track " + track);
+				showInfo("select track " + track + "("+avComponent[track].language+")");
 				console.log("select track " + track);
 				this.video.selectComponent(avComponent[track]);
 				console.log("READY");
