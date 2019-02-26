@@ -15,4 +15,4 @@ deploy:
   
   script:
    - rm -fr '/builds/sofia/ReferenceApplication/.git' && rm -f '/builds/sofia/ReferenceApplication/.gitlab-ci.yml' && rm -f '/builds/sofia/ReferenceApplication/.gitignore'
-   - rsync -avz --rsync-path="sudo /usr/bin/rsync" -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" '/builds/sofia/ReferenceApplication/src/*' root@212.226.118.3:/srv/www/htdocs/staging/
+   - rsync -avz --rsync-path="sudo /usr/bin/rsync" -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" '/builds/sofia/ReferenceApplication/src/*' root@refapp.hbbtv.org:/srv/www/htdocs/staging/
