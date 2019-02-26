@@ -1,0 +1,18 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  image: sofia:latest
+
+  only:
+    - "master"
+
+  before_script:
+   - eval $(ssh-agent -s)
+   - bash -c 'ssh-add <(echo "$SSH_PRIVATE_KEY")'
+   - bash -c 'cat <(echo "$SALT_ROSTER") > /etc/salt/roster'
+  
+  script:
+   - rm -fr '/builds/sofia/ReferenceApplication/.git' && rm -f '/builds/sofia/ReferenceApplication/.gitlab-ci.yml' && rm -f '/builds/sofia/ReferenceApplication/.gitignore'
+   - rsync -avz --rsync-path="sudo /usr/bin/rsync" -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" '/builds/sofia/ReferenceApplication/src/*' root@212.226.118.3:/srv/www/htdocs/staging/
