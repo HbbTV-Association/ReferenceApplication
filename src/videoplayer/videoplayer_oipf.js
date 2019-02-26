@@ -33,6 +33,7 @@ VideoPlayer.prototype.createPlayer = function(){
 			+'<div id="prew"></div>'
 			+'<div id="ppauseplay" class="pause"><div class="vcrbtn"></div><span id="pauseplay"></span></div> '
 			+'<div id="pff"></div>'
+			+'<div id="subtitleButton"><div id="subtitleButtonText">Subtitles</div></div>'
 			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
 			+'</div>');
 		console.log("Add player component");
@@ -217,6 +218,67 @@ VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	}
 }
 
+VideoPlayer.prototype.clearLicenseRequest = function(callback){
+	console.log("clearLicenseRequest()");
+	
+	/***
+		if drm object exists set empty acquisition
+	***/
+
+	this.oipfDrm = $("#oipfDrm")[0];
+	
+	if( !this.oipfDrm ){
+		if( callback ){
+			callback("oipfDrm is null");
+		}
+		return;
+	}
+	
+	var self = this;
+	if( this.drm.system == "playready" ){
+		var msgType = "application/vnd.ms-playready.initiator+xml";
+		var xmlLicenceAcquisition =
+		'<?xml version="1.0" encoding="utf-8"?>' +
+		'<PlayReadyInitiator xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols/">' +
+		'</PlayReadyInitiator>';
+		var DRMSysID = "urn:dvb:casystemid:19219";
+		
+	}
+	else if( this.drm.system == "marlin" ){
+		var msgType = "application/vnd.marlin.drm.actiontoken+xml";
+		var xmlLicenceAcquisition =
+		'<?xml version="1.0" encoding="utf-8"?>' +
+		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL></URL></RightsIssuer></RightsURL></Marlin>';
+		var DRMSysID = "urn:dvb:casystemid:19188";
+	}
+	else if( this.drm.system == "clearkey" ){
+		self.player.setProtectionData({
+			"org.w3.clearkey": { 
+				"serverURL": ""
+			}
+		});
+		callback();
+	}
+	
+	
+	try {
+		this.oipfDrm.onDRMMessageResult = callback;
+	} catch (e) {
+		console.log("sendLicenseRequest Error 1: " + e.message );
+	}
+	try {
+		this.oipfDrm.onDRMRightsError = callback;
+	} catch (e) {
+		console.log("sendLicenseRequest Error 2: " + e.message );
+	}
+	try {
+		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		console.log("drm data cleared");
+	} catch (e) {
+		console.log("sendLicenseRequest Error 3: " + e.message );
+	}
+	
+};
 
 VideoPlayer.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -465,34 +527,46 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 		self.displayPlayer(5);
 		*/
 		
+		
 		self.watched.load();
 		var position = this.watched.get( self.videoid );
 		console.log("position", position );
 		if( position ){
-			self.pause();
-			console.log("video paused");
-			showDialog("Resume","Do you want to resume video at position " + toTime( position.position ) , ["Yes", "No, Start over"], function( val ){
-				if( val == 0 ){
-					self.play();
-					console.log("Seek to resume and play")
-					self.video.seek( position.position * 1000 );
-					self.setFullscreen(true);
-					self.displayPlayer(5);
-				}
-				else{
-					console.log("video.play()")
-					self.video.play(1);
-					self.setFullscreen(true);
-					self.displayPlayer(5);
-				}
-			}, 0, 0, "basicInfoDialog");
+			self.resumePosition = position.position;
+			console.log("resumePosition is " + self.resumePosition);
+			self.whenstart = function(){
+				self.pause();
+				console.log("video paused by resume dialog in whenstart function");
+				showDialog("Resume","Do you want to resume video at position " + toTime( self.resumePosition ) , ["Yes", "No, Start over"], function( val ){
+					if( val == 0 ){
+						self.whenstart = function(){
+							console.log("Seek to resume and play " + self.resumePosition * 1000);
+							self.video.seek( self.resumePosition * 1000 );
+							self.whenstart = null;
+							self.resumePosition = 0;
+							
+						};
+						self.setFullscreen(true);
+						self.displayPlayer(5);
+						self.video.play(1);
+					}
+					else{
+						console.log("video.play()")
+						self.video.play(1);
+						self.setFullscreen(true);
+						self.displayPlayer(5);
+						self.resumePosition = 0;
+					}
+					
+				}, 0, 0, "basicInfoDialog");
+			};
 		}
-		else{
-			console.log("video.play()")
-			self.video.play();
-			self.setFullscreen(true);
-			self.displayPlayer(5);
-		}
+		
+		console.log("video.play()")
+		self.video.play();
+		self.setFullscreen(true);
+		self.displayPlayer(5);
+		
 		
 	}
 	catch(e){
@@ -567,6 +641,11 @@ VideoPlayer.prototype.clearVideo = function(){
 		console.log( e.description );
 	}
 	this.subtitles = null;
+	
+	this.clearLicenseRequest( function(msg){
+		console.log("License cleared:" + msg);
+	});
+	
 	console.log("clearing video completed");
 }
 
@@ -619,6 +698,19 @@ VideoPlayer.prototype.doPlayStateChange = function(){
 				$("#audioButton").hide();
 			}
 			
+			if( this.subtitles && this.subtitles.length ){
+				$("#subtitleButton").show();
+			}
+			else{
+				$("#subtitleButton").hide();
+			}
+			
+			// check if there is function to execute after all other things are done for video start
+			if( self.whenstart && typeof self.whenstart == "function" ){
+				self.whenstart();
+				self.whenstart = null;
+			}
+			
             break;
         case 2: // paused
             self.setLoading(false);
@@ -641,9 +733,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
         case 5: // finished
         	clearInterval(self.progressUpdateInterval);
             self.setLoading(false);
-            if(self.isFullscreen()){
-                //self.controls.show();
-            }
+			self.stop();
             break;
         case 6: // error
         	clearInterval(self.progressUpdateInterval);

@@ -271,7 +271,7 @@
     background-position: -60px 0px;
     width: 30px;
     height: 30px;
-    right: 250px;
+    right: 300px;
     -webkit-animation: fromRight 1s;
     -moz-animation: fromRight 1s;
     -o-animation: fromRight 1s;
@@ -293,7 +293,7 @@
     font-size: 21px;
 }
 #audioButton{
-	right: 115px !important;
+	right: 160px !important;
 	background-position: -30px 0px !important;
 }
 

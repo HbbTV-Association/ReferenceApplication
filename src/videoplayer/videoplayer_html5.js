@@ -35,7 +35,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	}
 
 	try{
-		this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
+		// removed type attribute
+		//this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
+		this.video = $("<video id='video' class='fullscreen'></video>")[0];
 		this.element.appendChild( this.video );
 		console.log("html5 video object created");
 	} catch( e ){
@@ -272,6 +274,10 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 					self.subtitleTrack = defaultSub;
 					console.log( self.video.textTracks[ defaultSub ] );
 				}
+				$("#subtitleButton").show();
+			}
+			else{
+				$("#subtitleButton").hide();
 			}
 			
 			if( self.getAudioTracks() ){
@@ -518,6 +524,67 @@ VideoPlayerHTML5.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
+VideoPlayerHTML5.prototype.clearLicenseRequest = function(callback){
+	console.log("clearLicenseRequest()");
+	
+	/***
+		if drm object exists set empty acquisition
+	***/
+
+	this.oipfDrm = $("#oipfDrm")[0];
+	
+	if( !this.oipfDrm ){
+		if( callback ){
+			callback("oipfDrm is null");
+		}
+		return;
+	}
+	
+	var self = this;
+	if( this.drm.system == "playready" ){
+		var msgType = "application/vnd.ms-playready.initiator+xml";
+		var xmlLicenceAcquisition =
+		'<?xml version="1.0" encoding="utf-8"?>' +
+		'<PlayReadyInitiator xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols/">' +
+		'</PlayReadyInitiator>';
+		var DRMSysID = "urn:dvb:casystemid:19219";
+		
+	}
+	else if( this.drm.system == "marlin" ){
+		var msgType = "application/vnd.marlin.drm.actiontoken+xml";
+		var xmlLicenceAcquisition =
+		'<?xml version="1.0" encoding="utf-8"?>' +
+		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL></URL></RightsIssuer></RightsURL></Marlin>';
+		var DRMSysID = "urn:dvb:casystemid:19188";
+	}
+	else if( this.drm.system == "clearkey" ){
+		self.player.setProtectionData({
+			"org.w3.clearkey": { 
+				"serverURL": ""
+			}
+		});
+		callback();
+	}
+	
+	
+	try {
+		this.oipfDrm.onDRMMessageResult = callback;
+	} catch (e) {
+		console.log("sendLicenseRequest Error 1: " + e.message );
+	}
+	try {
+		this.oipfDrm.onDRMRightsError = callback;
+	} catch (e) {
+		console.log("sendLicenseRequest Error 2: " + e.message );
+	}
+	try {
+		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		console.log("drm data cleared");
+	} catch (e) {
+		console.log("sendLicenseRequest Error 3: " + e.message );
+	}
+	
+};
 
 VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
@@ -846,31 +913,36 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 	this.clearAds();
 	
 	this.subtitles = null;
+	
+	this.clearLicenseRequest( function(msg){
+		console.log("License cleared:" + msg);
+	});
+	
 };
 VideoPlayerHTML5.prototype.clearAds = function(){
-	try{
-		if( self.adPlayer ){
+	if( self.adPlayer ){
+		try{
 			self.adPlayer[0].stop();
+		} catch(e){ console.log("Error at clearAds(): " + e.message); }
+		try{
 			self.adPlayer[1].stop();
+		} catch(e){ console.log("Error at clearAds(): " + e.message); }
+		try{
 			$( self.adPlayer[0] ).addClass("hide");
 			$( self.adPlayer[1] ).addClass("hide");
 			self.adPlayer[0].src = "";
 			self.adPlayer[1].src = "";
-			
-			self.adPlayer = null;
-			self.onAdBreak = false;
-			self.adBreaks = null;
-			self.adBuffer = null;
-			self.adCount = 0;
-		}
-		$( "#ad1" ).remove(); // clear from dom
-		$( "#ad2" ).remove(); // clear from dom
-		$( "#adInfo" ).remove(); // clear from dom
+		} catch(e){ console.log("Error at clearAds(): " + e.message); }
+		
+		self.adPlayer = null;
+		self.onAdBreak = false;
+		self.adBreaks = null;
+		self.adBuffer = null;
+		self.adCount = 0;
 	}
-	catch(e){
-		console.log("Error at clearVideo()");
-		console.log(e.description);
-	}
+	$( "#ad1" ).remove(); // clear from dom
+	$( "#ad2" ).remove(); // clear from dom
+	$( "#adInfo" ).remove(); // clear from dom
 };
 
 VideoPlayerHTML5.prototype.isFullscreen = function(){

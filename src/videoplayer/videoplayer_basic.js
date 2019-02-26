@@ -591,6 +591,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 * @param (Int) sec: How many seconds is seeked. Positiove integer for forward, negative for rewind.
 	 */
 	this.seek = function( sec ){
+		console.log("seek: " + sec);
 		var self = this;
 		try{
 			
@@ -622,7 +623,10 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				console.log("perform seek now!");
 				self.seekTimer = null;
 				try{
-					var toSeek = (self.timeInMilliseconds? self.seekValue * 1000 : self.seekValue);
+					// if oipf player, form toSeek value absolute
+					var toSeek = (self.timeInMilliseconds? ( self.video.playPosition + (self.seekValue * 1000) ) : self.seekValue);
+					
+					console.log("seekValue: " + self.seekValue);
 					self.video.seek( toSeek );
 					Monitor.videoSeek( self.seekValue );
 					console.log("seek completed to " + toSeek);
@@ -697,7 +701,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		save : function()
 		{
 			expiry = Math.round( (new Date()).getTime() + 1000 * 60 * 60 *24 * 30 );
-			createCookie( "SofiaWatched", JSON.stringify( this.list ), expiry );
+			createCookie( "RefappWatched", JSON.stringify( this.list ), expiry );
 		},
 		get : function( id )
 		{
@@ -722,7 +726,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		load : function( successCB ){
 			
 			try{	
-				this.list = JSON.parse( readCookie("SofiaWatched") ) || [];
+				this.list = JSON.parse( readCookie("RefappWatched") ) || [];
 			}
 			catch(e){
 				console.log( "error: " + e.message );
