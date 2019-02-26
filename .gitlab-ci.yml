@@ -14,5 +14,5 @@ deploy:
    - bash -c 'cat <(echo "$SALT_ROSTER") > /etc/salt/roster'
   
   script:
-   - rm -fr '/builds/sofia/ReferenceApplication/.git' && rm -f '/builds/sofia/ReferenceApplication/.gitlab-ci.yml' && rm -f '/builds/sofia/ReferenceApplication/.gitignore'
-   - rsync -avz --rsync-path="sudo /usr/bin/rsync" -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" '/builds/sofia/ReferenceApplication/src/*' root@refapp.hbbtv.org:/srv/www/htdocs/staging/
+   - rm -fr '/builds/sofia/referenceapplication/.git' && rm -f '/builds/sofia/referenceapplication/.gitlab-ci.yml' && rm -f '/builds/sofia/referenceapplication/.gitignore'
+   - rsync -avz --rsync-path="sudo /usr/bin/rsync" -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" '/builds/sofia/referenceapplication/src/*' root@refapp.hbbtv.org:/srv/www/htdocs/staging/
