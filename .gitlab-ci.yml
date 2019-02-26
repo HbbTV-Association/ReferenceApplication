@@ -6,7 +6,7 @@ deploy:
   image: sofia:latest
 
   only:
-    - "master"
+    - "staging"
 
   before_script:
    - eval $(ssh-agent -s)
