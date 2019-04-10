@@ -44,6 +44,11 @@ for any problems or questions
  - Will be in line with github repository
  - Low latency (multi moof/mdat) Live and VOD DASH
  - available at http://refapp.hbbtv.org/staging/
+ 
+ ## MPEG-2 TS
+ - Includes AITs with direct links to production and staging instances
+ - separate links for HbbTV 1.5 and 2.0.2 versions
+ - available at http://refapp.hbbtv.org/videos/refapp_10_04_2019.ts
 
 ### Components and modules:
 
