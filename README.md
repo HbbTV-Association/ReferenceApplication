@@ -17,7 +17,7 @@ Application prowides test cases and test material done with tools included in [t
 
 
 The software is under continuous development and licensed with MIT License.
-Issues can be reported here in github or you may send email to hbbtv_refapp@sofiadigital.com
+Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO JUHA JOKI) or you may send email to hbbtv_refapp@sofiadigital.com
 for any problems or questions
 
 ### Usage, testing, installation, integration:
@@ -44,6 +44,11 @@ for any problems or questions
  - Will be in line with github repository
  - Low latency (multi moof/mdat) Live and VOD DASH
  - available at http://refapp.hbbtv.org/staging/
+ 
+ ## MPEG-2 TS
+ - Includes AITs with direct links to production and staging instances
+ - separate links for HbbTV 1.5 and 2.0.2 versions
+ - available at http://refapp.hbbtv.org/videos/refapp_10_04_2019.ts
 
 ### Components and modules:
 
