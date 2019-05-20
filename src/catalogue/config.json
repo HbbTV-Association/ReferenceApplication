@@ -498,25 +498,25 @@
             "items": [
                 {
                     "title": "Reload Video cataloque",
-                    "eval": "location.reload();",
+                    "eval": "menu.savePosition();location.reload();",
                     "app": 0,
                     "img": "icons/icons_1x1_reload.png"
                 },
                 {
                     "title": "Set mode HbbTV 1.5",
-                    "eval": "location.href='index_oipf.php'",
+                    "eval": "menu.savePosition();location.href='index_oipf.php';",
                     "app": 0,
                     "img": "icons/icons_1x1_wrench.png"
                 },
                 {
                     "title": "Set mode HbbTV 2.0.1",
-                    "eval": "location.href='index_html5.php'",
+                    "eval": "menu.savePosition();location.href='index_html5.php'",
                     "app": 0,
                     "img": "icons/icons_1x1_wrench.png"
                 },
                 {
                     "title": "Set mode MSE-EME",
-                    "eval": "location.href='index_mse-eme.php'",
+                    "eval": "menu.savePosition();location.href='index_mse-eme.php'",
                     "app": 0,
                     "img": "icons/icons_1x1_wrench.png"
                 },
@@ -526,6 +526,12 @@
                     "app": 0,
                     "img": "icons/icons_1x1_delete.png",
                     "desc": "Use this function carefully. It may affect on test results / analytics if the device is recognized by a cookie"
+                },
+				{
+                    "title": "show XML capabilities",
+                    "eval": "getCapabilities();",
+                    "app": 0,
+                    "img": "icons/icons_1x1_wrench.png"
                 },
                 {
                     "title": "Do a funny trick",

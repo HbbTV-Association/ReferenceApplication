@@ -25,6 +25,7 @@ $resources = array(
 	"topmenu.js",
 	"topmenuitem.js",
 	"../debugscreen.js",
+	"../log.js",
 	"../keycodes.js",
 	"navigation.js", 
 	"../videoplayer/videoplayer_basic.js",

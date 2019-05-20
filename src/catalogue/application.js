@@ -51,6 +51,26 @@ function init()
 		}
 
 		menu = new Menu("menu", new_config);
+		setTimeout( function(){
+		// check if saved position found and activate current position
+		var previous = sessionStorage.getItem( "refappPosition" );
+		if( previous ){
+			sessionStorage.removeItem("refappPosition");
+			previous = JSON.parse( previous );
+			console.log("FF to position ", previous);
+			for(i = 0; i < previous[0]; ++i){
+				menu.navigate(VK_RIGHT, true);
+			}
+			for(i = 0; i <= previous[2]; ++i){
+				menu.navigate(VK_DOWN, true);
+			}
+			for(i = 0; i < previous[1]; ++i){
+				menu.navigate(VK_RIGHT, true);
+			}
+		}
+		}, 100);
+		
+		
 		setLoading(false);
 	}, "json");
 	

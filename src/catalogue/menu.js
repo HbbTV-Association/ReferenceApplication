@@ -93,9 +93,9 @@ Menu.prototype.setActiveGrid = function(grid){
 	}
 }
 
-Menu.prototype.navigate = function(key){
+Menu.prototype.navigate = function(key, force){
 	var self = this;
-	if(!animating){
+	if(!animating || force){
 
 		clearTimeout(self.startBoxVideoTimeout);
 
@@ -239,6 +239,13 @@ Menu.prototype.navigate = function(key){
 		}
 	}
 }
+
+Menu.prototype.savePosition = function(){
+	var topIndex = $(this.topmenu.element).find(".selected").index();
+	var gridColIndex = $(menu.focus.element.parentElement).index();
+	var gridRowIndex = $(menu.focus.element).index();
+	sessionStorage.setItem( "refappPosition", JSON.stringify( [topIndex, gridColIndex, gridRowIndex] ) );
+};
 
 function getOffset(element){
 	var bodyRect = document.body.getBoundingClientRect(),

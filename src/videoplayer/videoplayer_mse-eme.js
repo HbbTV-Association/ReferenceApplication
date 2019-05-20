@@ -614,7 +614,7 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		self.watched.load();
 		var position = this.watched.get( self.videoid );
 		console.log("position", position );
-		if( position ){
+		if( !self.live && position ){
 			self.video.pause();
 			console.log("video paused");
 			showDialog("Resume","Do you want to resume video at position " + toTime( position.position ) , ["Yes", "No, Start over"], function( val ){

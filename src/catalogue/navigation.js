@@ -37,6 +37,7 @@ function onKey(keycode){
 		if( infoBoxScrollable && ( keycode == VK_UP || keycode == VK_DOWN ) ){
 			var top = parseInt( $("#infoBox > .verticalMiddle").css("top") );
 			$("#infoBox > .verticalMiddle").css("top", ( top + ( keycode == VK_UP? 10 : -10 ) ) + "px");
+			showInfo("top:" + top + ", target: " + ( top + ( keycode == VK_UP? 10 : -10 ) ) + "px");
 			return;
 		}
 		showInfoBox(false);

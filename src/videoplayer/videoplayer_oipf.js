@@ -530,8 +530,7 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 		
 		self.watched.load();
 		var position = this.watched.get( self.videoid );
-		console.log("position", position );
-		if( position ){
+		if( !self.live && position ){
 			self.resumePosition = position.position;
 			console.log("resumePosition is " + self.resumePosition);
 			self.whenstart = function(){

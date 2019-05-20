@@ -166,6 +166,7 @@ function showInfoBox( html )
 	if( $("#infoBox > .verticalMiddle").outerHeight() > $("#infoBox").outerHeight() ){
 		// inner container is larger. Activate scrolling
 		infoBoxScrollable = true;
+		$("#infoBox > .verticalMiddle").css( "top", "500px" );
 	}
 	else{
 		infoBoxScrollable = false;
@@ -599,9 +600,8 @@ Capabilities
 *****/
 
 var capabilities = null;
-
-var xmlExample = "<capabilities>  <getFriends>true</getFriends>  <cacheFriends>true</cacheFriends>  <followPerson>true</followPerson>  <doNotFollowPerson>false</doNotFollowPerson>  <getActivities>true</getActivities>  <cacheActivities>false</cacheActivities>  <displayUrl>false</displayUrl>  <useLogonWebAuth>false</useLogonWebAuth>  <hideHyperlinks>false</hideHyperlinks>  <supportsAutoConfigure>false</supportsAutoConfigure>  <contactSyncRestartInterval>60</contactSyncRestartInterval>  <dynamicActivitiesLookupEx>true</dynamicActivitiesLookupEx>  <dynamicContactsLookup>false</dynamicContactsLookup>  <useLogonCached>false</useLogonCached>  <hideRememberMyPassword>false</hideRememberMyPassword>  <createAccountUrl>http://contoso.com/createAccount</createAccountUrl>  <forgotPasswordUrl>http://contoso.com/forgotPassword</forgotPasswordUrl></capabilities>";
-
+var xmlstr = "";
+var xmlExample = null;
 var getCapabilities = function() {
 	try {
 			var capobj = function(){
@@ -624,15 +624,36 @@ var getCapabilities = function() {
 		console.log("error getting capabilities");
 	}
 	xmlstr = "";
+	
+	if( !capabilities ){
+		
+		$.ajax({
+			async : false,
+			url : "../capabilities_ex.xml",
+			dataType : "xml",
+			success : function(xml){
+				capabilities = xml;
+			}
+		});
+	}
+	
+	
 	if (capabilities != null) {
 		var serializer = new XMLSerializer();
 		var xmlstr = serializer.serializeToString( capabilities );
+		
+		// send xml to server
+		//logger( xmlstr );
+		
 	} else {
 		xmlstr = "<profilelist></profilelist>";
 	}
 	//xmlstr = xmlExample;
 	//console.log( "capabilities original:" ,capabilities );
 	console.log( "capabilities:" ,xmlstr );
+	
+	/*
+	// OLD VERSION
 	var entries = xmlstr.grep(/\<(\w*)\>/g).map(function(i){return i.replace("<","").replace(">","")});
 	console.log( entries, xmlstr );
 	var table = $("<div class='verticalMiddle'></div>");
@@ -642,6 +663,29 @@ var getCapabilities = function() {
 		console.log( value );
 		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;'>"+name+"</div><div style='display: table-cell;vertical-align: middle;border-bottom: 1px solid white;border-top: 1px solid white;'>"+value+"</div></div>");
 	});
+	
+	*/
+	var table = $("<div class='verticalMiddle'></div>");
+	/*
+	$.each( $(capabilities).find("ui_profile  *"), function( i, property ){
+		if( !property[0] )
+			return;
+		var name = property[0].nodeName;
+		var attr = "";
+		$.each( property[0].attributes, function(n, attribute){
+			attr += attribute.nodeName + " = " +attribute.nodeValue + ";";
+		} );
+		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;'>"+name+"</div><div style='display: table-cell;vertical-align: middle;border-bottom: 1px solid white;border-top: 1px solid white;'>"+attr+"</div></div>");
+
+	} );
+	*/
+	
+	var printableSource = xmlstr.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+	table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>UserAgent: </div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ navigator.userAgent +"</div></div>");
+	table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>xmlCapabilities</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'><pre style='word-break: break-all;'>"+ printableSource +"</pre></div></div>");
+
+	
+	
 	showInfoBox( table );
 	//showInfoBox( xmlstr.replace(/\</, "\<").replace(/\>/, "\>") );
 	//showInfo( xmlstr );
