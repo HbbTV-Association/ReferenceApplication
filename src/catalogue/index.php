@@ -99,17 +99,12 @@ function onLoad() {
     registerKeyListener();
 	showApplication();
 	
-	showInfo("READY... show applicaiton");
-	//setTimeout( function(){
-		try{
-			init();
-			showInfo("READY... init succeed");
-		} catch(e){
-			lastError = e;
-			//showInfo("error " + e.description + " msg: " + e.message);
-			error( e );
-		}
-	//}, 2000);
+	try{
+		init();
+	} catch(e){
+		lastError = e;
+		error( e );
+	}
 	
 }
 

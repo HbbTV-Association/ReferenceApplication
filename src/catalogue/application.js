@@ -90,8 +90,6 @@ function init()
 		
 		if( profile.hbbtv == "1.5" ){
 			vplayer = new VideoPlayer("videodiv", profile);
-			//vplayer = new VideoPlayerBasic("videodiv", profile);
-			//vplayer = new VideoPlayerEME("videodiv", profile);
 			$("#wrapper").append("<div id='appversion'>HbbTV 1.5</div>");
 		}
 		else if( profile.hbbtv == false ) {

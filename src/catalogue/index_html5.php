@@ -40,7 +40,6 @@
 		showApplication();
 		try{
 			init();
-			showInfo("READY... init succeed");
 		} catch(e){
 			lastError = e;
 			//showInfo("error " + e.description + " msg: " + e.message);

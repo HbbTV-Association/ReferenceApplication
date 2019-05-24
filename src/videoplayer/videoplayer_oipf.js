@@ -11,8 +11,7 @@
 
 function VideoPlayer(element_id, profile, width, height){
 	console.log("VideoPlayer - Constructor");
-	showInfo("VideoPlayer - Constructor");
-	//return;
+	
 	// Call super class constructor
 	VideoPlayerBasic.call(this, element_id, profile, width, height);
 	this.timeInMilliseconds = true;

@@ -14,7 +14,7 @@ console.log = function(){
 	
 	applog.push( Array.apply(this, arguments).map( function(argument){ return XMLEscape( typeof argument == "string"? argument : JSON.stringify( argument ) ) } ) ); 
 	originalLog.apply( this, arguments ); 
-	debug( Array.from(arguments) );
+	debug( arguments );
 };
 
 function saveAppLog(){
@@ -45,19 +45,28 @@ function debug(lines){
 	if( !$("#debugScreen")[0] ){
 		$("body").append('<div id="debugScreen"><div id="debugText"></div></div>');
 	}
+	try{
 	var textArea = $("#debugText");
+	
+	var hasPerformance = typeof( performance ) != "undefined";
+	var timestamp = "";
+	if( hasPerformance ){
+		timestamp = "[" + performance.now() + "ms]: ";
+	}
 	$.each( lines, function( i, object ){
 		var line = "";
 		
 		if( typeof object == "string" ){
-			line = "[" + performance.now() + "ms]: " + XMLEscape( object );
+			line = timestamp + XMLEscape( object );
 		}
 		else {
-			line = "[" +performance.now() + "ms]: [obj] " + XMLEscape( JSON.stringify( object ) );
+			line = timestamp + "[obj] " + XMLEscape( JSON.stringify( object ) );
 		}
 		textArea.append( line + "<br/>");
 	} );
-	
+	} catch(e){
+		showInfo(e.description);
+	}
 }
 
 function toggleDebug(){
