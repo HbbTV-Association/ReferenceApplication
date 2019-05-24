@@ -21,7 +21,7 @@
 	<script type="application/javascript">
 	
 	var profile = { hbbtv : "2.0", video : "html5", version : "html5"};
-	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
+	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not  
 	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
 	
 	/*** End of Settings ***/
@@ -36,9 +36,16 @@
 	var main 		= null;
 
 	function onLoad(){
-		console.log("onLoad");
+
 		showApplication();
-		init();
+		try{
+			init();
+			showInfo("READY... init succeed");
+		} catch(e){
+			lastError = e;
+			//showInfo("error " + e.description + " msg: " + e.message);
+			error( e );
+		}
 		registerKeys(1);
 		registerKeyListener();
 	}

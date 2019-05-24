@@ -16,6 +16,8 @@ function showApplication() {
 
 function init()
 {
+	//toggleDebug();
+	//console.log("test");
 	setLoading(true);
 	$.ajaxSetup({ cache: false });
 	$.get("config.json", function( menuconfig ){
@@ -51,28 +53,31 @@ function init()
 		}
 
 		menu = new Menu("menu", new_config);
-		setTimeout( function(){
-		// check if saved position found and activate current position
-		var previous = sessionStorage.getItem( "refappPosition" );
-		if( previous ){
-			sessionStorage.removeItem("refappPosition");
-			previous = JSON.parse( previous );
-			console.log("FF to position ", previous);
-			for(i = 0; i < previous[0]; ++i){
-				menu.navigate(VK_RIGHT, true);
-			}
-			for(i = 0; i <= previous[2]; ++i){
-				menu.navigate(VK_DOWN, true);
-			}
-			for(i = 0; i < previous[1]; ++i){
-				menu.navigate(VK_RIGHT, true);
-			}
-		}
-		}, 100);
 		
+		/*
+		setTimeout( function(){
+			// check if saved position found and activate current position
+			var previous = sessionStorage.getItem( "refappPosition" );
+			if( previous ){
+				sessionStorage.removeItem("refappPosition");
+				previous = JSON.parse( previous );
+				console.log("FF to position ", previous);
+				for(i = 0; i < previous[0]; ++i){
+					menu.navigate(VK_RIGHT, true);
+				}
+				for(i = 0; i <= previous[2]; ++i){
+					menu.navigate(VK_DOWN, true);
+				}
+				for(i = 0; i < previous[1]; ++i){
+					menu.navigate(VK_RIGHT, true);
+				}
+			}
+		}, 100);
+		*/
 		
 		setLoading(false);
 	}, "json");
+	
 	
 	// Monitor instance must be accessible in the application. 
 	// If Monitor implementation is not included, empty interface does nothing but must be present
@@ -82,8 +87,11 @@ function init()
 	
 	// selects the version of the videoplayer by application profile used
 	try{
+		
 		if( profile.hbbtv == "1.5" ){
 			vplayer = new VideoPlayer("videodiv", profile);
+			//vplayer = new VideoPlayerBasic("videodiv", profile);
+			//vplayer = new VideoPlayerEME("videodiv", profile);
 			$("#wrapper").append("<div id='appversion'>HbbTV 1.5</div>");
 		}
 		else if( profile.hbbtv == false ) {
@@ -94,11 +102,14 @@ function init()
 			vplayer = new VideoPlayerHTML5("videodiv", profile);
 			$("#wrapper").append("<div id='appversion'>HbbTV 2.0.1</div>");
 		}
+		
 		vplayer.populate();
 		vplayer.clearVideo();
 	} catch(e){
+		showInfo("error "+ profile.hbbtv +" " + e.message + e.lineNumber + " vplayer " );
 		console.log( e.message );
 	}
+	
 	
 	// if debug is included, display button to toggle debug screen on/off
 	if( typeof debug == "function" ){

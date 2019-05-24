@@ -3,6 +3,7 @@ function Menu(element_id, config){
 }
 
 Menu.prototype.init = function(element_id, config){
+	
 	var self = this;
 	self.focus = null;
 	self.element = document.getElementById(element_id);

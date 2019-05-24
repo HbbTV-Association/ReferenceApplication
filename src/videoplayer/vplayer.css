@@ -4,7 +4,7 @@
 	overflow: hidden;
 	opacity : 1.0;
 	transition: opacity 1s;
-	background:black;
+	_background:black;
 	
 	top: 0px;
 	left: 0px;

@@ -93,12 +93,24 @@ var animating 	= false;
 var menu 		= null;
 var vplayer 	= null;
 var main 		= null;
-
+var lastError = null;
 function onLoad() {
 	registerKeys(1);
     registerKeyListener();
 	showApplication();
-    init();
+	
+	showInfo("READY... show applicaiton");
+	//setTimeout( function(){
+		try{
+			init();
+			showInfo("READY... init succeed");
+		} catch(e){
+			lastError = e;
+			//showInfo("error " + e.description + " msg: " + e.message);
+			error( e );
+		}
+	//}, 2000);
+	
 }
 
 </script>

@@ -11,7 +11,8 @@
 
 function VideoPlayer(element_id, profile, width, height){
 	console.log("VideoPlayer - Constructor");
-	
+	showInfo("VideoPlayer - Constructor");
+	//return;
 	// Call super class constructor
 	VideoPlayerBasic.call(this, element_id, profile, width, height);
 	this.timeInMilliseconds = true;
@@ -216,7 +217,7 @@ VideoPlayer.prototype.setSubtitles = function( subtitles ){
 	else{
 		this.subtitles = null;
 	}
-}
+};
 
 VideoPlayer.prototype.clearLicenseRequest = function(callback){
 	console.log("clearLicenseRequest()");
@@ -571,7 +572,7 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 	catch(e){
 		console.log("error setting subs: " + e);
 	}
-}
+};
 
 VideoPlayer.prototype.pause = function(){
 	console.log("oipf player pause");
@@ -583,7 +584,7 @@ VideoPlayer.prototype.pause = function(){
 	catch(e){
 		console.log(e);
 	}
-}
+};
 
 VideoPlayer.prototype.stop = function(){
 	showInfo("Exit Video", 1);
@@ -602,7 +603,7 @@ VideoPlayer.prototype.stop = function(){
 	catch(e){
 		console.log(e);
 	}
-}
+};
 
 VideoPlayer.prototype.play = function(){
 	var self = this;
@@ -613,7 +614,7 @@ VideoPlayer.prototype.play = function(){
 	catch(e){
 		console.log(e);
 	}
-}
+};
 
 VideoPlayer.prototype.clearVideo = function(){
 	console.log("clearing video");
@@ -646,16 +647,16 @@ VideoPlayer.prototype.clearVideo = function(){
 	});
 	
 	console.log("clearing video completed");
-}
+};
 
 VideoPlayer.prototype.isFullscreen = function(){
 	var self = this;
 	return self.fullscreen;
-}
+};
 
 VideoPlayer.prototype.isPlaying = function(){
 	return ( this.video && this.video.playState == 1 ); // return true/false
-}
+};
 
 VideoPlayer.prototype.doPlayStateChange = function(){
 	var self = this;
@@ -760,7 +761,7 @@ VideoPlayer.prototype.doPlayStateChange = function(){
             // do nothing
             break;
 	}
-}
+};
 
 VideoPlayer.prototype.getStreamComponents = function(){
 	try {
@@ -776,7 +777,7 @@ VideoPlayer.prototype.getStreamComponents = function(){
 		showInfo("Switching audio components not supported");
 	}
 	
-}
+};
 
 VideoPlayer.prototype.getAudioTracks = function(){
 	
@@ -878,7 +879,7 @@ VideoPlayer.prototype.changeAVcomponent = function( component ) {
 		console.log("enableSubtitles - Error: " + e.description);
 	}
 
-}
+};
 
 VideoPlayer.prototype.enableSubtitles = function( next ) {
 	console.log("enableSubtitles("+ next +")");
@@ -935,4 +936,4 @@ VideoPlayer.prototype.enableSubtitles = function( next ) {
 		console.log("enableSubtitles - Error: " + e.description);
 	}
 
-}
+};

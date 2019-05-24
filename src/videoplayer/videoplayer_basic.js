@@ -8,6 +8,8 @@
  */
 function VideoPlayerBasic(element_id, profile, width, height){
 	
+	showInfo("VideoPlayerBasic - Constructor");
+	
 	console.log("VideoPlayerBasic - Constructor");
 	this.FILETYPES = {
 		MP4:0,

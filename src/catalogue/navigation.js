@@ -45,7 +45,7 @@ function onKey(keycode){
 	}
 	
     if(!animating && !loading){
-        if(vplayer.isVisible() && vplayer.isFullscreen()){
+        if(vplayer && vplayer.isVisible() && vplayer.isFullscreen()){
             vplayer.navigate(keycode);
             return true;
         }
