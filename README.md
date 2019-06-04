@@ -1,6 +1,6 @@
 # Reference Video Application
 
-### Notice 24th May 2019: Microsoft Playready Server is unavailable for OIPF and HTML5 clients at the moment. We are investigating the issue together with Microsoft. For PlayReady testing please refer to test task 2.1.2, which uses the Expressplay license server.
+### Notice 4th June 2019: Previous Issue with Microsoft Playready is fixed. 
 
 ## Reference application for online video streaming.
 This application is implemented to be a reference video catalogue and player application 
