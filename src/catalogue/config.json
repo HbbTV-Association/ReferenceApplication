@@ -452,6 +452,13 @@
                     "app": 0,
                     "img": "icons/icons_1x1_wrench.png"
                 },
+				{
+                    "title": "Show cookies",
+                    "eval": "displayCookies(); ",
+                    "app": 0,
+                    "img": "icons/icons_1x1_localstorage.png",
+                    "desc": "This option will save console.log messages to the server"
+                },
                 {
                     "title": "Delete cookies",
                     "eval": "deleteAllCookies(true);",
@@ -471,17 +478,11 @@
                     "app": 0,
                     "img": "icons/icons_1x1_localstorage.png"                     
                 },
-                {
-                    "title": "Check Internet Connection",
-                    "eval": "showInfo( (navigator.onLine )); ",
-                    "app": 0,
-                    "img": "icons/icons_1x1_checkinternet.png"
-                },
 				{
-                    "title": "Close App",
-                    "eval": "window.close();",
+                    "title": "show XML capabilities",
+                    "eval": "getCapabilities();",
                     "app": 0,
-                    "img": "icons/icons_1x1_checkinternet.png"
+                    "img": "icons/icons_1x1_wrench.png"
                 },
                 {
                     "title": "Save Application log",
@@ -489,13 +490,6 @@
                     "app": 0,
                     "img": "icons/icons_1x1_localstorage.png",
 					"desc" : "This option will save console.log messages to the server"
-                },
-                {
-                    "title": "Show cookies",
-                    "eval": "displayCookies(); ",
-                    "app": 0,
-                    "img": "icons/icons_1x1_localstorage.png",
-                    "desc": "This option will save console.log messages to the server"
                 },
                 {
                     "title": "Display channel list",
