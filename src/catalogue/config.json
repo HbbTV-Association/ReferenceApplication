@@ -563,6 +563,20 @@
                     "app": 0,
                     "img": "icons/icons_1x1_localstorage.png",
                     "desc": "This option will save console.log messages to the server"
+                },
+                {
+                    "title": "Show cookies",
+                    "eval": "displayCookies(); ",
+                    "app": 0,
+                    "img": "icons/icons_1x1_localstorage.png",
+                    "desc": "This option will save console.log messages to the server"
+                },
+                {
+                    "title": "Display channel list",
+                    "eval": "displayChannelList(); ",
+                    "app": 0,
+                    "img": "icons/icons_1x1_localstorage.png",
+                    "desc": "This option will save console.log messages to the server"
                 }
             ]
         }

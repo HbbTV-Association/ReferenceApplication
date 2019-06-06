@@ -475,7 +475,9 @@ VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 	this.onAdBreak = true; // disable seeking
 	this.adCount = 0;
 	try{
-		this.video.pause();
+		if( this.isPlaying() ){
+			this.video.pause();
+		}
 	} catch(e){
 		console.log("content video pause failed. May be not initialized yet (prerolls)");
 	}
@@ -495,7 +497,9 @@ VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 VideoPlayerHTML5.prototype.playAds = function(){
 	this.onAdBreak = true; // disable seeking
 	try{
-		this.video.pause();
+		if( this.isPlaying() ){
+			this.video.pause();
+		}
 	} catch(e){
 		console.log("content video pause failed. May be not initialized yet (prerolls)");
 	}

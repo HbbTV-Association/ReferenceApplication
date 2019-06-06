@@ -576,7 +576,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			}
 			
 		} catch(e){
-			console.log("error getting playback position and duration");
+			//console.log("error getting playback position and duration");
 			return { duration : 0, position : 0 };
 		}
 		
@@ -672,6 +672,17 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			// do not save if watched less than 10s
 			if( time < 10 )
 				return;
+			
+			// drop data if watched near to end
+			if( time > duration - 15 ){
+				if( this.current !== null ){
+					this.deleteCurrent();
+					 this.current = null;
+					 console.log("deleted record for video " + videoid);
+				}
+				console.log("play positio not saved. too close to end");
+				return;
+			}
 			
 			var item = null;
 			if( this.current === null && videoid ){

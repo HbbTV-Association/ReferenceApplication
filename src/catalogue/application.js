@@ -76,6 +76,7 @@ function init()
 		*/
 		
 		setLoading(false);
+		monitorAppState();
 	}, "json");
 	
 	
@@ -114,5 +115,50 @@ function init()
 		displayDebugButton( true, "Engineer view" );
 	}
 }
+
+var lifetime = 0;
+var playerStates = [];
+var appStateInterval = null;
+function monitorAppState(){
+	appStateInterval = setInterval( function(){
+		lifetime += 1000;
+		if( vplayer ){
+			playerStates.push( { time : lifetime, playerPlaying : vplayer.isPlaying(), playerTime : vplayer.time() } );
+		}
+		
+		// check if player is jamming
+		var jamming = true;
+		$.each( playerStates, function(nth, state){
+			if( !playerStates[0].playerPlaying || playerStates[0].playerPlaying != state.playerPlaying || playerStates[0].playerTime != state.playerTime ){
+				jamming = false;
+				return false;
+			}
+		} );
+		
+		//console.log("is jamming? " + jamming);
+		if( jamming ){
+			showInfo("Player is jamming");
+		}
+		
+		if( playerStates.length > 10 ){
+			playerStates.shift();
+		}
+	}, 1000 );
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
