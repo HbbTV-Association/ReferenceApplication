@@ -257,6 +257,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
 			self.displayPlayer( 5 );
+			var metadataTracks = [];
 			// TODO: Set the first subtitle track active if any exists.
 			if( self.video.textTracks && self.video.textTracks.length ){
 				var defaultSub = -1;
@@ -267,6 +268,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 						$("#subtitleButtonText").html("Subtitles: " + track.language );
 					} else if( track.kind != "metadata" ){
 						track.mode = "hidden";
+					}
+					else if( track.kind == "metadata" ){
+						metadataTracks.push(i);
 					}
 				} );
 				if( defaultSub >= 0 ){

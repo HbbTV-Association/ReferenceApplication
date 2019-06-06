@@ -152,19 +152,37 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			case VK_YELLOW:
 				try{
 					if( this.video.textTracks ){
+						console.log("VideoPlayerBasic - navigate()");
 						console.log("switch text Track");
 						//var tracks = this.video.textTracks.length;
 						
+						
 						// count all tracks except metadata
 						var tracks = 0;
-						for( var i = 0; i < this.video.textTracks.length; ++i ){
-							if( this.video.textTracks[i].kind != "metadata" ){
-								tracks++;
-								this.video.textTracks[i].mode = 'hidden'; // hide all
+						var metadataTracks = [];
+						var firstTextTrack = null;
+						console.log("begin try");
+						try{
+							console.log("begin for");
+							for( var i = 0; i < this.video.textTracks.length; ++i ){
+								console.log("in loop " + i);
+								if( this.video.textTracks[i].kind != "metadata" ){
+									if( firstTextTrack === null ){
+										firstTextTrack = i;
+									}
+									tracks++;
+									this.video.textTracks[i].mode = 'hidden'; // hide all
+								}
+								else{
+									metadataTracks.push(i);
+								}
 							}
+						} catch(e){
+							console.log("error " + e.description);
 						}
 						
 						console.log("text tracks " + tracks );
+						console.log("metaDataTracks ", metadataTracks );
 						if( !tracks ){
 							showInfo("No Subtitles Available");
 							break;
@@ -172,15 +190,18 @@ function VideoPlayerBasic(element_id, profile, width, height){
 						
 						if( this.subtitleTrack === false )
 						{
-							this.subtitleTrack = 0;
+							this.subtitleTrack = firstTextTrack;
 						}
 						console.log("Current track index " + this.subtitleTrack);
 						if( this.subtitleTrack >= tracks ){
-							this.subtitleTrack = 0; // was off, select first
+							this.subtitleTrack = firstTextTrack; // was off, select first
 						}
 						else{
-							//this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
-							this.subtitleTrack++;
+							this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
+							do{
+								this.subtitleTrack++;
+								console.log("increment track index: " + this.subtitleTrack);
+							} while( metadataTracks.indexOf( this.subtitleTrack ) != -1 );
 						}
 						
 						var lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].language );
