@@ -125,7 +125,7 @@ VideoPlayer.prototype.prepareAdPlayers = function(){
 			player.addClass("hide"); // hide ad video
 			$("#adInfo").removeClass("show");
 			
-			self.video.play();
+			self.video.play(1);
 			$(self.video).removeClass("hide"); // show content video
 		}
 		
@@ -493,12 +493,13 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 	}
 	
 	
+	
+	if( !self.video ){
+		self.populate();
+		self.setEventHandlers();
+	}
+	
 	try{
-		if( !self.video ){
-			self.populate();
-			self.setEventHandlers();
-		}
-		
 		var player = this.video;
 		this.subtitles = player.textTracks;
 		
@@ -516,18 +517,22 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 			} );
 		}
 		
-		self.video.onPlayStateChange = function(){ self.doPlayStateChange(); };
-		self.element.removeClass("hidden");
-		self.visible = true;
+	} catch(e){
+		console.log("error setting subs: " + e);
+	}
 		
-		/*
-		self.video.play(1);
+	self.video.onPlayStateChange = function(){ self.doPlayStateChange(); };
+	self.element.removeClass("hidden");
+	self.visible = true;
 		
-		self.setFullscreen(true);
-		self.displayPlayer(5);
-		*/
+	/*
+	self.video.play(1);
+	
+	self.setFullscreen(true);
+	self.displayPlayer(5);
+	*/
 		
-		
+	try{
 		self.watched.load();
 		var position = this.watched.get( self.videoid );
 		if( !self.live && position ){
@@ -546,14 +551,12 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 							
 						};
 						self.setFullscreen(true);
-						self.displayPlayer(5);
-						self.video.play(1);
+						self.play();
 					}
 					else{
 						console.log("video.play()")
-						self.video.play(1);
+						self.play();
 						self.setFullscreen(true);
-						self.displayPlayer(5);
 						self.resumePosition = 0;
 					}
 					
@@ -561,16 +564,21 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 			};
 		}
 		
-		console.log("video.play()")
-		self.video.play();
-		self.setFullscreen(true);
-		self.displayPlayer(5);
-		
-		
+	} catch(e){
+		console.log("getting resume position: " + e.description);
 	}
-	catch(e){
-		console.log("error setting subs: " + e);
+	
+	try{
+		console.log("video.play()");
+		showInfo("Play NOW");
+		self.play();
+	} catch(e){
+		console.log("error start video play: " , e);
 	}
+	
+	self.setFullscreen(true);
+	self.displayPlayer(5);
+	
 };
 
 VideoPlayer.prototype.pause = function(){
@@ -611,7 +619,7 @@ VideoPlayer.prototype.play = function(){
 		self.displayPlayer(5);
 	}
 	catch(e){
-		console.log(e);
+		console.log("Error at VideoPlayer.play() " + e.description);
 	}
 };
 

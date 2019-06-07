@@ -152,7 +152,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			case VK_YELLOW:
 				try{
 					if( this.video.textTracks ){
-						console.log("VideoPlayerBasic - navigate()");
 						console.log("switch text Track");
 						//var tracks = this.video.textTracks.length;
 						
@@ -161,11 +160,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 						var tracks = 0;
 						var metadataTracks = [];
 						var firstTextTrack = null;
-						console.log("begin try");
 						try{
-							console.log("begin for");
 							for( var i = 0; i < this.video.textTracks.length; ++i ){
-								console.log("in loop " + i);
 								if( this.video.textTracks[i].kind != "metadata" ){
 									if( firstTextTrack === null ){
 										firstTextTrack = i;
@@ -511,7 +507,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			var play_position = barWidth;
 			
-			console.log(  play_position, position, duration );
+			//console.log(  play_position, position, duration );
 			
 			$("#playposition").css("left", play_position);
 			$("#progress_currentTime").css("left", play_position);
@@ -701,17 +697,17 @@ function VideoPlayerBasic(element_id, profile, width, height){
 					 this.current = null;
 					 console.log("deleted record for video " + videoid);
 				}
-				console.log("play positio not saved. too close to end");
+				//console.log("play positio not saved. too close to end");
 				return;
 			}
 			
 			var item = null;
 			if( this.current === null && videoid ){
-				console.log("acreate watched new item");
+				console.log("create watched new item");
 				item = { videoid : videoid, position : time, duration : duration };
 			}
 			else if( this.current !== null ){
-				console.log("update playposition for ", this.list[ this.current ]);
+				//console.log("update playposition for ", this.list[ this.current ]);
 				this.list[ this.current ].position = time;
 			} else {
 				console.log( "videoid is missing" );
