@@ -38,7 +38,8 @@ For example, after switching the language from English to Finnish, special chara
 
 RefApp offers an engineer view with console output that can be utilized in real-time. The view can be accessed via pressing the *blue* button while the app is open.
 
-![Engineer View](6_EngineerView.png?raw=true)
+![Engineer View](engineer_view.gif)
+<!--- ![Engineer View](6_EngineerView.png?raw=true) --->
 
 The engineer view helps debugging and offers relevant information about key presses and the current state of the stream.
 
@@ -50,7 +51,8 @@ RefApp also supports live-stream testing with a variety of live-streams. Note th
 
 While a live-stream is playing, there should be the *LIVE* indicator on the right of the progression bar.
 
-![Live playing](7_LivePlay.png?raw=true)
+![Live playing](live.gif)
+<!--- ![Live playing](7_LivePlay.png?raw=true) --->
 
 ### Settings
 
