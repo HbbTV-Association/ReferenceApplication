@@ -8,11 +8,13 @@ RefApp will open on the *NoDRM* category on startup.
 
 While navigating within the app, information about each video should be displayed on the bottom of the screen.
 
-![Video info](2_VideoInfo.png?raw=true)
+![Navigation](navigation_info.gif?raw=true)
+<!--- ![Video info](2_VideoInfo.png?raw=true) --->
 
 Immediately after opening a video stream, the player (progress bar with controls) should be visible for a few seconds. Throughout the video, there should be a top bar visible with relevant information about the currently streamed video.
 
-![Video play](3_VideoPlay.png?raw=true)
+![Playing](open_test.gif)
+<!--- ![Video play](3_VideoPlay.png?raw=true) --->
 
 ### Subtitled streams
 RefApp offers a wide range of streams to test hardware capabilities, including support for out-of-band- and in-band subtitles.
@@ -21,7 +23,8 @@ RefApp offers a wide range of streams to test hardware capabilities, including s
 
 Switching between subtitle languages is supported and can be performed via pressing the *yellow* button.
 
-![Subtitles while playing](4_SubtitlesPlay.png?raw=true)
+![Subtitles](subtitles.gif)
+<!--- ![Subtitles while playing](4_SubtitlesPlay.png?raw=true) --->
 
 For example, after switching the language from English to Finnish, special characters and how they are displayed should be performed every 10 seconds.
 
