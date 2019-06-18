@@ -31,10 +31,21 @@ For example, after switching the language from English to Finnish, special chara
 ![Finnish subtitles](5_SubtitlesFin.png?raw=true)
 
 ### Ad-insertion
- [TODO]
- ### In-band events
- [TODO]
- ### Engineer view
+
+Advert insertion testing is also supported by RefApp. This includes testing of pre- and mid-rolls. Launching the "Advert insertion" test should immediately launch an advert of 5, 15 or 30 seconds long. While the advert is playing, the background should be orange, a frame count should be sliding from side to side and a series of beeping sounds should be audible. 
+
+![Ad insertion](9_ad_insert.png?raw=true)
+
+### In-band events
+
+The "In-band events" test currently should display a box containing relevant information about the event. During the test there should be the following events:
+* Start:  0, Ends: 12
+* Start: 24, Ends: 36
+* Start: 54, Ends: 66
+
+![In-band events](10_event.jpg)
+
+### Engineer view
 
 RefApp offers an engineer view with console output that can be utilized in real-time. The view can be accessed via pressing the *blue* button while the app is open.
 
