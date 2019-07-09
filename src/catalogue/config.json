@@ -478,26 +478,13 @@
                     "app": 0,
                     "img": "icons/icons_1x1_localstorage.png"                     
                 },
-				{
-                    "title": "show XML capabilities",
-                    "eval": "getCapabilities();",
-                    "app": 0,
-                    "img": "icons/icons_1x1_wrench.png"
-                },
                 {
                     "title": "Save Application log",
                     "eval": "saveAppLog(); ",
                     "app": 0,
                     "img": "icons/icons_1x1_localstorage.png",
 					"desc" : "This option will save console.log messages to the server"
-                },
-                {
-                    "title": "Display channel list",
-                    "eval": "displayChannelList(); ",
-                    "app": 0,
-                    "img": "icons/icons_1x1_localstorage.png",
-                    "desc": "This option will save console.log messages to the server"
-                }
+                }              
             ]
         }
     ],
