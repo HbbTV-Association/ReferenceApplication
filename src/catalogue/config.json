@@ -102,8 +102,8 @@
 					"profile" : ["html5", "mse-eme"]							
                 },
                 {
-                    "title": "1.7 Multiple audio (v4)",
-                    "url": "../../videos/02_gran_dillama_1080p_ma_25f75g6sv4/manifest.mpd",
+                    "title": "1.7 Multiple audio (v5)",
+                    "url": "../../videos/02_gran_dillama_1080p_ma_25f75g6sv5/manifest.mpd",
                     "img": "icons/icons_1x1_multipleaudio.png",
                     "app": 6,
 					"desc": "AudioTrack changing test. Use green to change audio"
@@ -211,8 +211,8 @@
 					"profile" : ["html5", "mse-eme"]					
                 },
                 {
-                    "title": "2.7 Multiple audio (v4)",
-                    "url": "../../videos/02_gran_dillama_1080p_ma_25f75g6sv4/drm/manifest.mpd",
+                    "title": "2.7 Multiple audio (v5)",
+                    "url": "../../videos/02_gran_dillama_1080p_ma_25f75g6sv5/drm/manifest.mpd",
                     "img": "icons/icons_1x1_multipleaudio.png",
 					"la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
 					"drm": "playready",
@@ -310,9 +310,9 @@
 					"profile" : ["html5"]					
                 },
 		{
-                    "title": "3.7 Multiple audio (v4)",
+                    "title": "3.7 Multiple audio (v5)",
                     "url":
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABgABQAAFzYADHJlZmVyZW5jZWFwcCmuAAAAEAn8mXpuMdMekKf8he1hzFkAgAMEfqNReMO3yFZClaSVmx80_EJV8jkw33hvZmUOE1OrwQ-9Ulmci_SBW8jbV_dsbXx8qIX14Q0Vrm9qxSxhDdXdCytrmlNgVdwpw4KYaeR9DRpdOhxuZXpHkYiAD2vjqt0NNI5Mhvn99CJCvvBZWYNWtgKAtTHbuZ2slh_OL3WbAAAAFMLa3DeYrTLqQmLxsZQFN3AwPGpO#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_ma_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ABgABQAAFzYADHJlZmVyZW5jZWFwcCmuAAAAEAn8mXpuMdMekKf8he1hzFkAgAMEfqNReMO3yFZClaSVmx80_EJV8jkw33hvZmUOE1OrwQ-9Ulmci_SBW8jbV_dsbXx8qIX14Q0Vrm9qxSxhDdXdCytrmlNgVdwpw4KYaeR9DRpdOhxuZXpHkYiAD2vjqt0NNI5Mhvn99CJCvvBZWYNWtgKAtTHbuZ2slh_OL3WbAAAAFMLa3DeYrTLqQmLxsZQFN3AwPGpO#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_ma_25f75g6sv5%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_multipleaudio.png",
                                         "drm": "marlin",
                     "app": 6,
