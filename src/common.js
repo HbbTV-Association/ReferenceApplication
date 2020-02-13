@@ -321,7 +321,9 @@ function registerKeys(mode) {
 		mask = 0x1 + 0x2 + 0x4 + 0x8 + 0x10 + 0x20 + 0x40 + 0x80 + 0x100;
 	}
 	try {
-		var app = document.getElementById('appmgr').getOwnerApplication(document);
+        if( typeof( app ) == "undefined" ){
+            app = document.getElementById('appmgr').getOwnerApplication(document); // use global variable app. Declare if not declared
+        }
 		//showInfo("register keys mask: " + mask);
 		app.privateData.keyset.setValue(mask);
 		if( mode >= 0 ){
