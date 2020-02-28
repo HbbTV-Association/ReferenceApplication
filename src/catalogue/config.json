@@ -499,13 +499,12 @@
                     "img": "icons/icons_1x1_localstorage.png",
 					"desc" : "Channel list"
                 },
-				
-                {
-                    "title": "Display channel list",
+				{
+                    "title": "Display Channel list",
                     "eval": "displayChannelList(); ",
                     "app": 0,
                     "img": "icons/icons_1x1_localstorage.png",
-                    "desc": "This option will save console.log messages to the server"
+					"desc" : "Channel list"
                 }
             ]
         }
