@@ -176,7 +176,7 @@ function showInfoBox( html )
 function addTableRow( table, cells ){
 	var row = $("<div style='display: table-row;background:rgba(0,0,0,0.9);'></div>");
 	$.each( cells, function (i, value){
-		row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+value+"</div>");
+		row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+ XMLEscape( value ) +"</div>");
 	});
 	table.append( row );
 }
@@ -478,12 +478,13 @@ function displayChannelList(){
 		
 		for (var i=0; i<lst.length; i++) {
 			var ch = lst.item(i);
-			addTableRow( table, [i, ch.name, ch.ccid, ch.onid, ch.sid, ch.tsid] );
+			console.log(i, ch.name, ch.ccid, ch.onid, ch.sid, ch.tsid);
+            addTableRow( table, [i, ch.name, ch.ccid, ch.onid, ch.sid, ch.tsid] );
 		}
 		showInfoBox( table );
 
 	} catch (e) {
-		showInfo('accessing channel list failed.');
+		showInfo('accessing channel list failed.' + e.message);
 		return;
 	}
 }
