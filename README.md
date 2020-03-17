@@ -1,7 +1,5 @@
 # Reference Video Application
 
-### Notice 4th June 2019: Previous Issue with Microsoft Playready is fixed. 
-
 ## Reference application for online video streaming.
 This application is implemented to be a reference video catalogue and player application 
 for DASH content on HbbTV 1.5 and 2.0.1 devices, with various DRM and subtitle tests. 
@@ -15,7 +13,7 @@ Application prowides test cases and test material done with tools included in [t
 - Audio selection
 - Ad insertion (pre-roll and mid-roll)
 - Live DASH
-
+- MultiPeriod DASH
 
 
 The software is under continuous development and licensed with MIT License.
@@ -42,10 +40,17 @@ for any problems or questions
  - available at http://refapp.hbbtv.org/production/
  
  ## Staging
- - Intended for early access testing of new features
+ - Intended for testing of new features considered stable enough
  - Will be in line with github repository
  - Low latency (multi moof/mdat) Live and VOD DASH
  - available at http://refapp.hbbtv.org/staging/
+ 
+  ## Testing
+ - Intended for rolling out new features and signaling
+ - New content: Multiperiod DASH (Task 6)
+ - available at http://refapp.hbbtv.org/testing/
+ - Please refer to http://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt 
+   for information regarding MultiPeriod DASH content
  
  ## MPEG-2 TS
  - Includes AITs with direct links to production and staging instances
