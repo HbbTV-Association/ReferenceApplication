@@ -49,8 +49,24 @@ for any problems or questions
  - Intended for rolling out new features and signaling
  - New content: Multiperiod DASH (Task 6)
  - available at http://refapp.hbbtv.org/testing/
- - Please refer to http://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt 
-   for information regarding MultiPeriod DASH content
+ 
+ # Please refer to http://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt 
+
+for information regarding MultiPeriod DASH content. From the user point of view one should see on the TV screen the notifications of received events (similar to the inband event test now). And transitions between main content (llama drama cartoon) and ad contents (orange test video with time counters). 
+
+Transitions are listed below, and the device should follow this timeline. While playing, there are popups informing about MPD and EMSG events, these fizz by quite fast, but they are logged in file as well. check the readme for complete list of events.
+
+Period p1: 00:00:00-00:01:00, 60s, 00_llama (main 00:00:00-00:01:00)
+Period p2: 00:01:00-00:01:30, 30s, test01 (advert 1 00:00:00-00:00:30)
+Period p3: 00:01:30-00:02:00, 30s, test02 (advert 2 00:00:00-00:00:30)
+Period p4: 00:02:00-00:02:30, 30s, test03 (advert 3 00:00:00-00:00:30)
+Period p5: 00:02:30-00:03:30, 60s, 00_llama (main 00:01:00-00:02:00)
+Period p6: 00:03:30-00:04:00, 30s, test01 (advert 1 00:00:00-00:00:30)
+Period p7: 00:04:00-00:04:30, 30s, test02 (advert 2 00:00:00-00:00:30)
+Period p8: 00:04:30-00:05:00, 30s, test03 (advert 3 00:00:00-00:00:30)
+Period p9: 00:05:00-00:06:00, 60s, 00_llama (main 00:02:00-00:03:00)
+Period p10: 00:06:00-00:07:30, 90s, test00 (advert 1+2+3 00:00:00-00:01:30)
+Period p11: 00:07:30-00:10:56, 206s, 00_llama (main 00:03:00-06:26:00)
  
  ## MPEG-2 TS
  - Includes AITs with direct links to production and staging instances
