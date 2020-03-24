@@ -60,7 +60,8 @@ From the user point of view one should see on the TV screen
 
 Always check the readme for complete list of events. Transitions are listed below, and the device should follow this timeline.
 
-`Period p1: 00:00:00-00:01:00, 60s, 00_llama (main 00:00:00-00:01:00)
+```
+Period p1: 00:00:00-00:01:00, 60s, 00_llama (main 00:00:00-00:01:00)
 00:00:00 ( 0s)   MPD event,  value=1a2b3m, id=10
 00:00:01 ( 1s)   MPD event,  value=1a2b3m, id=11
 00:00:08 ( 8s)   EMSG event, value=1a2b3c, id=1 (segment 5.m4s)
@@ -75,7 +76,7 @@ Period p8: 00:04:30-00:05:00, 30s, test03 (advert 3 00:00:00-00:00:30)
 Period p9: 00:05:00-00:06:00, 60s, 00_llama (main 00:02:00-00:03:00)
 Period p10: 00:06:00-00:07:30, 90s, test00 (advert 1+2+3 00:00:00-00:01:30)
 Period p11: 00:07:30-00:10:56, 206s, 00_llama (main 00:03:00-06:26:00)
-`
+```
  
  ## MPEG-2 TS
  - Includes AITs with direct links to production and staging instances
