@@ -50,13 +50,21 @@ for any problems or questions
  - New content: Multiperiod DASH (Task 6)
  - available at http://refapp.hbbtv.org/testing/
  
- ### Please refer to http://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt 
+ ### Multiperiod DASH content
+ 
+Please refer to [multi-period text file](http://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt) for information regarding multi-period DASH content. <br>
 
-for information regarding MultiPeriod DASH content. From the user point of view one should see on the TV screen the notifications of received events (similar to the inband event test now). And transitions between main content (llama drama cartoon) and ad contents (orange test video with time counters). 
+From the user point of view one should see on the TV screen 
+- the notifications/pop-ups of received EMSG and MPD events
+- the transitions between main content (llama drama cartoon) and ad contents (orange test video with time counters). 
 
-Transitions are listed below, and the device should follow this timeline. While playing, there are popups informing about MPD and EMSG events, these fizz by quite fast, but they are logged in file as well. check the readme for complete list of events.
+Always check the readme for complete list of events. Transitions are listed below, and the device should follow this timeline.
 
-Period p1: 00:00:00-00:01:00, 60s, 00_llama (main 00:00:00-00:01:00)
+`Period p1: 00:00:00-00:01:00, 60s, 00_llama (main 00:00:00-00:01:00)
+00:00:00 ( 0s)   MPD event,  value=1a2b3m, id=10
+00:00:01 ( 1s)   MPD event,  value=1a2b3m, id=11
+00:00:08 ( 8s)   EMSG event, value=1a2b3c, id=1 (segment 5.m4s)
+00:01:00 (60s)   MPD event,  value=1a2b3m, id=12
 Period p2: 00:01:00-00:01:30, 30s, test01 (advert 1 00:00:00-00:00:30)
 Period p3: 00:01:30-00:02:00, 30s, test02 (advert 2 00:00:00-00:00:30)
 Period p4: 00:02:00-00:02:30, 30s, test03 (advert 3 00:00:00-00:00:30)
@@ -67,6 +75,7 @@ Period p8: 00:04:30-00:05:00, 30s, test03 (advert 3 00:00:00-00:00:30)
 Period p9: 00:05:00-00:06:00, 60s, 00_llama (main 00:02:00-00:03:00)
 Period p10: 00:06:00-00:07:30, 90s, test00 (advert 1+2+3 00:00:00-00:01:30)
 Period p11: 00:07:30-00:10:56, 206s, 00_llama (main 00:03:00-06:26:00)
+`
  
  ## MPEG-2 TS
  - Includes AITs with direct links to production and staging instances
