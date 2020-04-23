@@ -141,10 +141,10 @@
                     "title": "2.1.2 AVC 1080p video (v3)",
                     "url": "../../videos/tears_of_steel_1080p_25f75g6sv3/drm/manifest.mpd",
 					"img": "icons/icons_1x1_1080p.png",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=BQAAABc2N6EAAAAAAHC9U6xqGE-CtFJAupTE2rkAVPDkK1VQFS1v5opRWq_rAJ9RJvqJNyjoza2qyCFtuLEJ28keS5xNK6h2DsisQTsLDYzoDVYola4jQgvSv7RL9bz5ygpEPyBlEH7L2xAsxFUvOrlguKo6w1IDOyE2hid2qzz19PAQd82bueLOaV9o0668nLY",
+                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=BgAAABc2N1cAAAAAAICqifyQfnJMb9zXmWcEVpqcGMKIyU2MIQl5XZfu6irXz8aM2sTX4olB2QVA-uZ1sQlCviJjBW4Sl532woAgf0GtJTMyQKPIl8l0S1QPSv4UirXzx0x05q8l6uSRGkgTefOvQ-YRhznLoPLHoIN0xaWw7Sosg1fUvTQt_VCS395BDnc8FtvXGzBr2xCWY0i1e0TyCSu5",
                     "drm": "playready",
                     "app": 6,
-					"desc": "ExpressPlay license server (Expires 11-Apr-2020)"
+					"desc": "ExpressPlay license server (Expires 23-May-2020)"
                 },					
                 {
                     "title": "2.2 HEVC 2160p video",
