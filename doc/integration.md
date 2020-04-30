@@ -99,7 +99,7 @@ Hint: **src/resources.php** may be used to include selected resources in differe
 
 #### Video player API
 
-API documentation here: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
+API documentation here: https://tvportal.sofiadigital.tv/referenceapp/doc/
 
 ##### method sequence in different player
 
