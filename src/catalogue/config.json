@@ -141,10 +141,10 @@
                     "title": "2.1.2 AVC 1080p video (v3)",
                     "url": "../../videos/tears_of_steel_1080p_25f75g6sv3/drm/manifest.mpd",
 					"img": "icons/icons_1x1_1080p.png",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=BwAAABc2N6EAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJBhJ-IuFuTVOVwWViaL_oLdm4i1j4CbJhaSfJtnrFUgbZpZ9dR2Z769XauCnWqwhPd_zQ3yJSgkpBHqD62JR8avSTbLRpgl-CUpzJfnPm26pcx2bUcXVbaFFQp2NqkBp8UaCh6kzWomu_fHQYAqtZ2mgiilSzkbd94gRRTe6TgSi9SFm-pFornH-rY5iZ9UOVz1ZKwRlW0kPda6xrMcLAm-Bbu-_A",
+                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=19-Dec-2BwAAABc2N0cAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJDU81gtNSjCuj1Kl0qWDAO6SaPFqPpvTjW8XZE0vWfn4L8Zy_rEtGzMDPiSVyTWH7HOAeayvu5831RTFo1mLlOnXyfJgAEAaK3mS_oxmtqVHGrYyrBIfFIysjt6idMEi3jf8V-fYYVHCC3Xe8OQ8CVYWfOl7Nk6kzBMHFCpngSYmHwTNZbf4e-qe6TaAvq101wg-PZDZS6bhYDlWESLvq8YaPPiJw020",
                     "drm": "playready",
                     "app": 6,
-					"desc": "ExpressPlay license server (Expires 22-Oct-2020)"
+					"desc": "ExpressPlay license server (Expires 19-Dec-2020)"
                 },					
                 {
                     "title": "2.2 HEVC 2160p video",
@@ -237,31 +237,31 @@
                 {
                     "title": "3.1 AVC 1080p video (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
 					"img": "icons/icons_1x1_1080p.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (Expires 22-Oct-2020)",
+					"desc": "MS3 compound URL (Expires 19-Dec-2020)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
                     "title": "3.2 HEVC 2160p video (v3)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnNACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEGHRjnVLuhyK_tCvJb_BZBYAgNvU-zAEuaYjc1DC-JWk6nlqnda9hDs8gPuSw_Nw34_UH66gwmjjI4YWFBqyjXz2yRTQTcYkO4vbb6rSI5c-eJAZKmS8CTLuKM-xIaf7rFjOOxQe3ggW4YwdSGqtVuukwBXVjbVRrgtfvAnKB3IaFw_hI7nLOpE-MQestROwWdJrAAAAFBG21lb8ORJOmV9ZhMJ6OtS3ME9s#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F01_llama_drama_2160p_25f75g6sv3%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmsACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEH4YXF_uEzVwv1g1sBj1Ys0AgA-wMD1sl_x7BzfBMBqt5Y3I8osXFkUS-Hx-mLuXhhinTMjf3m2Pvyl2XICAmuXTfZt_2r_idGdKb6LmFkMdDTiX0m0iniOGzcNkBT0WNefCuAQqj2N6rnOmJ_fWe4bB_es_9M4tnvHSw6Qktcn5tXwxYRcLxwSsi3fGRyzXTZxwAAAAFID1V_qyqRMCgFX30LRE5jV0EXaI#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F01_llama_drama_2160p_25f75g6sv3%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_2160p.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (Expires 22-Oct-2020)",
+					"desc": "MS3 compound URL (Expires 19-Dec-2020)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
                     "title": "3.3 Out-of-band subtitles (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_out-of-band-subtitle.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "TTML subtitles (Expires 22-Oct-2020)",
+					"desc": "TTML subtitles (Expires 19-Dec-2020)",
 					"subtitles" : [{
                         "code" : "eng",
                         "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_en.xml"
@@ -275,21 +275,21 @@
 				{
                     "title": "3.4 In-band subtitles (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_subib.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_subib.mpd",
                     "img": "icons/icons_1x1_in-band-subtitle.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "In-band subtitles (Expires 22-Oct-2020)",
+					"desc": "In-band subtitles (Expires 19-Dec-2020)",
 					"profile" : ["html5"]					
                 },
                 {
                     "title": "3.5 Advert insertion (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_insert-ad.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "Ads delivered from any ad-server on ad-event time (Expires 22-Oct-2020) ",
+					"desc": "Ads delivered from any ad-server on ad-event time (Expires 19-Dec-2020) ",
 					"adBreaks" : [
 						{ "position" : "preroll", "ads" : 1 },
 						{ "position" : 20, "ads" : 3 },
@@ -302,21 +302,21 @@
                 {
                     "title": "3.6 In-band events (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_evtib.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_evtib.mpd",
                     "img": "icons/icons_1x1_in-band-events.png",
 					"drm": "marlin",
                     "app": 6,
-					"desc": "TextTrack cues in inband tracks (Expires 22-Oct-2020)",
+					"desc": "TextTrack cues in inband tracks (Expires 19-Dec-2020)",
 					"profile" : ["html5"]					
                 },
 		{
                     "title": "3.7 Multiple audio (v4)",
                     "url":
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_ma_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_ma_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_multipleaudio.png",
                                         "drm": "marlin",
                     "app": 6,
-                                        "desc": "AudioTrack changing test (Expires 22-Oct-2020)"
+                                        "desc": "AudioTrack changing test (Expires 19-Dec-2020)"
                 }
             ]
         },
@@ -388,10 +388,10 @@
 			{
 				"title": "5.3 Livesim multi moof/mdat Marlin DRM",
 				"url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
-				"desc": "Livesimulator with multiple fragments Marlin DRM (Expires 22-Oct-2020)",
+				"desc": "Livesimulator with multiple fragments Marlin DRM (Expires 19-Dec-2020)",
 				"live": true
 			},
 			{
@@ -415,11 +415,11 @@
                 	{
                     		"title": "5.6 Livesim single moof/mdat (Marlin)",
                     		"url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCncACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEM4MjV3nls7osQIkXdxWIncAgAwbirS1ljdX3qTzOcV6G47QLD31cmeActBmiIgGW40DhUjCTKtoI8tgya6TAg1gPCVsTTdzutqPIPy1Vkz3dSF7sBOhSXM23F3CLjh87vP_U0TKdp3Z0M5kZv-kpoCObf6va2R6f3OLV84_UFiafAC17RhnAGDIBPksKCu7P3vmAAAAFHK9GZPJXOuhQgHmhjK4_kj0Xuak#http%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamanofragdrmv1%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmeACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAqxBH8sgHJaNQqAgfrPW7wAgMLcRtdMGViKq4Tvv58eYKoUFJZv2F0o871crJLxgem4wBHNEp92ZY3q5fP7prVONOIwCz_iMX8LEEZL2mZaeo_KZb-Za10EyuM0L-TWwFIFPf0wDyvZoGyW63OvPR7zm2kAviLUmIGK72wZMopRQTYwoDL4qw60z4ynuLa4b5UfAAAAFHYhnwEMO4iDChJkq0frOcyIx_mn#http%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamanofragdrmv1%2Fmanifest.mpd",
                     		"img": "icons/icons_1x1_livestream.png",
                     		"drm": "marlin",
                     		"app": 6,
-                    		"desc": "Livesimulator with single fragment Marlin DRM (Expires 22-Oct-2020)",
+                    		"desc": "Livesimulator with single fragment Marlin DRM (Expires 19-Dec-2020)",
                     		"live": true
                 	}
 
