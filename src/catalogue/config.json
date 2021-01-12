@@ -227,6 +227,15 @@
                    "drm" : "playready",
                    "la_url" : "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
                    "desc": "Multiple moof/mdat fragments in a segment file"
+                },
+                {
+                    "title": "2.9 AVC 1080p video SL3000",
+                    "url": "../../videos/00_llama_1080p_v2/drm/manifest.mpd",
+                    "img": "icons/icons_1x1_1080p.png",
+                    "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:3000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+                    "drm": "playready",
+                    "app": 6,
+                    "desc": "License URL override method, SecurityLevel 3000"
                 }
             ]
         },
