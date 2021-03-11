@@ -62,11 +62,11 @@
 					"desc": "TTML subtitles",
 					"subtitles" : [{
                         "code" : "eng",
-                        "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_eng.xml"
+                        "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_eng.xml"
                     },
                     {
                         "code" : "fin",
-                        "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_fin2.xml"
+                        "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_fin2.xml"
                     }],
 					"profile" : ["html5", "mse-eme"]					
                 },
@@ -110,7 +110,7 @@
                 },
                 {
                    "title": "1.8 Multiple moof/mdat (v5)",
-                   "url": "http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f25g2sv5/manifest.mpd",
+                   "url": "https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f25g2sv5/manifest.mpd",
                    "img": "icons/icons_1x1_1080p.png",
                    "app": 6,
                    "desc": "Multiple moof/mdat fragments in a segment file"
@@ -165,11 +165,11 @@
 					"desc": "TTML subtitles",
 					"subtitles" : [{
                         "code" : "eng",
-                        "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv4/sub_eng.xml"
+                        "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv4/sub_eng.xml"
                     },
                     {
                         "code" : "fin",
-                        "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv4/sub_fin2.xml"
+                        "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv4/sub_fin2.xml"
                     }],
 					"profile" : ["html5", "mse-eme"]					
                 },
@@ -221,7 +221,7 @@
                 },
                 {
                    "title": "2.8 Multiple moof/mdat (v5)",
-                   "url": "http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f25g2sv5/drm/manifest.mpd",
+                   "url": "https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f25g2sv5/drm/manifest.mpd",
                    "img": "icons/icons_1x1_1080p.png",
                    "app": 6,
                    "drm" : "playready",
@@ -264,11 +264,11 @@
 					"desc": "TTML subtitles (Expires 16-Mar-2021)",
 					"subtitles" : [{
                         "code" : "eng",
-                        "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_en.xml"
+                        "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_en.xml"
                     },
                     {
                         "code" : "fin",
-                        "src" : "../getSubs.php?file=http://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_fin2.xml"
+                        "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_fin2.xml"
                     }],
 					"profile" : ["html5"]					
                 },
@@ -330,7 +330,7 @@
 					"img": "icons/icons_1x1_1080p.png",
 					"app": 6,
 					"drm" : "clearkey",
-					"la_url" : "http://refapp.hbbtv.org/videos/laurl_ck.php",
+					"la_url" : "https://refapp.hbbtv.org/videos/laurl_ck.php",
 					"desc": "ClearKey video",
 					"profile" : ["mse-eme"]							
 				},
@@ -340,7 +340,7 @@
 					"img": "icons/icons_1x1_2160p.png",
 					"app": 6,
 					"drm" : "clearkey",
-					"la_url" : "http://refapp.hbbtv.org/videos/laurl_ck.php",
+					"la_url" : "https://refapp.hbbtv.org/videos/laurl_ck.php",
 					"desc": "ClearKey video",
 					"profile" : ["mse-eme"]							
 				},
@@ -350,7 +350,7 @@
                     "img": "icons/icons_1x1_insert-ad.png",
                     "drm": "clearkey",
                     "app": 6,
-					"la_url" : "http://refapp.hbbtv.org/videos/laurl_ck.php",
+					"la_url" : "https://refapp.hbbtv.org/videos/laurl_ck.php",
 					"desc": "Ads delivered from any ad-server on ad-event time",
 					"adBreaks" : [
 						{ "position" : "preroll", "ads" : 1 },
@@ -369,7 +369,7 @@
             "items": [
 			{
 				"title": "5.1 Livesim multi moof/mdat",
-				"url": "http://refapp.hbbtv.org/livesim/02_llamav2/manifest.mpd",
+				"url": "https://refapp.hbbtv.org/livesim/02_llamav2/manifest.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
 				"desc": "Livesimulator with multiple fragments (NoDRM)",
@@ -377,7 +377,7 @@
 			},
 			{
 				"title": "5.2 Livesim multi moof/mdat Playready DRM",
-				"url": "http://refapp.hbbtv.org/livesim/02_llamadrmv2/manifest.mpd",
+				"url": "https://refapp.hbbtv.org/livesim/02_llamadrmv2/manifest.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
 				"drm" : "playready",
@@ -396,7 +396,7 @@
 			},
 			{
                     		"title": "5.4 Livesim single moof/mdat",
-                    		"url": "http://refapp.hbbtv.org/livesim/02_llamanofragv1/manifest.mpd",
+                    		"url": "https://refapp.hbbtv.org/livesim/02_llamanofragv1/manifest.mpd",
                     		"img": "icons/icons_1x1_livestream.png",
                     		"app": 6,
                     		"desc": "Livesimulator with single fragment",
@@ -404,7 +404,7 @@
                 	},
                 	{
                     		"title": "5.5 Livesim single moof/mdat (Playready)",
-                    		"url": "http://refapp.hbbtv.org/livesim/02_llamanofragdrmv1/manifest.mpd",
+                    		"url": "https://refapp.hbbtv.org/livesim/02_llamanofragdrmv1/manifest.mpd",
                     		"img": "icons/icons_1x1_livestream.png",
                     		"drm": "playready",
                     		"la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
