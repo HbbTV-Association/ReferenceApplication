@@ -22,12 +22,19 @@ for any problems or questions
 
 ### Usage, testing, installation, integration:
 
- - Test latest stable version of the application at http://refapp.hbbtv.org/production (see versions for more info)
+ - Test latest stable version of the application at https://refapp.hbbtv.org/production (see versions for more info)
  - Follow [installation] guide to get source and set up local version
- - Read API documentation: http://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
+ - Read API documentation: https://tvportal.sofiadigital.tv/referenceapp/doc/
  - Follow [integration] guide to integrate videoplayer and/or components to different application
  - Follow [dasher] guide to use dasher tool to create dash media files
  - See [tests] report
+
+## PC Usage
+- MSE-EME version should work with any modern browser (staging or testing instance works best since production at some parts still has http links)
+- HbbTV Emulators are available for Firefox & Chrome (FireHbb, HybridTVViewer, RedOrbit)
+- Arrow keys work with cursor keys
+- Color keys are mapped to R, G, B, Y
+- Back key is mapped to backspace
 
 ### Versions
 
@@ -37,22 +44,22 @@ for any problems or questions
  - Also non-DRM streams for reference and including MSE/EME for non HbbTV browsers
  - Subtitle and audio stream selection via color buttons
  - Live and VOD DASH profiles
- - available at http://refapp.hbbtv.org/production/
+ - available at https://refapp.hbbtv.org/production/
  
  ## Staging
  - Intended for testing of new features considered stable enough
  - Will be in line with github repository
  - Low latency (multi moof/mdat) Live and VOD DASH
- - available at http://refapp.hbbtv.org/staging/
+ - available at https://refapp.hbbtv.org/staging/
  
   ## Testing
  - Intended for rolling out new features and signaling
  - New content: Multiperiod DASH (Task 6)
- - available at http://refapp.hbbtv.org/testing/
+ - available at https://refapp.hbbtv.org/testing/
  
  ### Multiperiod DASH content
  
-Please refer to [multi-period text file](http://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt) for information regarding multi-period DASH content. <br>
+Please refer to [multi-period text file](https://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt) for information regarding multi-period DASH content. <br>
 
 From the user point of view one should see on the TV screen 
 - the notifications/pop-ups of received EMSG and MPD events
@@ -81,7 +88,7 @@ Period p11: 00:07:30-00:10:56, 206s, 00_llama (main 00:03:00-06:26:00)
  ## MPEG-2 TS
  - Includes AITs with direct links to production and staging instances
  - separate links for HbbTV 1.5 and 2.0.2 versions
- - available at http://refapp.hbbtv.org/videos/refapp_10_04_2019.ts
+ - available at https://refapp.hbbtv.org/videos/refapp_10_04_2019.ts
 
 ### Components and modules:
 
