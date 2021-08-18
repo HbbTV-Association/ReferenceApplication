@@ -369,7 +369,7 @@
             "items": [
 			{
 				"title": "5.1 Livesim multi moof/mdat",
-				"url": "https://refapp.hbbtv.org/livesim/02_llamav2/manifest.mpd",
+				"url": "https://refapp.hbbtv.org/livesim/02_llamav2/manifest_baseurl.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
 				"desc": "Livesimulator with multiple fragments (NoDRM)",
@@ -377,7 +377,7 @@
 			},
 			{
 				"title": "5.2 Livesim multi moof/mdat Playready DRM",
-				"url": "https://refapp.hbbtv.org/livesim/02_llamadrmv2/manifest.mpd",
+				"url": "https://refapp.hbbtv.org/livesim/02_llamadrmv2/manifest_baseurl.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
 				"drm" : "playready",
@@ -388,41 +388,40 @@
 			{
 				"title": "5.3 Livesim multi moof/mdat Marlin DRM",
 				"url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmtACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEMKnrGUt2rvT0EqzlP-fTfQAgFul0Fg-192mEJVph39mhzky2SPVtxUT8c7xRtA_a4Ltb2BQHVCzsbHszPjVLr4yS-h-ePDQ1elm52gCq4NXH72zOq0p44sIsvsrpB8YMkCYPZgUUCK2odK1yWGoLZgAbHntuPngunXJBaKQDon4XK0-5UB8NvKXCd-JVxdn3CQ1AAAAFFxm6illN05dKOHfmzBQHMemGnH-#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmtACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEMKnrGUt2rvT0EqzlP-fTfQAgFul0Fg-192mEJVph39mhzky2SPVtxUT8c7xRtA_a4Ltb2BQHVCzsbHszPjVLr4yS-h-ePDQ1elm52gCq4NXH72zOq0p44sIsvsrpB8YMkCYPZgUUCK2odK1yWGoLZgAbHntuPngunXJBaKQDon4XK0-5UB8NvKXCd-JVxdn3CQ1AAAAFFxm6illN05dKOHfmzBQHMemGnH-#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest%5Fbaseurl.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
 				"desc": "Livesimulator with multiple fragments Marlin DRM (Expires 11-Sep-2021)",
 				"live": true
 			},
 			{
-                    		"title": "5.4 Livesim single moof/mdat",
-                    		"url": "https://refapp.hbbtv.org/livesim/02_llamanofragv1/manifest.mpd",
-                    		"img": "icons/icons_1x1_livestream.png",
-                    		"app": 6,
-                    		"desc": "Livesimulator with single fragment",
-                    		"live": true
-                	},
-                	{
-                    		"title": "5.5 Livesim single moof/mdat (Playready)",
-                    		"url": "https://refapp.hbbtv.org/livesim/02_llamanofragdrmv1/manifest.mpd",
-                    		"img": "icons/icons_1x1_livestream.png",
-                    		"drm": "playready",
-                    		"la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
-                    		"app": 6,
-                    		"desc": "Livesimulator with single fragment Playready DRM",
-                    		"live": true
-                	},
-                	{
-                    		"title": "5.6 Livesim single moof/mdat (Marlin)",
-                    		"url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmtACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEMKnrGUt2rvT0EqzlP-fTfQAgFul0Fg-192mEJVph39mhzky2SPVtxUT8c7xRtA_a4Ltb2BQHVCzsbHszPjVLr4yS-h-ePDQ1elm52gCq4NXH72zOq0p44sIsvsrpB8YMkCYPZgUUCK2odK1yWGoLZgAbHntuPngunXJBaKQDon4XK0-5UB8NvKXCd-JVxdn3CQ1AAAAFFxm6illN05dKOHfmzBQHMemGnH-#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamanofragdrmv1%2Fmanifest.mpd",
-                    		"img": "icons/icons_1x1_livestream.png",
-                    		"drm": "marlin",
-                    		"app": 6,
-                    		"desc": "Livesimulator with single fragment Marlin DRM (Expires 11-Sep-2021)",
-                    		"live": true
-                	}
-
+                "title": "5.4 Livesim single moof/mdat",
+                "url": "https://refapp.hbbtv.org/livesim/02_llamanofragv1/manifest_baseurl.mpd",
+                "img": "icons/icons_1x1_livestream.png",
+                "app": 6,
+                "desc": "Livesimulator with single fragment",
+                "live": true
+            },
+            {
+            	"title": "5.5 Livesim single moof/mdat (Playready)",
+            	"url": "https://refapp.hbbtv.org/livesim/02_llamanofragdrmv1/manifest_baseurl.mpd",
+            	"img": "icons/icons_1x1_livestream.png",
+            	"drm": "playready",
+                "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+                "app": 6,
+                "desc": "Livesimulator with single fragment Playready DRM",
+                "live": true
+            },
+            {
+            	"title": "5.6 Livesim single moof/mdat (Marlin)",
+                "url": 
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmtACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEMKnrGUt2rvT0EqzlP-fTfQAgFul0Fg-192mEJVph39mhzky2SPVtxUT8c7xRtA_a4Ltb2BQHVCzsbHszPjVLr4yS-h-ePDQ1elm52gCq4NXH72zOq0p44sIsvsrpB8YMkCYPZgUUCK2odK1yWGoLZgAbHntuPngunXJBaKQDon4XK0-5UB8NvKXCd-JVxdn3CQ1AAAAFFxm6illN05dKOHfmzBQHMemGnH-#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamanofragdrmv1%2Fmanifest%5Fbaseurl.mpd",
+                "img": "icons/icons_1x1_livestream.png",
+                "drm": "marlin",
+                "app": 6,
+                "desc": "Livesimulator with single fragment Marlin DRM (Expires 11-Sep-2021)",
+                "live": true
+            }
 			]
 		},
 	    {
