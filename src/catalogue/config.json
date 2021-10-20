@@ -71,11 +71,11 @@
 					"profile" : ["html5", "mse-eme"]					
                 },
                 {
-                    "title": "1.4 In-band subtitles (v5)",
-                    "url": "../../videos/02_gran_dillama_1080p_25f75g6sv5/manifest_subib.mpd",
+                    "title": "1.4 In-band subtitles (v7)",
+                    "url": "../../videos/02_gran_dillama_1080p_25f75g6sv7/manifest_subib.mpd",
                     "img": "icons/icons_1x1_in-band-subtitle.png",
                     "app": 6,
-					"desc": "In-band subtitles",
+					"desc": "In-band subtitles 2021",
 					"profile" : ["html5", "mse-eme"]				
                 },
                 {
