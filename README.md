@@ -30,11 +30,12 @@ for any problems or questions
  - See [tests] report
 
 ## PC Usage
-- MSE-EME version should work with any modern browser (staging or testing instance works best since production at some parts still has http links)
+- MSE-EME version should work with any modern browser
 - HbbTV Emulators are available for Firefox & Chrome (FireHbb, HybridTVViewer, RedOrbit)
 - Arrow keys work with cursor keys
 - Color keys are mapped to R, G, B, Y
 - Back key is mapped to backspace
+- For Playready DRM usage check also ticket https://github.com/HbbTV-Association/ReferenceApplication/issues/38 for up-to-date information
 
 ### Versions
 
@@ -59,6 +60,8 @@ for any problems or questions
  
  ### Multiperiod DASH content
  
+This is a work in progress, available in the _testing_ instance of the Reference Application. It works best in the MSE-EME version of the refapp, utilizing the latest released version of the Reference DASH-IF dash.js player. (https://reference.dashif.org/dash.js/)
+
 Please refer to [multi-period text file](https://refapp.hbbtv.org/videos/00_llama_multiperiod_v1/readme.txt) for information regarding multi-period DASH content. <br>
 
 From the user point of view one should see on the TV screen 
