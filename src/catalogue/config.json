@@ -144,7 +144,7 @@
                     "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=BwAAABc2N5IAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJAtiQBdnrYkwUDBsWqRcLy0RQKWVOaLQfGyE1fPOwhPqkzPIPkKc5OyxXmbQdDVazjDsKQEyjamFO-dfCFhPjXHuQQwDri4hEb3QtcfXEdmjA9Rfq6WJvePQfqHXENHXQ3wdQW1rO6lHlu26upwDJZj4ubeM-BGn7YIOHtUSet6QqHHLoFiZ07P-cGbE6q50YeEfT4cXR1s1qPTxXPP1OmSNIu9pw",
                     "drm": "playready",
                     "app": 6,
-					"desc": "ExpressPlay license server (Expires 20-Nov-2021)"
+					"desc": "ExpressPlay license server (Expires 13-Feb-2022)"
                 },					
                 {
                     "title": "2.2 HEVC 2160p video",
@@ -241,7 +241,7 @@
 					"img": "icons/icons_1x1_1080p.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (Expires 20-Nov-2021)",
+					"desc": "MS3 compound URL (Expires 13-Feb-2022)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
@@ -251,7 +251,7 @@
                     "img": "icons/icons_1x1_2160p.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (Expires 20-Nov-2021)",
+					"desc": "MS3 compound URL (Expires 13-Feb-2022)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
@@ -261,7 +261,7 @@
                     "img": "icons/icons_1x1_out-of-band-subtitle.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "TTML subtitles (Expires 20-Nov-2021)",
+					"desc": "TTML subtitles (Expires 13-Feb-2022)",
 					"subtitles" : [{
                         "code" : "eng",
                         "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_en.xml"
@@ -279,7 +279,7 @@
                     "img": "icons/icons_1x1_in-band-subtitle.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "In-band subtitles (Expires 20-Nov-2021)",
+					"desc": "In-band subtitles (Expires 13-Feb-2022)",
 					"profile" : ["html5"]					
                 },
                 {
@@ -289,7 +289,7 @@
                     "img": "icons/icons_1x1_insert-ad.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "Ads delivered from any ad-server on ad-event time (Expires 20-Nov-2021) ",
+					"desc": "Ads delivered from any ad-server on ad-event time (Expires 13-Feb-2022) ",
 					"adBreaks" : [
 						{ "position" : "preroll", "ads" : 1 },
 						{ "position" : 20, "ads" : 3 },
@@ -306,7 +306,7 @@
                     "img": "icons/icons_1x1_in-band-events.png",
 					"drm": "marlin",
                     "app": 6,
-					"desc": "TextTrack cues in inband tracks (Expires 20-Nov-2021)",
+					"desc": "TextTrack cues in inband tracks (Expires 13-Feb-2022)",
 					"profile" : ["html5"]					
                 },
 		{
@@ -316,7 +316,7 @@
                     "img": "icons/icons_1x1_multipleaudio.png",
                                         "drm": "marlin",
                     "app": 6,
-                                        "desc": "AudioTrack changing test (Expires 20-Nov-2021)"
+                                        "desc": "AudioTrack changing test (Expires 13-Feb-2022)"
                 }
             ]
         },
@@ -391,7 +391,7 @@
         "ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=DwABQAAFzYADHJlZmVyZW5jZWFwcCnRACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEAjxo7wb1t1n0nYc7TKkV8QAgEZgk7cGyRqKpUAuA5lA2HhbaRFEm47PDGkW_VXPniD5d_lE2TERsf8fmOxjRxA4Dx4UgiOVv3w84gAZOHQu34EfR79y7Q8s060WnH9zSkHo8YalgIv-GvtvRlYqDqe3cL6hUg7guKZ9DThgEjXK_lZ2H2m7X2tlUXFqY5nZIOJZAAAAFPOaAhOafH_JXeZQ3YpqTIvOXt8k#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest%5Fbaseurl.mpd",
                         "img": "icons/icons_1x1_livestream.png",
                         "app": 6,
-                        "desc": "Livesimulator with multiple fragments Marlin DRM (Expires 20-Nov-2021)",
+                        "desc": "Livesimulator with multiple fragments Marlin DRM (Expires 13-Feb-2022)",
                         "live": true
                     },
                     {
@@ -419,7 +419,7 @@
                         "img": "icons/icons_1x1_livestream.png",
                         "drm": "marlin",
                         "app": 6,
-                        "desc": "Livesimulator with single fragment Marlin DRM (Expires 20-Nov-2021)",
+                        "desc": "Livesimulator with single fragment Marlin DRM (Expires 13-Feb-2022)",
                         "live": true
                     }
 			]
