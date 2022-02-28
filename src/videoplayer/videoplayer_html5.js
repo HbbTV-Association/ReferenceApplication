@@ -705,7 +705,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
+VideoPlayerHTML5.prototype.startVideo = function( isLive ){
 	console.log("startVideo()");
 	this.subtitleTrack = false
 	// reset progress bar always
@@ -726,21 +726,20 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 		this.subtitleTrack = false;
 	}
 	
-	if( nthCall && nthCall > 0 ){
-		try{
-			var broadcast = $("#broadcast")[0];
-			if( !broadcast ){
-				$("body").append("<object type='video/broadcast' id='broadcast'></object>");
-			}
-			broadcast = $("#broadcast")[0];
-			console.log( broadcast );
+	try{
+		var broadcast = $("#broadcast")[0];
+		if( !broadcast ){
+			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+		}
+		broadcast = $("#broadcast")[0];
+		if( broadcast.playState != 3 /* stopped */ ){
 			broadcast.bindToCurrentChannel();
 			broadcast.stop();
 			console.log("broadcast stopped");
 		}
-		catch(e){
-			console.log("error stopping broadcast");
-		}
+	}
+	catch(e){
+		console.log("error stopping broadcast");
 	}
 	
 	var self = this;
@@ -789,7 +788,7 @@ VideoPlayerHTML5.prototype.startVideo = function( isLive, nthCall ){
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo( isLive, 2 );
+				self.startVideo( isLive );
 			}
 			else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );
