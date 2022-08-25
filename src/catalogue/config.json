@@ -10,12 +10,12 @@
                     "submenu": 1
                 },
                 {
-                    "title": "PlayReady1",
+                    "title": "PlayReady 1",
                     "app": 0,
                     "submenu": 2
                 },
                 {
-                    "title": "PlayReady2",
+                    "title": "PlayReady 2",
                     "app": 0,
                     "submenu": 3
                 },								
@@ -162,7 +162,7 @@
         },
         {
             "center": 0,
-            "title": "DASH PlayReady1",
+            "title": "DASH PlayReady 1",
             "items": [
 				{
                     "title": "2.1 AVC 1080p video",
@@ -184,10 +184,10 @@
                     "title": "2.1.2 AVC 1080p video",
                     "url": "https://refapp.hbbtv.org/videos/tears_of_steel_1080p_25f50g8sv5/drm/manifest.mpd",
                     "img": "icons/icons_1x1_1080p.png",
-                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=BwAAABc2N3YAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJBH5dvsUBBid8c7nQMqguivNKOdyTOGf_Qs6SWIVlVUVzcGxsRTLas8XQFil7uO5a57yFxTx4xPZYBg-nqESNcbyx_fjEeWoXS19KUxvaNkfsGx_b4XKbDPwgOedEDm2Tbahh8RoMnEPk25083siOaiqTRLeLMWnCH0NPGCWk7rnpT0CSsdppdx6S7Yj2kvYzDPoLrMkY9dgVn8Cqlxdz7fLpyFnA",
+                    "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=BwAAABc2N5YAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJDnpZHp3pug5muyPc1d5v2NyaClmrqZTXtpc-NXNG5KQrcm8JvvDGbEl2xwml0Ub8XCYAEEYobX85bcp9CvMWFCCPZGfLdPT5VHO9xpPuwdrYHBCDs3DuNR6F229aHRXP7lnj4vfgX4rLkURxroes-2u0jqyHbu5KHaQzy0MMcaShwzihPJNNTReIkGYvPt3ojFuOMfvAY1QrxdTQHLM6mM8Gt8OQ",
                     "drm": "playready",
                     "app": 6,
-					"desc": "ExpressPlay license server (Expires 30-Jul-2022)"
+					"desc": "ExpressPlay license server (Expires 25-Sep-2022)"
                 },
                 {
                     "title": "2.2 HEVC 2160p video",
@@ -275,7 +275,7 @@
         },
         {
             "center": 0,
-            "title": "DASH PlayReady2",
+            "title": "DASH PlayReady 2",
             "items": [
                 {
                     "title": "2.9 AVC 1080p SL2000",
@@ -364,31 +364,31 @@
                 {
                     "title": "3.1 AVC 1080p video (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
 					"img": "icons/icons_1x1_1080p.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (Expires 30-Jul-2022)",
+					"desc": "MS3 compound URL (Expires 25-Sep-2022)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
                     "title": "3.2 HEVC 2160p video (v3)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmaACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHyIfnrlCKAMUzlOVZL2-rwAgLok7eCT83FCOM0_QqDLPRBPwdpGmJjxW1PMJcwZYQJyCqnZ2ZELyyqvsOvYIG3LSK5v72hL7_f_hqEtB01-jljZxyL7QdbMWW1KUkjRzOuZHkOnziEyLneX-sDmPL2kAaW9GXiHYrbjvyNXkacw0KkTVrFifqWqUJob8wp2KQ12AAAAFLJnKYWPVGIcxesaEzGxGbpUHL5V#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F01_llama_drama_2160p_25f75g6sv3%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnOACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJrVeus_BsO3cYnLdL4mRBUAgIa52cqlRj5pWN_j6y3p8iWM5aNI1p0BgMZmL6pPfymAuaw9ftO7S6Ueb0Je5n62qNOuWmMOGgjJiD1-FC-OFT0Uor2ClxcYH-Fu0XIsvbXnvNchVZ1L-FONP-tUUUkcDtVPmq0SyUvA2Vt_SR39wErWUcLor2bHdhu5rLP94DBdAAAAFBvD_A2T7HGdmDs0kLqkLtPjGXj3#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F01_llama_drama_2160p_25f75g6sv3%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_2160p.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "MS3 compound URL (Expires 30-Jul-2022)",
+					"desc": "MS3 compound URL (Expires 25-Sep-2022)",
 					"profile" : ["html5", "oipf"]
                 },
                 {
                     "title": "3.3 Out-of-band subtitles (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_out-of-band-subtitle.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "TTML subtitles (Expires 30-Jul-2022)",
+					"desc": "TTML subtitles (Expires 25-Sep-2022)",
 					"subtitles" : [{
                         "code" : "eng",
                         "src" : "../getSubs.php?file=https://refapp.hbbtv.org/videos/02_gran_dillama_1080p_25f75g6sv3/sub_en.xml"
@@ -402,21 +402,21 @@
 				{
                     "title": "3.4 In-band subtitles (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_subib.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_subib.mpd",
                     "img": "icons/icons_1x1_in-band-subtitle.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "In-band subtitles (Expires 30-Jul-2022)",
+					"desc": "In-band subtitles (Expires 25-Sep-2022)",
 					"profile" : ["html5"]					
                 },
                 {
                     "title": "3.5 Advert insertion (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_insert-ad.png",
                     "drm": "marlin",
                     "app": 6,
-					"desc": "Ads delivered from any ad-server on ad-event time (Expires 30-Jul-2022) ",
+					"desc": "Ads delivered from any ad-server on ad-event time (Expires 25-Sep-2022) ",
 					"adBreaks" : [
 						{ "position" : "preroll", "ads" : 1 },
 						{ "position" : 20, "ads" : 3 },
@@ -429,21 +429,21 @@
                 {
                     "title": "3.6 In-band events (v4)",
                     "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_evtib.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_25f75g6sv4%2Fdrm%2Fmanifest_evtib.mpd",
                     "img": "icons/icons_1x1_in-band-events.png",
 					"drm": "marlin",
                     "app": 6,
-					"desc": "TextTrack cues in inband tracks (Expires 30-Jul-2022)",
+					"desc": "TextTrack cues in inband tracks (Expires 25-Sep-2022)",
 					"profile" : ["html5"]					
                 },
 		{
                     "title": "3.7 Multiple audio (v4)",
                     "url":
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_ma_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Fvideos%2F02_gran_dillama_1080p_ma_25f75g6sv4%2Fdrm%2Fmanifest.mpd",
                     "img": "icons/icons_1x1_multipleaudio.png",
                     "drm": "marlin",
                     "app": 6,
-                    "desc": "AudioTrack changing test (Expires 30-Jul-2022)"
+                    "desc": "AudioTrack changing test (Expires 25-Sep-2022)"
                 }
             ]
         },
@@ -515,10 +515,10 @@
 			{
 				"title": "5.3 Livesim multi moof/mdat Marlin DRM",
 				"url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest%5Fbaseurl.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamadrmv2%2Fmanifest%5Fbaseurl.mpd",
 				"img": "icons/icons_1x1_livestream.png",
 				"app": 6,
-				"desc": "Livesimulator with multiple fragments Marlin DRM (Expires 30-Jul-2022)",
+				"desc": "Livesimulator with multiple fragments Marlin DRM (Expires 25-Sep-2022)",
 				"live": true
 			},
 			{
@@ -542,11 +542,11 @@
             {
             	"title": "5.6 Livesim single moof/mdat (Marlin)",
                 "url": 
-"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmZACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEFleEa32CRSEeDMH2PFViEoAgByPfY36WurIphM9ykOBT4Hw7A2owlWcWT-YG_V72-v2An73z0akUSROE6oL8p1XlHwdQd6mratNTdTUN24GkaVdOrUXfwWH-Yk-J9D0La0DHpeYewQUE0uLmVDiKWxytn0Y5dpE6BoR7Pp8CVfx4232S1J5jvSe4_sI01adAAisAAAAFGHl7U5D5vbELIfqrg9Vw6zUioKp#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamanofragdrmv1%2Fmanifest%5Fbaseurl.mpd",
+"ms3://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCm7ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEE3jNFxnzc9h3cO7exMVmAoAgJcw4JxbfmwX7aSuadixKK3GJm7GpTlxz9H6o1-AeSwNg6wZ_EjgYf4uxXOs8_cxFTzCXyzAEYCWGvpQB8XdjgWSL6eIZukA3X6uLDOItwifEVM4m1TRIzAgtGlxx-Ldt0Ymy4BdCpswlaroXCEB4E8LIZSTNCS16nFhiNTUeRlWAAAAFPIhKbINKiUaHBUUnjW4L3VHua3v#https%3A%2F%2Frefapp.hbbtv.org%2Flivesim%2F02_llamanofragdrmv1%2Fmanifest%5Fbaseurl.mpd",
                 "img": "icons/icons_1x1_livestream.png",
                 "drm": "marlin",
                 "app": 6,
-                "desc": "Livesimulator with single fragment Marlin DRM (Expires 30-Jul-2022)",
+                "desc": "Livesimulator with single fragment Marlin DRM (Expires 25-Sep-2022)",
                 "live": true
             }
 			]
