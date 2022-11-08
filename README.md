@@ -55,8 +55,8 @@ for any problems or questions
  
   ## Testing
  - Intended for rolling out new features and signaling
- - New content: Multiperiod DASH (Task 6)
- - available at https://refapp.hbbtv.org/testing/
+ - New content: Playready CBCS 
+ - available at https://refapp.hbbtv.org/testing/catalogue/
  
  ### Multiperiod DASH content
  
