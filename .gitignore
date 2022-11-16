@@ -1,6 +1,9 @@
 *.bak
-src/videoplayer/monitor/*
+#src/videoplayer/monitor/*
 src/catalogue/log/*.json
+src/catalogue/log/*.txt
+src/log/*.json
+src/log/*.txt
 deploy
 out
 videos

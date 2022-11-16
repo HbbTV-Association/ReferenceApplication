@@ -27,7 +27,6 @@ function monitor( monitorRoot ) {
 						object.setAttribute("id", "oipfcap");
 						object.setAttribute("type", "application/oipfCapabilities");
 						document.body.appendChild( object );
-						
 					}
 					return object;
 				}();

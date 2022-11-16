@@ -1,0 +1,47 @@
+<profilelist>
+	<ui_profile name="OITF_HD_UIPROF+META_EIT+META_SI+HTML5_MEDIA+ANA+DVB_S+DVB_S2+DVB_T+DVB_T2+DVB_C+DVB_C2+POINTER+DRM">
+		<ext>
+			<video_broadcast type="ID_ANALOG ID_DVB_T ID_DVB_S ID_DVB_S2 ID_DVB_T2 ID_DVB_C ">true</video_broadcast>
+			<overlaylocaltuner>global</overlaylocaltuner>
+			<parentalcontrol scheme="dvb-si">true</parentalcontrol>
+			<extendedAVControl>true</extendedAVControl>
+			<clientMetadata type="dvb-si eit-pf">true</clientMetadata>
+			<configurationChanges>true</configurationChanges>
+			<pointer>true</pointer>
+			<drm DRMSystemID="urn:dvb:casystemid:19219">MP4</drm>
+		</ext>
+	</ui_profile>
+	<audio_profile name="MPEG1_L3" type="audio/mpeg"/>
+	<audio_profile name="HEAAC" type="audio/mp4"/>
+	<video_profile name="TS_AVC_SD_25_MPEG1_L2" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_25_MPEG1_L2" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_25_MPEG1_L3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_25_MPEG1_L3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_25_HEAAC" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_25_HEAAC" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_25_AC3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_25_AC3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_30_MPEG1_L2" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_30_MPEG1_L2" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_30_MPEG1_L3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_30_MPEG1_L3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_30_HEAAC" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_30_HEAAC" type="video/mpeg"/>
+	<video_profile name="TS_AVC_SD_30_AC3" type="video/mpeg"/>
+	<video_profile name="TS_AVC_HD_30_AC3" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_SD_25_MPEG1_L2" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_HD_25_MPEG1_L2" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_SD_25_MPEG1_L3" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_HD_25_MPEG1_L3" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_SD_25_HEAAC" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_HD_25_HEAAC" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_SD_25_AC3" type="video/mpeg"/>
+	<video_profile name="TS_MPEG2_HD_25_AC3" type="video/mpeg"/>
+	<video_profile name="MP4_AVC_SD_25_E-AC3" type="video/mp4" DRMSystemID="urn:dvb:casystemid:19219"/>
+	<video_profile name="MP4_AVC_HD_25_E-AC3" type="video/mp4" DRMSystemID="urn:dvb:casystemid:19219"/>
+	<video_profile name="MP4_AVC_SD_25_HEAAC" type="video/mp4" transport="dash" DRMSystemID="urn:dvb:casystemid:19219"/>
+	<video_profile name="MP4_AVC_HD_25_HEAAC" type="video/mp4" transport="dash" DRMSystemID="urn:dvb:casystemid:19219"/>
+	<video_profile name="MP4_AVC_SD_25_HEAAC_EBUTTD" type="video/mp4" transport="dash" DRMSystemID="urn:dvb:casystemid:19219"/>
+	<video_profile name="MP4_AVC_HD_25_HEAAC_EBUTTD" type="video/mp4" transport="dash" DRMSystemID="urn:dvb:casystemid:19219"/>
+	<html5_media>true</html5_media>
+</profilelist>

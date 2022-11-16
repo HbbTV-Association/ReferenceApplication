@@ -105,7 +105,7 @@ function showInfo( msg, timeout, inMs )
 		if( typeof msg != "string" ){
 			msg = JSON.stringify( msg );
 		}
-		$("#info").html( XMLEscape( msg ) );
+		$("#info").html( XMLEscape(msg,false,true) );
 	}
 	catch(e){
 		console.log( "error in show info function: " + e.message );
@@ -166,6 +166,7 @@ function showInfoBox( html )
 	if( $("#infoBox > .verticalMiddle").outerHeight() > $("#infoBox").outerHeight() ){
 		// inner container is larger. Activate scrolling
 		infoBoxScrollable = true;
+		$("#infoBox > .verticalMiddle").css( "top", "500px" );
 	}
 	else{
 		infoBoxScrollable = false;
@@ -175,7 +176,7 @@ function showInfoBox( html )
 function addTableRow( table, cells ){
 	var row = $("<div style='display: table-row;background:rgba(0,0,0,0.9);'></div>");
 	$.each( cells, function (i, value){
-		row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+value+"</div>");
+		row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+ XMLEscape(value,false,true) +"</div>");
 	});
 	table.append( row );
 }
@@ -203,6 +204,14 @@ String.prototype.hashCode = function() {
   }
   return hash;
 };
+
+// create GUID
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 // adds event listener (action) for multiple (events) "separated by space" for object (obj) 
 function addEventListeners( obj, events, action ){
@@ -320,7 +329,9 @@ function registerKeys(mode) {
 		mask = 0x1 + 0x2 + 0x4 + 0x8 + 0x10 + 0x20 + 0x40 + 0x80 + 0x100;
 	}
 	try {
-		var app = document.getElementById('appmgr').getOwnerApplication(document);
+        if( typeof( app ) == "undefined" ){
+            app = document.getElementById('appmgr').getOwnerApplication(document); // use global variable app. Declare if not declared
+        }
 		//showInfo("register keys mask: " + mask);
 		app.privateData.keyset.setValue(mask);
 		if( mode >= 0 ){
@@ -334,22 +345,20 @@ function stripTags( str ){
 	return str.replace(/<\/?[^>]+(>|$)/g, "");
 }
 
-function XMLEscape(sValue, bUseApos) {
+function XMLEscape(sValue, bUseApos, bStripTags) {
 	try{
 		var sval="";
 		if(!sValue) return "";
-		sValue = stripTags( sValue );
+		
+		if(bStripTags) sValue = stripTags(sValue); // remove xml field delimiters to have a clear value string
 
-		if (sValue.search("&lt;") != -1 || sValue.search("&gt;") != -1  || sValue.search("&amp;") != -1  || sValue.search("&quot;") != -1  || sValue.search("&apos;") != -1  || sValue.search("&#39;") != -1  || sValue.search("&#x2F;") != -1 ){
-			return sValue;
-		}
 		for(var idx=0; idx < sValue.length; idx++) {
 			var c = sValue.charAt(idx);
 			if      (c == '<') sval += "&lt;";
 			else if (c == '>') sval += "&gt;";
 			else if (c == '&') sval += "&amp;";
 			else if (c == '"') sval += "&quot;";
-			else if (c == '/') sval += "&#x2F;";
+			//else if (c == '/') sval += "&#x2F;";
 			else if (c == '\'') sval += (bUseApos ? "&apos;" : "&#39;");
 			else sval += c;
 		}
@@ -423,6 +432,13 @@ function arrayBufferToString(buffer){
 	return str;
 }
 
+// Convert Uint8Array bytes to String 
+function uint8ArrayToString(arrUint8) {
+	if(!arrUint8) return "";
+	else if(typeof arrUint8 == "string") return arrUint8; // failsafe
+	return String.fromCharCode.apply(null, arrUint8);
+}
+
 /***************
 	COOKIES
 ***************/
@@ -461,10 +477,8 @@ function deleteCookie(name ) {
 	Helper functions
 ***/
 
-function displayChannelList(){
-	
-	broadcast = $("#broadcast")[0];
-		
+function displayChannelList(){	
+	broadcast = $("#broadcast")[0];		
 	if( !broadcast ){
 		$("body").append('<object id="broadcast" type="video/broadcast"></object>');
 		broadcast = $("#broadcast")[0];
@@ -473,16 +487,17 @@ function displayChannelList(){
 	try {
 		var lst = broadcast.getChannelConfig().channelList;
 		var table = $("<div class='verticalMiddle'></div>");
-		
+		addTableRow( table, ["", "Name", "ccid", "onid", "sid", "tsid"] );
 		
 		for (var i=0; i<lst.length; i++) {
 			var ch = lst.item(i);
-			addTableRow( table, [i, ch.name, ch.ccid, ch.onid, ch.sid, ch.tsid] );
+			console.log(i+1, ch.name, ch.ccid, ch.onid, ch.sid, ch.tsid);
+            addTableRow( table, [""+(i+1), ch.name, ch.ccid, ""+ch.onid, ""+ch.sid, ""+ch.tsid] );
 		}
+		
 		showInfoBox( table );
-
 	} catch (e) {
-		showInfo('accessing channel list failed.');
+		showInfo('accessing channel list failed.' + e.message);
 		return;
 	}
 }
@@ -565,28 +580,34 @@ function getChannelData(){
 	}
 }
 
+function deleteAllCookies(param1) {
+	document.cookie = "RefappWatched=; path=/; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+	console.log("Deleted cookie 'RefappWatched'");
+}
 
 function readAllCookies(){
 	var cookies = document.cookie.split(';');
 	list = {};
 	$.each( cookies, function( i, cookie ){
 		var search = cookie.grep(/(\w*).?=(.*)/);
-		list[ search[0] ] = search[1];
+		if(search!=null)
+			list[ search[0] ] = search[1];
 	} );
-	return list;
-		
+	return list;		
 }
 
 function displayCookies(time){
 	var cookies = readAllCookies();
 	var table = $("<div class='verticalMiddle'></div>");
+	if($.isEmptyObject(cookies))
+		cookies[""]="no cookies";
 	$.each(cookies, function(name, value){
 		if( value.length > 80 ){
 			var lbreak = 80;
 			while(lbreak < value.length){
 				value = value.substr(0, lbreak) + "<br/>" + value.substr( lbreak );
 				lbreak += 80;
-				console.log("added line break");
+				//console.log("added line break");
 			}
 		}
 		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+name+"</div><div style='display: table-cell;vertical-align: middle;border-bottom: 1px solid white;border-top: 1px solid white;'>"+value+"</div></div>");
@@ -597,82 +618,180 @@ function displayCookies(time){
 /*****
 Capabilities
 *****/
-
 var capabilities = null;
-
-var xmlExample = "<capabilities>  <getFriends>true</getFriends>  <cacheFriends>true</cacheFriends>  <followPerson>true</followPerson>  <doNotFollowPerson>false</doNotFollowPerson>  <getActivities>true</getActivities>  <cacheActivities>false</cacheActivities>  <displayUrl>false</displayUrl>  <useLogonWebAuth>false</useLogonWebAuth>  <hideHyperlinks>false</hideHyperlinks>  <supportsAutoConfigure>false</supportsAutoConfigure>  <contactSyncRestartInterval>60</contactSyncRestartInterval>  <dynamicActivitiesLookupEx>true</dynamicActivitiesLookupEx>  <dynamicContactsLookup>false</dynamicContactsLookup>  <useLogonCached>false</useLogonCached>  <hideRememberMyPassword>false</hideRememberMyPassword>  <createAccountUrl>http://contoso.com/createAccount</createAccountUrl>  <forgotPasswordUrl>http://contoso.com/forgotPassword</forgotPasswordUrl></capabilities>";
-
 var getCapabilities = function() {
 	try {
-			var capobj = function(){
-				var object = document.getElementById("oipfcap");
-				if( !object ){
-					object = document.createElement("object");
-					object.setAttribute("id", "oipfcap");
-					object.setAttribute("type", "application/oipfCapabilities");
-					document.body.appendChild( object );
-					
-				}
-				return object;
-			}();
-			try {		
-				capabilities = capobj.xmlCapabilities;
-			} catch (e) {
-				capabilities = null;
+		var capobj = function(){
+			var object = document.getElementById("oipfcap");
+			if( !object ){
+				object = document.createElement("object");
+				object.setAttribute("id", "oipfcap");
+				object.setAttribute("type", "application/oipfCapabilities");
+				document.body.appendChild( object );
+				
 			}
+			return object;
+		}();
+		capabilities = capobj.xmlCapabilities;
 	} catch (e) {
 		console.log("error getting capabilities");
+		capabilities = null;
 	}
-	xmlstr = "";
+	
+	var xmlstr = "";
 	if (capabilities != null) {
+		// PrettyPrint xml with newline indentation
+		XMLIndentChildren(capabilities, capabilities.documentElement, "\n", "\n  ");
 		var serializer = new XMLSerializer();
-		var xmlstr = serializer.serializeToString( capabilities );
+		xmlstr = $.trim( serializer.serializeToString( capabilities ) );
 	} else {
 		xmlstr = "<profilelist></profilelist>";
 	}
-	//xmlstr = xmlExample;
-	//console.log( "capabilities original:" ,capabilities );
-	console.log( "capabilities:" ,xmlstr );
-	var entries = xmlstr.grep(/\<(\w*)\>/g).map(function(i){return i.replace("<","").replace(">","")});
-	console.log( entries, xmlstr );
-	var table = $("<div class='verticalMiddle'></div>");
-	$.each(entries, function(i,name){
-		//var value = capabilities.getElementsByTagName(name)[0].nodeValue;
-		var value = $(xmlstr).find( name ).text();
-		console.log( value );
-		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;'>"+name+"</div><div style='display: table-cell;vertical-align: middle;border-bottom: 1px solid white;border-top: 1px solid white;'>"+value+"</div></div>");
-	});
-	showInfoBox( table );
-	//showInfoBox( xmlstr.replace(/\</, "\<").replace(/\>/, "\>") );
-	//showInfo( xmlstr );
-}
+	console.log( "capabilities:", xmlstr );
 
+	var table = $("<div class='verticalMiddle'></div>");	
+	var printableSource = xmlstr.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+	table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>UserAgent</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ navigator.userAgent +"</div></div>");
+	table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>XML</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'><pre style='word-break: break-all;'>"+ printableSource +"</pre></div></div>");
+	showInfoBox( table );
+}
 
 function mediaPlaySpeeds(){
-	
 }
 
+function displayDRMCapabilities() {
+	var drmAgent = $("#oipfDrm")[0];
+	if(!drmAgent){
+		if( !$("#drm")[0] )
+			$("body").append("<div id='drm'></div>");
+		console.log("Create DRM agent");
+		$("#drm").html('<object id="oipfDrm" type="application/oipfDrmAgent" width="0" height="0"></object>');	
+		drmAgent = $("#oipfDrm")[0];
+	}
+	
+	var capabilities = null;
+	try {
+		var capobj = function(){
+			var object = document.getElementById("oipfcap");
+			if( !object ){
+				console.log("Create oipfcap object");
+				object = document.createElement("object");
+				object.setAttribute("id", "oipfcap");
+				object.setAttribute("type", "application/oipfCapabilities");
+				document.body.appendChild( object );				
+			}
+			return object;
+		}();
+		capabilities = capobj.xmlCapabilities;
+	} catch (e) {
+		console.log("Error getting capabilities");	
+	}
+	
+	var xmlstr = "";
+	if (capabilities != null) {
+		XMLIndentChildren(capabilities, capabilities.documentElement, "\n", "\n  ");
+		var serializer = new XMLSerializer();
+		var sArr = $.trim( serializer.serializeToString( capabilities ) ).split("\n");
+		for(var idx=0; idx<sArr.length; idx++) {
+			var val = $.trim(sArr[idx]).toUpperCase();
+			if(val.indexOf("DRM")>=0)
+				xmlstr += $.trim(sArr[idx])+"\n";
+		}
+	}
+	
+	getDeviceID("marlin", function(isOk, retval) {
+		var jsonRetval = { deviceID_marlin: "", deviceID_playready: "" };
+		jsonRetval.deviceID_marlin = retval;
+		getDeviceID("playready", function(isOk, retval) {
+			jsonRetval.deviceID_playready = retval;
+			xmlstr = "<deviceID sysid=\"marlin\">" + jsonRetval.deviceID_marlin + "</deviceID>\n"
+				+ "<deviceID sysid=\"playready\">" + jsonRetval.deviceID_playready + "</deviceID>\n"
+				+ xmlstr;
+			console.log(xmlstr);
+			var table = $("<div class='verticalMiddle'></div>");
+			var printableSource = xmlstr.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+			table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>DRM</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'><pre style='word-break: break-all;'>"+ printableSource +"</pre></div></div>");
+			showInfoBox( table );
+		});
+	});	
+}
 
+function getDeviceID(sysid, callback) {
+	// Get deviceID from oipfDrmAgent object
+	var DRMMessage   = '{"command": "getDeviceID"}';
+	var DRM_MSG_TYPE = "application/vnd.marlin.xpca+json";
 
+	sysid = sysid ? sysid.toUpperCase() : "default";
+	var DRM_SYSTEM_ID = 
+		sysid=="MARLIN" ? "urn:dvb:casystemid:19188" :  // marlin XCA
+		"urn:dvb:casystemid:19219"; // playready
 
+	var drmAgent = $("#oipfDrm")[0];
+	if(!drmAgent) {
+		console.log("oipfDrm is null");
+		return;
+	}
+	
+	console.log("Get deviceId for " + DRM_SYSTEM_ID);
+	drmAgent.onDRMMessageResult = function(msgID, resultMsg, resultCode) {
+		console.log("msgID: " + msgID + ", resultCode: " + resultCode
+			+ ", resultMsg: " + resultMsg);
+		try {
+			var deviceIdObj = JSON.parse(resultMsg);
+			//window.localStorage.setItem('deviceID', deviceIdObj.deviceID.ID);
+			//showInfo( JSON.stringify(deviceIdObj) );			
+			callback(true, JSON.stringify(deviceIdObj) );
+		} catch(e) {
+			if(!resultMsg || resultMsg=="") resultMsg=""+resultCode;
+			//showInfo("Error "+ XMLEscape(resultMsg,false,true) );
+			callback(false, "Error "+ XMLEscape(resultMsg,false,true) );
+		}
+	};
 
+	try {
+		var msgID = drmAgent.sendDRMMessage(DRM_MSG_TYPE, DRMMessage, DRM_SYSTEM_ID);
+	} catch(ex) {
+		callback(false, "Error "+ XMLEscape(ex.message));
+	}
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function XMLIndentChildren(xmlDoc, node, prevPrefix, prefix) {
+  var children = node.childNodes;
+  var idx;
+  var prevChild = null;
+  var prevChildType = 1;
+  var child = null;
+  var childType;
+  for (idx = 0; idx < children.length; idx++) {
+    child = children[idx];
+    childType = child.nodeType;
+    if (childType != 3) {
+      if (prevChildType == 3) {
+        // Update prev text node with correct indent
+        prevChild.nodeValue = prefix;
+      } else {
+        // Create and insert text node with correct indent
+        var textNode = xmlDoc.createTextNode(prefix);
+        node.insertBefore(textNode, child);
+        idx++;
+      }
+      if (childType == 1) {
+        var isLeaf = child.childNodes.length == 0 || child.childNodes.length == 1 && child.childNodes[0].nodeType != 1;
+        if (!isLeaf) {
+          XMLIndentChildren(xmlDoc, child, prefix, prefix + "  ");
+        }
+      }
+    }
+    prevChild = child;
+    prevChildType =childType;
+  }
+  if (child != null) {
+    // Previous level indentation after last child
+    if (childType == 3) {
+      child.nodeValue = prevPrefix;
+    } else {
+      var textNode = xmlDoc.createTextNode(prevPrefix);
+      node.append(textNode);
+    }
+  }
+}

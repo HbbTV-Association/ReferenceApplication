@@ -49,7 +49,14 @@ public class Utils {
 				params.put(args[idx].trim(), "");
 		}
 		
-		// read config file		
+		// read config file or use a default dasher.properties in a dasher app folder
+		if (!params.containsKey("config")) {
+			// "C:\apps\refapp\tools\java\lib" -> "C:/apps/refapp/tools/java/dasher.properties"
+			String libFolder = Utils.getLibraryFolder(MediaTools.class);
+			libFolder = Utils.normalizePath(libFolder, true);
+			params.put("config", new File(libFolder).getParent()+"/dasher.properties" );
+		}
+		
 		String config = getString(params, "config", "", true);
 		if (!config.isEmpty()) {
 			FileInputStream fis = new FileInputStream(config);
@@ -135,7 +142,7 @@ public class Utils {
 		return DatatypeConverter.printBase64Binary(buf);
 	}	
 
-	public static byte[] bse64Decode(String buf) {
+	public static byte[] base64Decode(String buf) {
 		return DatatypeConverter.parseBase64Binary(buf);
 	}
 
@@ -173,8 +180,34 @@ public class Utils {
             (byte)(value >>> 24)};
 	}
 	
+    public static int getFourCCInt(String text) {
+    	// 4CC("cbcs") to integer(1667392371)
+        int val = 0;
+        for (int idx = 0; idx < 4; idx++) {
+            val <<= 8;
+            val |= text.charAt(idx);
+        }
+        return val;
+    }
+    
+    public static String getFourCC(int value) {
+    	// 4CC integer(1667392371) to text("cbcs")     	
+        String s = "";
+        s += (char) ((value >> 24) & 0xFF);
+        s += (char) ((value >> 16) & 0xFF);
+        s += (char) ((value >> 8) & 0xFF);
+        s += (char) (value & 0xFF);
+        return s;
+	}	
+		
 	public static boolean isWindows() {
 		return System.getProperty("os.name").toLowerCase(Locale.US).indexOf("windows") != -1;
+	}
+	
+	public static byte[] trimArray(byte[] arr, int trimLeadingBytes, int trimTrailingBytes) {
+		byte[] newArr = new byte[arr.length-trimLeadingBytes-trimTrailingBytes];
+		System.arraycopy(arr, trimLeadingBytes, newArr, 0, newArr.length);
+		return newArr;
 	}
 		
 	/**
@@ -282,6 +315,23 @@ public class Utils {
 		}		
 	}
 	
+	/**
+	 * Read binary file.
+	 */
+	public static byte[] readFile(File file) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		FileInputStream fis = new FileInputStream(file);
+		try {
+			byte[] buf=new byte[2*1024];
+			int read;
+			while( (read=fis.read(buf))>-1 )
+				baos.write(buf, 0, read);
+		} finally {
+			fis.close();
+		}
+		return baos.toByteArray();
+	}
+		
 	public static void saveFile(File file, byte[] b) throws IOException {
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;		

@@ -3,6 +3,7 @@ function Menu(element_id, config){
 }
 
 Menu.prototype.init = function(element_id, config){
+	
 	var self = this;
 	self.focus = null;
 	self.element = document.getElementById(element_id);
@@ -93,9 +94,9 @@ Menu.prototype.setActiveGrid = function(grid){
 	}
 }
 
-Menu.prototype.navigate = function(key){
+Menu.prototype.navigate = function(key, force){
 	var self = this;
-	if(!animating){
+	if(!animating || force){
 
 		clearTimeout(self.startBoxVideoTimeout);
 
@@ -108,18 +109,6 @@ Menu.prototype.navigate = function(key){
 					}
 					else if(self.focus.url && self.focus.url.length > 0){
 						if( self.focus.url.match(/\.mpd$/) || self.focus.url.match(/\.mp4$/) || self.focus.app == 6 ){
-							/*
-							// if profile changed, to 1.5 use VideoPlayer
-							if( profile.hbbtv == "1.5" && !(vplayer instanceof VideoPlayer ) ){
-								vplayer = new VideoPlayer("videodiv", profile);
-								vplayer.populate();
-							}
-							else if( profile.hbbtv == "2.0" && !(vplayer instanceof VideoPlayerHTML5 ) ){
-								vplayer = new VideoPlayerHTML5("videodiv", profile);
-								vplayer.populate();
-							}
-							*/
-							
 							// if video has not autostarted, start it
 							if( !vplayer.isPlaying() ){
 								console.log("init player session");
@@ -240,6 +229,13 @@ Menu.prototype.navigate = function(key){
 	}
 }
 
+Menu.prototype.savePosition = function(){
+	var topIndex = $(this.topmenu.element).find(".selected").index();
+	var gridColIndex = $(menu.focus.element.parentElement).index();
+	var gridRowIndex = $(menu.focus.element).index();
+	sessionStorage.setItem( "refappPosition", JSON.stringify( [topIndex, gridColIndex, gridRowIndex] ) );
+};
+
 function getOffset(element){
 	var bodyRect = document.body.getBoundingClientRect(),
     elemRect = element.getBoundingClientRect(),
@@ -287,9 +283,7 @@ Menu.prototype.prepareVideoStart = function(){
 			else{
 				vplayer.setDRM( false );
 			}
-			
-			vplayer.player.initialize( vplayer.video, null, false);
-			
+			//vplayer.player.initialize( vplayer.video, null, false);
 			vplayer.setURL( self.focus.url );
 		}
 		else{
@@ -306,13 +300,3 @@ Menu.prototype.prepareVideoStart = function(){
 		console.log("try: " + self.focus.url + " : " + e.message );
 	}
 }
-
-
-
-
-
-
-
-
-
-

@@ -127,7 +127,7 @@ public class XMLUtil {
 	    transformer.setOutputProperty("http://www.oracle.com/xml/is-standalone", "yes");
 	    transformer.transform(source, result);
 	    
-	    // Java10-transformer adds unecessary empty lines, remove empty lines
+	    // Java10-transformer adds unecessary empty lines, remove empty lines, study why does it happens.
 	    BufferedReader reader = new BufferedReader(new StringReader(writer.toString()));
 	    StringBuilder buf = new StringBuilder();
 	    try {

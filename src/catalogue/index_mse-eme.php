@@ -5,7 +5,7 @@
 	header( "Pragma: no-cache" );
 	header( "Content-Type: text/html;charset=utf-8" );
 ?><!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<title>HbbTV Reference Video Application</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -13,8 +13,6 @@
 	<script type="application/javascript">
 	
 	var profile = { hbbtv : false, video : "dashjs", version : "mse-eme"};
-	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
-	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
 	
 	/*** End of Settings ***/
 	
@@ -45,8 +43,8 @@
 	?>
 	
 	<!-- yobora integration test -->
-	<script type="text/javascript" src="http://smartplugin.youbora.com/v5/javascript/hbbtv-html5/5.3.0/sp.min.js" youbora-debug="4"></script>
-
+	<script type="text/javascript" src="//smartplugin.youbora.com/v5/javascript/hbbtv-html5/5.3.0/sp.min.js" youbora-debug="4"></script>
+	<script onload="odd.init('sofia')" src="https://odd.dtv.fi/odd.js"></script>
 </head>
 <body onload="onLoad();">
 	<div style="visibility:hidden;width:0px;height:0px;">

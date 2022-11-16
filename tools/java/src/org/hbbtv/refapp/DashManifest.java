@@ -34,10 +34,10 @@ public class DashManifest {
 
 	/**
 	 * Fix manifest formatting issues.
-	 * @param mode	h264,h265
+	 * @param gopdur    GOP(sec) is needed for MDP.minBufferTime
 	 * @throws Exception
 	 */
-	public void fixContent(StreamSpec.TYPE mode) throws Exception {
+	public void fixContent(int gopdur) throws Exception {
 		modified=false;
 		String val;
 
@@ -77,7 +77,7 @@ public class DashManifest {
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
 			elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
 			val = elem.getAttribute("media");
-			if (val.contains("$Time$")) {
+			if (val.contains("$Number$") && val.contains("$Time$")) {
 				modified=true;
 				elem.setAttribute("media", val.replace("$Time$","") );
 			}
@@ -130,8 +130,9 @@ public class DashManifest {
 			}
 		}
 		
-		// Add Role=main to first audio adaptationset (TODO: what to put additional audios?, video?)
-		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
+		// Add Role=main,alternate inside AdaptationSet elements
+		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");		
+		int countA=0, countV=0;
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
 			elem = XMLUtil.getChildElement(elemAS, "Role");
 			if (elem!=null) continue;
@@ -141,22 +142,39 @@ public class DashManifest {
 			if (mime.isEmpty()) mime = elemAS.getAttribute("mimeType");
 			if (mime.startsWith("audio/")) {
 				modified=true;
-				String xml="<Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>";
+				String xml= String.format("<Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"%s\"/>"
+					, (countA==0?"main":"alternate"));
 				Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
 				elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
 				elemAS.insertBefore( doc.importNode(newElem, true), elem);
-				break;
+				countA++;
+			} else if (mime.startsWith("video/")) {
+				modified=true;
+				String xml= String.format("<Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"%s\"/>"
+					, (countV==0?"main":"alternate"));
+				Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
+				elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
+				elemAS.insertBefore( doc.importNode(newElem, true), elem);
+				countV++;
 			}
 		}
 		
+		// see also MediaTools.getDashArgs(), -min-buffer=(gopdur*1000*2) millis, MDP@minBufferTime="PT4S" secs		
+		if(gopdur>0) {
+			int time = gopdur*2;
+			val = doc.getDocumentElement().getAttribute("minBufferTime");
+			if(!val.contains("PT"+time+"S"))
+				doc.getDocumentElement().setAttribute("minBufferTime", "PT"+time+"S");
+		}
 	}
 	
 	public void addNamespaces() {
 		String[] values = new String[] {
-				"xmlns:cenc", "urn:mpeg:cenc:2013",
-				"xmlns:mspr", "urn:microsoft:playready",
-				"xmlns:mas",  "urn:marlin:mas:1-0:services:schemas:mpd",
-				"xmlns:ck",   "http://dashif.org/guidelines/clearKey"
+				"xmlns:cenc",  "urn:mpeg:cenc:2013",
+				"xmlns:mspr",  "urn:microsoft:playready",
+				"xmlns:mas",   "urn:marlin:mas:1-0:services:schemas:mpd",
+				"xmlns:ck",    "http://dashif.org/guidelines/clearKey", // legacy clearkey
+				"xmlns:dashif","https://dashif.org/" // new clearkey
 		};
 		
 		Element elem = doc.getDocumentElement();
@@ -179,16 +197,24 @@ public class DashManifest {
 			profile="urn:mpeg:dash:profile:isoff-live:2011,urn:dvb:dash:profile:dvb-dash:2014,urn:hbbtv:dash:profile:isoff-live:2012";
 		else if ("dvb2014".equalsIgnoreCase(profile)) // DVB (new)
 			profile="urn:dvb:dash:profile:dvb-dash:2014,urn:dvb:dash:profile:dvb-dash:isoff-ext-live:2014";
+		else if (profile.isEmpty() || profile.equals("keep")) return; // keep the original value
 		doc.getDocumentElement().setAttribute("profiles", profile);
 	}
 
-	public void addContentProtectionElement(String xml) {
+	/**
+	 * @param asType AdaptationSet "video","audio" or empty string to put inside all AS elements
+	 * @param xml
+	 */
+	public void addContentProtectionElement(String asType, String xml) {
 		// add CP element after existing ContentProtection elements
+		if(xml.isEmpty()) return;
 		Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
-		modified=true;
 
 		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			if(!asType.isEmpty() && !elemAS.getAttribute("contentType").equals(asType))
+				continue;
+			modified=true;			
 			List<Element> elems = XMLUtil.getChildElements(elemAS, "ContentProtection");
 			if (elems.isEmpty()) {
 				elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");

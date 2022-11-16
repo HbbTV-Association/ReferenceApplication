@@ -1,3 +1,0 @@
-[submodule "deploy"]
-	path = deploy
-	url = git@git.sofiadigital.fi:sofia/sofia_deploy.git

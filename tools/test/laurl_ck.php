@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $kidb= str_replace("-","+", str_replace("_","/",$kidb));
   $kid = bin2hex(base64_decode($kidb, true)); // hex format
 }
+if($kid=="") $kid = $_REQUEST["kid"]; // failsafe to "?kid=4321..." param
 $kid = strtoupper($kid);
 
 // KID=KEY lookup table, find KEY and base64(trim trailing "=" chars)
@@ -53,11 +54,13 @@ $keys = array(
   "43215678123412341234123412341236" => "12341234123412341234123412341236",
   "43215678123412341234123412341237" => "12341234123412341234123412341237",
   "43215678123412341234123412341238" => "12341234123412341234123412341238",
+  "43215678123412341234123412341239" => "12341234123412341234123412341239",
 
   "5A461E692ABF5534A30FFC45BFD7148D" => "307F7B3F5579BEF53894A6D946762267"
 );
 $key = base64_encode(hex2bin($keys[$kid]));
 $key = str_replace("=","", str_replace("+","-", str_replace("/","_",$key)));
+$kidb= base64_encode(hex2bin($kid));
 $kidb= str_replace("=","", str_replace("+","-", str_replace("/","_",$kidb)));
 
 $data = "{\"keys\": [{\"k\": \$key, \"kty\": \"oct\", \"kid\": \$kid }], \"type\": \"temporary\"}";

@@ -11,7 +11,7 @@
 	echo "<?xml version='1.0' encoding='utf-8' ?>";
 ?>
 <!DOCTYPE html PUBLIC '-//HbbTV//1.2.1//EN' 'http://www.hbbtv.org/dtd/HbbTV-1.2.1.dtd'>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<title>HbbTV Reference Video Application</title>
 	
@@ -22,10 +22,7 @@
 		Settings
 	***/
 	var profile = { hbbtv : "1.5", video : "avobject", version : "oipf"};
-	
-	// change this to point to video files location. This will be used as root for relative links. Absolute urls are not affected
-	var defaultVideoRoot = "http://meridian.sofiadigital.fi/tvportal/referenceapp/videos/"; 
-	
+		
 	</script>
 	<!-- List all css and js resource files or minified and combined resource files -->
 	<?php 
@@ -52,7 +49,7 @@ function onLoad() {
 }
 
 </script>
-
+<script onload="odd.init('sofia')" src="https://odd.dtv.fi/odd.js"></script>
 </head>
 <body onload="onLoad();">
 	<div style="visibility:hidden;width:0px;height:0px;">

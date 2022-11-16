@@ -39,7 +39,9 @@ GridView.prototype.init = function(items){
 			}
 		}
 		items[i].imageSizeClass = imageSizeClass;
+		
 	}
+	
 	items = items.sort(function(a,b){
 		if(a.imageSizeClass.priority > b.imageSizeClass.priority){
 			return 1;
@@ -51,7 +53,7 @@ GridView.prototype.init = function(items){
 			return 0;
 		}
 	});
-
+	
 	/* IMAGESIZE END */
 
 	/* CREATE GRID LAYOUT */

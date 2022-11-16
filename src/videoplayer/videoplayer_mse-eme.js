@@ -30,21 +30,25 @@ VideoPlayerEME.prototype.createPlayer = function(){
 			+'<div id="pff"></div>'
 			+'<div id="subtitleButton"><div id="subtitleButtonText">Subtitles</div></div>'
 			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
-			+'</div>');
+			+'</div>'
+			);
 		console.log("Add player component");
 	}
 
 	try{
-		this.video = $("<video id='video' data-dashjs-player></video>")[0];
+		this.video = $("<video id='video' style='width:100%'></video>")[0]; // data-dashjs-player
 		this.element.appendChild( this.video );
+		$("<div id='video-caption'></div>").insertAfter("#video"); // put TTML subtitles div after a video element
 		this.player = dashjs.MediaPlayer().create();
+		this.player.initialize();
+		this.player.attachView(document.getElementById("video"));
+		this.player.attachTTMLRenderingDiv(document.getElementById("video-caption"));
 		console.log( "video object created ", this.player );
 	} catch( e ){
 		console.log("Error creating dashjs video object ", e.description );
 	}
-	
-	
-	var player = this.video;
+		
+	var player = this.video; // player=HTMLVideoObject, self.player=dashjsPlayer
 	
 	addEventListeners( player, 'ended abort', function(e){
 		console.log( e.type );
@@ -93,7 +97,6 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	player.addEventListener('canplay', function(){
 		canplay = true;
 		console.log("canplay");
-		
 	} );
 	
 	player.addEventListener('loadedmetadata', function(){
@@ -135,10 +138,23 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		$("#ppauseplay").removeClass("pause").addClass("play");
 	} );
 	
+	// listen for dash events by schemeUri (inband EMSG in .m4s segments or outband in manifest)
+	// event.messageData is byte buffer in EMSG inband and is string in outband manifest.
+	var SCHEME_ID_URI = "http://hbbtv.org/refapp";
+	var fnEvent = function(evt) {
+		var cueValue = uint8ArrayToString(evt.event.messageData);
+		var info = "presentationTime="+evt.event.calculatedPresentationTime + ", duration="+evt.event.duration;
+		info    += ", "+evt.event.eventStream.schemeIdUri + ", "+ evt.event.eventStream.value;
+		info    += ", id="+evt.event.id+", " + cueValue;
+		console.log("EVENT.START "+info);
+		info =  "cue: '" + cueValue + "' start: " + evt.event.calculatedPresentationTime 
+			+ ", ends: " + (evt.event.calculatedPresentationTime+evt.event.duration) + "<br/>";
+		showInfo(info, evt.event.duration);
+	};
+	self.player.on(SCHEME_ID_URI, fnEvent
+		, null, { mode: dashjs.MediaPlayer.events.EVENT_MODE_ON_START }); // EVENT_MODE_ON_RECEIVE
+	
 	player.textTracks.addEventListener('addtrack', function(evt){
-		
-		
-		
 		// set up inband cue events listeners for new tracks
 		var track = evt.track;
 		
@@ -171,26 +187,18 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		} catch( e ){
 			console.log( "error checking tracks: " + e.description );
 		}
-		
-		
-		track.onerror = function(){
-			console.log("track error: ", arguments );
-		}
-		
-		track.onload = function(){
-			console.log("track loaded: ", arguments );
-		}
-		
-		
-		console.log("at addtrack nth track: " + this.length + " : set up cuechange listeners", track);
+			
+		// this = TextTrackList
+		console.log("at addtrack nth track: " + this.length + " : set up cuechange listeners"
+			, "kind="+track.kind + ", " + track.language + ", " + track.label);
 		
 		// show subtitle button label if there is a track that is not metadata 
-		if( track.kind != "metadata" ){
-			$("#subtitleButton").show();
-		}
-		if( track.kind == "audio" ){
-			$("#audioButton").show();
-		}
+		//if( track.kind != "metadata" ){
+		//	$("#subtitleButton").show();
+		//}
+		//if( track.kind == "audio" ){
+		//	$("#audioButton").show();
+		//}
 		
 		/*
 		// the first track is set showing
@@ -206,53 +214,38 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		self.subtitleTrack = 0;
 		*/
 		
-		
-		console.log("text track ", track);
-		track.oncuechange = function(evt) {
-			
-			if( this.kind == "metadata" ){
-			
+		//console.log("text track ", track);
+		/* if( this.kind == "metadata" ){
+			track.oncuechange = function(evt) {
 				showInfo("cuechange! kind=" + this.kind);
-				
 				try{
 					var cuelist = this.activeCues;
 					if ( cuelist && cuelist.length > 0) {
 						console.log("cue keys: ",  Object.keys( cuelist[0] ) ); 
 						var info = "";
 						$.each( cuelist, function(c, cue){
-							
 							// try read text attribute
 							if( cue.text ){
 								showInfo( cue.text );
 							}
-							
 							var cueValue = arrayBufferToString( cue.data );
 							//console.log( "cues["+c+"].data ("+ cue.data.constructor.name+") = " + cueValue ); 
 							console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime + " Data: " + cueValue );
 							info +=  "cue: '" + cueValue + "' start : " + cue.startTime + ", ends : " + cue.endTime + "<br/>";
-							
-						} );
-						
+						} );						
 						showInfo( info, 999 );
-					}
-					else{
+					} else{
 						showInfo("Metadata cue exit", 1);
 					}
 				} catch(e){
 					console.log("error Reading cues", e.message );
 				}
-				
-			}
-			else{
-				console.log("cue event " + this.kind + " received");
-			}
-		};
+			};
+			console.log("oncuechange function set");
+		} */
 		
-		console.log( "oncuechange function set" );
 	} );
-	
-	
-	
+		
 	player.addEventListener('playing', function(){
 		console.log("playing");
 		
@@ -264,43 +257,46 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		if( self.firstPlay ){
 			self.firstPlay = false;
 			self.displayPlayer( 5 );
+
+			if(self.player.getTracksFor("text").length>=1)
+				$("#subtitleButton").show();
+			if(self.player.getTracksFor("audio").length>=1)
+				$("#audioButton").show();
 			
-			// TODO: Set the first subtitle track active if any exists.
 			if( self.video.textTracks && self.video.textTracks.length ){
 				var defaultSub = -1;
 				$.each( self.video.textTracks, function(i, track){
 					if( defaultSub < 0 && track.kind != "metadata" ) {
-						track.mode = "showing";
+						//track.mode = "showing";
 						defaultSub = i;
 						$("#subtitleButtonText").html("Subtitles: " + track.language );
-					} else if( track.kind != "metadata" ){
-						track.mode = "hidden";
+					//} else if( track.kind != "metadata" ){
+					//	track.mode = "hidden";
 					}
 				} );
 				if( defaultSub >= 0 ){
-					console.log("Found default subtitle track: " + defaultSub);
+					self.player.setTextTrack(defaultSub); // dashjsPlayer object
+					//self.player.updatePortalSize();
+					var track=self.video.textTracks[defaultSub]; // TextTrack object
+					console.log("Found default subtitle track: " + defaultSub
+						, "kind="+track.kind + ", " + track.language + ", " + track.label);
 					self.subtitleTrack = defaultSub;
-					console.log( self.video.textTracks[ defaultSub ] );
 				}
 			}
 			
 			// audio tracks
-			if( self.video.audioTracks && self.video.audioTracks.length ){
-				var defaultAudio = -1;
-				$.each( self.video.audioTracks, function(i, track){
-					if( defaultAudio < 0 && track.kind != "metadata" ) {
-						track.mode = "showing";
-						defaultAudio = i;
-						$("#audioButtonText").html("Audio: " + track.language );
-					} else if( track.kind != "metadata" ){
-						track.mode = "hidden";
-					}
-				} );
-				if( defaultAudio >= 0 ){
-					console.log("Found default audio track: " + defaultAudio);
-					self.audioTrack = defaultAudio;
-					console.log( self.video.audioTracks[ defaultAudio ] );
+			var defaultAudio = -1;
+			$.each( self.player.getTracksFor("audio"), function(i, track){
+				if( defaultAudio < 0) {
+					defaultAudio = i;
+					$("#audioButtonText").html("Audio: " + track.lang);
 				}
+			} );
+			if( defaultAudio >= 0 ){
+				var track = self.player.getTracksFor("audio")[defaultAudio];
+				console.log("Found default audio track: " + defaultAudio
+					, ""+track.type+ ", "+ track.lang + ", " + track.codec ); //track
+				self.audioTrack = defaultAudio;
 			}
 		}
 		Monitor.videoPlaying();
@@ -340,8 +336,9 @@ VideoPlayerEME.prototype.createPlayer = function(){
 }
 
 VideoPlayerEME.prototype.setURL = function(url){
+	url = url.replace("${GUID}", uuidv4());
 	console.log("setURL(",url,")");
-	console.log("player.attachSource(url)");
+	//this.player.attachTTMLRenderingDiv(document.getElementById("video-caption")); //$("#video-caption")[0]);
 	this.player.attachSource(url);
 	// create id for video url
 	this.videoid = url.hashCode();
@@ -499,21 +496,86 @@ VideoPlayerEME.prototype.playAds = function(){
 	$( idleAdPlayer ).addClass("hide");
 };
 
+VideoPlayerEME.prototype.setSubtitles = function( subtitles ){
+	// do not create <Track> html objects inside the <video> element,
+	// this is handled by Dashjs if subs are listed in a manifest.
+	// FIXME: what if manifest did not have and we wanted to insert adhoc subtitles?
+	if(subtitles){
+		console.log("VideoPlayerEME.setSubtitles()");
+		this.subtitles = subtitles;
+	} else {
+		this.subtitles = null;
+	}
+};
 
 VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
 	
-	/***
-		Create DRM object and container for it
-	***/
-
+	// Create DRM object and container for it
 	this.drm.successCallback = callback;
 	var self = this;
 	
 	if( this.drm.system == "playready" ){
+		// use simple playready config (persistentState=optional, distinctiveIdentifier=optional)
 		self.player.setProtectionData({
 			"com.microsoft.playready": { "serverURL": self.drm.la_url }
-		});
+		});			
+	}
+	else if( this.drm.system.indexOf("playready.recommendation")===0 
+			|| this.drm.system.indexOf("playready.")===0 ){
+		// playready.HW, playready.recommendation.SL3000, playready.recommendation.SL2000, playready.recommendation.SL150
+		// Trick DashJS to use a new "com.microsoft.playready.recommendation" systemId,
+		// this is supported in a recent MSEdge and SmartTVs.
+		var useRecommendationSys = this.drm.system.indexOf("playready.recommendation")===0;
+		var secLevel = this.drm.system.indexOf(".SL3000")>0 ? "3000" // best
+			: this.drm.system.indexOf(".3000")>0            ? "3000"
+			: this.drm.system.indexOf(".HW")>0              ? "3000"
+			: this.drm.system.indexOf(".SL2000")>0          ? "2000"
+			: this.drm.system.indexOf(".2000")>0            ? "2000"
+			: this.drm.system.indexOf(".SL150")>0           ? "150"
+			: this.drm.system.indexOf(".150")>0             ? "150" // worst
+			: "2000";
+		console.log("Use playready security level "+secLevel);
+		if(useRecommendationSys || secLevel=="3000") {
+			// use new systemStringPriority to activate a new ".recommmendation" drm on Edge
+			self.player.setProtectionData({
+				"com.microsoft.playready": { 
+					"serverURL": self.drm.la_url
+					, "priority":1
+					, "persistentState": "required", "distinctiveIdentifier": "required"
+					, "videoRobustness": secLevel // SL3000 needs a new GPU(trusted module) 
+					, "audioRobustness": secLevel=="150" ? "150": "2000"  // always SL2000 for audio
+					, "systemStringPriority": [ "com.microsoft.playready.recommendation","com.microsoft.playready" ]
+				}
+				,"com.widevine.alpha": { "priority":99 }
+			});
+		} else {
+			// this "persistentState+distinctiveIdentifier" without sysStrPriority used to activate a new drm on older dashjs releases
+			self.player.setProtectionData({
+				"com.microsoft.playready": { 
+					"serverURL": self.drm.la_url
+					, "priority":1
+					, "persistentState": "required", "distinctiveIdentifier": "required"
+					, "videoRobustness": secLevel
+					, "audioRobustness": secLevel=="150" ? "150": "2000"  // always SL2000 for audio
+				}
+				,"com.widevine.alpha": { "priority":99 }
+			});
+		}
+		
+		// playready.UTF8, playready.UTF16
+		// some devices may use utf-8 playready format.
+		var msgFormat="";
+		msgFormat= this.drm.system.indexOf(".UTF8")>0  || this.drm.system.indexOf(".UTF-8")>0  ? "utf-8" : msgFormat;
+		msgFormat= this.drm.system.indexOf(".UTF16")>0 || this.drm.system.indexOf(".UTF-16")>0 ? "utf-16": msgFormat;
+		if(msgFormat!="") {
+			var keySystems = self.player.getProtectionController().getKeySystems();
+			for(var idx=0; idx<keySystems.length; idx++) {
+				if(keySystems[idx].systemString.indexOf("com.microsoft.playready")===0)
+					keySystems[idx].setPlayReadyMessageFormat(msgFormat);
+			}
+			console.log("Use playready message format " + msgFormat);
+		}		
 	}
 	else if( this.drm.system == "marlin" ){
 		// Not supported
@@ -524,6 +586,31 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 				"serverURL": self.drm.la_url
 				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
 			}
+		});
+	} else if(this.drm.system.indexOf("widevine")===0) {
+		// widevine, widevine.HW, widevine.SL1, widevine.SL2, widevine.SL3, also "widevine.SL1D"
+		// security level(best to worst): Widevine 1,2,3 | EME 5,4,3,2,1
+		var secLevel = this.drm.system.indexOf(".SL1")>0 ? "HW_SECURE_ALL"  // best
+			: this.drm.system.indexOf(".1")>0            ? "HW_SECURE_ALL"
+			: this.drm.system.indexOf(".HW")>0           ? "HW_SECURE_ALL"
+			: this.drm.system.indexOf(".SL1D")>0         ? "HW_SECURE_DECODE"
+			: this.drm.system.indexOf(".1D")>0           ? "HW_SECURE_DECODE"
+			: this.drm.system.indexOf(".SL2")>0          ? "HW_SECURE_CRYPTO"
+			: this.drm.system.indexOf(".2")>0            ? "HW_SECURE_CRYPTO" 
+			: "SW_SECURE_DECODE";  // worst L1 for video
+		console.log("Use widevine security level "+secLevel);			
+		self.player.setProtectionData({
+			"com.widevine.alpha": {
+				"serverURL": self.drm.la_url
+				, "priority":1
+				//, "initDataTypes": [ "cenc" ]
+				//, "sessionTypes": [ "temporary" ] // persistent-license, temporary
+				//, "persistentState": "required", "distinctiveIdentifier": "required"
+				, "persistentState": "optional", "distinctiveIdentifier": "optional"
+				, "videoRobustness": secLevel
+				, "audioRobustness": "SW_SECURE_CRYPTO" // worst L1 for audio
+			}
+			,"com.microsoft.playready": { "priority":99 }
 		});
 	} else {
 		var protData={};
@@ -540,26 +627,25 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 
 
 VideoPlayerEME.prototype.startVideo = function( isLive ){
-	console.log("startVideo()");
-	
-	// reset progress bar always
+	console.log("startVideo()");	
+	// always reset progress bar 
 	this.resetProgressBar();
 	
 	this.subtitleTrack = false;
-	var self = this;
+	var self = this; // VideoPlayerEME object
 	this.onAdBreak = false;
 	this.firstPlay = true;
 	
 	if( isLive ){
 		self.live = true;
-	}
-	else{
+	} else {
 		self.live = false;
 	}
 	
 	if( !this.subtitles ){
 		this.subtitleTrack = false;
 	}
+	
 	try{
 		if( !self.video ){
 			console.log("populate player and create video object");
@@ -607,14 +693,12 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		self.displayPlayer(5);
 		*/
 		
-		
-		
 		self.element.removeClass("hidden");
 		self.visible = true;
 		self.watched.load();
-		var position = this.watched.get( self.videoid );
-		console.log("position", position );
-		if( position ){
+		var position = null; // this.watched.get( self.videoid );
+		//console.log("position", position );
+		if( !self.live && position ){
 			self.video.pause();
 			console.log("video paused");
 			showDialog("Resume","Do you want to resume video at position " + toTime( position.position ) , ["Yes", "No, Start over"], function( val ){
@@ -624,8 +708,7 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 					self.video.seek( position.position );
 					self.setFullscreen(true);
 					self.displayPlayer(5);
-				}
-				else{
+				} else{
 					console.log("video.play()")
 					self.video.play(1);
 					self.setFullscreen(true);
@@ -689,22 +772,23 @@ VideoPlayerEME.prototype.clearVideo = function(){
 	self.element.addClass("hidden");
 	$("#player").removeClass("show");
 	$("#subtitleButton").hide();
+	$("#audioButton").hide();
 	self.visible = false;
 	try{
 		if(self.video){
 			self.video.pause();
-			self.video.src = "";
-			$( "#video" ).remove(); // clear from dom
+			//self.video.src = ""; // must not clear a field value or dashjs gets an infinite error loop
+			$("#video").remove(); // clear from dom
+			$("#video-caption").remove();
 			this.video = null;
-		}
+		}		
 	}
 	catch(e){
 		console.log("Error at clearVideo()");
 		console.log( e.description );
 	}
 	
-	this.clearAds();
-	
+	this.clearAds();	
 	this.subtitles = null;
 };
 
@@ -741,5 +825,23 @@ VideoPlayerEME.prototype.isFullscreen = function(){
 
 VideoPlayerEME.prototype.isPlaying = function(){
 	return ( this.video && !this.video.paused ); // return true/false
+};
+
+VideoPlayerEME.prototype.getAudioTracks = function(){
+	try {
+		var tracks=this.player.getTracksFor("audio");
+		return tracks.length;
+	} catch(e){
+		showInfo( "getComponents not available", e.message );
+	}
+};
+
+VideoPlayerEME.prototype.getCurrentAudioTrack = function(){
+	try {
+		var track=this.player.getCurrentTrackFor("audio");
+		return track.lang;
+	} catch(e){
+		return "undefined";
+	}
 };
 

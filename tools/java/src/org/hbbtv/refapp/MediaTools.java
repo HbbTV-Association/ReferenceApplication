@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
- * Utilify functions for executable tools used by dasher (ffmpeg,ffprobe,mp4box).
+ * Utility functions for executable tools used by dasher (ffmpeg,ffprobe,mp4box).
  */
 public class MediaTools {
 	private static String FFPROBE;
@@ -69,7 +70,8 @@ public class MediaTools {
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
-			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"", // allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit)
+			// allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit) 
+			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"", 
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
 			"-an",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
@@ -152,6 +154,8 @@ public class MediaTools {
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
 			"-ar", ""+spec.sampleRate,
 			"-ac", ""+spec.channels,	// channel count 2..n
+			// initial_moov=100% fragmented output 
+			"-movflags", "empty_moov+negative_cts_offsets+faststart", 			
 			"-vn",
 			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
 			"-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
@@ -162,51 +166,93 @@ public class MediaTools {
 		return args;
 	}
 	
-	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, boolean useIdFolder, 
-			String initMode, int ver) {
+	/**
+	 * Create MP4Box command.
+	 * @param specs		stream specifications
+	 * @param segdur	segment duration seconds
+	 * @param gopdur	GOP duration seconds
+	 * @param timLimit  timelimit seconds or -1
+	 * @param initMode	init segment. inband=AVC3_common_init, multi=AVC1_common_init_hbbtv,
+	 * 			merge=AVC1_common_init, no=AVC1_separate_init(=best backward comp)
+	 * @param sidx		SIDX box. -1=no sidx, 0=one sidx box, 1..n=number of subsegs in SIDX box
+	 * @param segname	segment url name. number=use $Number$, time=use $Time$,
+	 * 			number-timeline=use $Number$ and SegmentTimeline, time-timeline=use $Time$ and SegmentTimeline
+	 * @param ver       4=use AudioSample rate/no bound-closest args 
+	 * @param namePrefix v1.mp4 and a1.mp4 input file prefix. "temp-"
+	 * @param cmaf      cmf2,cmfc,no  cmaf profile
+	 * @return
+	 */
+	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, int gopdur,
+			long timeLimit,
+			String initMode,
+			int sidx,
+			String segname,
+			int ver, 
+			String namePrefix,
+			String cmaf) {
 		// Use MDP.minBufferTime=segdur*2 to make validator happy, default 1.5sec-3sec 
 		// value most likely gives "buffer underrun" warnings.
 		//    https://conformance.dashif.org/
-		// ver(version):
+		//    https://www.mankier.com/1/gpac-filters
+		// ver(version): 
 		//    1=write SIDX table (1 fragment), segtimeline
-		//    2=NO SIDX table, no segtimeline, use audioSampleRate scale
+		//    2=no segtimeline, use audioSampleRate scale, use -bound(split before or at boundary not after)
+		//    3=no segtimeline, use audioSampleRate scale, use -closest(split closest before or after)
+		//    4=use audioSampleRate scale, don't use bound+closest(case: spring 8s multimoofmdat duration broken) 
 		int scale=-1;
-		if (ver==2) {
+		if (ver>=2) {
 			for(StreamSpec spec : specs) {
 				if (spec.enabled && spec.type.isAudio()) {
 					scale = spec.sampleRate; // 44100, 48000
 					break;
 				}
 			}
+			scale = Math.max(1000, scale); // default to 1s if no audio was given
 		}
+		segname = segname.toLowerCase(Locale.US);
 		
+		// use ver=4, don't use ver=3 "-closest" as it most likely breaks 8s segdur(case: spring 3. and 4. segments)
 		List<String> args=Arrays.asList(MP4BOX,
 			"-dash", ""+(scale>0?segdur*scale : segdur*1000), // segment duration 6sec*1000 or use audioRate
 			"-frag", ""+(scale>0?segdur*scale : segdur*1000), // for better seg alignment (important for 44.1KHz)
 			scale>0?"-dash-scale":"", scale>0?""+scale:"",
-			ver==1?"":"-bound", 	// force seg duration, last segment may be shorter (video=146sec, segdur=6sec -> 24*6sec + 1*2sec segments)
+			(ver==1 || ver==4?"":ver==2?"-bound":"-closest"), // force seg duration, last segment may be shorter (video=146sec, segdur=6sec -> 24*6sec + 1*2sec segments)
 			"-mem-frags", "-rap",
 			"-profile", "dashavc264:live",
 			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012", // hbbtv1.5
-			"-min-buffer", ""+(segdur*1000*2), //  "3000", // MDP.minBufferTime value
+			"-min-buffer", ""+(gopdur*1000*2), //  ""+(segdur*1000*2) | "3000" |  MDP.minBufferTime value, does this work?
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
 			"-bs-switching", initMode, // inband=AVC3_common_init, multi=AVC1_common_init_hbbtv, merge=AVC1_commonn_init, no=AVC1_separate_init (best backward comp)
 			"-sample-groups-traf",	// sgpd+sbgp atom in MOOF/TRAF(audio), IE11 fix  
 			"-single-traf", 
-			"-subsegs-per-sidx", ver==1?"1":"-1", // SIDX table with 1 fragment or no SIDX
+			"--tfdt64",          // use 64bit tfdt(version=1) timestamp
+			"--tfdt_traf",		 // write MOOF/MDAT/TFDT(decodeTime) inside all multifrag pairs
+			"--noroll=yes",		 // don't write SGPD,SBGP(sample-to-groupbox roll) atoms
+			"--btrt=no",		 // don't write BTRT bitrate in init.mp4 (old Sony players may crash)
+			"--truns_first=yes", // MOOF/TRAF/TRUN, /SENC ordering, some devices may crash if SENC is before TRUN
+			(cmaf.isEmpty() ? "$DEL$" : "--cmaf="+cmaf), // CMAF constraints (no edit list, truns_first, negative composite offset, ..)
+			"-subsegs-per-sidx", ""+sidx,
 			//"-last-dynamic",  // insert lmsg brand to the last segment(MDP.type=dynamic)
-			"-segment-name", (useIdFolder ? "$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$_$Number$$Init=i$"), 
-			ver==1?"-segment-timeline":"",
+			//"-segment-name", (useIdFolder ? "$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$_$Number$$Init=i$"),
+			"-segment-name", segname.startsWith("number") ? 
+					"$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$/$Time$$Init=i$",
+			segname.endsWith("-timeline") ? "-segment-timeline" : "$DEL$", //ver==1?"-segment-timeline":"",
 			"-out", "manifest.mpd"	// output file
 		);
 		args = new ArrayList<String>(args);
 		
 		for(StreamSpec spec : specs) {
 			if (!spec.enabled) continue;
-			String arg="temp-${name}.mp4#trackID=1:id=${name}:period=p0";
-			arg = arg.replace("${name}", spec.name);
+			String arg=namePrefix+"${name}.mp4#trackID=1:id=${name}:period=p0:${timelimit}";
+			arg = arg.replace("${name}", spec.name)
+				.replace(":${timelimit}", timeLimit>0?":dur="+timeLimit:"");
 			args.add(arg);
 		}
+		for(int idx=args.size()-1; idx>=0; idx--) {
+			if (args.get(idx).equals("$DEL$")) args.remove(idx); // remove obsolete args
+		}		
+		//for(int idx=0; idx<args.size(); idx++)
+		//	System.out.format("%d %s%n", idx, args.get(idx));			
 		
 		return args;
 	}
@@ -243,12 +289,14 @@ public class MediaTools {
 		oFile.delete(); // delete temporary temp-v1.hvc file
 	}	
 	
-	public static List<String> getDashCryptArgs(File drmspecFile, File outputFolder, StreamSpec spec) {
-		String streamFile = "temp-"+spec.name+".mp4";
+	public static List<String> getDashCryptArgs(File drmspecFile, File outputFolder, 
+				StreamSpec spec, String namePrefix) {
+		String streamFile = namePrefix+spec.name+".mp4";
+		String outFile = "temp-"+spec.name+".mp4";
 		List<String> args=Arrays.asList(MP4BOX,
 			"-crypt", Utils.normalizePath(drmspecFile.getAbsolutePath(), true), // drm/drmspec.xml input file
 			streamFile, // input unencrypted stream file
-			"-out", Utils.normalizePath(outputFolder.getAbsolutePath(), true)+"/"+streamFile
+			"-out", Utils.normalizePath(outputFolder.getAbsolutePath(), true)+"/"+outFile
 		);
 		args = new ArrayList<String>(args);
 		return args;
@@ -259,7 +307,7 @@ public class MediaTools {
 		List<String> args=Arrays.asList(FFMPEG, 
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
-			"-ss", ""+timeSec,		// timestamp seconds where image is taken from (1..n)
+			"-ss", ""+timeSec,		// timestamp seconds an image is taken at (1..n)
 			"-vf", "scale="+size,	// 640x360
 			"-qscale:v", "5",
 			"-vframes", "1",
@@ -269,25 +317,54 @@ public class MediaTools {
 		return args;
 	}
 
-	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile, String id) {
+	public static List<String> getTrimMp4Args(File inputFile, File outputFile, long timeLimit) {
 		List<String> args=Arrays.asList(MP4BOX,
-				"-add", ""+subFile.getAbsolutePath()+":ext=ttml",
-				"-new", outputFile.getAbsolutePath()
+			"-splitx", "0:"+timeLimit,	// trim 0-XX seconds 
+			inputFile.getAbsolutePath(),
+			"-out", outputFile.getAbsolutePath()
 		);
 		args = new ArrayList<String>(args);
 		return args;
 	}
 
-	public static List<String> getSubIBSegmentsArgs(File subFile, String id, int segdur) {
+	/**
+	 * Convert TTML subtitles sub_xxx.xml to sub_xxx.mp4 file.
+	 * @param subFile
+	 * @param outputFile
+	 * @param id	Not used at the moment
+	 * @return
+	 */
+	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile
+			, String id) {
 		List<String> args=Arrays.asList(MP4BOX,
-				"-dash", ""+(segdur*1000),
-				"-mem-frags",
-				"-profile", "dashavc264:live",
-				"-bs-switching", "no",
-				"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "1",
-				"-segment-name", "$RepresentationID$/sub_$Number$$Init=i$",
-				"-out", subFile.getAbsolutePath().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd
-				subFile.getAbsolutePath()+":id="+id	// input output/temp-sub_xxx.mp4
+			"-add", ""+subFile.getAbsolutePath()+":ext=ttml",
+			"-new", outputFile.getAbsolutePath()
+		);
+		args = new ArrayList<String>(args);
+		return args;
+	}
+
+	/**
+	 * Create m4s segments from sub_xxx.mp4(ttml) file.
+	 * @param subFile	temp-sub_xxx.mp4 file
+	 * @param id		sub_xxx
+	 * @param segdur	segment duration, seconds
+	 * @param segname	number,time,number-timeline,time-timeline
+	 * @return
+	 */
+	public static List<String> getSubIBSegmentsArgs(File subFile, String id, int segdur
+				, String segname) {
+		List<String> args=Arrays.asList(MP4BOX,
+			"-dash", ""+(segdur*1000),
+			"-mem-frags",
+			"-profile", "dashavc264:live",
+			"-bs-switching", "no",
+			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "-1", // "1"
+			//"-segment-name", "$RepresentationID$/sub_$Number$$Init=i$",
+			"-segment-name", segname.startsWith("number") ? "$RepresentationID$/sub_$Number$$Init=i$" : "$RepresentationID$/sub_$Time$$Init=i$",
+			segname.endsWith("-timeline") ? "-segment-timeline" : "",
+			"-out", subFile.getAbsolutePath().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd
+			subFile.getAbsolutePath()+":id="+id	// input output/temp-sub_xxx.mp4
 		);
 		args = new ArrayList<String>(args);
 		return args;

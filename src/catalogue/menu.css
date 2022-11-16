@@ -6,6 +6,8 @@ body {
 	background-image:none !important;
     overflow: hidden;
     font-family: Tiresias, TiresiasScreenfont, sans-serif;
+	width: 1280px;
+	height: 720px;
 }
 div, span {
 

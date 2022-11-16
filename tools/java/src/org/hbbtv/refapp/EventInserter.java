@@ -30,18 +30,18 @@ public class EventInserter {
         if (!videoFile.exists())
             throw new FileNotFoundException(videoFile.getAbsolutePath() + " not found");
 
-		String mode = Utils.getString(params, "mode", "", true);
-		if (mode.isEmpty() && videoFile.getName().endsWith(".mpd")) 
-			mode = "mpd";
-		
+        String mode = videoFile.getName().endsWith(".mpd") ? "mpd" : "emsg";
 		if (mode.equalsIgnoreCase("mpd")) {
 			// add <InbandEventStream..> to manifest, or delete from manifest
 			doMPD(videoFile, params);
 			return;
-		} // else mode=seg
-        
-		// mode=emsg (EMSG inserter, EMSG delete)
-		
+		} else if (mode.equalsIgnoreCase("emsg")) {
+			// insert emsg to a segment
+		} else {
+			throw new IllegalArgumentException("Invalid mode ("+mode+")");
+		}        
+
+		// mode=emsg (EMSG inserter, EMSG delete)			
         // if output is empty then use temp file for writing and rename to an output name
         String val = Utils.getString(params, "output", "", true);
 		File outputFile = val.isEmpty() ? videoFile : new File(val);
@@ -78,6 +78,7 @@ public class EventInserter {
         				System.out.println("Dropping EMSG index " + idx);        				
         				boxes.remove(idx);
         				if (idx<moofIdx) moofIdx--;
+        				if (idx<sidxIdx) sidxIdx--;
         				isModified=true;        				
         			}
         		}
@@ -116,7 +117,7 @@ public class EventInserter {
             	emsg.setId( val.startsWith("0x") ? 
             		Long.parseLong(val.substring(2), 16) : Long.parseLong(val) );
 
-            	val = Utils.getString(params, "msg", "1", true);  // "This is an EMSG event (value=1, id=1)"
+            	val = Utils.getString(params, "msg", "", true);  // "This is an EMSG event (value=1, id=1)"
             	emsg.setMessageData( val.startsWith("0x") ?
             		Utils.hexToBytes(val) : val.getBytes("UTF-8") );
             	
@@ -169,6 +170,5 @@ public class EventInserter {
     		manifest.save(outputFile, false);
     	}
 	}
-
 	
 }

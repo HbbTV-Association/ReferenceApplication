@@ -31,6 +31,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		this.element.setAttribute("id", this.element_id);
 	}
 	$(this.element).addClass("hidden");
+	//this.element.style.position="relative";
 	this.fullscreenElement = this.element;
 	this.width = width;
 	this.height = height;
@@ -68,8 +69,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		this.element.appendChild(this.loadingImage);
 		this.setFullscreen(true);
 	};
-	
-	 	
 	 	
 
 	/**
@@ -107,6 +106,9 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			console.log("Navigation on ad break");
 		}
 		
+		// this       = VideoPlayerEME, VideoPlayer(oipf) instance
+		// this.video = HTMLVideoElement
+		// this.player= DashJSPlayer instance
 		switch(key){
 			case VK_UP:
 				self.displayPlayer(5);
@@ -153,34 +155,48 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				try{
 					if( this.video.textTracks ){
 						console.log("switch text Track");
-						//var tracks = this.video.textTracks.length;
-						
+						//var tracks = this.video.textTracks.length;						
 						// count all tracks except metadata
 						var tracks = 0;
-						for( var i = 0; i < this.video.textTracks.length; ++i ){
-							if( this.video.textTracks[i].kind != "metadata" ){
-								tracks++;
-								this.video.textTracks[i].mode = 'hidden'; // hide all
+						var metadataTracks = [];
+						var firstTextTrack = null;
+						try{
+							for( var i = 0; i < this.video.textTracks.length; ++i ){
+								if( this.video.textTracks[i].kind != "metadata" ){
+									if( firstTextTrack === null ){
+										firstTextTrack = i;
+									}
+									tracks++;
+									this.video.textTracks[i].mode = 'hidden'; // hide all
+								}
+								else{
+									metadataTracks.push(i);
+								}
 							}
+						} catch(e){
+							console.log("error " + e.description);
 						}
 						
 						console.log("text tracks " + tracks );
+						console.log("metaDataTracks ", metadataTracks );
 						if( !tracks ){
 							showInfo("No Subtitles Available");
 							break;
 						}
 						
-						if( this.subtitleTrack === false )
-						{
-							this.subtitleTrack = 0;
+						if( this.subtitleTrack === false ) {
+							this.subtitleTrack = firstTextTrack;
 						}
 						console.log("Current track index " + this.subtitleTrack);
 						if( this.subtitleTrack >= tracks ){
-							this.subtitleTrack = 0; // was off, select first
+							this.subtitleTrack = firstTextTrack; // was off, select first
 						}
 						else{
-							//this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
-							this.subtitleTrack++;
+							this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
+							do{
+								this.subtitleTrack++;
+								console.log("increment track index: " + this.subtitleTrack);
+							} while( metadataTracks.indexOf( this.subtitleTrack ) != -1 );
 						}
 						
 						var lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].language );
@@ -205,46 +221,51 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			case VK_GREEN:
 				try{
 					if( this.getAudioTracks() > 1 ){
-						if( this.video.audioTracks ){
-							console.log("switch audio Track");
-							
-							var tracks = this.video.audioTracks.length;
-							console.log("audiotracks " + tracks );
-							
-							if( this.audioTrack === false )
-							{
+						var isEME=this.constructor.name=="VideoPlayerEME";
+						if( isEME || this.video.audioTracks ){
+							console.log("switch audio track");
+							if( this.audioTrack === false ) {
 								this.audioTrack = 0;
 							}
-							console.log("Current audio track index " + this.audioTrack);
+							
+							var tracks = isEME ? this.getAudioTracks() : this.video.audioTracks.length;							
 							if( this.audioTrack >= tracks ){
-								this.audioTrack = 0; // was off, select first
-							}
-							else{
-								//this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
+								this.audioTrack = 0; // was off(muted), select first and unmute audio
+							} else {
 								this.audioTrack++;
 							}
 							
-							for (var i = 0; i < this.video.audioTracks.length; i += 1) {
-								this.video.audioTracks[i].enabled = false;
+							var lang;
+							if(isEME) {
+								if(this.audioTrack == tracks) {
+									this.player.setMute(true);
+									lang="Muted";
+								} else {
+									var track = this.player.getTracksFor("audio")[this.audioTrack];
+									lang = track.lang;
+									this.player.setCurrentTrack(track);
+									this.player.setMute(false);
+								}
+							} else {
+								for (var i = 0; i < this.video.audioTracks.length; i += 1) {
+									this.video.audioTracks[i].enabled = false;
+								}
+								var muted = ( this.audioTrack == tracks );
+								if( !muted ){
+									this.video.audioTracks[this.audioTrack].enabled = true;
+								}
+								lang = (muted? "Muted" : this.video.audioTracks[this.audioTrack].language );
 							}
-							var muted = ( this.audioTrack == tracks );
-							if( !muted ){
-								this.video.audioTracks[this.audioTrack].enabled = true;
-							}
-							var lang = (muted? "Muted" : this.video.audioTracks[this.audioTrack].language );
+							console.log("audiotracks " + tracks + ", current: "+this.audioTrack + ", " + lang);
 							
 							$("#audioButtonText").html( "Audio: " + lang );
 							showInfo("Audio: " + lang);
-							
-						}
-						else{
+						} else{
 							this.changeAVcomponent( this.AVCOMPONENTS.AUDIO );
 						}
-					}
-					else if( this.getAudioTracks() == 1 ){
+					} else if( this.getAudioTracks() == 1 ) {
 						showInfo("Current audio track (1/1): " + this.getCurrentAudioTrack() );
-					}
-					else{
+					} else {
 						showInfo("No audio tracks available");
 					}
 				} catch( e ){
@@ -295,29 +316,29 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			console.log("set subs from active assets metadata 'subtitles'");
 			this.subtitles = subtitles;
-			
-			console.log( JSON.stringify( this.subtitles ) );
+			console.log("subtitles: "+JSON.stringify(this.subtitles) );
 			
 			if( this.subtitles && this.subtitles.length ){
-				
 				$.each( this.subtitles, function(i, lang){
-					//console.log( lang );
 					console.log("Subtitles " + i + ": " + lang.code + " - " + lang.src);
 									
 					var track = document.createElement("track");
 					track.kind = "subtitles";
 					track.label = lang.code;
 					track.language = lang.code;
-					track.srclang = lang.code;
+					// https://www.w3schools.com/tags/ref_language_codes.asp
+					//if (lang.code=="eng") lang.isocode="en";
+					//else if (lang.code=="fin") lang.isocode="fi";
+					//else if (lang.code=="swe") lang.isocode="sv";
+					//else if (lang.code=="ger") lang.isocode="de";
+					track.srclang = lang.code; //lang.isocode;
 					track.src = lang.src;
 					track.onerror = function(e){
 						self.lastError = e;
-						console.log(e);
-						showInfo("Error getting subtitle file");
-					};
-					
+						console.log("track.onerror: "+JSON.stringify(e));
+						//showInfo("Error getting subtitle file");
+					};					
 					player.appendChild(track);
-					
 				} );
 				$("#subtitleButton").show();
 				$("#subtitleButtonText").html( "Subtitles: " + player.textTracks[0].label );
@@ -376,8 +397,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 * @param {bool} fs. Set video fullscreen if true, and to the active asset box if false
 	 * @method setFullscreen
 	 */
-	this.setFullscreen = function(fs){
-		
+	this.setFullscreen = function(fs){		
 		this.fullscreen = fs;
 		if(fs){
 			this.element.addClass("fullscreen");
@@ -451,16 +471,13 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			}
 			else{
 				// <video> object used
-				
 				var time = this.time();
-				
-				
-				if( this.video.duration ){
+				if(this.video && this.video.duration ){
 					position = (sec ? sec + this.video.currentTime : this.video.currentTime);
 					duration = this.video.duration;
 				}
 				// oipf player object used. Convert milliseconds to seconds
-				else if( this.video.playTime ){
+				else if(this.video && this.video.playTime ){
 					position = (sec? this.video.playPosition / 1000 + sec : this.video.playPosition / 1000);
 					duration = this.video.playTime / 1000;
 				}
@@ -478,7 +495,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 
 			pbar = document.getElementById("progressbar");
 
-			var barWidth = Math.floor((position / duration) * pbMaxWidth );
+			var barWidth=0;
+			if(duration!=0) barWidth = Math.floor((position / duration) * pbMaxWidth );
 			if(barWidth > pbMaxWidth){
 				barWidth = pbMaxWidth;
 			}
@@ -490,7 +508,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			var play_position = barWidth;
 			
-			console.log(  play_position, position, duration );
+			//console.log(  play_position, position, duration );
 			
 			$("#playposition").css("left", play_position);
 			$("#progress_currentTime").css("left", play_position);
@@ -576,7 +594,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			}
 			
 		} catch(e){
-			console.log("error getting playback position and duration");
+			//console.log("error getting playback position and duration");
 			return { duration : 0, position : 0 };
 		}
 		
@@ -673,13 +691,24 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			if( time < 10 )
 				return;
 			
+			// drop data if watched near to end
+			if( time > duration - 15 ){
+				if( this.current !== null ){
+					this.deleteCurrent();
+					 this.current = null;
+					 console.log("deleted record for video " + videoid);
+				}
+				//console.log("play positio not saved. too close to end");
+				return;
+			}
+			
 			var item = null;
 			if( this.current === null && videoid ){
-				console.log("acreate watched new item");
+				console.log("create watched new item");
 				item = { videoid : videoid, position : time, duration : duration };
 			}
 			else if( this.current !== null ){
-				console.log("update playposition for ", this.list[ this.current ]);
+				//console.log("update playposition for ", this.list[ this.current ]);
 				this.list[ this.current ].position = time;
 			} else {
 				console.log( "videoid is missing" );
@@ -741,14 +770,3 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	};
 	
 }
-
-
-
-
-
-
-
-
-
-
-

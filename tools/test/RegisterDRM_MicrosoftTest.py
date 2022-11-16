@@ -2,6 +2,7 @@
 ## Create Microsoft Test Server DRM keys, parse LAURL array
 ##  python.exe RegisterDRM_MicrosoftTest.py > keys_microsofttest.json
 ## Aki Nieminen/Sofia Digital
+## 2019-05-27/Aki: removed firstexp attribute from laurl(older TVs without time-policies may fail)
 ## 2017-11-30/Aki: changed hexdecode to python3
 ## 2017-08-21/Aki: initial release
 
@@ -10,13 +11,16 @@ from optparse import OptionParser
 
 def registerPlayready(drmType, auth, kid, enckey):
 	now = datetime.datetime.utcnow() + datetime.timedelta(minutes=120)
-	url="https://test.playready.microsoft.com/service/rightsmanager.asmx"	
-	params = "cfg=(kid:header,sl:2000,persist:false,firstexp:%s,contentkey:%s)" % (
-		60*1,  ##expiration(seconds) on first play
-		##now.strftime('%Y%m%d%H%M%S'), ##expiration:20170921000000
-		#base64.b64encode(enckey.decode('hex'))
+	url="https://test.playready.microsoft.com/service/rightsmanager.asmx"
+	params = "cfg=(kid:header,sl:2000,persist:false,contentkey:%s)" % (
 		base64.b64encode(bytearray.fromhex(enckey)).decode("ISO-8859-1")
 	)
+	#params = "cfg=(kid:header,sl:2000,persist:false,firstexp:%s,contentkey:%s)" % (
+	#	60*1,  ##expiration(seconds) on first play
+	#	##now.strftime('%Y%m%d%H%M%S'), ##expiration:20170921000000
+	#	#base64.b64encode(enckey.decode('hex'))
+	#	base64.b64encode(bytearray.fromhex(enckey)).decode("ISO-8859-1")
+	#)
 	return url + "?" + params
 	
 def register(drmType, auth, kid, enckey):

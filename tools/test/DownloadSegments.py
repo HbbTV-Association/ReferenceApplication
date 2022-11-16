@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 ## Download DASH segment files to a local disk
 ##  python.exe DownloadSegments.py --input="http://server.com/my/dash.mpd" --output="/tmp/outputfolder"
+##		--download=0...n (0=no download, 1..n=max number of segments, default all)
 ## Aki Nieminen/Sofia Digital
 ## 2018-09-10/Aki: initial release (supports simple vod manifest only)
 
@@ -32,7 +33,7 @@ def main():
 	parser.add_option("-h", "--help", action="help")
 	parser.add_option("--input", type="string", dest="input", help="Input mpd")
 	parser.add_option("--output", type="string", dest="output", help="Output folder")
-	parser.add_option("--download", type="int", dest="download", default=1, help="Download segments(1/0)")
+	parser.add_option("--download", type="int", dest="download", default=9223372036854775807, help="Download segments(1/0)")
 	(options, args) = parser.parse_args()
 	for opt in {"input","output"}:
 		if options.__dict__[opt] is None: parser.error("parameter %s is missing"%opt)	
@@ -40,6 +41,8 @@ def main():
 	#	if options.__dict__[opt] is None: options.__dict__[opt]="" ## Cast none to empty string
 
 	#now = datetime.datetime.utcnow()
+
+	if options.output=="": options.output="."
 	
 	## store original manifest to an output folder
 	## this script does not modify manifest to use a relative segment urls
@@ -47,22 +50,30 @@ def main():
 	with open(options.output+"/manifest_original.mpd", 'wb') as output:
 		output.write(buf)
 
+	BaseURLMpd=options.input[0 : options.input.rindex('/')+1]
+	BaseURL   = BaseURLMpd;
+		
 	## loop all <Representation> elements and parse init+mediaurl links
-	BaseURL=""
 	duration=0
 	files = []
-	files.append(options.input)	
+	files.append("input="+options.input)	
 	
 	xmlRoot=ElementTree.fromstring(buf)
 	elemSeg = None
 	elems = xmlRoot.iter()
+	
 	for elem in elems:
 		tag = elem.tag if '}' not in elem.tag else elem.tag.split('}', 1)[1] ## drop leading namespace identifier
 		if tag=="MPD":
-			duration=ISO8601DurationToSeconds(elem.attrib["mediaPresentationDuration"])
+			##FIXME: dynamic dash does not work
+			val=("" if not "mediaPresentationDuration" in elem.attrib else elem.attrib["mediaPresentationDuration"])
+			duration=ISO8601DurationToSeconds(val)
 			duration=roundUp(duration) ## "PT123.08S"=123.08 is roundup to 124 seconds
+			files.append("duration=" + str(duration));
 		if tag=="BaseURL":
 			BaseURL=elem.text
+			if not (BaseURL.startswith("http:") or BaseURL.startswith("https:") ):
+				BaseURL=BaseURLMpd+BaseURL;
 		if tag=="SegmentTemplate":
 			elemSeg = elem;
 		if tag=="Representation":
@@ -71,37 +82,64 @@ def main():
 	## it's time to download all files (remove mpd from list)
 	writeArrayToFile(files, options.output+"/manifest_segments.txt")
 	del files[0]
-	if options.download==1:
-		downloadSegments(files, options.output)
+	if options.download>=1:
+		downloadSegments(files, options.output, options.download)
 
 	
 def getSegmentURLs(files, duration, BaseURL, elemSeg, elem):
 	url = elemSeg.attrib["initialization"] \
-		.replace("$RepresentationID$", elem.attrib["id"])
+		.replace("$RepresentationID$", elem.attrib["id"]) \
+		.replace("$Bandwidth$", elem.attrib["bandwidth"]);
 	if not (url.startswith("http:") or url.startswith("https:") ):
 		url = BaseURL + url
-	files.append(url)
+	files.append("init="+elem.attrib["id"] + " | " + url)
 
 	mediaUrl = elemSeg.attrib["media"] \
-		.replace("$RepresentationID$", elem.attrib["id"])
+		.replace("$RepresentationID$", elem.attrib["id"]) \
+		.replace("$Bandwidth$", elem.attrib["bandwidth"]);
 	if not (mediaUrl.startswith("http:") or mediaUrl.startswith("https:") ):
 		mediaUrl = BaseURL + mediaUrl
-		
-	maxNum=roundUp( duration / (int(elemSeg.attrib["duration"]) / int(elemSeg.attrib["timescale"])) )
-	for num in range( int(elemSeg.attrib["startNumber"]), maxNum+1):
+	
+	if not "duration" in elemSeg.attrib:
+		maxNum=0
+		for elemS in elemSeg.iter():
+			tag = elemS.tag if '}' not in elemS.tag else elemS.tag.split('}', 1)[1]
+			if tag=="S":
+				maxNum = maxNum + 1 + (0 if not "r" in elemS.attrib else int(elemS.attrib["r"]))
+	else:
+		maxNum=roundUp( duration / (int(elemSeg.attrib["duration"]) / int(elemSeg.attrib["timescale"])) )
+	
+	startNum = int(elemSeg.attrib["startNumber"]);
+	for num in range(startNum, startNum+maxNum):
 		url = mediaUrl.replace("$Number$", str(num))
-		files.append(url)
+		files.append("seg="+elem.attrib["id"] + " | " + url)
+	#for num in range( int(elemSeg.attrib["startNumber"]), maxNum+1):
+	#	url = mediaUrl.replace("$Number$", str(num))
+	#	files.append("seg="+elem.attrib["id"] + " | " + url)
 	return files
 
 	
-def downloadSegments(files, folder):
+def downloadSegments(files, folder, maxSegCount):
 	## todo: this does not keep the original subfolders, all the files
 	## are downloaded to the same output folder.
+	segCount=0
 	for line in files:
-		print(line)
-		filename=line[line.rfind("/")+1:] ## ""http://some.com/sub/file.mp4" -> "file.mp4"
-		response = urllib_request.urlopen(line)
-		with open(folder+"/"+filename, "wb") as output:
+		print(line)  ## repid1 | http://some.com/sub/file.mp4
+		key = line[0 : line.find("=")].strip() # "input|init|seg"
+		if not(key=="init" or key=="seg"): continue;
+		
+		id = line[line.find("=")+1 : line.find("|")].strip() # repid1
+		url = line[line.find("|")+1:].strip() # http://some.com/sub/file.mp4
+		filename=url[url.rfind("/")+1:]       # file.mp4
+
+		if   (key=="init"): segCount=0;
+		elif (key=="seg") : segCount=segCount+1
+		if (segCount>maxSegCount): continue;
+		
+		if not os.path.exists(folder+"/"+id+"/"): os.makedirs(folder+"/"+id+"/")
+
+		response = urllib_request.urlopen(url)
+		with open(folder+"/"+id+"/"+filename, "wb") as output:
 			while True:
 				chunk = response.read(16*1024)
 				if not chunk: break

@@ -4,7 +4,7 @@
 	overflow: hidden;
 	opacity : 1.0;
 	transition: opacity 1s;
-	background:black;
+	_background:black;
 	
 	top: 0px;
 	left: 0px;
@@ -271,7 +271,7 @@
     background-position: -60px 0px;
     width: 30px;
     height: 30px;
-    right: 300px;
+    right: 320px;
     -webkit-animation: fromRight 1s;
     -moz-animation: fromRight 1s;
     -o-animation: fromRight 1s;

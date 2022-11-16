@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Insert subtitle descriptor to manifest.
+ * Insert subtitle descriptor to a manifest.
  *
  * Insert subtitle(out-of-band), copy input file to manifest output folder.
  *   java -cp "./lib/*" org.hbbtv.refapp.SubtitleInserter mode=ob input=/input/sub_fin.xml lang=fin copyinput=1 manifest=/dash/manifest.mpd output=/dash/manifest_subob.mpd
@@ -47,7 +47,10 @@ public class SubtitleInserter {
 				Utils.getBoolean(params, "copyinput", false), // split ttml.xml to segment files
 				(int)Utils.getLong(params, "segdur", 6) ,
 				Utils.getBoolean(params, "deletetempfiles", true),
-				Utils.getString(params, "urlprefix", "", true) ); // "../" for drm/manifest.mpd file
+				Utils.getString(params, "urlprefix", "", true),
+				Utils.getString(params, "segname", "number", true),
+				Utils.getLong(params, "timelimit", -1) // read X seconds from start
+				); // "../" for drm/manifest.mpd file
 		}		
 	}
 
@@ -102,17 +105,21 @@ public class SubtitleInserter {
 	 * @param segdur		segment duration (seconds)
 	 * @param deletetempfiles  delete temporary files
 	 * @param urlPrefix		segment template init+media templates (../ for drm manifest.mpd file)
-	 * @param
+	 * @param segname		number,time,number-timeline,time-timeline
+	 * @param timeLimit		seconds of subtitle track to read or -1 to read a full ttml file
 	 * @throws Exception
 	 */
 	public static void insertIB(File subFile, File manifestFile, File outputFile,
 			String lang, String repId, boolean createSegs, int segdur,
-			boolean deletetempfiles, String urlPrefix) throws Exception {
+			boolean deletetempfiles, String urlPrefix,
+			String segname, long timeLimit) throws Exception {
 		if (createSegs) {
 			if (!subFile.exists())
 				throw new FileNotFoundException(subFile.getAbsolutePath() + " not found");
 		}
+		segname = segname.toLowerCase(Locale.US);
 
+		String segTimeline="";
 		if (createSegs) {
 			File outputFolder = outputFile.getParentFile();
 
@@ -124,13 +131,49 @@ public class SubtitleInserter {
 			// create fragmented output/temp-sub_xxx.mp4 from sub_xxx.xml text file
 			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, repId); 
 			MediaTools.executeProcess(args, outputFolder);
+			if (timeLimit>0) {
+				args=MediaTools.getTrimMp4Args(tempOutput, tempOutput, timeLimit); 
+				MediaTools.executeProcess(args, outputFolder);
+			}
+			
+			// create output/sub_xxx/sub_x.m4s segments from output/temp-sub_xxx.mp4 temp file
 			new File(outputFolder, repId+"/").mkdir();
-			// create output/sub_xxx/sub_x.m4s segment files
-			args=MediaTools.getSubIBSegmentsArgs(tempOutput, repId, segdur);
+			args=MediaTools.getSubIBSegmentsArgs(tempOutput, repId, segdur, segname);
 			MediaTools.executeProcess(args, new File(outputFolder, repId+"/") );
+			// extract optional SegmentTimeline from temporary sub.mpd file
+			StringBuilder data = Utils.loadTextFile(new File(args.get( args.indexOf("-out")+1 )), "UTF-8"); 
+			int startIdx= data.indexOf("<SegmentTimeline>");
+			if (startIdx>0)
+				segTimeline = data.substring(startIdx, data.indexOf("</SegmentTimeline>")+18);
 		}
+
+		StringBuilder sbuf = new StringBuilder(8048);
+		sbuf.append(Utils.NL+Utils.NL);
+		sbuf.append("  <AdaptationSet segmentAlignment=\"true\" lang=\"${lang}\" contentType=\"text\" mimeType=\"application/mp4\" startWithSAP=\"1\">"+Utils.NL );
+		sbuf.append("    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL );  // subtitle,captions,main
+		if (segTimeline.isEmpty()) {
+			sbuf.append( segname.startsWith("number") ?
+				 "    <SegmentTemplate initialization=\"${file}$RepresentationID$/sub_i.mp4\" media=\"${file}$RepresentationID$/sub_$Number$.m4s\" timescale=\"1000\" startNumber=\"1\" duration=\"${dur}\"/>"+Utils.NL :
+				 "    <SegmentTemplate initialization=\"${file}$RepresentationID$/sub_i.mp4\" media=\"${file}$RepresentationID$/sub_$Time$.m4s\" timescale=\"1000\" startNumber=\"1\" duration=\"${dur}\"/>"+Utils.NL 
+			);
+		} else {
+			sbuf.append( segname.startsWith("number") ?
+				 "    <SegmentTemplate initialization=\"${file}$RepresentationID$/sub_i.mp4\" media=\"${file}$RepresentationID$/sub_$Number$.m4s\" timescale=\"1000\" startNumber=\"1\">"+Utils.NL :
+				 "    <SegmentTemplate initialization=\"${file}$RepresentationID$/sub_i.mp4\" media=\"${file}$RepresentationID$/sub_$Time$.m4s\" timescale=\"1000\" startNumber=\"1\">"+Utils.NL 
+			);
+			sbuf.append("    "+segTimeline+Utils.NL);
+			sbuf.append("    </SegmentTemplate>"+Utils.NL);			
+		}
+		sbuf.append("    <Representation id=\"${id}\" bandwidth=\"6000\" codecs=\"stpp\"></Representation>"+Utils.NL );
+		sbuf.append("  </AdaptationSet>"+Utils.NL );
+
+		String template=sbuf.toString().replace("${lang}", lang)
+			.replace("${id}", repId)
+			.replace("${file}", urlPrefix)
+			.replace("${dur}", ""+(segdur*1000));
 		
-		String template=Utils.NL+Utils.NL+"  <AdaptationSet segmentAlignment=\"true\" lang=\"${lang}\" contentType=\"text\" mimeType=\"application/mp4\">"+Utils.NL
+		/*String template=Utils.NL+Utils.NL
+			+"  <AdaptationSet segmentAlignment=\"true\" lang=\"${lang}\" contentType=\"text\" mimeType=\"application/mp4\">"+Utils.NL
 			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL  // subtitle,captions,main
 			+"    <SegmentTemplate initialization=\"${file}$RepresentationID$/sub_i.mp4\" media=\"${file}$RepresentationID$/sub_$Number$.m4s\" timescale=\"1000\" startNumber=\"1\" duration=\"${dur}\"/>"+Utils.NL
 			+"    <Representation id=\"${id}\" startWithSAP=\"1\" bandwidth=\"6000\" codecs=\"stpp\"></Representation>"+Utils.NL
@@ -138,7 +181,7 @@ public class SubtitleInserter {
 		template=template.replace("${lang}", lang)
 				.replace("${id}", repId)
 				.replace("${file}", urlPrefix)
-				.replace("${dur}", ""+(segdur*1000));
+				.replace("${dur}", ""+(segdur*1000));*/
 		
 		StringBuilder data = Utils.loadTextFile(manifestFile, "UTF-8"); 
 		int startIdx = data.lastIndexOf("</AdaptationSet>");

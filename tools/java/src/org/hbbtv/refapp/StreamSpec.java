@@ -6,8 +6,10 @@ import java.util.Locale;
  * Simple structure for output stream properties.
  */
 public class StreamSpec implements Cloneable {
+	// dash=dash only without transcoding
 	public static enum TYPE { 
-		VIDEO_H264, VIDEO_H265, AUDIO_AAC, AUDIO_AC3, AUDIO_EAC3; 
+		VIDEO_H264, VIDEO_H265, AUDIO_AAC, AUDIO_AC3, AUDIO_EAC3,
+		DASH; 
 
 		public boolean isAudio() { 
 			return this.toString().startsWith("AUDIO_"); 
@@ -22,6 +24,7 @@ public class StreamSpec implements Cloneable {
 				val.equalsIgnoreCase("EC3")  || val.endsWith("_EC3") ? AUDIO_EAC3 :
 				val.equalsIgnoreCase("H264") || val.endsWith("_H264")? VIDEO_H264 :
 				val.equalsIgnoreCase("H265") || val.endsWith("_H265")? VIDEO_H265 :
+				val.equalsIgnoreCase("dash") ? DASH :
 				null;
 		}
 	};
@@ -30,7 +33,7 @@ public class StreamSpec implements Cloneable {
 	public String name;		// v1, v2, v3, a1 (segment_*.mp4|m4s name prefix)
 	public String size;		// 1280x720, 1920x1080, 3840x2160
 	public String bitrate;	// 128k, 500k, 1500k, 2500k
-	public int sampleRate;	// 44100, 48000	 (audio sample rate)
+	public int sampleRate;	// 44100, 48000	 (audio sample rate), should use 48000 for aac tracks
 	public int channels;	// 2 (audio channel count)
 	public boolean enabled;
 	

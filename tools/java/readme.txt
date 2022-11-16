@@ -107,6 +107,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2019-06-12:
+- added mode=dash to skip transcoding and dash+encrypt input files
 2018-10-30:
 - added frags argument for multifragment(moof/mdat pairs)
 2017-02-12:

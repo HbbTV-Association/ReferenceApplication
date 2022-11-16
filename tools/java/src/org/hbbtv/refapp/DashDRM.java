@@ -19,6 +19,7 @@ import com.google.protobuf.ByteString;
  */
 public class DashDRM {
 	// http://dashif.org/identifiers/protection/
+	// https://dashif.org/identifiers/content_protection/
 	public static final String SYSID_PLAYREADY= "9A04F07998404286AB92E65BE0885F95";     // PSSH SystemId
 	public static final String GUID_PLAYREADY = "9a04f079-9840-4286-ab92-e65be0885f95"; // SchemeId GUID
 	public static final String SYSID_MARLIN   = "69f908af481646ea910ccd5dcccb0a3a";     // SysId and GUID does not
@@ -35,43 +36,122 @@ public class DashDRM {
 	private Map<String,String> params;
 
 	/**
+	 * DRM is enabled in an encoder settings?
+	 * @param params
+	 * @return
+	 */
+	public static boolean hasParams(Map<String,String> params) {
+		String keys[]=new String[]{ 
+				"drm.kid",       "drm.key",		  // use same value for video+audio tracks.       
+				"drm.kid.video", "drm.key.video", // Playready may need to use separate KIDs
+				"drm.kid.audio", "drm.key.audio", // for video(SL3000) and audio(SL2000) tracks.
+		};
+		for(int idx=0; idx<keys.length; idx=+2) {
+			// KID and KEY params found?
+			if(!Utils.getString(params, keys[idx], "", true).isEmpty() &&
+					!Utils.getString(params, keys[idx+1], "", true).isEmpty())
+				return true;
+		}
+		return false;		
+	}
+	
+	/**
 	 * Initialize drm.* arguments.
 	 * @param params
 	 * @throws NoSuchAlgorithmException 
 	 */
 	public void initParams(Map<String,String> params) {
-		// should use RandomNumberGenerator?
-		if (params.get("drm.kid").equals("rng"))
-			params.put("drm.kid", "0x"+Utils.bytesToHex(randomizeBytes(16)) );
-		if (params.get("drm.key").equals("rng"))
-			params.put("drm.key", "0x"+Utils.bytesToHex(randomizeKey(16)) );
-		if (!params.containsKey("drm.playready.laurl"))
-			params.put("drm.playready.laurl", "");
-		
-		String val = Utils.getString(params, "drm.iv", "rng", true);
-		if (val.equals("rng"))
-			params.put("drm.iv", "0x"+Utils.bytesToHex(randomizeBytes(8)) );
+		// rng=RandomNumberGenerator
+		String keys[]=new String[]{ 
+				"drm.kid",       "drm.key",       "drm.iv",        // 0..2 
+				"drm.kid.video", "drm.key.video", "drm.iv.video",  // 3..5
+				"drm.kid.audio", "drm.key.audio", "drm.iv.audio"   // 6..8
+		};
+		for(String key : keys) {
+			boolean isIv = key.contains(".iv");
+			String val = Utils.getString(params, key, "", true);
+			if(isIv && val.isEmpty()) val="rng"; // empty IV defaults to rng
+			if(val.equals("rng")) {
+				int byteLen = isIv ? 8 : 16;
+				params.put(key, "0x"+Utils.bytesToHex(
+					key.contains(".key") ? randomizeKey(byteLen) : randomizeBytes(byteLen)
+				));				
+			}
+		}
+		// copy values to .video|.audio fields if missing, use "drm.kid|.key|.iv" defaults. 
+		for(int idx=3; idx<=5; idx++) {
+			if(Utils.getString(params, keys[idx], "", true).isEmpty())
+				params.put(keys[idx], Utils.getString(params, keys[idx-3], "", true));
+		}
+		for(int idx=6; idx<=8; idx++) {
+			if(Utils.getString(params, keys[idx], "", true).isEmpty())
+				params.put(keys[idx], Utils.getString(params, keys[idx-6], "", true));
+		}
+		for(String keySuffix : new String[]{"video","audio"}) {
+			String key="drm.playready.laurl";
+			if(Utils.getString(params, key+"."+keySuffix, "", true).isEmpty())
+				params.put(key+"."+keySuffix, Utils.getString(params, key, "", true));
+		}
 		
 		this.params=params;
+	}
+	
+	public void printParamsToLogger(LogWriter logger) {
+		try {
+			for(String key : new String[]{ 
+				"drm.kid.video", "drm.key.video", "drm.iv.video", "drm.playready.laurl.video",
+				"drm.kid.audio", "drm.key.audio", "drm.iv.audio", "drm.playready.laurl.audio"
+			}) {
+				String val = Utils.getString(params, key, "", true);
+				if(!val.isEmpty())
+					logger.println(key+"="+params.get(key));
+			}
+		} catch(IOException ex) { 
+			ex.printStackTrace();
+		}
 	}
 
 	/**
 	 * Create GPACDRM.xml specification, this is required for
 	 * encryption of output/temp-v1.mp4 to output/drm/temp-v1.mp4 process.
 	 * @throws Exception
+	 * @param keySuffix  "video","audio"
+	 * @param  drmMode		 "cenc", "cbcs" 1:9 pattern, "cbcs0" 0:0 pattern  
 	 */
-	public String createGPACDRM() throws Exception {
+	public String createGPACDRM(String keySuffix, String drmMode) throws Exception {
 		String val;
 		StringBuilder buf = new StringBuilder();
 
+		// should use "cenc", "cbcs", "cbcs0" values only, rest are legacy names.
+		//   CENC AES-CTR or cenc: Counter and sub-sample encryption (for DASH)
+		//   CENC AES-CBC: Cipher Block Chaining and sub-sample encryption
+		//   CENC AES-CTR Pattern: CTR + sub-sample using a pattern of unencrypted/encrypted bytes
+		//   CENC AES-CBC Pattern or cbcs: CBC + sub-sample using a pattern of unencrypted/encrypted bytes (for HLS)
+		String mode;
+		if(drmMode.equalsIgnoreCase("cenc-cbc") || drmMode.equalsIgnoreCase("cbc")
+				|| drmMode.equalsIgnoreCase("cbc1") )
+			mode = "CENC AES-CBC";
+		else if(drmMode.equalsIgnoreCase("cenc-ctrp") || drmMode.equalsIgnoreCase("cens") )
+			mode = "CENC AES-CTR Pattern";
+		else if(drmMode.equalsIgnoreCase("cenc-cbcp") || drmMode.equalsIgnoreCase("cbcs") 				
+				|| drmMode.equalsIgnoreCase("cbcs0") || drmMode.equalsIgnoreCase("cbc0") ) {
+			// cbcs  video=1:9(drm:nodrm) pattern (crypt_byte_block:skip_byte_block), audio=fully encrypted pattern
+			// cbcs0 video=0:0  special case pattern, audio=fully encrypted patterm
+			mode = "CENC AES-CBC Pattern"; // dash+hls, should also use "cmaf=cmf2" argument
+		} else {
+			// default to traditional "cenc", cenc-ctr, ctr
+			mode = "CENC AES-CTR"; // dash
+		}
+		
 		buf.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" + Dasher.NL);
-		buf.append("<GPACDRM type=\"CENC AES-CTR\">"+Dasher.NL);
+		buf.append(String.format("<GPACDRM type=\"%s\">", mode) +Dasher.NL);
 
 		// write KID,KEY,IV values to xml comment (0xAABBCC..DD)
-		String kid = Utils.getString(params, "drm.kid", "", true);
-		String key = Utils.getString(params, "drm.key", "", true);
-		String iv  = Utils.getString(params, "drm.iv", "", true);
+		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		String key = Utils.getString(params, "drm.key."+keySuffix, "", true);
+		String iv  = Utils.getString(params, "drm.iv."+keySuffix, "", true);
 		buf.append("<!-- "+Dasher.NL);
+		buf.append("  suffix=" + keySuffix+Dasher.NL);
 		buf.append("  kid=" + kid +Dasher.NL);
 		buf.append("  key=" + key +Dasher.NL);
 		buf.append("  iv="  + iv  +Dasher.NL);
@@ -80,8 +160,8 @@ public class DashDRM {
 		// write Playready(0,pro,pssh)
 		val = Utils.getString(params, "drm.playready", "0", true);
 		if (!val.equals("0")) {
-			String laurl= Utils.getString(params, "drm.playready.laurl", "", true);			
-			byte[] wrm = createPlayreadyXML(kid, key, laurl).getBytes("UTF-16LE");
+			String laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix, "", true);			
+			byte[] wrm = createPlayreadyXML(kid, key, laurl, mode).getBytes("UTF-16LE");
 			buf.append(Dasher.NL);
 			buf.append("<!-- Playready -->"+Dasher.NL);
 			buf.append("<DRMInfo type=\"pssh\" version=\"0\">"+Dasher.NL);
@@ -137,9 +217,31 @@ public class DashDRM {
 
 		// pending: ADOBE_PRIMETIME "f239e769efa348509c16a903c6932efb", "urn:uuid:F239E769-EFA3-4850-9C16-A903C6932EFB"
 		
-		// write encryption keys, supports one KEY for now
+		// CBCS_1:9 = crypt_byte_block="1" skip_byte_block="9" is set on VIDEO, other tracks don't use 1:9 pattern.		
+		// write encryption keys, supports one KEY for now, IV length 8 or 16 bytes
+		// CBCS_0:0 = special case pattern, crypt all blocks		
+		int cryptBytes=-1; int skipBytes=-1;
+		if(mode.equals("CENC AES-CBC Pattern") && keySuffix.startsWith("video")) {
+			if(drmMode.equals("cbcs0")) {
+				cryptBytes=skipBytes=0;
+			} else {
+				cryptBytes=1; skipBytes=9; 
+			}
+		}		
+
 		buf.append(Dasher.NL);
-		buf.append("<CrypTrack trackID=\"1\" IsEncrypted=\"1\" IV_size=\"8\" first_IV=\"" +iv+ "\" saiSavedBox=\"senc\">"+Dasher.NL);
+		//buf.append(String.format("<CrypTrack trackID=\"1\" IsEncrypted=\"1\" IV_size=\"%d\" first_IV=\"%s\" saiSavedBox=\"senc\""
+		buf.append(String.format("<CrypTrack trackID=\"1\" IsEncrypted=\"1\" %s=\"%d\" %s=\"%s\" saiSavedBox=\"senc\""		
+				+ " %s %s >"
+				, (drmMode.startsWith("cbcs") ? "constant_IV_size" : "IV_size")
+				, (iv.length()-2)/2
+				, (drmMode.startsWith("cbcs") ? "constant_IV" : "first_IV")
+				, iv
+				//, (iv.length()-2)/2, iv
+				, (cryptBytes>=0 ? "crypt_byte_block=\""+cryptBytes+"\"" : "")
+				, (skipBytes>=0  ? "skip_byte_block=\""+skipBytes+"\"" : "")
+				)
+				+Dasher.NL);
 		buf.append("  <key KID=\"" + kid+ "\" value=\"" +key+ "\"/>"+Dasher.NL);
 		buf.append("</CrypTrack>"+Dasher.NL);
 				
@@ -148,15 +250,17 @@ public class DashDRM {
 		return buf.toString();
 	}
 	
-	public String createPlayreadyMPDElement() throws Exception {
+	public String createPlayreadyMPDElement(String keySuffix) throws Exception {
 		String opt = Utils.getString(params, "drm.playready", "0", true); // 0,1,pro,pssh
 		if (opt.equals("0")) return ""; // do not create element
 		else if (opt.equals("1")) opt="pro,pssh";
-		
-		String kid = Utils.getString(params, "drm.kid", "", true);
-		String key = Utils.getString(params, "drm.key", "", true);
-		String laurl= Utils.getString(params, "drm.playready.laurl", "", true);
-		byte[] wrm = createPlayreadyXML(kid, key, laurl).getBytes("UTF-16LE");
+
+		String kid  = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		String key  = Utils.getString(params, "drm.key."+keySuffix, "", true);
+		String laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix, "", true);
+		String mode = Utils.getString(params, "drm.mode", "", true);
+
+		byte[] wrm = createPlayreadyXML(kid, key, laurl, mode).getBytes("UTF-16LE");
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_PLAYREADY+"\">"+Dasher.NL);
@@ -170,25 +274,27 @@ public class DashDRM {
 		return buf.toString();
 	}
 	
-	public String createWidevineMPDElement() throws Exception {
+	public String createWidevineMPDElement(String keySuffix) throws Exception {
 		String opt = Utils.getString(params, "drm.widevine", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 		
-		String kid = Utils.getString(params, "drm.kid", "", true);
-		String prov= Utils.getString(params, "drm.widevine.provider", "", true);
-		String cid = Utils.getString(params, "drm.widevine.contentid", "", true);
+		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		String prov= Utils.getString(params, "drm.widevine.provider", "", true);  // always use same provider and
+		String cid = Utils.getString(params, "drm.widevine.contentid", "", true); // contentid values for all tracks.
+		String mode= Utils.getString(params, "drm.mode", "", true);
+		
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_WIDEVINE+"\">"+Dasher.NL);
-		buf.append("  <cenc:pssh>"+ createWidevinePSSH(kid, prov, cid) +"</cenc:pssh>"+Dasher.NL);		
+		buf.append("  <cenc:pssh>"+ createWidevinePSSH(kid, prov, cid, mode) +"</cenc:pssh>"+Dasher.NL);		
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();		
 	}
 	
-	public String createMarlinMPDElement() throws Exception {
+	public String createMarlinMPDElement(String keySuffix) throws Exception {
 		String opt = Utils.getString(params, "drm.marlin", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String kid = Utils.getString(params, "drm.kid", "", true);		
+		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);		
 		StringBuilder buf = new StringBuilder();
 		// Marlin must have schemeidUri UCASE(against regular specs) and kid LCASE
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+ (GUID_MARLIN.toUpperCase(Locale.US)) +"\">"+Dasher.NL);
@@ -202,21 +308,24 @@ public class DashDRM {
 	public String createClearKeyMPDElement() throws Exception {
 		String opt = Utils.getString(params, "drm.clearkey", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
-
+		// https://github.com/Dash-Industry-Forum/dash.js/issues/3343
+		// https://dashif-documents.azurewebsites.net/Guidelines-Security/master/Guidelines-Security.html#CPS-mpd-drm-config
 		String laurl = Utils.getString(params, "drm.clearkey.laurl", "", true);		
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_CLEARKEY+"\" value=\"ClearKey1.0\">"+Dasher.NL);
-		if (!laurl.isEmpty())
-			buf.append("<ck:Laurl Lic_type=\"EME-1.0\">"+ Utils.XMLEncode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL);
+		if (!laurl.isEmpty()) {
+			buf.append("<dashif:laurl>"+ Utils.XMLEncode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
+			buf.append("<ck:Laurl Lic_type=\"EME-1.0\">"+ Utils.XMLEncode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
+		}
 		buf.append("</ContentProtection>"+Dasher.NL);
 		return buf.toString();
 	}
 
-	public String createCENCMPDElement() throws Exception {
+	public String createCENCMPDElement(String keySuffix) throws Exception {
 		String opt = Utils.getString(params, "drm.cenc", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String kid   = Utils.getString(params, "drm.kid", "", true);		
+		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);		
 		StringBuilder buf = new StringBuilder();
 		buf.append("<ContentProtection schemeIdUri=\"urn:uuid:"+GUID_CENC+"\">"+Dasher.NL);
 		buf.append("  <cenc:pssh>"+createPSSHv1(SYSID_CENC, kid)+"</cenc:pssh>"+Dasher.NL);
@@ -224,7 +333,10 @@ public class DashDRM {
 		return buf.toString();
 	}
 
-	private String createPlayreadyXML(String kid, String key, String laurl) throws Exception {
+	public String createPlayreadyXML(String kid, String key, String laurl, String alg) throws Exception {
+		// drm.mode="cbcs", "cbc1", "cbcs0", "CENC AES-CBC Pattern"
+		alg = alg.toLowerCase(Locale.US).contains("cbc") ? "AESCBC" : "AESCTR";
+		
 		byte[] kidbuf = Utils.hexToBytes(kid);
 		byte[] keybuf = Utils.hexToBytes(key);
 		
@@ -243,10 +355,20 @@ public class DashDRM {
         byte[] checkbuf = cipher.doFinal(kidbuf); // encrypt KID with KEY spec
         checkbuf = Arrays.copyOf(checkbuf, 8);
 
-        String val = "<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.0.0.0\"><DATA><PROTECTINFO><KEYLEN>16</KEYLEN><ALGID>AESCTR</ALGID></PROTECTINFO><KID>${kid}</KID><CHECKSUM>${check}</CHECKSUM>"
+        String val;
+        if(alg.equals("AESCTR")) {
+	        val = "<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.0.0.0\"><DATA><PROTECTINFO><KEYLEN>16</KEYLEN><ALGID>${alg}</ALGID></PROTECTINFO><KID>${kid}</KID><CHECKSUM>${check}</CHECKSUM>"
         			+"<LA_URL>${laurl}</LA_URL></DATA></WRMHEADER>";
+        } else {
+	        val = "<WRMHEADER xmlns=\"http://schemas.microsoft.com/DRM/2007/03/PlayReadyHeader\" version=\"4.3.0.0\"><DATA>"
+        		+ "<LA_URL>${laurl}</LA_URL>"
+        		+ "<PROTECTINFO><KIDS><KID ALGID=\"${alg}\" VALUE=\"${kid}\"></KID></KIDS></PROTECTINFO>"
+    			+"</DATA></WRMHEADER>";        	
+        }
+        
         val=val.replace("${kid}", Utils.base64Encode(kidbuf))
-        	.replace("${check}", Utils.base64Encode(checkbuf));
+        	.replace("${check}", Utils.base64Encode(checkbuf))
+        	.replace("${alg}", alg);
         val = laurl.isEmpty() ?
         	val.replace("<LA_URL>${laurl}</LA_URL>", "") :
         	val.replace("${laurl}", Utils.XMLEncode(laurl, true, false) );
@@ -254,7 +376,7 @@ public class DashDRM {
         return val;
 	}
 	
-	private String createPlayreadyPSSH(byte[] xmlBytes) throws IOException {
+	public String createPlayreadyPSSH(byte[] xmlBytes) throws IOException {
 		// create <cenc:pssh>BgIAAE..<cenc:pssh> value for <ContentProtection> element
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(xmlBytes.length+42);
 
@@ -291,15 +413,23 @@ public class DashDRM {
 		return Utils.base64Encode(psshBytes);		
 	}
 
-	private String createWidevinePSSH(String kid, String provider, String contentId) throws IOException {
+	private String createWidevinePSSH(String kid, String provider, String contentId, String alg) throws IOException {
 		// Use ProtoBuffer builder, set ALG,KID,PROVIDER
 		WidevineCencHeaderProto.WidevineCencHeader.Builder psshBuilder=WidevineCencHeaderProto.WidevineCencHeader.newBuilder();
-		psshBuilder.setAlgorithm( WidevineCencHeaderProto.WidevineCencHeader.Algorithm.valueOf("AESCTR") );
+		
+		alg = alg.toLowerCase(Locale.US).contains("cbc") ? "AESCBC" : "AESCTR"; // cbcs,cbcs0,cenc
+		if(alg.equals("AESCTR")) {
+			psshBuilder.setAlgorithm( WidevineCencHeaderProto.WidevineCencHeader.Algorithm.valueOf(alg) );
+		} else {
+			//psshBuilder.setAlgorithm( WidevineCencHeaderProto.WidevineCencHeader.Algorithm.valueOf("AESCTR") );
+			psshBuilder.setProtectionScheme(Utils.getFourCCInt("cbcs")); // cbcs: int=1667392371, hex=63626373			
+		}
+
 		psshBuilder.addKeyId( ByteString.copyFrom(Utils.hexToBytes(kid)) );
 		if (!provider.isEmpty())  psshBuilder.setProvider(provider); // intertrust, usp-cenc, widevine_test, whatever, ..
 		if (!contentId.isEmpty()) psshBuilder.setContentId( ByteString.copyFrom(contentId,"ISO-8859-1") );
 		WidevineCencHeaderProto.WidevineCencHeader psshObj = psshBuilder.build();
-
+		
 		byte[] pssh=psshObj.toByteArray(); // pssh payload
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(64);
 		baos.write(Utils.toIntArray(32+pssh.length)); // length, fixed 32-bytes prefix in PSSH box
