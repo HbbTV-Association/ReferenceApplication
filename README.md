@@ -49,8 +49,9 @@ Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO J
  
   ## Testing
  - Intended for rolling out new features and signaling
+ - Now includes Playready persistent license test for OIPF/HTML5 players (native)
  - Suitable for early testing and feedback
- - available at https://refapp.hbbtv.org/testing/
+ - available at https://refapp.hbbtv.org/testing/catalogue/index.php
  
 ### Multi-period DASH content
 

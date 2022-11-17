@@ -515,10 +515,19 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	this.drm.successCallback = callback;
 	var self = this;
 	
+	// persistent-license test needs a session GUID to track laurl invocation
+	var laUrl = self.drm.la_url;
+	if(laUrl.indexOf("${GUID}")>=0) {
+		self.drm.la_url_guid = uuidv4();
+		laUrl = laUrl.replace("${GUID}", self.drm.la_url_guid);
+	} else {
+		delete self.drm.la_url_guid;
+	}
+	
 	if( this.drm.system == "playready" ){
 		// use simple playready config (persistentState=optional, distinctiveIdentifier=optional)
 		self.player.setProtectionData({
-			"com.microsoft.playready": { "serverURL": self.drm.la_url }
+			"com.microsoft.playready": { "serverURL": laUrl }
 		});			
 	}
 	else if( this.drm.system.indexOf("playready.recommendation")===0 
@@ -540,7 +549,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			// use new systemStringPriority to activate a new ".recommmendation" drm on Edge
 			self.player.setProtectionData({
 				"com.microsoft.playready": { 
-					"serverURL": self.drm.la_url
+					"serverURL": laUrl
 					, "priority":1
 					, "persistentState": "required", "distinctiveIdentifier": "required"
 					, "videoRobustness": secLevel // SL3000 needs a new GPU(trusted module) 
@@ -553,7 +562,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			// this "persistentState+distinctiveIdentifier" without sysStrPriority used to activate a new drm on older dashjs releases
 			self.player.setProtectionData({
 				"com.microsoft.playready": { 
-					"serverURL": self.drm.la_url
+					"serverURL": laUrl
 					, "priority":1
 					, "persistentState": "required", "distinctiveIdentifier": "required"
 					, "videoRobustness": secLevel
@@ -583,7 +592,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	else if( this.drm.system == "clearkey" ){
 		self.player.setProtectionData({
 			"org.w3.clearkey": { 
-				"serverURL": self.drm.la_url
+				"serverURL": laUrl
 				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
 			}
 		});
@@ -601,7 +610,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 		console.log("Use widevine security level "+secLevel);			
 		self.player.setProtectionData({
 			"com.widevine.alpha": {
-				"serverURL": self.drm.la_url
+				"serverURL": laUrl
 				, "priority":1
 				//, "initDataTypes": [ "cenc" ]
 				//, "sessionTypes": [ "temporary" ] // persistent-license, temporary
@@ -614,7 +623,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 		});
 	} else {
 		var protData={};
-		protData[self.drm.system] = { "serverURL": self.drm.la_url };
+		protData[self.drm.system] = { "serverURL": laUrl };
 		self.player.setProtectionData(protData);
 	}
 	

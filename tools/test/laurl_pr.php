@@ -15,6 +15,7 @@ header('Access-Control-Expose-Headers: server,range,content-range,content-length
 $url = @$_REQUEST['laurl']; // redirect soapxml to this LAURL address or use predefined values, if empty use WRMHeaderKID
 $headerCustomdata  = @$_REQUEST['header-customdata']; // put to LAURL request header (BuyDRM xmlauth)
 $headerNVAuth      = @$_REQUEST['header-nvauth']; // nv-authorizations jwt token(nagra)
+$headerNVPreAuth   = @$_REQUEST['header-nvpreauth']; // PreAuthorization jwt token(nagra)
 $headerCustomdataDT= @$_REQUEST['header-dtcd']; // DrmToday CustomData
 
 $persist = @$_REQUEST['persist']; // MSTest server persist license
@@ -69,10 +70,11 @@ if($delimS<1) {
 if($delimE>0) {
 	$val = substr($query, $delimS, $delimE-$delimS); // KIDWrm base64
 	$kid = bin2hex( base64_decode($val,TRUE) ); // KIDWrmhex in mixed bigendian-littleendian
-	$kid = substr($kid, 6,2).substr($kid, 4,2).substr($kid, 2,2).substr($kid, 0,2) // KID(hex)
-		.substr($kid, 10,2).substr($kid, 8,2)
-		.substr($kid, 14,2).substr($kid, 12,2)
-		.substr($kid, 16,4).substr($kid, 20,12);
+	$kid =   substr($kid, 6,2).substr($kid, 4,2).substr($kid, 2,2).substr($kid, 0,2) // KID(guid)
+		."-".substr($kid, 10,2).substr($kid, 8,2)
+		."-".substr($kid, 14,2).substr($kid, 12,2)
+		."-".substr($kid, 16,4)
+		."-".substr($kid, 20,12);
 }
 
 if ($url=="" && $kid!="") $url = "MS".substr($kid, 32, 4);
@@ -120,6 +122,7 @@ $reqHeaders = array(
 );
 if ($headerCustomdata!="") array_push($reqHeaders, "customdata: ${headerCustomdata}");
 if ($headerNVAuth!="") array_push($reqHeaders, "nv-authorizations: ${headerNVAuth}");
+if ($headerNVPreAuth!="") array_push($reqHeaders, "PreAuthorization: ${headerNVPreAuth}");
 //if ($headerCustomdataDT!="") array_push($reqHeaders, "dt-customdata: ${headerCustomdataDT}");
 if ($headerCustomdataDT!="") array_push($reqHeaders, "http-header-CustomData: ${headerCustomdataDT}");
 

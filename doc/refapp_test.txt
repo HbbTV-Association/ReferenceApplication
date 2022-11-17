@@ -2,130 +2,108 @@ Test case: 2.1
 Devices: all HbbTV 1.5 compatible with Playready DRM support
 Test: AVC 1080p video, License URL override
 Expected result: Device plays video
-Latest results: 22/26 devices OK
 
 Test case: 2.1.1
 Devices: all HbbTV 1.5 compatible with Playready DRM support
 Test: AVC 1080p video, URL in manifest
 Expected result: Device plays video
-Latest results: 
 
 Test case: 2.1.2
 Devices: all HbbTV 1.5 compatible with Playready DRM support
 Test: AVC 1080p video, ExpressPlay Server
 Expected result: Device plays video
-Latest results: 
 
 Test case: 2.2
 Devices: all HbbTV 1.5 compatible with Playready DRM support
 Test: HEVC 2160p video License URL override
 Expected result: Device plays video
-Latest results: 12/12 devices OK
 
 Test case: 2.3
 Devices: all HbbTV 2.0.1 compatible with Playready DRM support
 Test: Out-of-band subtitles (TTML)
 Expected result: Device plays video and subtitles. Subtitle languages and mode off can be toggled with yellow RC button.
-Latest results: 6/7 devices OK
 
 Test case: 2.4
 Devices: all HbbTV 2.0.1 compatible with Playready DRM support
 Test: In-band subtitles
 Expected result: Device plays video and subtitles. Subtitle languages and mode off can be toggled with yellow RC button.
-Latest results: 2/5 devices OK
 
 Test case: 2.5
 Devices: all HbbTV 2.0.1 compatible with Playready DRM support
 Test: Advert insertion
 Expected result: Device shows pre-roll ads before DASH content, and periodical mid-roll ads based on configuration.
-Latest results: 2/5 devices OK
 
 Test case: 2.6
 Devices: all HbbTV 2.0.1 compatible with Playready DRM support
 Test: In-band events
 Expected result: Device shows periodical DASH event notification with video.
-Latest results: 4/5 devices OK
 
 Test case: 2.7
 Devices: all HbbTV 1.5 compatible with Playready DRM support
 Test: Multiple audio
 Expected result: Green color key can be used to change audio language.
-Latest results: 
 
 Test case: 2.8
 Devices: all HbbTV 1.5. compatible with Playready DRM support
 Test: Multiple moof/mdat
 Expected result: Low latency test for collecting results on moof/mdat techniques
-Latest results: 
 
 Test case: 3.1
 Devices: all HbbTV 1.5 compatible with Marlin DRM support
 Test: AVC 1080p video
 Expected result: Device plays video
-Latest results: 7/8 devices OK
 
 Test case: 3.2
 Devices: all HbbTV 1.5 compatible with Marlin DRM support
 Test: HEVC 2160p video
 Expected result: Device plays video
-Latest results: 2/2 devices OK
 
 Test case: 3.3
 Devices: all HbbTV 2.0.1 compatible with Marlin DRM support
 Test: Out-of-band subtitles
 Expected result: Device plays video and subtitles. Subtitle languages and mode off can be toggled with yellow RC button.
-Latest results: 0/1 devices OK
 
 Test case: 3.4
 Devices: all HbbTV 2.0.1 compatible with Marlin DRM support
 Test: In-band subtitles
 Expected result: Device plays video and subtitles. Subtitle languages and mode off can be toggled with yellow RC button.
-Latest results: 0/1 devices OK
 
 Test case: 3.5
 Devices: all HbbTV 2.0.1 compatible with Marlin DRM support
 Test: Advert insertion
 Expected result: Device shows pre-roll ads before DASH content, and periodical mid-roll ads based on configuration.
-Latest results: 0/1 devices OK
 
 Test case: 3.6
 Devices: all HbbTV 2.0.1 compatible with Marlin DRM support
 Test: In-band events
 Expected result: Device shows periodical DASH event notification with video.
-Latest results: 0/1 devices OK
 
 Test case: 4.1
 Devices: all MSE-EME compatible with ClearKey DRM support
 Test: ClearKey test
 Expected result: Device plays video
-Latest results: 5/5 devices OK
 
 Test case: 4.2
 Devices: all MSE-EME compatible with ClearKey DRM support
 Test: ClearKey test (HEVC)
 Expected result: Device plays video
-Latest results: 
 
 Test case: 4.5
 Devices: all MSE-EME compatible with ClearKey DRM support
 Test: Ad Insertion
 Expected result: Device shows pre-roll ads before DASH content, and periodical mid-roll ads based on configuration.
-Latest results: 
 
 Test case: 5.1
 Devices: all HbbTV 1.5 compatible 
 Test: Livesim multi moof/mdat
 Expected result: Low latency test for collecting results on moof/mdat techniques
-Latest results: 
 
 Test case: 5.2
 Devices: all HbbTV 1.5 compatible with Playready DRM support
 Test: Livesim multi moof/mdat with Playready DRM
 Expected result: Low latency test for collecting results on moof/mdat techniques
-Latest results: 
 
 Test case: 5.3
 Devices: all HbbTV 1.5 compatible 
 Test: Livesim single moof/mdat
 Expected result: Device plays video
-Latest results: 
