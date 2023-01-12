@@ -128,15 +128,22 @@ public class XMLUtil {
 	    transformer.transform(source, result);
 	    
 	    // Java10-transformer adds unecessary empty lines, remove empty lines, study why does it happens.
+	    // Fix few common identation bugs in mpd manifest.
 	    BufferedReader reader = new BufferedReader(new StringReader(writer.toString()));
 	    StringBuilder buf = new StringBuilder();
 	    try {
 		    String line;
+	    	boolean wasEmptyLine=false;
 		    while( (line=reader.readLine())!=null ) {
-		    	if (!line.trim().isEmpty()) {
+		    	String linetrim = line.trim();
+		    	if (!linetrim.isEmpty()) {
+		    		if(line.startsWith("<SegmentTemplate ")) line="   "+line;
+		    		else if(line.startsWith("<ContentProtection ")) line="   "+line;
+		    		else if(linetrim.startsWith("<AdaptationSet ") && !wasEmptyLine) line=Utils.NL+line;		    			
 		    		buf.append(line); 
 		    		buf.append(Utils.NL);
-		    	}
+		    		wasEmptyLine=false;
+		    	} else wasEmptyLine=true;
 		    }
 	    } finally {
 	    	reader.close();

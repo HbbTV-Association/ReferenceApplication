@@ -13,12 +13,14 @@ import java.util.Map;
 
 /**
  * Utility functions for executable tools used by dasher (ffmpeg,ffprobe,mp4box).
+ * Some methods are replaced by MediaTools2.java
  */
 public class MediaTools {
-	private static String FFPROBE;
-	private static String FFMPEG;
-	private static String MP4BOX;
-	
+	public static String FFPROBE;
+	public static String FFMPEG;
+	public static String MP4BOX;
+	public static String LIBFOLDER; // "c:/apps/refapp/tools/java/lib"
+		
 	public static void initTools(String ffmpeg,  String mp4box) {
 		// set system-wide default values 
 		String ext = Utils.isWindows() ? ".exe" : "";
@@ -38,19 +40,65 @@ public class MediaTools {
 
 		// mp4box=c:/apps/gpac/MP4Box.exe
 		if (mp4box!=null && !mp4box.isEmpty()) 
-			MP4BOX = mp4box;		
+			MP4BOX = mp4box;
+		
+		// "C:\apps\refapp\tools\java\lib" -> "c:/apps/refapp/tools/java/lib"
+		LIBFOLDER = Utils.getLibraryFolder(MediaTools.class);
+		LIBFOLDER = Utils.normalizePath(LIBFOLDER, true);
+		//if (LIBFOLDER.charAt(1)==':') libFolder = libFolder.substring(2);
+	}
+	
+	/**
+	 * Initialize parameters, set defaults
+	 * @param params
+	 */
+	public static void initParams(Map<String,String> params) {
+		String val;
+
+		// subtitles copy "sub.1" to an internal "subib.1", "subob.1" attributes
+		for(int idx=1; ; idx++) {
+			String key="sub."+idx;
+			if(!params.containsKey(key)) {
+				if (idx<=5) continue; // try 1..5 then give up
+				else break;  
+			}
+			val = params.remove(key);
+			if(val!=null) {
+				if(Utils.getBoolean(params, "subib", false)) // use Inband(m4s files)
+					params.put("subib."+idx, val);
+				if(Utils.getBoolean(params, "subob", false)) // use Outband(xml file)
+					params.put("subob."+idx, val);
+			}
+		}
+		
+		// support fraction of seconds, internally INTEGER so use *1000 milliseconds
+		// if "auto" then fix later based on source FPS, see Dasher.java
+		val = Utils.getString(params, "segdur", "8", true); // "3.84"-> 3840, "8"->8000
+		if(val.equalsIgnoreCase("auto")) val="0";
+		params.put("segdur",""+( (int)(Double.parseDouble(val)*1000) ));
+		val = Utils.getString(params, "gopdur", "2", true);
+		if(val.equalsIgnoreCase("auto")) val="0";
+		params.put("gopdur",""+( (int)(Double.parseDouble(val)*1000) ));
+
+		// manifest profile
+		val = Utils.getString(params, "profile", "", true);
+		if(val.isEmpty()) params.put("profile", "dvb2014");  // hbbtv15
+		// use best segment strategy version
+		val = Utils.getString(params, "segver", "", true);
+		if(val.isEmpty()) params.put("segver", "4");
+		// remove an internal drm flag
+		params.remove("drm.created");
 	}
 
-	public static List<String> getTranscodeH264Args(File file, StreamSpec spec, 
-				int fps, int gopdur, String overlayOpt, long timeLimit, int ver) {
-		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
-		String libFolder = Utils.getLibraryFolder(MediaTools.class);
-		libFolder = Utils.normalizePath(libFolder, true);
-		if (libFolder.charAt(1)==':') libFolder = libFolder.substring(2);
-
-		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
-
-		int gop = fps*gopdur;
+	public static List<String> getTranscodeH264Args(StreamSpec spec, 
+				int fps, int gopdur, int segdur, 
+				String overlayOpt, long timeLimit, int ver) {
+		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
+		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
+		
+		// gopdur=milliseconds(3840,2000), gop=number of video frames
+		int gop   = fps*gopdur/1000;
+		int keyMin= gop / 2;
 		List<String> args=Arrays.asList(FFMPEG, 
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
@@ -65,42 +113,42 @@ public class MediaTools {
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
-			"-g", ""+gop,			// GOP frames (fps=25, gopdur=3 -> gop=75)
-			"-keyint_min", ""+fps,	// I-Frame interval (keyframes)
+			"-g", ""+gop,			// GOP frames (25fps, gopdur=3000ms -> gop=75)
+			"-keyint_min", ""+keyMin,	// I-Frame interval (keyframes)
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
 			// allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit) 
 			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"", 
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
-			"-an",
+			"-an", "-sn",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
-			"-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+			"-y", outputFile
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
 		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
-		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);		
+		updateOverlayOpt(args, spec, fps, gop, segdur, overlayOpt);
+		removeEmptyOpt(args);
 		return args;
 	}
 
-	public static List<String> getTranscodeH265Args(File file, StreamSpec spec, 
-			int fps, int gopdur, String overlayOpt, long timeLimit, int ver) {
-		// "C:\apps\refapp\tools\java\lib" -> "/apps/refapp/tools/java/lib"
-		String libFolder = Utils.getLibraryFolder(MediaTools.class);
-		libFolder = Utils.normalizePath(libFolder, true);
-		if (libFolder.charAt(1)==':') libFolder = libFolder.substring(2);
-	
-		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
-
+	public static List<String> getTranscodeH265Args(StreamSpec spec, 
+			int fps, int gopdur, int segdur, 
+			String overlayOpt, long timeLimit, int ver) {
+		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
+		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
+		
 		// must also use x265-params custom argument to give a common ffmpeg args (ref,bf,g,keyint,etc..)
 		String level = spec.level.isEmpty()?"5.0":spec.level;
-		int gop = fps*gopdur;
+		int gop   = fps*gopdur/1000;
+		int keyMin= gop / 2;
 		List<String> args=Arrays.asList(FFMPEG, 
 			"-hide_banner", "-nostats",
 			"-i", inputFile,
 			"-threads", "4", "-preset", "fast",
-			"-c:v", "libx265", 
+			"-c:v", "libx265",
+			"-tag:v", "hvc1", // use HVC1 instead of default HEV1			
 			"-level", level,// profile=main(8bit) is given in x265-params
 			"-s:v", spec.size, 		// resolution 3840x2160
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
@@ -109,17 +157,17 @@ public class MediaTools {
 			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
-			"-g", ""+gop,			// GOP frames (fps=25, gopdur=3 -> gop=75)
-			"-keyint_min", ""+fps,	// I-Frame interval (keyframes)
+			"-g", ""+gop,			// GOP frames
+			"-keyint_min", ""+keyMin,	// I-Frame interval (keyframes)
 			"-b_strategy", "1",		// BPyramid strategy
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
 			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"",
-			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${fps}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
+			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${keymin}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
 			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
-			"-an", 
+			"-an", "-sn",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
-			"-y", "temp-"+spec.name+".mp4"  // skip audio, overwrite output file
+			"-y", outputFile
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
@@ -127,18 +175,22 @@ public class MediaTools {
 		args.set(idx, args.get(idx)
 				.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
 				.replace("${level}", level)
-				.replace("${fps}", ""+fps)
+				//.replace("${fps}", ""+fps)
+				.replace("${keymin}", ""+keyMin)
 				.replace("${gop}", ""+gop)
 				.replace("${bitrate}", spec.bitrate)
 				);
 
 		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
-		updateOverlayOpt(args, spec, fps, gop, overlayOpt, libFolder);
+		updateOverlayOpt(args, spec, fps, gop, segdur, overlayOpt);
+		removeEmptyOpt(args);
 		return args;
 	}
 	
-	public static List<String> getTranscodeAudioArgs(File file, StreamSpec spec, long timeLimit) {
-		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);
+	public static List<String> getTranscodeAudioArgs(StreamSpec spec, long timeLimit) {
+		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
+		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
+		
 		String codec = spec.type==StreamSpec.TYPE.AUDIO_AC3 ? "ac3" :
 			spec.type==StreamSpec.TYPE.AUDIO_EAC3 ? "eac3" :
 			"aac";
@@ -148,7 +200,7 @@ public class MediaTools {
 			"-i", inputFile,
 			"-threads", "4",
 			"-c:a", codec, 
-			"-strict", "experimental",
+			//"-strict", "experimental",  // no longer required in ffmpeg
 			"-b:a", spec.bitrate, 		// audio bitrate 128k
 			"-maxrate:a", spec.bitrate, "-bufsize:a", spec.bitrate,
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
@@ -156,21 +208,21 @@ public class MediaTools {
 			"-ac", ""+spec.channels,	// channel count 2..n
 			// initial_moov=100% fragmented output 
 			"-movflags", "empty_moov+negative_cts_offsets+faststart", 			
-			"-vn",
+			"-vn", "-sn",
 			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
-			"-y", "temp-"+spec.name+".mp4"  // skip video, overwrite output file
+			"-y", outputFile
 		);
 		args = new ArrayList<String>(args);
 		
-		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
+		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
+		removeEmptyOpt(args);
 		return args;
 	}
 	
 	/**
 	 * Create MP4Box command.
 	 * @param specs		stream specifications
-	 * @param segdur	segment duration seconds
-	 * @param gopdur	GOP duration seconds
+	 * @param segdur	segment duration in milliseconds
 	 * @param timLimit  timelimit seconds or -1
 	 * @param initMode	init segment. inband=AVC3_common_init, multi=AVC1_common_init_hbbtv,
 	 * 			merge=AVC1_common_init, no=AVC1_separate_init(=best backward comp)
@@ -178,18 +230,21 @@ public class MediaTools {
 	 * @param segname	segment url name. number=use $Number$, time=use $Time$,
 	 * 			number-timeline=use $Number$ and SegmentTimeline, time-timeline=use $Time$ and SegmentTimeline
 	 * @param ver       4=use AudioSample rate/no bound-closest args 
-	 * @param namePrefix v1.mp4 and a1.mp4 input file prefix. "temp-"
 	 * @param cmaf      cmf2,cmfc,no  cmaf profile
+	 * @param manifestName   "manifest.mpd", "cenc/manifest.mpd"
+	 * @param useDrmInput
 	 * @return
 	 */
-	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, int gopdur,
+	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, 
+			//int gopdur, @param gopdur	GOP duration seconds
 			long timeLimit,
 			String initMode,
 			int sidx,
 			String segname,
-			int ver, 
-			String namePrefix,
-			String cmaf) {
+			int ver, String cmaf,
+			String manifestName,
+			boolean useDrmInput
+			) {
 		// Use MDP.minBufferTime=segdur*2 to make validator happy, default 1.5sec-3sec 
 		// value most likely gives "buffer underrun" warnings.
 		//    https://conformance.dashif.org/
@@ -202,7 +257,7 @@ public class MediaTools {
 		int scale=-1;
 		if (ver>=2) {
 			for(StreamSpec spec : specs) {
-				if (spec.enabled && spec.type.isAudio()) {
+				if (spec.type.isAudio()) {
 					scale = spec.sampleRate; // 44100, 48000
 					break;
 				}
@@ -213,14 +268,15 @@ public class MediaTools {
 		
 		// use ver=4, don't use ver=3 "-closest" as it most likely breaks 8s segdur(case: spring 3. and 4. segments)
 		List<String> args=Arrays.asList(MP4BOX,
-			"-dash", ""+(scale>0?segdur*scale : segdur*1000), // segment duration 6sec*1000 or use audioRate
-			"-frag", ""+(scale>0?segdur*scale : segdur*1000), // for better seg alignment (important for 44.1KHz)
+			"-dash", ""+(scale>0?segdur*scale/1000 : segdur), // segment duration 6sec*1000 or use audioRate
+			"-frag", ""+(scale>0?segdur*scale/1000 : segdur), // for better seg alignment (important for 44.1KHz)
 			scale>0?"-dash-scale":"", scale>0?""+scale:"",
 			(ver==1 || ver==4?"":ver==2?"-bound":"-closest"), // force seg duration, last segment may be shorter (video=146sec, segdur=6sec -> 24*6sec + 1*2sec segments)
 			"-mem-frags", "-rap",
 			"-profile", "dashavc264:live",
 			"-profile-ext", "urn:hbbtv:dash:profile:isoff-live:2012", // hbbtv1.5
-			"-min-buffer", ""+(gopdur*1000*2), //  ""+(segdur*1000*2) | "3000" |  MDP.minBufferTime value, does this work?
+			//"-min-buffer", ""+(gopdur*1000*2), //  ""+(segdur*1000*2) | "3000" |  MDP.minBufferTime value, does this work?
+			"-min-buffer", "2000", //  ""+(segdur*1000*2) | "3000" |  MDP.minBufferTime value, does this work?
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
 			"-bs-switching", initMode, // inband=AVC3_common_init, multi=AVC1_common_init_hbbtv, merge=AVC1_commonn_init, no=AVC1_separate_init (best backward comp)
 			"-sample-groups-traf",	// sgpd+sbgp atom in MOOF/TRAF(audio), IE11 fix  
@@ -237,23 +293,21 @@ public class MediaTools {
 			"-segment-name", segname.startsWith("number") ? 
 					"$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$/$Time$$Init=i$",
 			segname.endsWith("-timeline") ? "-segment-timeline" : "$DEL$", //ver==1?"-segment-timeline":"",
-			"-out", "manifest.mpd"	// output file
+			"-out", manifestName  // output file
 		);
 		args = new ArrayList<String>(args);
 		
 		for(StreamSpec spec : specs) {
-			if (!spec.enabled) continue;
-			String arg=namePrefix+"${name}.mp4#trackID=1:id=${name}:period=p0:${timelimit}";
+			File trackFile = useDrmInput ? 
+				spec.inputFileTrackDrm : spec.inputFileTrack;
+			String filename = Utils.normalizePath(trackFile.getAbsolutePath(), true);
+			String arg=filename+"#trackID=1:id=${name}:period=p0:${timelimit}";
 			arg = arg.replace("${name}", spec.name)
 				.replace(":${timelimit}", timeLimit>0?":dur="+timeLimit:"");
-			args.add(arg);
+			args.add("\""+arg+"\"");
 		}
-		for(int idx=args.size()-1; idx>=0; idx--) {
-			if (args.get(idx).equals("$DEL$")) args.remove(idx); // remove obsolete args
-		}		
-		//for(int idx=0; idx<args.size(); idx++)
-		//	System.out.format("%d %s%n", idx, args.get(idx));			
 		
+		removeEmptyOpt(args);		
 		return args;
 	}
 
@@ -289,39 +343,25 @@ public class MediaTools {
 		oFile.delete(); // delete temporary temp-v1.hvc file
 	}	
 	
-	public static List<String> getDashCryptArgs(File drmspecFile, File outputFolder, 
-				StreamSpec spec, String namePrefix) {
-		String streamFile = namePrefix+spec.name+".mp4";
-		String outFile = "temp-"+spec.name+".mp4";
+	public static List<String> getDashCryptArgs(File drmspecFile,  
+				StreamSpec spec, String mode) {
+		// "temp-v1.mp4" -> "temp-v1-cenc.mp4"		
+		String filename  = spec.inputFileTrack.getName().replace(".mp4", "-"+mode+".mp4");
 		List<String> args=Arrays.asList(MP4BOX,
-			"-crypt", Utils.normalizePath(drmspecFile.getAbsolutePath(), true), // drm/drmspec.xml input file
-			streamFile, // input unencrypted stream file
-			"-out", Utils.normalizePath(outputFolder.getAbsolutePath(), true)+"/"+outFile
-		);
-		args = new ArrayList<String>(args);
-		return args;
-	}
-
-	public static List<String> getImageArgs(File file, int timeSec, String size) {
-		String inputFile = Utils.normalizePath(file.getAbsolutePath(), true);		
-		List<String> args=Arrays.asList(FFMPEG, 
-			"-hide_banner", "-nostats",
-			"-i", inputFile,
-			"-ss", ""+timeSec,		// timestamp seconds an image is taken at (1..n)
-			"-vf", "scale="+size,	// 640x360
-			"-qscale:v", "5",
-			"-vframes", "1",
-			"-an", "-y", "image_"+size+".jpg" 
+			"-crypt", drmspecFile.getName(), // temp-drmspec.xml input file
+			Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true), // "temp-v1.mp4"
+			"-out", filename 
 		);
 		args = new ArrayList<String>(args);
 		return args;
 	}
 
 	public static List<String> getTrimMp4Args(File inputFile, File outputFile, long timeLimit) {
+		// see SubtitleInserter.java
 		List<String> args=Arrays.asList(MP4BOX,
 			"-splitx", "0:"+timeLimit,	// trim 0-XX seconds 
-			inputFile.getAbsolutePath(),
-			"-out", outputFile.getAbsolutePath()
+			inputFile.getName(),
+			"-out", outputFile.getName()
 		);
 		args = new ArrayList<String>(args);
 		return args;
@@ -331,14 +371,12 @@ public class MediaTools {
 	 * Convert TTML subtitles sub_xxx.xml to sub_xxx.mp4 file.
 	 * @param subFile
 	 * @param outputFile
-	 * @param id	Not used at the moment
 	 * @return
 	 */
-	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile
-			, String id) {
+	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile) {
 		List<String> args=Arrays.asList(MP4BOX,
-			"-add", ""+subFile.getAbsolutePath()+":ext=ttml",
-			"-new", outputFile.getAbsolutePath()
+			"-add", subFile.getAbsolutePath()+":ext=ttml",
+			"-new", outputFile.getName() //outputFile.getAbsolutePath()
 		);
 		args = new ArrayList<String>(args);
 		return args;
@@ -348,25 +386,28 @@ public class MediaTools {
 	 * Create m4s segments from sub_xxx.mp4(ttml) file.
 	 * @param subFile	temp-sub_xxx.mp4 file
 	 * @param id		sub_xxx
-	 * @param segdur	segment duration, seconds
+	 * @param segdur	segment duration, millis(8000=8sec)
 	 * @param segname	number,time,number-timeline,time-timeline
 	 * @return
 	 */
 	public static List<String> getSubIBSegmentsArgs(File subFile, String id, int segdur
-				, String segname) {
+				, String segname, String cmaf, boolean isSingleSeg) {
 		List<String> args=Arrays.asList(MP4BOX,
-			"-dash", ""+(segdur*1000),
+			"-dash", ""+segdur,
 			"-mem-frags",
-			"-profile", "dashavc264:live",
+			"-profile", (isSingleSeg ? "dashavc264:onDemand":"dashavc264:live"),
 			"-bs-switching", "no",
-			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "-1", // "1"
-			//"-segment-name", "$RepresentationID$/sub_$Number$$Init=i$",
+			"-sample-groups-traf", "-single-traf", "-subsegs-per-sidx", "-1",
+			"--tfdt64", "--tfdt_traf", "--noroll=yes", "--btrt=no",
+			"--truns_first=yes",
+			(cmaf.isEmpty() ? "$DEL$" : "--cmaf="+cmaf),
 			"-segment-name", segname.startsWith("number") ? "$RepresentationID$/sub_$Number$$Init=i$" : "$RepresentationID$/sub_$Time$$Init=i$",
 			segname.endsWith("-timeline") ? "-segment-timeline" : "",
-			"-out", subFile.getAbsolutePath().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd
+			"-out", subFile.getName().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd					
 			subFile.getAbsolutePath()+":id="+id	// input output/temp-sub_xxx.mp4
 		);
 		args = new ArrayList<String>(args);
+		MediaTools.removeEmptyOpt(args);
 		return args;
 	}
 
@@ -418,12 +459,15 @@ public class MediaTools {
 				meta.put("videoIndex", ""+idx);
 				meta.put("videoCodec", props.get("streams.stream."+idx+".codec_name") ); // h264,prores
 				meta.put("videoCodecTag", props.get("streams.stream."+idx+".codec_tag_string") ); // avc1,apch
-				meta.put("videoWidth", props.get("streams.stream."+idx+".width") );		// 720/576=frameaspect
+				meta.put("videoProfile", props.get("streams.stream."+idx+".profile") );  // Main,High
+				meta.put("videoLevel", props.get("streams.stream."+idx+".level") );  // 32,40
+				meta.put("videoWidth", props.get("streams.stream."+idx+".width") );  // 720/576=frameaspect
 				meta.put("videoHeight", props.get("streams.stream."+idx+".height") );
 				meta.put("videoPAR", props.get("streams.stream."+idx+".sample_aspect_ratio") ); // 12/11 pixelaspect
 				meta.put("videoDAR", props.get("streams.stream."+idx+".display_aspect_ratio") ); // 15/11, dar=par*frameaspect 
 				meta.put("videoDuration", props.get("streams.stream."+idx+".duration") ); // 60.040000  sec.millis
 				meta.put("videoPixFormat", props.get("streams.stream."+idx+".pix_fmt") ); // yuv420p, yuv422p10le
+				meta.put("videoLang", props.get("streams.stream."+idx+".tags.language") ); // eng
 
 				value = props.get("streams.stream."+idx+".bit_rate");
 				if (value==null || value.isEmpty() || value.equalsIgnoreCase("N/A")) 
@@ -446,11 +490,13 @@ public class MediaTools {
 			} else if (value.equals("audio") && !meta.containsKey("audioIndex")) {
 				meta.put("audioIndex", ""+idx);
 				meta.put("audioCodec", props.get("streams.stream."+idx+".codec_name") ); // aac, eac3, pcm_s24le
-				meta.put("audioCodecTag", props.get("streams.stream."+idx+".codec_tag_string") ); // mp4a, ec-3, lpcm 				
+				meta.put("audioCodecTag", props.get("streams.stream."+idx+".codec_tag_string") ); // mp4a, ec-3, lpcm
+				meta.put("audioProfile", props.get("streams.stream."+idx+".profile") );  // LC
 				meta.put("audioChannels", props.get("streams.stream."+idx+".channels") ); // 2, 6
 				meta.put("audioChannelLayout", props.get("streams.stream."+idx+".channel_layout") ); // stereo, 5.1(side)
 				meta.put("audioRate", props.get("streams.stream."+idx+".sample_rate") ); // 48000=48KHz, 44100=44.1KHz
 				meta.put("audioDuration", props.get("streams.stream."+idx+".duration") ); // 60.040000  sec.millis
+				meta.put("audioLang", props.get("streams.stream."+idx+".tags.language") ); // eng
 
 				value = props.get("streams.stream."+idx+".bit_rate");
 				if (value==null || value.isEmpty() || value.equalsIgnoreCase("N/A")) 
@@ -486,7 +532,7 @@ public class MediaTools {
 		meta.put("fileFormat", value); // "mpegts", "mov,mp4,m4a,3gp,3g2,mj2"
 
 		// read interlace/progressive flag
-		// TODO: this is not 100% accurate but should do fine for now.
+		// TODO: this is not 100% accurate
 		if (meta.containsKey("videoIndex")) {
 			exec.command(
 				Arrays.asList(new String[] {
@@ -560,31 +606,50 @@ public class MediaTools {
 		return builder.toString();
 	}
 
-	private static int updateOverlayOpt(List<String> args, StreamSpec spec, int fps, int gop, String overlayOpt, String libFolder) {
+	public static int updateOverlayOpt(List<String> args, StreamSpec spec, 
+			int fps, int gop, int segdur, String overlayOpt) {
 		int argIdx=args.indexOf("${overlayOpt}");
-		if (argIdx>0) {
-			if (overlayOpt.equals("1")) {
-				String arg="fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=38:box=1:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+60"
-						+ ":text='${mode} ${size} ${bitrate} ${fps}fps ${gop}gop \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
-				arg = arg.replace("${size}", spec.size)
-					.replace("${mode}", spec.getCodec())	// H264,H265 substring
-					.replace("${bitrate}", spec.bitrate)
-					.replace("${fps}", ""+fps)
-					.replace("${gop}", ""+gop)
-					.replace("${libFolder}", libFolder);
-				if (spec.getWidth()>2500)
-					arg=arg.replace("fontsize=38", "fontsize=60"); // use larger font for 3840x2160 image
-				args.set(argIdx, "drawtext="+arg);
+		if (argIdx<1) return argIdx;
+
+		// segdur(millis) 8000->8, 3840->3.84
+		String sSegdur=String.format(Locale.US, "%.2f", (double)segdur/1000).replace(".00","");				
+
+		if (overlayOpt.equals("1")) {
+			//String arg="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=38:box=1:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+60"
+			//		+ ":text='${mode} ${size} ${bitrate} ${fps}fps ${gop}gop ${segdur} \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
+			String arg1="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=${fontsize}:alpha=0.5:box=1:boxborderw=4:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+${y1}"
+					+ ":text='${mode} ${size} ${bitrate} ${segdur}s \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
+			String arg2="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=${fontsize}:alpha=0.5:box=1:boxborderw=4:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+${y2}"
+					+ ":text='${fps}fps ${gop}gop frame\\:\\ %{frame_num}':start_number=1";
+			String arg = arg1+","+arg2; // separate drawtext if both timecode+framenum is used
+			
+			arg = arg.replace("${size}", spec.size)
+				.replace("${mode}", spec.getCodec())	// H264,H265 substring
+				.replace("${bitrate}", spec.bitrate)
+				.replace("${segdur}", sSegdur)
+				.replace("${fps}", ""+fps)
+				.replace("${gop}", ""+gop)
+				.replace("${libFolder}", LIBFOLDER.replace(":", "\\\\:"));			
+			if (spec.getWidth()<=2500) {
+				arg=arg.replace("${fontsize}", "38")
+					.replace("${y1}", "60")
+					.replace("${y2}", "98");
 			} else {
-				args.remove(argIdx);	// remove $overlayOpt arg
-				args.remove(argIdx-1);  // remove previous "-vf" videofilter arg
-				argIdx=-1;
+				// use larger font for 3840x2160				
+				arg=arg.replace("${fontsize}", "50")
+					.replace("${y1}", "60")
+					.replace("${y2}", "110");
 			}
+			args.set(argIdx, arg);
+		} else {
+			args.remove(argIdx);	// remove $overlayOpt arg
+			args.remove(argIdx-1);  // remove previous "-vf" videofilter arg
+			argIdx=-1;
 		}
 		return argIdx;
 	}
 	
-	private static int updateOpt(List<String> args, String key, String value, boolean setToKeyPos) {
+	public static int updateOpt(List<String> args, String key, String value, boolean setToKeyPos) {
 		// update [ "-somekey", "${someval}" ] element,
 		// find by -somekey or ${someval}, delete elements if value is NULL.
 		int idx=args.indexOf(key);
@@ -597,6 +662,19 @@ public class MediaTools {
 			}
 		}
 		return idx;
+	}
+	
+	public static int removeEmptyOpt(List<String> args) {
+		// some cmdline apps do not like an empty arguments
+		int count=0;
+		for(int idx=args.size()-1; idx>=0; idx--) {
+			String val = args.get(idx);
+			if(val.isEmpty() || val.equals("$DEL$")) {
+				args.remove(idx);
+				count++;
+			}
+		}
+		return count;
 	}
 	
 }

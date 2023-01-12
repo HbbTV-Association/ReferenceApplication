@@ -366,12 +366,12 @@
                 }
                 ,{
                    "title": "2.18 Persistent license",
-                   "url": "https://refapp.hbbtv.org/videos/00_llama_1080p_v5/drm/manifest_subib.mpd",
+                   "url": "https://refapp.hbbtv.org/videos/00_llama_1080p_v5/drm/manifest_subib_evtob.mpd",
                    "img": "icons/icons_1x1_1080p.png",
                    "app": 6,
                    "drm" : "playready",
-                   "la_url" : "https://refapp.hbbtv.org/videos/laurl_pr.php?persist=true&guid=${GUID}&logfile=aki",
-                   "desc": "Use persistent license, playready SL2000 (UI notification under construction, mseeme not using yet)"
+                   "la_url" : "https://refapp.hbbtv.org/videos/laurl_pr.php?persist=true&guid=${SESSION_GUID}",
+                   "desc": "Persistent license, SessionGUID=${SESSION_GUID}(UI notification under construction)"
 				   ,"profile": [ "oipf","html5", "mse-eme" ]
                 }
 			]

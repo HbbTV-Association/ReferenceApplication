@@ -107,6 +107,8 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2022-12-13:
+- added hls, segdur 3.84s, refactor dasher, cenc/cbcs/cbcs0 drm
 2019-06-12:
 - added mode=dash to skip transcoding and dash+encrypt input files
 2018-10-30:

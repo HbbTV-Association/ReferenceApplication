@@ -27,7 +27,10 @@ function init() {
 		config = menuconfig.menus;
 		main = config[0];
 
-		var new_config = [];
+		var new_config = [];		
+		var sessionGUID = uuidv4(); // GUID per each configjson reload session
+		console.log("SessionGUID=" + sessionGUID);
+
 		for(var i = 0; i < main.items.length; i++){
 			if(main.items[i].submenu){
 				var submenu = config[main.items[i].submenu];
@@ -40,6 +43,10 @@ function init() {
 						if(item.url && !item.url.match(/http/)) {
 							item.url = ctxUrl+"/"+item.url; //item.url.replace(/.*videos/, "http://refapp.hbbtv.org/videos")
 						}
+						
+						if(item.url)    item.url   = item.url.replace("${SESSION_GUID}", sessionGUID);
+						if(item.la_url) item.la_url= item.la_url.replace("${SESSION_GUID}", sessionGUID);
+						if(item.desc)   item.desc  = item.desc.replace("${SESSION_GUID}", sessionGUID);
 						
 						// create MarlinMS3 url syntax
 						// ms3://ms3.service.com/laurl#https%3A%2F%2Fcontent.com%2Fvideos%2Fmyvideo%2Fdrm%2Fmanifest.mpd
@@ -54,16 +61,20 @@ function init() {
 
 						submenuItems.push( item );
 					});
-					new_config.push({"items": submenuItems, "title":main.items[i].title});
-				} catch( e ){
+					if(submenuItems.length>0)
+						new_config.push({"items": submenuItems, "title":main.items[i].title});
+				} catch(ex){
+					console.log(ex);
 					// no drop offs, if error happens
-					new_config.push({"items":submenu.items, "title":main.items[i].title});
+					if(submenu && submenu.items.length>0)
+						new_config.push({"items":submenu.items, "title":main.items[i].title});
 				}
 				
 			}
 		}
 
 		menu = new Menu("menu", new_config);
+		menu.sessionGUID = sessionGUID;
 		
 		/*
 		setTimeout( function(){

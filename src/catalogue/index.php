@@ -1,13 +1,9 @@
-<?php
-	
-	date_default_timezone_set("Europe/Helsinki");
-	
+<?php	
+	date_default_timezone_set("Europe/Helsinki");	
 	error_reporting(E_ALL);
 	ini_set('display_errors', 1);
 
-
-	function getApplicationProfile(){
-		
+	function getApplicationProfile(){		
 		$profiles = json_decode( file_get_contents( "../profiles.json" ), true );
 		
 		$userAgent = $_SERVER['HTTP_USER_AGENT'];
@@ -55,7 +51,8 @@
 	header( "Content-Type: ". $profile['contentType'] .";charset=utf-8" );	
 	
 	// XML Header to start document
-	echo $profile['xmlHeader'] ."\n";
+	$val = $profile['xmlHeader'];
+	if($val!="") echo $val ."\n";
 
 	// <!DOCTYPE>
 	echo $profile['doctype'] ."\n";

@@ -564,11 +564,6 @@ VideoPlayerHTML5.prototype.clearLicenseRequest = function(callback){
 		'</WidevineCredentialsInfo>';
 	}
 	else if( this.drm.system == "clearkey" ){
-		self.player.setProtectionData({
-			"org.w3.clearkey": { 
-				"serverURL": ""
-			}
-		});
 		callback();
 	}
 	
@@ -664,7 +659,8 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		console.log("sendLicenseRequest Error 2: " + e.message );
 	}
 	try {
-		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		var msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		console.log("sendLicenseRequest msgId: " + msgId);
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
 	}
@@ -672,6 +668,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 	
 	
 	function drmMsgHandler(msgID, resultMsg, resultCode) {
+		console.log("drmMsgHandler drmMsgID, resultMsg, resultCode: " + msgID +","+  resultMsg +","+ resultCode);
 		showInfo("drmMsgID, resultMsg, resultCode: " + msgID +","+  resultMsg +","+ resultCode);
 		var errorMessage = "";
 		switch (resultCode) {
@@ -701,12 +698,13 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		}
 		
 		if( resultCode > 0 ){
-			showInfo( errorMessage );
+			showInfo("" + resultCode + " " + errorMessage );
 			Monitor.drmError(errorMessage);
 		}
 	}
 
-	function drmRightsErrorHandler(resultCode, id, systemid, issuer) {
+	function drmRightsErrorHandler(resultCode, contentId, systemId, issuerUrl) {
+		console.log("drmRightsErrorHandler resultCode, contentId, sysId, issuerUrl: " + resultCode + "," + contentId + "," + systemId + "," + issuerUrl);
 		var errorMessage = "";
 		switch (resultCode) {
 			case 0:
@@ -719,7 +717,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 				errorMessage = ("license valid");
 			break;
 		}
-		showInfo( errorMessage );
+		showInfo("" + resultCode + " "+ errorMessage);
 		Monitor.drmError(errorMessage);
 	}
 	

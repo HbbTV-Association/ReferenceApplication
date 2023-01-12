@@ -1,0 +1,71 @@
+
+body {
+  font-family: Verdana, Arial, sans-serif;
+}
+
+div.tabs {
+  margin-top:0.7em;
+  margin-bottom:0.5em;
+}
+
+span.tab {
+  background-color: #e1e1e1;
+  margin-right: 3px;
+  padding: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 1px solid #ff8c00;
+}
+span.tab.active {
+  background-color: #cbcbcb;
+  padding: 2px;
+  border-top: 2px solid #ee8400;
+  border-left: 2px solid #ee8400;
+  border-right: 2px solid #ee8400;
+  border-bottom: 3px solid #cbcbcb;
+}
+span.tab:hover {
+  border: solid 2px blue; 
+  padding: 2px 2px 2px 2px;
+}
+
+div.menuItems {
+  max-width: 85%;
+}
+
+div.menuItems > div.menuItem {
+  padding: 1px 1px 1px 1px;  
+  margin-bottom: 0.9em;
+  max-height: 9.4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+div.menuItems > div.menuItem:hover {
+    border: solid 1px lightgray; padding: 0 0 0px 0;
+}
+
+div.menuItems > div.menuItem span.title {
+  cursor: pointer;
+  color: blue;
+}
+
+div.textarea { /* editable div editbox */
+  border: solid 1px gray; padding: 4px 4px 4px 4px;
+  min-height:2em;
+}
+
+div.formPopup {
+  width: 550px;
+  display: none;
+  border: solid 2px gray;
+  padding: 0.6em 0.6em 0.6em 0.6em;
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.8), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+div.formPopup > div.form {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-gap: 0.2rem 0.4rem;
+}
+div.formPopup > div.form > label { text-align: right; }
+div.formPopup > div.form > label.divider { padding-top:0.4rem; }

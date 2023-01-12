@@ -260,11 +260,6 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 		'</WidevineCredentialsInfo>';
 	}
 	else if( this.drm.system == "clearkey" ){
-		self.player.setProtectionData({
-			"org.w3.clearkey": { 
-				"serverURL": ""
-			}
-		});
 		callback();
 	}
 		
@@ -355,12 +350,14 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		console.log("sendLicenseRequest Error 2: " + e.message );
 	}
 	try {
-		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		var msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		console.log("sendLicenseRequest msgId: " + msgId);
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
 	}
 	
 	function drmMsgHandler(msgID, resultMsg, resultCode) {
+		console.log("drmMsgHandler drmMsgID, resultMsg, resultCode: " + msgID +","+  resultMsg +","+ resultCode);
 		showInfo("msgID, resultMsg, resultCode: " + msgID +","+  resultMsg +","+ resultCode);
 		var errorMessage = "";
 		switch (resultCode) {
@@ -387,7 +384,7 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		}
 		
 		if( resultCode > 0 ){
-			showInfo( errorMessage );
+			showInfo("" + resultCode + " " + errorMessage );
 			Monitor.drmError(errorMessage);
 		}
 	}

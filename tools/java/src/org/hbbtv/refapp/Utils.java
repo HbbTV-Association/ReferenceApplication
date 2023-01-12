@@ -14,18 +14,19 @@ public class Utils {
 	public static final String getString(Map<String,String> params, String key, String defval, boolean trim) {
 		String val = params.get(key);
 		if (trim && val!=null) val=val.trim();
-		return (val==null || val.equals("") ? defval : val);
+		return (val==null || val.isEmpty() ? defval : val);
 	}
 	
 	public static final boolean getBoolean(Map<String,String> params, String key, boolean defval) {
 		String val = params.get(key);
-		if (val==null || val.equals("")) return defval;
-		else return val.equals("1") || val.equalsIgnoreCase("true") || val.equalsIgnoreCase("yes");
+		if (val==null || val.isEmpty()) return defval;
+		else return val.equals("1") || val.equalsIgnoreCase("true") 
+				|| val.equalsIgnoreCase("yes");
 	}
 
 	public static final long getLong(Map<String,String> params, String key, long defval) {
 		String val = params.get(key);
-		if (val==null || val.equals("")) return defval;
+		if (val==null || val.isEmpty()) return defval;
 		else return Long.parseLong(val);
 	}
 	
@@ -199,7 +200,13 @@ public class Utils {
         s += (char) (value & 0xFF);
         return s;
 	}	
-		
+
+    public static String getUUID() {
+    	// create UUID like "6f1f2c09-ce9d-4194-bb8c-709bd9f51231"
+    	UUID uuid = UUID.randomUUID();
+    	return uuid.toString();
+    }
+    
 	public static boolean isWindows() {
 		return System.getProperty("os.name").toLowerCase(Locale.US).indexOf("windows") != -1;
 	}
@@ -261,6 +268,18 @@ public class Utils {
 	}
 
 	/**
+	 * Explode to list, skip empty tokens in a values string.
+	 */
+	public static List<String> getList(String values, String delim) {
+		List<String> list = new ArrayList<String>(8);
+		for(String val : values.split(delim)) {
+			val = val.trim();
+			if(!val.isEmpty()) list.add(val);
+		}
+		return list;
+	}
+
+	/**
 	 * Copy file.
 	 * @param sFile	source
 	 * @param dFile	destination
@@ -296,6 +315,14 @@ public class Utils {
         dFile.setExecutable(sFile.canExecute());
         dFile.setLastModified(sFile.lastModified());
 	}
+	
+	public static void moveFile(File sFile, File dFile) throws IOException {
+		// rename succeeded, src and dest files were in a same folder
+		if (sFile.renameTo(dFile))
+			return;		
+		copyFile(sFile, dFile);
+		sFile.delete();
+	}	
 	
 	public static StringBuilder loadTextFile(File file, String charset) throws IOException {
 		FileInputStream fis=new FileInputStream(file);

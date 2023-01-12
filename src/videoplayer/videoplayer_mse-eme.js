@@ -41,10 +41,24 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		$("<div id='video-caption'></div>").insertAfter("#video"); // put TTML subtitles div after a video element
 		this.player = dashjs.MediaPlayer().create();
 		this.player.initialize();
+		this.player.setAutoPlay(true); // this fixes some slow-to-start live test manifests
 		this.player.attachView(document.getElementById("video"));
 		this.player.attachTTMLRenderingDiv(document.getElementById("video-caption"));
-		console.log( "video object created ", this.player );
+		this.player.updateSettings({ 
+		    debug: { logLevel: dashjs.Debug.LOG_LEVEL_WARNING } // LOG_LEVEL_WARNING,LOG_LEVEL_INFO,LOG_LEVEL_DEBUG
+			,streaming: {
+				text: {defaultEnabled: true}
+				//,manifestUpdateRetryInterval: 100
+				,delay: {
+					//liveDelayFragmentCount: 4,  // segcount
+					//liveDelay: 6, // seconds
+					useSuggestedPresentationDelay: true 
+				}
+			}  
+		}); 
+		console.log("video object created, dashjs "+this.player.getVersion() );
 	} catch( e ){
+		console.log(e);
 		console.log("Error creating dashjs video object ", e.description );
 	}
 		
@@ -113,7 +127,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		self.setLoading(true);
 	} );
 	
-	addEventListeners( player, "waiting stalled suspend", function(e){ 
+	addEventListeners( player, "stalled suspend", function(e){ 
 		console.log( e.type );
 	} );
 	
@@ -527,7 +541,8 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	if( this.drm.system == "playready" ){
 		// use simple playready config (persistentState=optional, distinctiveIdentifier=optional)
 		self.player.setProtectionData({
-			"com.microsoft.playready": { "serverURL": laUrl }
+			"com.microsoft.playready": { "serverURL": laUrl, "priority":1 }
+			,"com.widevine.alpha": { "priority":99 }
 		});			
 	}
 	else if( this.drm.system.indexOf("playready.recommendation")===0 
@@ -727,7 +742,7 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		}
 		else{
 			console.log("video.play()")
-			self.video.play();
+			self.player.play(); // self.player=dashjsPlayer, self.video.play() =Html5VideoElement
 			self.setFullscreen(true);
 			self.displayPlayer(5);
 		}
@@ -787,12 +802,13 @@ VideoPlayerEME.prototype.clearVideo = function(){
 		if(self.video){
 			self.video.pause();
 			//self.video.src = ""; // must not clear a field value or dashjs gets an infinite error loop
+			self.player.attachSource(null); // source+buffer teardown, keep settings
 			$("#video").remove(); // clear from dom
 			$("#video-caption").remove();
+			self.player.destroy(); // destroy an instance
 			this.video = null;
-		}		
-	}
-	catch(e){
+		}
+	} catch(e){
 		console.log("Error at clearVideo()");
 		console.log( e.description );
 	}

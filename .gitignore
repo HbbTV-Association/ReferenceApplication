@@ -1,5 +1,14 @@
 *.bak
 #src/videoplayer/monitor/*
+
+## editor sources are on tools/editor subfolder,
+## optional deployment goes to a src/editor UI folder
+src/editor/*
+
+## copy config-template.json to config.json in a test or first-time deployments,
+## file should not be overwritten in continuous deployments.
+src/catalogue/config.json
+
 src/catalogue/log/*.json
 src/catalogue/log/*.txt
 src/log/*.json

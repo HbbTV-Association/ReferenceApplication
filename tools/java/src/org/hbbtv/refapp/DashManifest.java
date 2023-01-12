@@ -37,7 +37,7 @@ public class DashManifest {
 	 * @param gopdur    GOP(sec) is needed for MDP.minBufferTime
 	 * @throws Exception
 	 */
-	public void fixContent(int gopdur) throws Exception {
+	public void fixContent() throws Exception {
 		modified=false;
 		String val;
 
@@ -76,6 +76,7 @@ public class DashManifest {
 		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
 			elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
+			if(elem==null) continue;
 			val = elem.getAttribute("media");
 			if (val.contains("$Number$") && val.contains("$Time$")) {
 				modified=true;
@@ -160,12 +161,12 @@ public class DashManifest {
 		}
 		
 		// see also MediaTools.getDashArgs(), -min-buffer=(gopdur*1000*2) millis, MDP@minBufferTime="PT4S" secs		
-		if(gopdur>0) {
-			int time = gopdur*2;
+		/*if(gopdur>0) {
+			int time = gopdur/1000; //gopdur*2;
 			val = doc.getDocumentElement().getAttribute("minBufferTime");
 			if(!val.contains("PT"+time+"S"))
 				doc.getDocumentElement().setAttribute("minBufferTime", "PT"+time+"S");
-		}
+		}*/
 	}
 	
 	public void addNamespaces() {
@@ -174,7 +175,8 @@ public class DashManifest {
 				"xmlns:mspr",  "urn:microsoft:playready",
 				"xmlns:mas",   "urn:marlin:mas:1-0:services:schemas:mpd",
 				"xmlns:ck",    "http://dashif.org/guidelines/clearKey", // legacy clearkey
-				"xmlns:dashif","https://dashif.org/" // new clearkey
+				"xmlns:dashif","https://dashif.org/", // new clearkey
+				"xmlns:xlink", "http://www.w3.org/1999/xlink" // Period XLINK injection
 		};
 		
 		Element elem = doc.getDocumentElement();

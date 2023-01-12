@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="generator" content="Sofia Digital" />
+  <!-- <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" /> -->
+  <meta name="format-detection" content="telephone=no" />
+  <title>Refapp Editor</title>
+  <link rel="stylesheet" type="text/css" href="app_style.css" />
+  <script defer src="app.js"></script>
+</head>
+<body>
+
+<div style="font-weight:bold; font-size:110%">Refapp Menu Editor</div>
+<div>
+  <div id="retval-modified" style="font-size:90%">&nbsp;</div>
+  <div id="retval" style="font-size:90%">&nbsp;</div>
+</div>
+
+
+<div style="margin-top:0.5rem;">
+  <button title="Save config to server" onclick="onSaveConfigClicked(this)">Save Config</button>
+  <button title="Reload config from server" onclick="onReloadClicked(this)">Reload Config</button>
+</div>
+
+<div id="tabs" class="tabs"></div>
+
+<div>
+  <div id="menuItems" class="menuItems">
+  </div>  
+  <div style="margin-top:1em;">
+    <button title="Add new item" id="menuItemAdd">New Item</button>
+  </div>
+</div>
+
+<div class="formPopup" id="menuItemForm">
+  <input id="databind" data-bind="" type="hidden" value="" />
+  <div class="form">
+    <label for="title">Title</label>
+    <input id="title" type="text" value="" onkeydown="formPopup_onKeyPress(this, event)"/>
+	
+	<label for="url">Url</label>
+	<div style="display:flex;flex-direction:row">
+      <input style="flex:1" id="url" type="text" value="" title="Manifest url" onkeydown="formPopup_onKeyPress(this, event)" />
+      <input id="live" type="checkbox" name="live" title="Live stream" value="1" onkeydown="formPopup_onKeyPress(this, event)" /><label for="live" Xclass="radioLabel" title="Live stream">live</label>
+    </div>
+
+    <label for="eval">Formula</label>
+	<input id="eval" type="text" value="" title="Evaluation formula for settings item" onkeydown="formPopup_onKeyPress(this, event)"/>
+
+    <label for="img">Image</label>
+	<input id="img" type="text" value="" title="Image url, icons/icons_1x1_1080p.png" onkeydown="formPopup_onKeyPress(this, event)"/>
+	
+	<label class="divider"></label><span></span>	
+	<label>DRM</label>	
+	<div>
+      <input id="drm_" type="radio" name="drm" title="No drm" value="" checked onkeydown="formPopup_onKeyPress(this, event)"/><label for="drm_" class="radioLabel" title="No drm">None</label>
+      <input id="drm_playready" type="radio" name="drm" title="Playready" value="playready" onkeydown="formPopup_onKeyPress(this, event)" /><label for="drm_playready" class="radioLabel">Playready</label>
+      <input id="drm_widevine" type="radio" name="drm" title="Widevine" value="widevine" onkeydown="formPopup_onKeyPress(this, event)"/><label for="drm_widevine" class="radioLabel">Widevine</label>
+      <input id="drm_clearkey" type="radio" name="drm" title="Clearkey" value="clearkey" onkeydown="formPopup_onKeyPress(this, event)"/><label for="drm_clearkey" class="radioLabel">Clearkey</label>
+    </div>
+	<label></label>
+	<div style="display:flex;flex-direction:row">
+	   <input id="drm_custom" type="radio" name="drm" title="Custom drm" value="custom" onkeydown="formPopup_onKeyPress(this, event)"/><label for="drm_custom" class="radioLabel" title="Custom drm identifier (marlin, playready.recommendation.SL3000)">Custom</label>
+	   &nbsp;<input style="flex:1" id="drmc" name="drm" type="text" value="" title="Custom drm identifier (marlin, playready.recommendation.SL3000)" onkeydown="formPopup_onKeyPress(this, event)" />
+    </div>
+	
+    <label for="laurl">LaUrl</label>
+	<input id="laurl" type="text" value="" title="Drm license acquisition url" onkeydown="formPopup_onKeyPress(this, event)" />
+    <label for="laurlid">LaUrl Id</label>
+	<input id="laurlid" type="text" value="" title="Drm license id used by refapp scripting, ${ep_Prod1236}" onkeydown="formPopup_onKeyPress(this, event)" />
+
+    <label class="divider"></label><span></span>
+    <label>Profiles</label>
+	<div>
+      <input id="profile_oipf"    type="checkbox" name="profile" title="Hbbtv 1.5 oipf"  value="oipf"    onkeydown="formPopup_onKeyPress(this, event)" /><label for="profile_oipf"    class="radioLabel" title="Hbbtv 1.5 oipf">Oipf</label>
+      <input id="profile_html5"   type="checkbox" name="profile" title="Hbbtv 2.x html5" value="html5"   onkeydown="formPopup_onKeyPress(this, event)" /><label for="profile_html5"   class="radioLabel" title="Hbbtv 2.x html5">Html5</label>  
+      <input id="profile_mse-eme" type="checkbox" name="profile" title="MSE-EME dashjs"  value="mse-eme" onkeydown="formPopup_onKeyPress(this, event)" /><label for="profile_mse-eme" class="radioLabel" title="MSE-EME dashjs">MSE-EME</label>
+    </div>
+	
+	<label class="divider"></label><span></span>
+    <label for="desc">Description</label>
+    <div id="desc" class="textarea" contenteditable="true" title="Description text" onkeydown="formPopup_onKeyPress(this, event)"></div>
+	<label class="divider"></label><span></span>
+  </div>
+    
+  <div>
+    <button title="OK" onclick="formPopup_clicked_ok(this)" onkeydown="formPopup_onKeyPress(this, event, 'ok')">OK</button>
+    <button title="Cancel" onclick="formPopup_clicked_cancel(this)" onkeydown="formPopup_onKeyPress(this, event, 'cancel')">Cancel</button>
+    <button title="Delete" onclick="formPopup_clicked_delete(this)" onkeydown="formPopup_onKeyPress(this, event, 'cancel')">Delete</button>
+  </div>
+
+</div>
+
+<template id="menuItemTemplate">
+  <div data-bind="keyidx" class="menuItem">
+	 <div><span data-bind="title" class="title"></span></div>
+	 <div><span data-bind="url"></span></div>
+	 <div><span data-bind="drm"></span> <span data-bind="laurl"></span></div>
+	 <div><span data-bind="desc" class="desc"></span></div>
+  </div>
+</template>
+
+</body>
+</html>
