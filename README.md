@@ -16,7 +16,17 @@ Application provides test cases and test material done with tools included in [t
 - MultiPeriod DASH
 
 The software is under continuous development and licensed with MIT License.
-Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO JUHA JOKI) or you may send email to hbbtv_refapp@sofiadigital.com for any problems or questions
+
+## Disclaimer and data collection
+
+This tool is provided by the HbbTV Association, a cooperation between broadcasters, operators, manufacturers and technology providers worldwide. It is a non-profit association registered in Switzerland, and is as such constrained by competition law which generally forbids coordination of activity, except standardization activity which produces clear benefits for consumers. Therefore, while the provision of this tool has been made to encourage and facilitate standardization around DRM, the HbbTV Association has chosen not to share individual device results with its own members or beyond, to avoid any risk of competitors gaining an advantage through this data.
+
+When the live instance (refapp.hbbtv.org) is accessed it is logged in the server access log. This log is never analysed unless explicitly requested by HbbTV association to obtain for example data about the diversity of devices running the app.
+The access data is tabulated monthly as total visitors, total requests and amount of data transferred. This data is shared in the HbbTV IITF Reference Application status report. No data is ever collected about the results of individual tests run by other people.
+
+100% of the test data in the anonymized result sheet (available to HbbTV members) is collected by test engineers of Sofia Digital, using the devices in the test laboratory of Sofia Digital. Sofia maintains internal and confidential data about specific models and results, and this data is available to manufacturers in question upon request. Sofia also sends this data periodically to manufacturers to discuss findings and possible bugs in the test materials or specific devices.
+
+Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO JUHA JOKI) or you may send email to hbbtv_refapp@sofiadigital.com for any problems or questions.
 
 ### Usage, testing, installation, integration:
 
@@ -45,6 +55,8 @@ Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO J
  - CBCS Playready content
  - Separate KID values for video and audio in Playready 
  - Multiperiod DRM and non-DRM tests
+ - Multi-DRM tests (Playready and Widevine)
+ - Persistent license tests for native players (MSE-EME coming soon)
  - available at https://refapp.hbbtv.org/staging/
  
   ## Testing

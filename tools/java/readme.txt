@@ -10,15 +10,28 @@ Streams are encrypted and dashed to a MultiDRM manifest.mpd file (playready,marl
 Insert EventMessageBox(EMSG) to mp4 segment and manifest.mpd files.
 Remove mp4 table from the mp4 files.
 Add ttml.xml subtitles (in-band, out-of-band).
+Write HLS manifest (experimental, no drm fully supported yet).
 
 Best result is achieved if input file is h264,h265/aac/25fps/16:9 format.
 - AVC(h264) video codec, HEVC(h265) video codec
-- aac audio codec
-- 25 frame rate, some HbbTV televisions may not support less common rates
+- aac audio codec, use 48000Hz sample rate
+- 25/30/50/60 frame rates, some HbbTV televisions may not support less common rates
 - aspect 16:9 resolution 1280x720, 1920x1080, 3840x2160 (pixel=1:1, display=16:9)
 
-Tool can output h264(AVC) or h265(HVC1) dash files.
-
+Tool can output h264(AVC) or h265(HVC1) dash and hls files, 
+output folder is using the following file format.
+    /videos/dash/video1/manifest.mpd
+    /videos/dash/video1/manifest.m3u8
+    /videos/dash/video1/v1/i.mp4
+    /videos/dash/video1/v1/1..n.m4s
+    /videos/dash/video1/a1/i.mp4
+    /videos/dash/video1/a1/1..n.m4s
+    /videos/dash/video1/cenc/manifest.mpd
+    /videos/dash/video1/cenc/manifest.m3u8
+    /videos/dash/video1/cenc/v1/i.mp4
+    /videos/dash/video1/cenc/v1/1..n.m4s
+    /videos/dash/video1/cenc/a1/i.mp4
+    /videos/dash/video1/cenc/a1/1..n.m4s
 
 Binary tools requirements
 Resource files
@@ -46,12 +59,28 @@ Compile and Build
 Use Java7 or higher, use Ant1.9 or higher.
 Use Eclipse or Ant script to build the project.
   /apache-ant-1.9.4/bin/ant -f build.xml
-Library is compiled to lib/dasher.jar file.
+Library is compiled to a lib/dasher.jar file.
 
 
 ** Run dasher **
+Use Java7 or higher to run an application.
 ====================
-Use Java7 to run an application.
+Transcode input file, no drm encoding, overlay a debug text on video tracks,
+use automatic segment duration (25fps=3.84s, 30fps=3.20s, 24fps=8s).
+  java -jar "/refapp/lib/dasher.jar" \
+    "input=/videos/video1.mp4" "output=/videos/dash/video1" \
+    "tempfolder=/tmp/video1" "logfile=/tmp/video1/manifest-log.txt" \
+    mode=h264 cmaf=cmf2 segdur=auto frags=4 \
+    video.1="v1 640x360 768k" \
+    video.1.profile=main video.1.level=3.1 video.1.crf=23 \
+    video.2="v2 1280x720 1500k" \
+    video.2.profile=main video.2.level=4.0 video.2.crf=23 \
+    video.3="v3 1920x1080 2100k" \
+    video.3.profile=high video.3.level=4.0 video.3.crf=23 \
+    audio.1="a1 48000 128k 2" \
+    image.seconds=15 \
+    overlay=1
+
 Trancode input file, save dash segments to output folder.
   java -jar "/refapp/lib/dasher.jar" config=dasher.properties input=/videos/video1.mp4 output=/videos/dash/video1/
 Trancode input file, save dash segments to current working folder.
@@ -63,8 +92,8 @@ Transcode input file, write logfile, use RandomNumberGenerator for kid and key
 Transcode input file, output H265 to current working directory, override few configuration values.
   java -jar "/refapp/lib/dasher.jar" config=dasher.properties mode=h265 logfile=manifest-log.txt drm.kid=rng drm.key=rng input=/videos/video1.mp4 output=.
 
-Unecrypted files are written to output folder.
-Encrypted files are written to output/drm subfolder.
+Unecrypted files are written to an output folder.
+Encrypted files are written to an output/cenc, output/cbcs subfolders.
 
 Logging file should not be copied to a public web server, 
 it contains sensitive data such as DRM kid,key,iv values.
