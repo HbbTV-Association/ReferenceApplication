@@ -19,7 +19,6 @@ function VideoPlayer(element_id, profile, width, height){
 }
 
 VideoPlayer.prototype.createPlayer = function(){
-	
 	console.log("createPlayer()");
 	
 	var self = this;
@@ -48,7 +47,7 @@ VideoPlayer.prototype.createPlayer = function(){
 
 VideoPlayer.prototype.setURL = function(url){
 	url = url.replace("${GUID}", uuidv4());
-	console.log("setURL(",url,")");
+	console.log("setURL("+url+")");
 	
 	var type = "application/dash+xml";
 	if( url.match(/mp4$/) ){
@@ -227,9 +226,12 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 		return;
 	}
 	
+	var msgType="";
 	var self = this;
-	if(this.drm.system.indexOf("playready")===0) {
-		var msgType = "application/vnd.ms-playready.initiator+xml";
+	if(!this.drm || !this.drm.system) {
+		callback();
+	} else if(this.drm.system.indexOf("playready")===0) {
+		msgType = "application/vnd.ms-playready.initiator+xml";
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<PlayReadyInitiator xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols/">' +
@@ -237,14 +239,14 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 		var DRMSysID = "urn:dvb:casystemid:19219";		
 	}	
 	else if( this.drm.system == "marlin" ){
-		var msgType = "application/vnd.marlin.drm.actiontoken+xml";
+		msgType = "application/vnd.marlin.drm.actiontoken+xml";
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL></URL></RightsIssuer></RightsURL></Marlin>';
 		var DRMSysID = "urn:dvb:casystemid:19188";
 	}
 	else if(this.drm.system.indexOf("widevine")===0) {
-		var msgType = "application/widevine+xml";
+		msgType = "application/widevine+xml";
 		var DRMSysID = "urn:dvb:casystemid:19156";
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
@@ -274,8 +276,10 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 		console.log("sendLicenseRequest Error 2: " + e.message );
 	}
 	try {
-		this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-		console.log("drm data cleared");
+		var msgId=-1;
+		if(msgType!="")
+			msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
+		console.log("drm data cleared, msgId: " + msgId);
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
 	}
@@ -284,12 +288,7 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 
 VideoPlayer.prototype.sendLicenseRequest = function(callback){
 	console.log("sendLicenseRequest()");
-	
-	// Create always new DRM object and container for it if it does not exist
-	if( !$("#drm")[0] )
-		$("body").append("<div id='drm'></div>");
-	console.log("Create DRM agent");
-	$("#drm").html('<object id="oipfDrm" type="application/oipfDrmAgent" width="0" height="0"></object>');	
+	createOIPFDrmAgent(); // see common.js
 	this.oipfDrm = $("#oipfDrm")[0];
 	
 	this.drm.successCallback = callback;
@@ -466,11 +465,10 @@ VideoPlayer.prototype.setSubtitles = function(){
 
 
 VideoPlayer.prototype.startVideo = function( isLive ){
-	console.log("startVideo()");	
-	// always reset progress bar
-	this.resetProgressBar();
-	
 	var self = this;
+	console.log("startVideo(), " + self.currentItem.title);
+	
+	this.resetProgressBar(); // always reset progress bar	
 	if( isLive ){
 		self.live = true;
 	} else{
@@ -493,7 +491,7 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 		console.log("error stopping broadcast");
 	}
 	
-	var self = this;
+	setOIPFActiveDRM(self.currentItem);
 	
 	if( this.drm && this.drm.ready == false ){
 		console.log("Send DRM License acquisition");
@@ -585,7 +583,7 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 	
 	try{
 		console.log("video.play()");
-		showInfo("Play NOW");
+		//showInfo("Play NOW");
 		self.play();
 	} catch(e){
 		console.log("error start video play: " , e);
@@ -620,10 +618,12 @@ VideoPlayer.prototype.stop = function(){
 		console.log( "clear video succeed" );
 		self.resetProgressBar();
 		console.log( "reset progressBar succeed" );
+	} catch(ex) {
+		console.log(ex);
 	}
-	catch(e){
-		console.log(e);
-	}
+	
+	if(self.currentItem.setActiveDRM_drmSystemId)
+		setOIPFActiveDRM(null);
 };
 
 VideoPlayer.prototype.play = function(){

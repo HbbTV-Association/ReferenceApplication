@@ -50,7 +50,7 @@ public class Dasher {
 
 			// delete main manifest and old files from output
 			if (Utils.getBoolean(params, "deleteoldfiles", true))
-				deleteOldFiles(outputFolder);
+				deleteOldFiles(outputFolder, false);
 			else
 				new File(outputFolder, "manifest.mpd").delete();
 
@@ -60,6 +60,9 @@ public class Dasher {
 			
 			MediaTools.initTools(params.get("tool.ffmpeg"), params.get("tool.mp4box"));						
 
+			if(!inputFile.exists())
+				throw new FileNotFoundException(inputFile.getAbsolutePath() + " input not found");
+			
 			logger.println(Utils.getNowAsString() + " Start dashing");
 			logger.println("input="  + Utils.normalizePath(inputFile.getAbsolutePath(), true) );
 			logger.println("output=" + Utils.normalizePath(outputFolder.getAbsolutePath(), true) );
@@ -169,7 +172,10 @@ public class Dasher {
 			long timeLimit = Utils.getLong(params, "timelimit", -1); // read X seconds from start
 			String overlayOpt = Utils.getString(params, "overlay", "0", true); // 1=enabled, 0=disabled
 			
-			int fps        = (int)Utils.getLong(meta, "videoFPS", 25);
+			String origFps  = Utils.getString(meta, "videoFPS", "25", false); // "25", "29.97"
+			boolean forceFps= origFps.indexOf('.')>0; // force temp-v1.mp4 output FPS 23.98->24, 29.97->30, 59.94->60
+			int fps = forceFps ? (int)Math.round(Double.parseDouble(origFps)) : Integer.parseInt(origFps);
+			
 			int frags      = (int)Utils.getLong(params, "frags", -1); // frags per segment(multi MOOF/MDAT pairs for low-latency)
 			int segdur     = (int)Utils.getLong(params, "segdur", 8000); // millis 8000=8s
 			int gopdur     = (int)Utils.getLong(params, "gopdur", 2000); // GOP duration in millis(2000=2s)
@@ -186,21 +192,21 @@ public class Dasher {
 				params.put("segdur", ""+segdur);
 				params.put("gopdur", ""+gopdur);
 			}
-			logger.println(String.format("%s Use fps=%d, segdur=%d, gopdur=%d, frags=%d"
-				, Utils.getNowAsString(), fps, segdur, gopdur, frags));
+			logger.println(String.format("%s Use fps=%d, origfps=%s, segdur=%d, gopdur=%d, frags=%d"
+				, Utils.getNowAsString(), fps, origFps, segdur, gopdur, frags));
 			
 			// transcode input file to an intermediate "temp/temp-v1.mp4"
 			for(StreamSpec spec : specs) {
 				List<String> args=null;
 				if(spec.type.isVideo() && spec.inputFile!=null) {
 					if(spec.type==StreamSpec.TYPE.VIDEO_H265 && !spec.crf.isEmpty())
-						args=MediaTools2.getTranscodeH265Args(spec, fps, gopdur, segdur, overlayOpt, timeLimit);
+						args=MediaTools2.getTranscodeH265Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H264 && !spec.crf.isEmpty())
-						args=MediaTools2.getTranscodeH264Args(spec, fps, gopdur, segdur, overlayOpt, timeLimit);
+						args=MediaTools2.getTranscodeH264Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H265)
-						args=MediaTools.getTranscodeH265Args(spec, fps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
+						args=MediaTools.getTranscodeH265Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H264)
-						args=MediaTools.getTranscodeH264Args(spec, fps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
+						args=MediaTools.getTranscodeH264Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
 
 				} else if(spec.type.isAudio() && spec.inputFile!=null) {
 					args=MediaTools.getTranscodeAudioArgs(spec, timeLimit);
@@ -229,7 +235,7 @@ public class Dasher {
 			// DASH: write unencrypted segments
 			if(arrSegments.contains("nodrm")) {
 				for(StreamSpec spec : specs)
-					deleteOldFiles(new File(outputFolder, spec.name));
+					deleteOldFiles(new File(outputFolder, spec.name), true);
 				
 				List<String> args=MediaTools2.getDashArgs(specs, segdur,
 					timeLimit,
@@ -301,13 +307,23 @@ public class Dasher {
 			}
 			
 			if (Utils.getBoolean(params, "deletetempfiles", true)) {
-				deleteOldFiles(tempFolder);
+				deleteOldFiles(tempFolder, true);
 				tempFolder.delete();
 			}
 						
 			params.put("iobuffer", "");
 			logger.println("");			
 			logger.println(Utils.getNowAsString() + " Completed dashing");
+			
+			// write metajson to stdout
+			if (Utils.getBoolean(params, "logfile.metasysout", false))
+				System.out.print(JSONUtil.getJson(meta));
+		} catch(Throwable ex) {
+			if (logger!=null) {
+				logger.println("");
+				logger.println(Utils.getNowAsString() + " " + Utils.getStackTrace(ex));
+			}
+			throw ex;
 		} finally {
 			if (logger!=null) {
 				if(!params.get("iobuffer").isEmpty())
@@ -317,12 +333,18 @@ public class Dasher {
 		}
 	}
 
-	public static int deleteOldFiles(File folder) throws IOException {
+	public static int deleteOldFiles(File folder, boolean delImages) throws IOException {
 		int count=0;
 		String exts[] = new String[] { ".m4s", ".mp4", 
 				".mpd", ".m3u8", 
-				".xml", ".txt",  
-				".jpg", ".jpeg", ".png" };
+				".xml", ".txt" };
+		if(delImages) {
+			String extn[]  = new String[] {".jpg", ".jpeg", ".png" };
+			String newArr[]= new String[exts.length+extn.length];
+			System.arraycopy(exts, 0, newArr, 0, exts.length);
+			System.arraycopy(extn, 0, newArr, exts.length, extn.length);
+			exts = newArr;
+		}
 		File[] files=folder.listFiles();
 		if (files==null) return 0;
 		for(File file : files) {
@@ -372,9 +394,9 @@ public class Dasher {
 		
 		// delete old files from output folder
 		outputFolderDrm.mkdir();
-		deleteOldFiles(outputFolderDrm);
+		deleteOldFiles(outputFolderDrm, true);
 		for(StreamSpec spec : specs) {
-			deleteOldFiles( new File(outputFolderDrm, spec.name) );
+			deleteOldFiles( new File(outputFolderDrm, spec.name), true );
 		}
 		
 		// create GPACDRM.xml drm specification file, write to workdir folder
@@ -606,10 +628,10 @@ public class Dasher {
 
 	private static boolean createImages(Map<String,String> params, 
 			File inputFile, File outputFolder, int inputDurationSec) throws IOException {
-		int timeSec=(int)Utils.getLong(params, "image.seconds", -1);
-		if (timeSec<0) return false;
+		String val = Utils.getString(params, "image.seconds", "", true);  // "15" or "15,60,120"
+		if(val.isEmpty() || val.equalsIgnoreCase("-1")) return false;		
+		List<String> timeSecs = Utils.getList(val, ",");
 
-		String val;
 		List<String> items=new ArrayList<String>(4);
 		logger.println("");
 		for(int idx=1; ; idx++) {
@@ -621,18 +643,34 @@ public class Dasher {
 			// adjust timestamp if video duration is short or inside the trailing "DURATION-10s" range 
 			// short video may have just one I-Frame at the start,
 			// this code expects to find I-Frames so timestamp is not an exact offset.
-			if     (inputDurationSec>0 && inputDurationSec<=10) timeSec=0;
-			else if(inputDurationSec>0 && inputDurationSec<=30) timeSec = Math.min(timeSec, 10);
-			if(timeSec>0 && inputDurationSec>0 && timeSec>=inputDurationSec-10)
-				timeSec = Math.max(inputDurationSec-10, (int)(inputDurationSec / 2) );
+			for(int idx=0; idx<timeSecs.size(); idx++) {
+				int timeSec = Integer.parseInt(timeSecs.get(idx).trim());
+				if(timeSec<0) continue;
+				
+				if (inputDurationSec>0 && inputDurationSec<=10) {
+					timeSec = idx==0 ? 0 : timeSec>=10 ? inputDurationSec/2 : timeSec;
+				} else if(inputDurationSec>0 && inputDurationSec<=30) {
+					timeSec = idx==0 ? Math.min(timeSec, 10) : timeSec>=30 ? inputDurationSec/2 : timeSec; 
+				}
+				if(timeSec>0 && inputDurationSec>0 && timeSec>=inputDurationSec-10) {
+					timeSec = idx==0 ? Math.max(inputDurationSec-10, (int)(inputDurationSec / 2))
+						: timeSec>=inputDurationSec-10 ? inputDurationSec-5 : timeSec;
+				}
 
-			List<String> args=MediaTools2.getImageArgs(inputFile, timeSec, items, 
-				"", 
-				Utils.getString(params, "image.filename", "image_{w}x{h}.jpg", true)
-			);
-			logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
-			val=MediaTools.executeProcess(args, outputFolder);
-			params.put("iobuffer", val);
+				// "image_{w}x{h}.jpg" -> image_640x360.jpg, image_640x360_1.jpg, image_640x360_2.jpg
+				String filename = Utils.getString(params, "image.filename", "image_{w}x{h}.jpg", true);
+				if(filename.contains("{idx}")) {
+					filename = filename.replace("{idx}", ""+(idx+1));
+				} else if(idx>=1) {
+					int delim = filename.lastIndexOf('.');
+					filename = filename.substring(0,delim) + "_"+idx+ filename.substring(delim);
+				}
+				
+				List<String> args=MediaTools2.getImageArgs(inputFile, timeSec, items, "", filename);
+				logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
+				val=MediaTools.executeProcess(args, outputFolder);
+				params.put("iobuffer", val);
+			}
 		}
 		return true;
 	}

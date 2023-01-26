@@ -259,7 +259,7 @@ public class DashManifest {
 	public void addInbandEventStreamElement(String scheme, String value, String mimeAS) {
 		// add IES element before <Representation..> element within video or audio AdaptationSet
 		String xml = String.format("<InbandEventStream schemeIdUri=\"%s\" value=\"%s\"/>"
-				, Utils.XMLEncode(scheme, true, false), Utils.XMLEncode(value, true, false) );				
+				, XMLUtil.encode(scheme, true, false), XMLUtil.encode(value, true, false) );				
 		Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
 
 		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");

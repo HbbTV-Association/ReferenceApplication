@@ -659,15 +659,57 @@ var getCapabilities = function() {
 function mediaPlaySpeeds(){
 }
 
-function displayDRMCapabilities() {
+function setOIPFActiveDRM(item) {
+	// read from configjson item.desc="setActiveDRM(playready), anything..." string
+	// if we need to use this function. Reset value after a playback.
+	var drmSystemId;
+	var desc;
+	if(item) {
+		item.setActiveDRM_drmSystemId=null;
+		var delim = item.desc.indexOf(")");
+		var desc  = delim>0 ? item.desc.substring(0,delim+1) : "";
+		if(desc=="setActiveDRM(playready)") {
+			drmSystemId="urn:dvb:casystemid:19219";
+		} else if (desc=="setActiveDRM(widevine)") {
+			drmSystemId="urn:dvb:casystemid:19156";
+		} else if (desc=="setActiveDRM(marlin)") {
+			drmSystemId="urn:dvb:casystemid:19188";
+		} else if (desc=="setActiveDRM(null)") {
+			drmSystemId=null;
+		} else return; // do nothing
+		item.setActiveDRM_drmSystemId=drmSystemId; // remember this, see player.stop()
+	} else {
+		// reset DRM system to a default state, see videoplayer_xx.clearVideo()
+		desc = "setActiveDRM(null)";
+		drmSystemId=null;
+	}
+	
+	var retval=false;
+	createOIPFDrmAgent();
+	var drmAgent = $("#oipfDrm")[0];
+	try {
+		retval=drmAgent.setActiveDRM(drmSystemId);		
+		console.log(desc + ", "+drmSystemId + ", retval="+retval);
+	} catch(ex) {
+		console.log(desc + ", "+drmSystemId + ", retval="+ex.message);
+	}
+}
+
+function createOIPFDrmAgent() {
+	// create DrmAgent if not already found in html DOM
 	var drmAgent = $("#oipfDrm")[0];
 	if(!drmAgent){
-		if( !$("#drm")[0] )
-			$("body").append("<div id='drm'></div>");
 		console.log("Create DRM agent");
+		if( !$("#drm")[0] )
+			$("body").append("<div id='drm'></div>");		
 		$("#drm").html('<object id="oipfDrm" type="application/oipfDrmAgent" width="0" height="0"></object>');	
-		drmAgent = $("#oipfDrm")[0];
 	}
+}
+
+function displayDRMCapabilities() {
+	createOIPFDrmAgent();
+	var drmAgent = $("#oipfDrm")[0];
+	setOIPFActiveDRM(null);
 	
 	var capabilities = null;
 	try {

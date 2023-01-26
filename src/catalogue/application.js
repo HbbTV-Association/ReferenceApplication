@@ -46,7 +46,11 @@ function init() {
 						
 						if(item.url)    item.url   = item.url.replace("${SESSION_GUID}", sessionGUID);
 						if(item.la_url) item.la_url= item.la_url.replace("${SESSION_GUID}", sessionGUID);
-						if(item.desc)   item.desc  = item.desc.replace("${SESSION_GUID}", sessionGUID);
+						if(item.desc) {
+							item.desc = item.desc.replace("${SESSION_GUID}", sessionGUID);
+						} else {
+							item.desc = "";
+						}
 						
 						// create MarlinMS3 url syntax
 						// ms3://ms3.service.com/laurl#https%3A%2F%2Fcontent.com%2Fvideos%2Fmyvideo%2Fdrm%2Fmanifest.mpd

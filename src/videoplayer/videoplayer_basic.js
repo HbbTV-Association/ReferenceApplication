@@ -7,7 +7,6 @@
  * @constructor
  */
 function VideoPlayerBasic(element_id, profile, width, height){
-	
 	console.log("VideoPlayerBasic - Constructor");
 	this.FILETYPES = {
 		MP4:0,
@@ -20,7 +19,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		SUBTITLE : 2
 	};
 	
-	// unknown yet
+	this.currentItem = null; // set by menu.js:prepareVideoStart(), config.json item
 	this.audioTrack = false;
 	this.subtitleTrack = false;
 	
@@ -543,7 +542,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	
 	/**
 	 * 
-	 * @param {String} system. Specifies DRM system to be used as a string value (for example playeready or marlin)
+	 * @param {String} system. Specifies DRM system to be used as a string value (for example playready or marlin)
 	 * @param {String} la_url. DRM lisence url
 	 * @method setDRM
 	 */

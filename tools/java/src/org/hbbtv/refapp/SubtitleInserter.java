@@ -149,7 +149,7 @@ public class SubtitleInserter {
 			File outputFolder = outputFile.getParentFile();
 
 			// delete old files from output folder (output/sub_xxx/*)
-			Dasher.deleteOldFiles(new File(outputFolder, repId+"/") );
+			Dasher.deleteOldFiles(new File(outputFolder, repId+"/"), true);
 			File tempOutput=new File(tempFolder, "temp-"+repId+".mp4");
 			tempOutput.delete();
 			

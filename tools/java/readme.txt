@@ -136,6 +136,10 @@ See dasher.properties file for full documentation.
 
 Version history
 ============================
+2023-01-24:
+- convert input fps 23.98->24fps, 29.97->30fps, 59.94->60fps
+2023-01-19:
+- added DasherImage tool to scale image files
 2022-12-13:
 - added hls, segdur 3.84s, refactor dasher, cenc/cbcs/cbcs0 drm
 2019-06-12:

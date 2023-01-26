@@ -91,7 +91,7 @@ public class MediaTools {
 	}
 
 	public static List<String> getTranscodeH264Args(StreamSpec spec, 
-				int fps, int gopdur, int segdur, 
+				int fps, boolean forceFps, int gopdur, int segdur, 
 				String overlayOpt, long timeLimit, int ver) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
@@ -111,6 +111,7 @@ public class MediaTools {
 			//"-maxrate:v", spec.bitrate, "-minrate:v", spec.bitrate,
 			//"-bufsize:v", 1.5*spec.bitrate,
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-r", forceFps ? ""+fps:"$DEL2$",
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
 			"-g", ""+gop,			// GOP frames (25fps, gopdur=3000ms -> gop=75)
@@ -134,7 +135,7 @@ public class MediaTools {
 	}
 
 	public static List<String> getTranscodeH265Args(StreamSpec spec, 
-			int fps, int gopdur, int segdur, 
+			int fps, boolean forceFps, int gopdur, int segdur, 
 			String overlayOpt, long timeLimit, int ver) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
@@ -155,6 +156,7 @@ public class MediaTools {
 			//"-maxrate:v", spec.bitrate,
 			//"-bufsize:v", spec.bitrate,
 			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-r", forceFps ? ""+fps:"$DEL2$",
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
 			"-g", ""+gop,			// GOP frames
@@ -468,6 +470,15 @@ public class MediaTools {
 				meta.put("videoDuration", props.get("streams.stream."+idx+".duration") ); // 60.040000  sec.millis
 				meta.put("videoPixFormat", props.get("streams.stream."+idx+".pix_fmt") ); // yuv420p, yuv422p10le
 				meta.put("videoLang", props.get("streams.stream."+idx+".tags.language") ); // eng
+				
+				value=props.get("streams.stream."+idx+".disposition.default");
+				if("1".equals(value)) meta.put("videoDispositionDefault", "1");
+				value=props.get("streams.stream."+idx+".disposition.dub"); // 1,0
+				if("1".equals(value)) meta.put("videoDispositionDub", "1");
+				value=props.get("streams.stream."+idx+".disposition.hearing_impaired");
+				if("1".equals(value)) meta.put("videoDispositionHearingImpaired", "1");
+				value=props.get("streams.stream."+idx+".disposition.visual_impaired");
+				if("1".equals(value)) meta.put("videoDispositionVisualImpaired", "1");				
 
 				value = props.get("streams.stream."+idx+".bit_rate");
 				if (value==null || value.isEmpty() || value.equalsIgnoreCase("N/A")) 
@@ -475,7 +486,7 @@ public class MediaTools {
 				if (value==null || value.equalsIgnoreCase("N/A")) value="";
 				meta.put("videoBitrate", value); // bit/s (512000=512Kbit/s)
 
-				value = props.get("streams.stream."+idx+".r_frame_rate"); // 25/1, 24/1, 30000/1001
+				value = props.get("streams.stream."+idx+".r_frame_rate"); // 25/1, 24/1, 30000/1001 (29,97)
 				if (value==null) value = "25/1";
 				if (value.endsWith("/1")) value = value.substring(0, value.length()-2); 
 				else {
@@ -483,7 +494,7 @@ public class MediaTools {
 					if (delim<1) value="";
 					else {
 						double fps = Double.parseDouble(value.substring(0, delim)) / Double.parseDouble(value.substring(delim+1));
-						value = String.format("%.4g%n", fps); // 29.9700
+						value = String.format(Locale.US,"%.4f", fps); // 29.9700
 					}
 				}
 				meta.put("videoFPS", value);
@@ -498,6 +509,15 @@ public class MediaTools {
 				meta.put("audioDuration", props.get("streams.stream."+idx+".duration") ); // 60.040000  sec.millis
 				meta.put("audioLang", props.get("streams.stream."+idx+".tags.language") ); // eng
 
+				value=props.get("streams.stream."+idx+".disposition.default");
+				if("1".equals(value)) meta.put("audioDispositionDefault", "1");
+				value=props.get("streams.stream."+idx+".disposition.dub"); // 1,0
+				if("1".equals(value)) meta.put("audioDispositionDub", "1");
+				value=props.get("streams.stream."+idx+".disposition.hearing_impaired");
+				if("1".equals(value)) meta.put("audioDispositionHearingImpaired", "1");
+				value=props.get("streams.stream."+idx+".disposition.visual_impaired");
+				if("1".equals(value)) meta.put("audioDispositionVisualImpaired", "1");
+				
 				value = props.get("streams.stream."+idx+".bit_rate");
 				if (value==null || value.isEmpty() || value.equalsIgnoreCase("N/A")) 
 					value = props.get("streams.stream."+idx+".max_bit_rate");
@@ -541,7 +561,7 @@ public class MediaTools {
 						"-nostats",
 						"-filter:v", "idet",	// interlace detection filter
 						"-frames:v", "1000",	// read n frames then stop
-						"-an", "-f", "null",	// no audio
+						"-an", "-sn", "-f", "null",	// no audio, no subs
 						"-"	// output STDERR
 				}));
 			value = readSTDIN(exec.start());
@@ -670,6 +690,11 @@ public class MediaTools {
 		for(int idx=args.size()-1; idx>=0; idx--) {
 			String val = args.get(idx);
 			if(val.isEmpty() || val.equals("$DEL$")) {
+				args.remove(idx);
+				count++;
+			} else if (val.equals("$DEL2$")) {
+				// delete this and previous tags ("-r", "$DEL2$")
+				args.set(idx-1, "");
 				args.remove(idx);
 				count++;
 			}

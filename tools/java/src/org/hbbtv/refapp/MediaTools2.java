@@ -71,7 +71,7 @@ public class MediaTools2 {
 	 * @return
 	 */
 	public static List<String> getTranscodeH264Args(StreamSpec spec, 
-			int fps, int gopdur, int segdur, 
+			int fps, boolean forceFps, int gopdur, int segdur, 
 			String overlayOpt, long timeLimit) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
@@ -109,6 +109,7 @@ public class MediaTools2 {
 			"-maxrate:v", spec.bitrate, // max rate for crf
 			"-bufsize:v", bufSize,      // 2*bitrate
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-r", forceFps ? ""+fps:"$DEL2$",
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes between ref frames
 			"-g", ""+gop,           // GOP frames
@@ -135,7 +136,7 @@ public class MediaTools2 {
 	 * @return
 	 */
 	public static List<String> getTranscodeH265Args(StreamSpec spec, 
-			int fps, int gopdur, int segdur, 
+			int fps, boolean forceFps, int gopdur, int segdur, 
 			String overlayOpt, long timeLimit) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
@@ -162,6 +163,7 @@ public class MediaTools2 {
 			//"-maxrate:v", spec.bitrate,
 			//"-bufsize:v", spec.bitrate,
 			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-r", forceFps ? ""+fps:"$DEL2$",			
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
 			"-g", ""+gop,			// GOP frames

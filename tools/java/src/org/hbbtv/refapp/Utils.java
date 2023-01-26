@@ -79,6 +79,13 @@ public class Utils {
 		return params;
 	}
 
+    public static String getStackTrace(Throwable ex) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		ex.printStackTrace(pw);
+		return sw.toString();
+    }
+    
 	/**
 	 * Get system timestamp as string
 	 * @return	yyyy-MM-dd hh:mm:ss
@@ -447,47 +454,5 @@ public class Utils {
 		   	return path;
 	}   	
 
-	
-	/**
-	 * XML encode string
-	 * @param s
-	 * @param useApos	usually is true
-	 * @param keepNewlines usually is false
-	 * @return
-	 */
-	public static String XMLEncode(String s, boolean useApos, boolean keepNewlines) {
-		StringBuilder str = new StringBuilder();
-		int len = (s != null ? s.length() : 0);
-		for (int i = 0; i < len; i++) {
-			char ch = s.charAt(i);
-			switch (ch) {
-			case '<': {    str.append("&lt;");     break; }
-			case '>': {    str.append("&gt;");     break; }
-			case '&': {    str.append("&amp;");    break; }
-			case '"': {    str.append("&quot;");   break; }
-			case '\'': {   
-				if (useApos) str.append("&apos;");
-				else str.append("&#39;");
-				break; }
-//            case '€': {    str.append("&#8364;"); break; }
-			case '\r':
-			case '\n':
-			case '\t':
-			case '\f': {
-				if (keepNewlines) {
-					str.append(ch);
-				} else {
-					str.append("&#");
-					str.append(Integer.toString(ch));
-					str.append(';');
-				}
-				break; }
-			default: {
-				str.append(ch);
-				}
-			}
-		}
-		return str.toString();
-	}
 	
 }

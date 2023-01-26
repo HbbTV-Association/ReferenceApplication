@@ -330,8 +330,8 @@ public class DashDRM {
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+GUID_WIDEVINE+"\" value=\"widevine\">"+Dasher.NL);
 		buf.append("     <cenc:pssh>"+ createWidevinePSSH(kid, prov, cid, mode) +"</cenc:pssh>"+Dasher.NL);
 		if(!laurl.isEmpty()) {
-			buf.append("     <dashif:laurl>"+ Utils.XMLEncode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
-			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ Utils.XMLEncode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
+			buf.append("     <dashif:laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
+			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ XMLUtil.encode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
 		}
 		buf.append("   </ContentProtection>"+Dasher.NL);
 		return buf.toString();		
@@ -362,8 +362,8 @@ public class DashDRM {
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+GUID_CLEARKEY+"\" value=\"ClearKey1.0\">"+Dasher.NL);
 		if (!laurl.isEmpty()) {
-			buf.append("     <dashif:laurl>"+ Utils.XMLEncode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
-			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ Utils.XMLEncode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
+			buf.append("     <dashif:laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
+			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ XMLUtil.encode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
 		}
 		buf.append("   </ContentProtection>"+Dasher.NL);
 		return buf.toString();
@@ -419,7 +419,7 @@ public class DashDRM {
         	.replace("${alg}", alg);
         val = laurl.isEmpty() ?
         	val.replace("<LA_URL>${laurl}</LA_URL>", "") :
-        	val.replace("${laurl}", Utils.XMLEncode(laurl, true, false) );
+        	val.replace("${laurl}", XMLUtil.encode(laurl, true, false) );
         
         return val;
 	}
