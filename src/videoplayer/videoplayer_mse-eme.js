@@ -353,6 +353,8 @@ VideoPlayerEME.prototype.setURL = function(url){
 	url = url.replace("${GUID}", uuidv4());
 	console.log("setURL(",url,")");
 	//this.player.attachTTMLRenderingDiv(document.getElementById("video-caption")); //$("#video-caption")[0]);
+	
+	if(this.adBreaks) this.player.setAutoPlay(false); // disable autoplay, play preroll before starting a video
 	this.player.attachSource(url);
 	// create id for video url
 	this.videoid = url.hashCode();
@@ -401,16 +403,12 @@ VideoPlayerEME.prototype.prepareAdPlayers = function(){
 	var adEnd = function(e){
 		self.setLoading(false);
 		
-		console.log("ad ended. adCount="+ self.adCount + " adBuffer length: " + self.adBuffer.length );
-		console.log( e.type );
+		console.log("ad ended. adCount="+ self.adCount + ", adBuffer length: " + self.adBuffer.length + ", type="+e.type);
 		var player = $(this);
 		if( self.adCount < self.adBuffer.length ){
-			player.addClass("hide");
-			
-			self.playAds();
-			
-		}
-		else{
+			player.addClass("hide");			
+			self.playAds();			
+		} else{
 			// no more ads, continue content
 			console.log("No more ads, continue content video");
 			self.onAdBreak = false;
@@ -443,7 +441,7 @@ VideoPlayerEME.prototype.prepareAdPlayers = function(){
 	
 	var onAdTimeupdate = function(){
 		var timeLeft = Math.floor( this.duration - this.currentTime )
-		if( timeLeft != NaN ){
+		if( timeLeft != NaN && self.adBuffer!=null ) {
 			$("#adInfo").addClass("show");
 			$("#adInfo").html("Ad " + self.adCount + "/" + self.adBuffer.length + " (" + timeLeft + "s)" );
 		}
@@ -466,22 +464,19 @@ VideoPlayerEME.prototype.getAds = function( adBreak ){
 		console.log("content video pause failed. May be not initialized yet (prerolls)");
 	}
 	var self = this;
-	console.log("get ads breaks=" + adBreak.ads);
-	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
+	console.log("get ads breaks=" + adBreak.ads + ", position="+adBreak.position );
+	$.get( "../getAds.php?breaks=" + adBreak.ads + "&position="+adBreak.position, function(ads){
 		self.adBuffer = ads;
-		console.log( "Got " + ads.length + " ads");
-		
-		self.prepareAdPlayers();
-		
-		self.playAds();
-		
+		console.log( "Got " + ads.length + " ads");		
+		self.prepareAdPlayers();		
+		self.playAds();		
 	}, "json" );
 };
 
 VideoPlayerEME.prototype.playAds = function(){
 	this.onAdBreak = true; // disable seeking
 	try{
-		this.video.pause();
+		this.video.pause(); // this.video=HTML5VideoElement, this.player=DashjsPlayer
 	} catch(e){
 		console.log("content video pause failed. May be not initialized yet (prerolls)");
 	}
@@ -507,7 +502,7 @@ VideoPlayerEME.prototype.playAds = function(){
 	
 	activeAdPlayer.play();
 	$( activeAdPlayer ).removeClass("hide");
-	$( idleAdPlayer ).addClass("hide");
+	$( idleAdPlayer ).addClass("hide");	
 };
 
 VideoPlayerEME.prototype.setSubtitles = function( subtitles ){
@@ -818,10 +813,9 @@ VideoPlayerEME.prototype.clearVideo = function(){
 };
 
 VideoPlayerEME.prototype.clearAds = function(){
+	var self = this;
 	try{
 		if( self.adPlayer ){
-			self.adPlayer[0].stop();
-			self.adPlayer[1].stop();
 			$( self.adPlayer[0] ).addClass("hide");
 			$( self.adPlayer[1] ).addClass("hide");
 			self.adPlayer[0].src = "";
@@ -836,9 +830,8 @@ VideoPlayerEME.prototype.clearAds = function(){
 		$( "#ad1" ).remove(); // clear from dom
 		$( "#ad2" ).remove(); // clear from dom
 		$( "#adInfo" ).remove(); // clear from dom
-	}
-	catch(e){
-		console.log("Error at clearVideo()");
+	} catch(e){
+		console.log("Error at clearAds()");
 		console.log(e.description);
 	}
 };
