@@ -74,8 +74,9 @@ Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO J
  ## MPEG-2 TS
  - Includes AITs with direct links to production and staging instances
  - separate links for HbbTV 1.5 and 2.0.x versions
- - available at https://refapp.hbbtv.org/videos/refapp_10_04_2019.ts
-
+ - Version with HTTP links available at https://refapp.hbbtv.org/videos/refapp_10_04_2019.ts (650 MiB)
+ - Version with HTTPS links available at https://refapp.hbbtv.org/videos/dash-drm_refapp_2023.ts (450 MiB)
+ 
 ### Components and modules:
 
 See components and modules listing at [integration] guide
