@@ -81,9 +81,6 @@ public class Dasher {
 				logger.println(key+"="+ (val!=null ? val : "") );
 			}
 						
-			val = Utils.getString(params, "mode", "h264", true); // h264,h265
-			StreamSpec.TYPE mode = StreamSpec.TYPE.fromString(val);
-
 			// create preview images
 			createImages(params, inputFile, outputFolder, (int)Utils.getLong(meta, "durationsec", -1) );
 			
@@ -101,13 +98,17 @@ public class Dasher {
 				
 				String[] valopts = val.split(" ");
 				StreamSpec spec = new StreamSpec();
-				spec.type   = mode; // h264,h265 
+				
 				spec.name   = valopts[0].trim();
 				spec.size   = valopts[1].toLowerCase(Locale.US).trim();
 				spec.bitrate= valopts[2].toLowerCase(Locale.US).trim();
 				//spec.enabled= true;
 				spec.inputFile = inputFile;
 				spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
+
+				val = Utils.getString(params, "video."+idx+".codec", "", true);
+				if (val.isEmpty()) val = Utils.getString(params, "video.codec", "h264", true);
+				spec.type = StreamSpec.TYPE.fromString(val); // h264,h265
 
 				val = Utils.getString(params, "video."+idx+".profile", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "video.profile", "", true);
@@ -121,9 +122,12 @@ public class Dasher {
 				if (val.isEmpty()) val = Utils.getString(params, "video.crf", "", true);
 				spec.crf=val; // if value found then use CRF encoding
 
+				spec.role     = "main";
+				spec.groupIdx = 0; // videos are grouped by codec(h264,h265,..), see MediaTools2.getDashArgs()
 				specs.add(spec);
 			}
 			
+			// audio should use the same codec for all bitrates, multiple audio codec may or may not work atm.
 			for(int idx=1; ; idx++) {
 				if(Utils.getString(meta, "audioIndex", "", false).isEmpty()) break; // no audio
 				// audio.1="a1 48000 128k 2"
@@ -140,14 +144,20 @@ public class Dasher {
 				spec.sampleRate = Integer.parseInt(valopts[1].trim());
 				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
 				spec.channels= Integer.parseInt(valopts[3].trim());
-				spec.type = StreamSpec.TYPE.fromString(valopts.length>=5 ? valopts[4] : "AAC");  
+								
+				val = Utils.getString(params, "audio."+idx+".codec", "", true);
+				if (val.isEmpty()) val = Utils.getString(params, "audio.codec", "AAC", true);
+				spec.type = StreamSpec.TYPE.fromString(val); // AAC, AC3, EAC3
+				
 				//spec.enabled = true;
 				spec.inputFile = inputFile; // video+audio from the same input file
 				spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
+				spec.role      = "main";
+				spec.groupIdx  = 1; // codec+lang (primary lang bitrates)
 				specs.add(spec);
 			}
 
-			// secondary audio inputs, clone "type=AUDIO_*" specs
+			// secondary audio lang inputs, clone "type=AUDIO_*" specs, each lang goes to a separate track group(adaptation set) 
 			// input.1="/temp/audio_swe.mp4", input.2="/temp/audio_ger.mp4"
 			List<StreamSpec> newSpecs = new ArrayList<StreamSpec>(4);
 			for(int idxI=1; ; idxI++) {
@@ -155,7 +165,7 @@ public class Dasher {
 				if (val.isEmpty()) {
 					if (idxI<=5) continue; // try input.1..5 then give up.
 					else break;  
-				}
+				} else if (val.endsWith("disable") || val.startsWith("disable")) continue;
 
 				for(int idx=0; idx<specs.size(); idx++) {
 					StreamSpec oldSpec = specs.get(idx);
@@ -163,7 +173,9 @@ public class Dasher {
 					StreamSpec spec = (StreamSpec)oldSpec.clone();
 					spec.name = spec.name+"-"+idxI; // "a1" -> "a1-1"
 					spec.inputFile = new File(val);
-					spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");					
+					spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
+					spec.role     = "main"; //"alternate"; // or use "main" for additional languages?
+					spec.groupIdx = spec.groupIdx+idxI; // codec+lang (2..n lang bitrates)
 					newSpecs.add(spec);
 				}
 			}
@@ -182,9 +194,11 @@ public class Dasher {
 			if(segdur<1) {
 				// segdur=auto so use the higher magic to decide best values
 				if(fps==25 || fps==50) {
-					segdur=gopdur=3840;  // 3.84s to align with AAC-48Khz segments
+					segdur=3840;       // 3.84s to align with AAC-48Khz segments
+					gopdur=segdur / 2; // 1.92s GOP, two IDR frames in a segment
 				} else if(fps==30 || fps==60) {
-					segdur=gopdur=3200;
+					segdur=3200;       // 3.2s segment
+					gopdur=segdur / 2; // 1.6s GOP
 				}  else {
 					segdur=8000; // 8s to align with AAC48Khz segments
 					gopdur=2000;
@@ -203,6 +217,7 @@ public class Dasher {
 						args=MediaTools2.getTranscodeH265Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H264 && !spec.crf.isEmpty())
 						args=MediaTools2.getTranscodeH264Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);
+
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H265)
 						args=MediaTools.getTranscodeH265Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H264)
@@ -281,6 +296,7 @@ public class Dasher {
 			}
 
 			// Subtitles(inband,outband) segments are never encrypted
+			// first call writes "sub_eng/i.mp4, 1.m4s, .." inband files or copy "sub_eng.xml" outband file
 			SubtitleInserter.setLogger(logger);
 			logger.println("");
 
@@ -293,16 +309,23 @@ public class Dasher {
 				true, "");
 			
 			if (Utils.getBoolean(params, "drm.created", false)) {
+				final String[] manifests = new String[] {
+					"manifest", "manifest_prcenc", "manifest_wvcenc",
+					"manifest_prwvcenc"
+				};
+				
 				for(String drmMode : params.get("drm.mode").split(",")) {
 					drmMode = drmMode.trim();
-					File outputFolderDrm = new File(outputFolder, drmMode+"/");					
-					createSubtitlesInband(params, new File(outputFolderDrm, "manifest.mpd"), 
-						new File(outputFolderDrm, "manifest_subib.mpd"),
-						tempFolder,
-						false, "../");
-					createSubtitlesOutband(params, new File(outputFolderDrm, "manifest.mpd"), 
-						new File(outputFolderDrm, "manifest_subob.mpd"),
-						false, "../");
+					File outputFolderDrm = new File(outputFolder, drmMode+"/");
+					for(String manifest : manifests) {
+						createSubtitlesInband(params, new File(outputFolderDrm, manifest+".mpd"), 
+							new File(outputFolderDrm, manifest+"_subib.mpd"),
+							tempFolder,
+							false, "../");
+						createSubtitlesOutband(params, new File(outputFolderDrm, manifest+".mpd"), 
+							new File(outputFolderDrm, manifest+"_subob.mpd"),
+							false, "../");
+					}				
 				}
 			}
 			
@@ -399,20 +422,15 @@ public class Dasher {
 			deleteOldFiles( new File(outputFolderDrm, spec.name), true );
 		}
 		
-		// create GPACDRM.xml drm specification file, write to workdir folder
-		File specFileVideo=new File(tempFolder, "temp-drmvideo-"+mode+".xml");
-		File specFileAudio=new File(tempFolder, "temp-drmaudio-"+mode+".xml");
-		specFileVideo.delete();
-		specFileAudio.delete();
-
 		String val=drm.createGPACDRM("video", mode); // cenc,cbcs,cbcs0
 		logger.println(val);
-		FileOutputStream fos = new FileOutputStream(specFileVideo);
-		try { fos.write(val.getBytes("UTF-8")); } finally { fos.close(); }					
+		File specFileVideo=new File(tempFolder, "temp-drmvideo-"+mode+".xml");
+		Utils.saveFile(specFileVideo, val.getBytes("UTF-8"));
+
 		val=drm.createGPACDRM("audio", mode); // cenc,cbcs,cbcs0
 		logger.println(val);
-		fos = new FileOutputStream(specFileAudio);
-		try { fos.write(val.getBytes("UTF-8")); } finally { fos.close(); }
+		File specFileAudio=new File(tempFolder, "temp-drmaudio-"+mode+".xml");		
+		Utils.saveFile(specFileAudio, val.getBytes("UTF-8"));		
 
 		List<String> args;
 
@@ -448,24 +466,50 @@ public class Dasher {
 		val=MediaTools.executeProcess(args, outputFolderDrm);
 		params.put("iobuffer", val);
 
-		// remove moov/trak/senc box from init segments, it breaks some of the hbbtv players,
-		// create init.mp without any PSSH boxes, only Playready/Marlin/etc init files for testing use,
+		// do not change the ordering of drmTypes array
+		final DashDRM.DRMType[] drmTypes = new DashDRM.DRMType[] {
+			DashDRM.PLAYREADY, DashDRM.WIDEVINE, DashDRM.MARLIN, DashDRM.CENC 
+		};
+		
+		 // combo manifest+init: "prwv", "prwvcenc", "prcenc", "wvcenc" 
+		final int[][] drmTypesCombo = new int[][]{  { 0,1 }, {0,1,3}, {0,3}, {1,3}  };
+		if(Utils.getString(params, "drm.playready", "0", true).equals("0")) // playready is disabled
+			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[2] = new int[]{};
+		if(Utils.getString(params, "drm.widevine", "0", true).equals("0"))  // widevine is disabled
+			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[3] = new int[]{};
+		
 		for(StreamSpec spec : specs) {
-			modifyInitSegment(spec, outputFolderDrm, Utils.getBoolean(params, "livesim", false) );
+			modifyInitSegment(spec, outputFolderDrm, Utils.getBoolean(params, "livesim", false) ); // remove senc+udta from init 
 			File initFile = new File(outputFolderDrm, spec.name+"/i.mp4");
-			File outFile  = new File(outputFolderDrm, spec.name+"/i_nopssh.mp4");					
+			File outFile  = new File(outputFolderDrm, spec.name+"/i_nopssh.mp4"); // without any PSSH boxes					
 			if (!isSingleSeg && BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
 				logger.println(String.format("Removed moov/pssh[*] from %s to %s"
 						, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
 
-			for(String sysId : (!isSingleSeg ? new String[]{ "playready", "widevine", "marlin", "cenc" } : new String[]{}) ) {
-				if (!Utils.getString(params, "drm."+sysId, "0", true).equals("0")) {
-					outFile  = new File(outputFolderDrm, String.format("%s/i_%s.mp4", spec.name, sysId));
-					if (BoxModifier.keepPSSH(initFile, outFile, sysId))
-						logger.println(String.format("Written moov/pssh[%s] from %s to %s"
-							, sysId
-							, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );						
+			if(!isSingleSeg) {
+				for(DashDRM.DRMType drmType : drmTypes) {
+					if (!Utils.getString(params, "drm."+drmType.NAME, "0", true).equals("0")) {
+						outFile  = new File(outputFolderDrm, String.format("%s/i_%s.mp4", spec.name, drmType.TAG)); // "v1/i_pr.mp4"
+						if (BoxModifier.keepPSSH(initFile, outFile, drmType.NAME))
+							logger.println(String.format("Written moov/pssh[%s] from %s to %s"
+								, drmType.NAME, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );						
+					}
 				}
+			}
+			
+			// Playready+Widevine+CENC combo
+			for(int idx=(!isSingleSeg?0:999); idx < drmTypesCombo.length; idx++) {
+				String tag="", name="";
+				int[] indexes = drmTypesCombo[idx]; // 0..n index of drmTypes array, empty array=skip
+				for(int idxI=0; idxI<indexes.length; idxI++) {
+					tag += drmTypes[indexes[idxI]].TAG;      // "prwvcenc"
+					name+= drmTypes[indexes[idxI]].NAME+","; // "playready,widevine,cenc"
+				}
+				if(tag.isEmpty()) continue;
+				outFile  = new File(outputFolderDrm, String.format("%s/i_%s.mp4", spec.name, tag));
+				if (BoxModifier.keepPSSH(initFile, outFile, name))
+					logger.println(String.format("Written moov/pssh[%s] from %s to %s"
+						, tag, initFile.getAbsolutePath(), outFile.getAbsolutePath()) );
 			}
 		}
 		
@@ -493,66 +537,80 @@ public class Dasher {
 		manifest.save(manifestFile, false);
 		String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
 		
-		// write clearkey manifest
+		// write clearkey manifest, use this one for clearkey testing
 		val=drm.createClearKeyMPDElement();
 		if (!isSingleSeg && !val.isEmpty()) {
 			manifest = new DashManifest(manifestData);
 			manifest.addContentProtectionElement("video", val);
 			manifest.addContentProtectionElement("audio", val);
-			manifest.removeContentProtectionElement("playready");
-			manifest.removeContentProtectionElement("widevine");
-			manifest.removeContentProtectionElement("marlin");
-			String data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
-					"initialization=\"$RepresentationID$_i_nopssh.mp4\"");
-			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+			for(int idx=0; idx<3; idx++)
+				manifest.removeContentProtectionElement(drmTypes[idx].NAME); // playready,widevine,marlin			
+			String data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
 					"initialization=\"$RepresentationID$/i_nopssh.mp4\"");					
-			Utils.saveFile(new File(outputFolderDrm, "manifest_clearkey.mpd"), data.getBytes("UTF-8") );
+			Utils.saveFile(new File(outputFolderDrm, "manifest_ck.mpd"), data.getBytes("UTF-8") );
+			
+			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+					"initialization=\"$RepresentationID$/i_cenc.mp4\"");					
+			Utils.saveFile(new File(outputFolderDrm, "manifest_ckcenc.mpd"), data.getBytes("UTF-8") );			
 		}
 
-		// write CENC-clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements.
-		if (!isSingleSeg && !Utils.getString(params, "drm.cenc", "0", true).equals("0")) {
+		// write CENC-clearkey manifest with just MPEG-CENC+EME-CENC(CLEARKEY) <ContentProtection> elements (legacy)
+		/*if (!isSingleSeg && !Utils.getString(params, "drm.cenc", "0", true).equals("0")) {
 			manifest = new DashManifest(manifestData);
 			manifest.addContentProtectionElement("video", drm.createCENCMPDElement("video") );
 			manifest.addContentProtectionElement("audio", drm.createCENCMPDElement("audio") );
-			manifest.removeContentProtectionElement("playready");
-			manifest.removeContentProtectionElement("widevine");
-			manifest.removeContentProtectionElement("marlin");
-			String data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
-						"initialization=\"$RepresentationID$_i_cenc.mp4\""); // CENC pssh
-			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
-					"initialization=\"$RepresentationID$/i_cenc.mp4\"");					
+			for(int idx=0; idx<3; idx++)
+				manifest.removeContentProtectionElement(drmTypes[idx].NAME); // playready,widevine,marlin
+			String data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+					"initialization=\"$RepresentationID$/i_cenc.mp4\""); // CENC pssh
 			Utils.saveFile(new File(outputFolderDrm, "manifest_cenc.mpd"), data.getBytes("UTF-8") );
-		}
+		}*/
 
-		// create manifest where init url points to vX_i_nopssh.mp4 files
-		String data = manifestData.replace("initialization=\"$RepresentationID$_i.mp4\"", 
-				"initialization=\"$RepresentationID$_i_nopssh.mp4\"");
-		data = manifestData.replace("initialization=\"$RepresentationID$/i.mp4\"", 
+		// create manifest where init url points to i_nopssh.mp4 files
+		String data = manifestData.replace("initialization=\"$RepresentationID$/i.mp4\"", 
 				"initialization=\"$RepresentationID$/i_nopssh.mp4\"");
 		if(!isSingleSeg)
 			Utils.saveFile(new File(outputFolderDrm, "manifest_nopssh.mpd"), data.getBytes("UTF-8"));
 
-		// create single DRM manifests
-		for(String sysId : (!isSingleSeg ? new String[]{ "playready", "widevine", "marlin" } : new String[] {}) ) {
+		// create single DRM manifests, first 3 types "playready","widevine","marlin"
+		for(int idx=(!isSingleSeg?0:999); idx<3; idx++) {		
+			String name = drmTypes[idx].NAME;
 			manifest = new DashManifest(manifestData);
-			if (!sysId.equals("playready")) manifest.removeContentProtectionElement("playready");
-			if (!sysId.equals("widevine"))  manifest.removeContentProtectionElement("widevine");
-			if (!sysId.equals("marlin"))    manifest.removeContentProtectionElement("marlin");
-			data = manifest.toString().replace("initialization=\"$RepresentationID$_i.mp4\"", 
-						"initialization=\"$RepresentationID$_i_"+sysId+".mp4\"");
+			if (!name.equals(DashDRM.PLAYREADY.NAME)) manifest.removeContentProtectionElement(DashDRM.PLAYREADY.NAME);
+			if (!name.equals(DashDRM.WIDEVINE.NAME))  manifest.removeContentProtectionElement(DashDRM.WIDEVINE.NAME);
+			if (!name.equals(DashDRM.MARLIN.NAME))    manifest.removeContentProtectionElement(DashDRM.MARLIN.NAME);
 			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
-					"initialization=\"$RepresentationID$/i_"+sysId+".mp4\"");					
-			Utils.saveFile(new File(outputFolderDrm, "manifest_"+sysId+".mpd"), data.getBytes("UTF-8"));					
+				"initialization=\"$RepresentationID$/i_"+drmTypes[idx].TAG+".mp4\""); // "pk","wv,"ml"			
+			if ( !Utils.getString(params, "drm."+name, "0", true).equals("0") )
+				Utils.saveFile(new File(outputFolderDrm, "manifest_"+drmTypes[idx].TAG+".mpd"), data.getBytes("UTF-8"));					
 		}
-
+		
+		for(int idx=(!isSingleSeg?0:999); idx < drmTypesCombo.length; idx++) {
+			String tag="", name="";
+			int[] indexes = drmTypesCombo[idx];
+			for(int idxI=0; idxI<indexes.length; idxI++) {
+				tag += drmTypes[indexes[idxI]].TAG;      // "prwvcenc"
+				name+= drmTypes[indexes[idxI]].NAME+","; // "playready,widevine,cenc"
+			}
+			if(tag.isEmpty()) continue;
+			
+			manifest = new DashManifest(manifestData);
+			manifest.removeContentProtectionElement(DashDRM.MARLIN.NAME);
+			if(!name.contains(DashDRM.PLAYREADY.NAME)) manifest.removeContentProtectionElement(DashDRM.PLAYREADY.NAME);
+			if(!name.contains(DashDRM.WIDEVINE.NAME))  manifest.removeContentProtectionElement(DashDRM.WIDEVINE.NAME);				
+			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
+					"initialization=\"$RepresentationID$/i_"+tag+".mp4\"");
+			Utils.saveFile(new File(outputFolderDrm, "manifest_"+tag+".mpd"), data.getBytes("UTF-8"));				
+		}
+			
 		logger.println(Utils.getNowAsString()+" Completed DRM "+mode);
 		return true;
 	}
 
 	private static void modifyInitSegment(StreamSpec spec, File outputFolder, boolean livesim) 
 			throws IOException {
-		// some dash validators give a warning of an unknown atom 'udta', 
-		// we don't need this user-defined-meta box.
+		// remove moov/trak/senc box from init.mp4, it breaks some hbbtv players, box is found in a 1..n.m4s files.		
+		// some dash validators give a warning of an unknown atom 'udta', we don't need an user-defined-meta box. 
 		File initFile = new File(outputFolder, spec.name+"/i.mp4");
 		if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 			logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
@@ -571,7 +629,9 @@ public class Dasher {
 			File manifestFile, File manifestOutput, File tempFolder,
 			boolean splitSegments, String urlPrefix) throws Exception {
 		// parse subib.X=sub_fin fin sub_fin.xml
+		if(!splitSegments && !manifestFile.exists()) return;		
 		boolean isFirstSub=true;
+		int asId=50; // AdaptationSet@id
 		for(int idx=1; ; idx++) {
 			String val = Utils.getString(params, "subib."+idx, "", true);
 			if (val.isEmpty()) {
@@ -581,6 +641,7 @@ public class Dasher {
 			if (val.endsWith("disable") || val.startsWith("disable")) continue;
 			String[] valopts = val.split(" ");
 
+			asId++;
 			logger.println("Create subtitles(inband) "+val);			
 			SubtitleInserter.insertIB(new File(valopts[2].trim()),	// input "sub_fin.xml" file path 
 				isFirstSub?manifestFile:manifestOutput, 
@@ -588,6 +649,7 @@ public class Dasher {
 				tempFolder,
 				valopts[1].trim(),	// lang "fin"
 				valopts[0].trim(),  // repId "sub_fin"
+				asId,
 				splitSegments, // split xml file to sub_fin/sub_1.m4s or reuse an existing segs
 				(int)Utils.getLong(params, "segdur", 8000),
 				Utils.getBoolean(params, "deletetempfiles", true), 
@@ -604,7 +666,9 @@ public class Dasher {
 	private static void createSubtitlesOutband(Map<String,String> params, File manifestFile, File manifestOutput,
 			boolean copySubFile, String urlPrefix) throws Exception {
 		// parse subob.X=sub_fin fin sub_fin.xml
+		if(!copySubFile && !manifestFile.exists()) return;
 		boolean isFirstSub=true;
+		int asId=50; // AdaptationSet@id
 		for(int idx=1; ; idx++) {
 			String val = Utils.getString(params, "subob."+idx, "", true);
 			if (val.isEmpty()) {
@@ -614,12 +678,14 @@ public class Dasher {
 			if (val.endsWith("disable") || val.startsWith("disable")) continue;
 			String[] valopts = val.split(" ");
 	
+			asId++;
 			logger.println("Create subtitles(outband) "+val);			
 			SubtitleInserter.insertOB(new File(valopts[2].trim()),	// input "sub_fin.xml" file path 
 				isFirstSub?manifestFile:manifestOutput, 
 				manifestOutput, 
 				valopts[1].trim(),	// lang "fin"
 				valopts[0].trim(),  // repId "sub_fin"
+				asId,
 				copySubFile,
 				urlPrefix);
 			isFirstSub=false;

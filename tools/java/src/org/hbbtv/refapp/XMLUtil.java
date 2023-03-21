@@ -111,10 +111,11 @@ public class XMLUtil {
 	/**
 	 * Create XML string from dom element tree.
 	 * @param elem
+	 * @param insertXmlDeclr  insert "<?xml ...?>" header
 	 * @return
 	 * @throws Exception
 	 */
-	public static String createXML(Element elem) throws Exception {
+	public static String createXML(Element elem, boolean insertXmlDeclr) throws Exception {
 	    DOMSource source = new DOMSource(elem);
 	    StringWriter writer = new StringWriter();
 	    StreamResult result = new StreamResult(writer);
@@ -122,9 +123,9 @@ public class XMLUtil {
 	    Transformer transformer = transformerFactory.newTransformer();
 	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 	    //transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-	    //transformer.setOutputProperty("http://www.oracle.com/xml/is-standalone", "yes");
 	    transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,"yes");
 	    transformer.setOutputProperty("http://www.oracle.com/xml/is-standalone", "yes");
+	    if(!insertXmlDeclr) transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes"); 
 	    transformer.transform(source, result);
 	    
 	    // Java10-transformer adds unecessary empty lines, remove empty lines, study why does it happens.

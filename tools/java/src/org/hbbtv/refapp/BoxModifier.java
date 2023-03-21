@@ -51,7 +51,7 @@ public class BoxModifier {
 			boolean isOk = Utils.getBoolean(params, "drm.playready", true);
 			if (isOk) {
 				String url = Utils.getString(params, "drm.playready.laurl", "", true);
-				boolean isModified=setPSSH(videoFile, outputFile, DashDRM.SYSID_PLAYREADY, kid, key, url, "", "", alg);
+				boolean isModified=setPSSH(videoFile, outputFile, DashDRM.PLAYREADY.SYSID, kid, key, url, "", "", alg);
 				System.out.println(isModified ? "PSSH found, set pssh" : "PSSH not found");
 				System.out.println("");
 			}
@@ -59,7 +59,7 @@ public class BoxModifier {
 			isOk = Utils.getBoolean(params, "drm.widevine", true);
 			if (isOk) {
 				String url="";
-				boolean isModified=setPSSH(videoFile, outputFile, DashDRM.SYSID_WIDEVINE, kid, key, url
+				boolean isModified=setPSSH(videoFile, outputFile, DashDRM.WIDEVINE.SYSID, kid, key, url
 						, Utils.getString(params, "drm.widevine.provider", "", true)
 						, Utils.getString(params, "drm.widevine.contentid", "", true)
 						, "" );
@@ -200,11 +200,12 @@ public class BoxModifier {
 	 * Keep given SystemID PSSH and remove the rest.
 	 * @param videoFile		input file.
 	 * @param outputFile	output file, this may be equal to videoFile value.
-	 * @param systemId      System id such as playready,marlin,widevine,cenc to keep
+	 * @param sysId      System id to keep, playready,marlin,widevine,cenc, 
+	 *     special case key "playready,widevine", "playready,widevine,cenc" combo
 	 * @return	true if file was modified.
 	 * @throws IOException
 	 */
-	public static boolean keepPSSH(File videoFile, File outputFile, String systemId) throws IOException {
+	public static boolean keepPSSH(File videoFile, File outputFile, String sysId) throws IOException {
         if (!videoFile.exists())
             throw new FileNotFoundException(videoFile.getAbsolutePath() + " not found");
         // if input=output then use outputTemp before writing to the destination file
@@ -215,13 +216,15 @@ public class BoxModifier {
         FileOutputStream fos = null;
         IsoFile isoFile = new IsoFile(fis.getChannel());
         try {
-        	if (systemId.equalsIgnoreCase("playready"))   systemId=DashDRM.SYSID_PLAYREADY;
-        	else if (systemId.equalsIgnoreCase("marlin")) systemId=DashDRM.SYSID_MARLIN;
-        	else if (systemId.equalsIgnoreCase("widevine")) systemId=DashDRM.SYSID_WIDEVINE;
-        	else if (systemId.equalsIgnoreCase("cenc"))   systemId=DashDRM.SYSID_CENC;
-        	else if (systemId.equalsIgnoreCase("clearkey")) systemId=DashDRM.SYSID_CLEARKEY;
-        	byte[] systemIdBytes=Utils.hexToBytes(systemId);
-
+    		// "playready,widevine", "playready,widevine,cenc", "playready,cenc", "widevine,cenc"
+        	List<byte[]> sysIdBytes = new ArrayList<byte[]>(2);
+    		String[] tokens = sysId.split("\\,");
+    		for(int idx=0; idx<tokens.length; idx++) {
+    			if(tokens[idx]==null || tokens[idx].isEmpty()) continue;
+    			DashDRM.DRMType drmType = DashDRM.getTypeByName(tokens[idx]);
+    			sysIdBytes.add( Utils.hexToBytes(drmType!=null ? drmType.SYSID : tokens[idx]) );
+    		}
+        	
         	List<Box> boxes=isoFile.getBoxes();
         	Container moov=null;        	
         	for(int idx=0; idx<boxes.size(); idx++) {
@@ -237,10 +240,18 @@ public class BoxModifier {
 	        	for(int idx=boxes.size()-1; idx>=0; idx--) {
 	        		if (!boxes.get(idx).getType().equals("pssh")) continue;
 	        		ProtectionSystemSpecificHeaderBox box = (ProtectionSystemSpecificHeaderBox)boxes.get(idx);
-	        		if (!Arrays.equals(systemIdBytes, box.getSystemId())) {
+
+	        		boolean isFound=false;
+	        		for(int idxL=0; idxL<sysIdBytes.size(); idxL++) {
+		        		if (Arrays.equals(sysIdBytes.get(idxL), box.getSystemId())) {
+		        			isFound=true;
+		        			break;
+		        		}
+	        		}
+	        		if(!isFound) {
 	        			boxes.remove(idx);
 	        			isModified=true;
-	        		}
+	        		}	        		
 	        	}
         	}
         	        	
@@ -275,7 +286,7 @@ public class BoxModifier {
 		params.put("drm.key", key);
 		params.put("drm.mode", alg);
 		
-		if (systemId.equalsIgnoreCase(DashDRM.SYSID_PLAYREADY)) {
+		if (systemId.equalsIgnoreCase(DashDRM.PLAYREADY.SYSID)) {
 			params.put("drm.playready", "1");
 			params.put("drm.playready.laurl", laurl);
 			DashDRM drm= new DashDRM();
@@ -285,7 +296,7 @@ public class BoxModifier {
 			
 			System.out.println("MPD/ContentProtection(Playready):");
 			System.out.println(drm.createPlayreadyMPDElement("video"));
-		} else if (systemId.equalsIgnoreCase(DashDRM.SYSID_WIDEVINE)) {
+		} else if (systemId.equalsIgnoreCase(DashDRM.WIDEVINE.SYSID)) {
 			// todo: does not modify yet, just printout
 			params.put("drm.widevine", "1");
 			params.put("drm.widevine.provider", wvProvider);

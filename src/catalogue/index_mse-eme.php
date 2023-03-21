@@ -39,7 +39,7 @@
 		to ensure device is not using cache when file is modified
 		***/
 		$profileResources = "mse-eme"; // additional resources
-		include("resources.php"); 
+		include_once("resources.php"); 
 	?>
 	
 	<!-- yobora integration test -->

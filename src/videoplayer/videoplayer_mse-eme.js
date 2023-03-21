@@ -646,12 +646,12 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 
 
 VideoPlayerEME.prototype.startVideo = function( isLive ){
-	console.log("startVideo()");	
-	// always reset progress bar 
-	this.resetProgressBar();
-	
-	this.subtitleTrack = false;
 	var self = this; // VideoPlayerEME object
+	console.log("startVideo(), " + self.currentItem.title);
+
+	// always reset progress bar 
+	this.resetProgressBar();	
+	this.subtitleTrack = false;
 	this.onAdBreak = false;
 	this.firstPlay = true;
 	

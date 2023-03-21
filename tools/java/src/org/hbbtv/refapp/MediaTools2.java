@@ -3,8 +3,10 @@ package org.hbbtv.refapp;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Utility functions for executable tools used by dasher (ffmpeg,ffprobe,mp4box).
@@ -105,7 +107,7 @@ public class MediaTools2 {
 			"-c:v", "libx264", "-crf", spec.crf, // ConstantRateFactor 
 			"-profile:v", spec.profile.isEmpty()?"main":spec.profile, 
 			"-level", spec.level.isEmpty()?"4.0":spec.level,
-			"-s:v", spec.size, 		// resolution 1920x1080
+			//"-s:v", spec.size, 		// resolution 1920x1080, replaced by swscale filter
 			"-maxrate:v", spec.bitrate, // max rate for crf
 			"-bufsize:v", bufSize,      // 2*bitrate
 			"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
@@ -119,14 +121,24 @@ public class MediaTools2 {
 			"-sc_threshold", "0",	// disable Scenecut
 			// allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit) 
 			"-movflags", "negative_cts_offsets+faststart", 
-			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
+			"-vf", "${overlay,scale}",	// draw overlay text on video (optional), swscale
+			"-color_range", "tv",	// limited(tv), full(pc) rgb range, signal range
+			"-colorspace", "bt709", // RGB to YUV colormatrix
+			"-color_primaries", "bt709", // RGB map to real values
+			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 
 			"-an", "-sn",			// skip audio, skip subtitles track
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile        // overwrite output file "temp-v1.mp4"
 		));
 	
+		// use full internal YUV444 + accurate rounding: flags=full_chroma_int+accurate_rnd 
+		String scale   = "scale="+spec.size+":out_range=tv:out_color_matrix=bt709:flags=full_chroma_int+accurate_rnd";
+		String format  = "format=yuv420p,setsar=1/1"; // StorageAspectRatio(1:1)
+		String overlay = MediaTools.getOverlayOpt(spec, fps, gop, segdur, overlayOpt);
+		String val     = overlay+","+scale+","+format;
+		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
+		
 		MediaTools.updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
-		MediaTools.updateOverlayOpt(args, spec, fps, gop, segdur, overlayOpt);
 		MediaTools.removeEmptyOpt(args);
 		return args;
 	}
@@ -141,12 +153,17 @@ public class MediaTools2 {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
 
-		String bufSuffix= spec.bitrate.substring(spec.bitrate.length()-1); // "1024k"->"k" 
+		String bufSuffix= spec.bitrate.substring(spec.bitrate.length()-1); // "1024k"->"k" bitrate should always be "k" suffix
 		String bufSize  = spec.bitrate.substring(0, spec.bitrate.length()-1); // "1024k"->"1024"
 		bufSize         = (Integer.parseInt(bufSize)*2)+bufSuffix; // "1024k * 2"->"2048k"
 		String level    = spec.level.isEmpty()?"5.0":spec.level;
 		int gop         = fps*gopdur/1000;
 		int keyMin      = gop / 2;
+		
+		String pixFormat = spec.profile.equals("main10")?"yuv420p10le"
+			: spec.profile.equals("high")  ?"yuv420p10le"
+			: spec.profile.equals("main12")?"yuv420p12le"
+			: "yuv420p"; // main(8bit), this value controls the profile main8bit,main10bit,main12bit
 
 		// must also use x265-params custom argument to give a common ffmpeg args (ref,bf,g,keyint,etc..)
 		List<String> args=Arrays.asList(MediaTools.FFMPEG, 
@@ -155,14 +172,14 @@ public class MediaTools2 {
 			"-threads", "4", "-preset", "fast",
 			"-c:v", "libx265", "-crf", spec.crf, // ConstantRateFactor
 			"-tag:v", "hvc1", // use HVC1 instead of default HEV1
-			"-level", level,// profile=main(8bit) is given in x265-params
-			"-s:v", spec.size, 		// resolution 3840x2160
+			"-level", level,
+			//"-s:v", spec.size, 		// resolution 3840x2160, replaced by swscale
 			"-maxrate:v", spec.bitrate, // max rate for crf
 			"-bufsize:v", bufSize,      // 2*bitrate			
 			//"-b:v", spec.bitrate, 	// video bitrate 2000k
 			//"-maxrate:v", spec.bitrate,
 			//"-bufsize:v", spec.bitrate,
-			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-pix_fmt", pixFormat,
 			"-r", forceFps ? ""+fps:"$DEL2$",			
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
@@ -172,8 +189,12 @@ public class MediaTools2 {
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
 			"-movflags", "negative_cts_offsets+faststart",
-			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${keymin}:keyint=${gop}:vbv-maxrate=${bitrate}:vbv-bufsize=${bufsize}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
-			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
+			"-x265-params", "level_idc=${level}:min-keyint=${keymin}:keyint=${gop}:vbv-maxrate=${bitrate}:vbv-bufsize=${bufsize}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
+			"-vf", "${overlay,scale}",	// draw overlay text on video (optional),swscale
+			"-color_range", "tv",	// limited(tv), full(pc) rgb range, signal range
+			"-colorspace", "bt709", // RGB to YUV colormatrix
+			"-color_primaries", "bt709", // RGB map to real values
+			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 			
 			"-an", "-sn",           // skip audio+subs
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile        // overwrite "temp-v1.mp4"
@@ -182,17 +203,23 @@ public class MediaTools2 {
 
 		int idx= args.indexOf("-x265-params")+1;
 		args.set(idx, args.get(idx)
-				.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
+				//.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
 				.replace("${level}", level)
 				//.replace("${fps}", ""+fps)
 				.replace("${keymin}", ""+keyMin)
 				.replace("${gop}", ""+gop)
-				.replace("${bitrate}", spec.bitrate)
-				.replace("${bufsize}", bufSize)
+				.replace("${bitrate}", spec.bitrate.replace("k", ""))
+				.replace("${bufsize}", bufSize.replace("k", ""))
 				);
 
+		// use full internal YUV444+accurate rounding: flags=full_chroma_int+accurate_rnd 
+		String scale   = "scale="+spec.size+":out_range=tv:out_color_matrix=bt709:flags=full_chroma_int+accurate_rnd";
+		String format  = "format="+pixFormat+",setsar=1/1"; // StorageAspectRatio(1:1)
+		String overlay = MediaTools.getOverlayOpt(spec, fps, gop, segdur, overlayOpt);
+		String val     = overlay+","+scale+","+format;
+		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
+		
 		MediaTools.updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
-		MediaTools.updateOverlayOpt(args, spec, fps, gop, segdur, overlayOpt);
 		MediaTools.removeEmptyOpt(args);
 		return args;
 	}
@@ -232,13 +259,34 @@ public class MediaTools2 {
 		//    2=no segtimeline, use audioSampleRate scale, use -bound(split before or at boundary not after)
 		//    3=no segtimeline, use audioSampleRate scale, use -closest(split closest before or after)
 		//    4=use audioSampleRate scale, don't use bound+closest(case: spring 8s multimoofmdat duration broken) 
+
+		Map<String,String> specAttrs=new HashMap<String,String>(3);
+		specAttrs.put("asIdV", "0");  // video: 1..n trackgroup per codec
+		specAttrs.put("asIdA", "20"); // audio: 21..n trackgroup per codec+lang
+		// Subtitle inserter uses asID=51..n
+		
 		int scale=-1;
 		for(StreamSpec spec : specs) {
-			if (spec.type.isAudio()) {
+			boolean isAudio = spec.type.isAudio();
+			if (isAudio && scale<0)
 				scale = spec.sampleRate; // 44100, 48000
-				break;
+
+			// AdaptationSet@id="1..n" track groups per codec (h264,h265)			
+			String key = spec.type.toString();
+			String val = specAttrs.get("codec."+key+"."+spec.groupIdx);
+			if(val==null) {
+				String asId = !isAudio ? "asIdV":"asIdA";
+				int ival = Integer.parseInt(specAttrs.get(asId))+1;
+				val = ""+ival;
+				specAttrs.put(asId, val);
+				specAttrs.put("codec."+key+"."+spec.groupIdx, val);
+				// spec.role=already set in dasher.java				
+			} else {
+				spec.role=""; // remove from additional tracks inside the same track group
 			}
+			spec.asId = val; // 1..n number
 		}
+		
 		scale = Math.max(1000, scale); // default to 1s if no audio was given
 		segname = segname.toLowerCase(Locale.US);
 		
@@ -254,7 +302,7 @@ public class MediaTools2 {
 			//"-min-buffer", ""+(gopdur*1000*2), //  ""+(segdur*1000*2) | "3000" |  MDP.minBufferTime value, does this work?
 			"-min-buffer", "2000", //  ""+(segdur*1000*2) | "3000" |  MDP.minBufferTime value, does this work?
 			"-mpd-title", "refapp", "-mpd-info-url", "http://refapp",
-			"-bs-switching", initMode, // inband=AVC3_common_init, multi=AVC1_common_init_hbbtv, merge=AVC1_commonn_init, no=AVC1_separate_init (best backward comp)
+			"-bs-switching", initMode, // inband=AVC3_common_init, multi=AVC1_common_init_hbbtv, merge=AVC1_common_init, no=AVC1_separate_init (best backward comp)
 			"-sample-groups-traf",	// sgpd+sbgp atom in MOOF/TRAF(audio), IE11 fix  
 			"-single-traf", 
 			"--tfdt64",          // use 64bit tfdt(version=1) timestamp
@@ -277,15 +325,21 @@ public class MediaTools2 {
 			File trackFile = useDrmInput ? 
 				spec.inputFileTrackDrm : spec.inputFileTrack;
 			String filename = Utils.normalizePath(trackFile.getAbsolutePath(), true);
-			String arg=filename+"#trackID=1:id=${name}:period=p0:${timelimit}";
+			String arg=filename+"#trackID=1:id=${name}:period=p0:asID=${asID}:role=${role}:${timelimit}";
 			
 			if(useHLS) {
 				arg +=":#HLSPL=manifest_${name}.m3u8"
 					+ ( spec.type.isAudio() ? ":#HLSGroup=audio":"");
 			}
 			
+			arg = arg.replace("${asID}", spec.asId);
+			
+			if(spec.role.isEmpty()) arg = arg.replace(":role=${role}", "");
+			else arg = arg.replace("${role}", spec.role);
+			
 			arg = arg.replace("${name}", spec.name)
-				.replace(":${timelimit}", timeLimit>0?":dur="+timeLimit:"");			
+				.replace(":${timelimit}", timeLimit>0?":dur="+timeLimit:"");
+						
 			args.add(arg);  //if(Utils.isWindows()) args.add("\""+arg+"\"");
 		}
 		

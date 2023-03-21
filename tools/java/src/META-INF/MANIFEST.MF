@@ -1,4 +1,4 @@
 Implementation-Title: dasher
 Implementation-Version: 1.0.0 (2017-06-21)
 Implementation-Vendor: HbbTV Association
-Implementation-URL: http://www.hbbtv.org/
+Implementation-URL: https://www.hbbtv.org/

@@ -76,10 +76,11 @@ public class MediaTools {
 		val = Utils.getString(params, "segdur", "8", true); // "3.84"-> 3840, "8"->8000
 		if(val.equalsIgnoreCase("auto")) val="0";
 		params.put("segdur",""+( (int)(Double.parseDouble(val)*1000) ));
+
 		val = Utils.getString(params, "gopdur", "2", true);
 		if(val.equalsIgnoreCase("auto")) val="0";
 		params.put("gopdur",""+( (int)(Double.parseDouble(val)*1000) ));
-
+		
 		// manifest profile
 		val = Utils.getString(params, "profile", "", true);
 		if(val.isEmpty()) params.put("profile", "dvb2014");  // hbbtv15
@@ -106,7 +107,7 @@ public class MediaTools {
 			"-c:v", "libx264", 
 			"-profile:v", spec.profile.isEmpty()?"main":spec.profile, 
 			"-level", spec.level.isEmpty()?"4.0":spec.level,
-			"-s:v", spec.size, 		// resolution 1920x1080
+			// "-s:v", spec.size, 		// resolution 1920x1080, replaced by swscale filter 
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
 			//"-maxrate:v", spec.bitrate, "-minrate:v", spec.bitrate,
 			//"-bufsize:v", 1.5*spec.bitrate,
@@ -121,15 +122,25 @@ public class MediaTools {
 			"-sc_threshold", "0",	// disable Scenecut
 			// allow negative MOOF/TRUN.CompositionTimeOffset(use s32bit, no u32bit) 
 			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"", 
-			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
+			"-vf", "${overlay,scale}",	// draw overlay text on video (optional), swscale
+			"-color_range", "tv",	// limited(tv), full(pc) rgb range, signal range
+			"-colorspace", "bt709", // RGB to YUV colormatrix
+			"-color_primaries", "bt709", // RGB map to real values
+			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 
 			"-an", "-sn",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile
 		);
 		args = new ArrayList<String>(args); // create modifiable list
 
+		// use full internal YUV444+accurate rounding: flags=full_chroma_int+accurate_rnd 
+		String scale   = "scale="+spec.size+":out_range=tv:out_color_matrix=bt709:flags=full_chroma_int+accurate_rnd";
+		String format  = "format=yuv420p,setsar=1/1"; // StorageAspectRatio(1:1)
+		String overlay = MediaTools.getOverlayOpt(spec, fps, gop, segdur, overlayOpt);
+		String val     = overlay+","+scale+","+format;
+		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
+		
 		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
-		updateOverlayOpt(args, spec, fps, gop, segdur, overlayOpt);
 		removeEmptyOpt(args);
 		return args;
 	}
@@ -139,6 +150,11 @@ public class MediaTools {
 			String overlayOpt, long timeLimit, int ver) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
+		
+		String pixFormat = spec.profile.equals("main10")?"yuv420p10le"
+				: spec.profile.equals("high")           ?"yuv420p10le"
+				: spec.profile.equals("main12")         ?"yuv420p12le"
+				: "yuv420p"; // main(8bit), this value controls the profile main8bit,main10bit,main12bit
 		
 		// must also use x265-params custom argument to give a common ffmpeg args (ref,bf,g,keyint,etc..)
 		String level = spec.level.isEmpty()?"5.0":spec.level;
@@ -150,12 +166,12 @@ public class MediaTools {
 			"-threads", "4", "-preset", "fast",
 			"-c:v", "libx265",
 			"-tag:v", "hvc1", // use HVC1 instead of default HEV1			
-			"-level", level,// profile=main(8bit) is given in x265-params
-			"-s:v", spec.size, 		// resolution 3840x2160
+			"-level", level,
+			//"-s:v", spec.size, 		// resolution 3840x2160, replaced by swscale
 			"-b:v", spec.bitrate, 	// video bitrate 2000k
 			//"-maxrate:v", spec.bitrate,
 			//"-bufsize:v", spec.bitrate,
-			//"-pix_fmt", "yuv420p",	// use most common pixel format for best compatibility
+			"-pix_fmt", pixFormat,
 			"-r", forceFps ? ""+fps:"$DEL2$",
 			"-refs", "3",			// reference frames
 			"-bf", "3",				// max number of bframes
@@ -165,8 +181,12 @@ public class MediaTools {
 			"-flags", "+cgop",		// use ClosedGOP
 			"-sc_threshold", "0",	// disable Scenecut
 			ver>=2?"-movflags":"", ver>=2?"negative_cts_offsets+faststart":"",
-			"-x265-params", "profile=${profile}:level_idc=${level}:min-keyint=${keymin}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
-			"-vf", "${overlayOpt}",	// draw overlay text on video (optional)
+			"-x265-params", "level_idc=${level}:min-keyint=${keymin}:keyint=${gop}:vbv-bufsize=${bitrate}:ref=3:bframes=3:b-adapt=1:no-open-gop=1:scenecut=0:b-pyramid=0",
+			"-vf", "${overlay,scale}",	// draw overlay text on video (optional),scale
+			"-color_range", "tv",	// limited(tv), full(pc) rgb range, signal range
+			"-colorspace", "bt709", // RGB to YUV colormatrix
+			"-color_primaries", "bt709", // RGB map to real values
+			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 						
 			"-an", "-sn",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile
@@ -175,16 +195,22 @@ public class MediaTools {
 
 		int idx= args.indexOf("-x265-params")+1;
 		args.set(idx, args.get(idx)
-				.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
+				//.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
 				.replace("${level}", level)
 				//.replace("${fps}", ""+fps)
 				.replace("${keymin}", ""+keyMin)
 				.replace("${gop}", ""+gop)
-				.replace("${bitrate}", spec.bitrate)
+				.replace("${bitrate}", spec.bitrate.replace("k", ""))
 				);
 
+		// use full internal YUV444+accurate rounding: flags=full_chroma_int+accurate_rnd 
+		String scale   = "scale="+spec.size+":out_range=tv:out_color_matrix=bt709:flags=full_chroma_int+accurate_rnd";
+		String format  = "format="+pixFormat+",setsar=1/1"; // StorageAspectRatio(1:1)
+		String overlay = MediaTools.getOverlayOpt(spec, fps, gop, segdur, overlayOpt);
+		String val     = overlay+","+scale+","+format;
+		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
+
 		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
-		updateOverlayOpt(args, spec, fps, gop, segdur, overlayOpt);
 		removeEmptyOpt(args);
 		return args;
 	}
@@ -208,8 +234,8 @@ public class MediaTools {
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
 			"-ar", ""+spec.sampleRate,
 			"-ac", ""+spec.channels,	// channel count 2..n
-			// initial_moov=100% fragmented output 
-			"-movflags", "empty_moov+negative_cts_offsets+faststart", 			
+			// initial_moov=100% fragmented output, don't use empty_moov flag for ac3,eac3 
+			"-movflags", ( codec.equals("aac")? "empty_moov+negative_cts_offsets+faststart" : "negative_cts_offsets+faststart" ), 			
 			"-vn", "-sn",
 			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
 			"-y", outputFile
@@ -237,7 +263,7 @@ public class MediaTools {
 	 * @param useDrmInput
 	 * @return
 	 */
-	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, 
+/*	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, 
 			//int gopdur, @param gopdur	GOP duration seconds
 			long timeLimit,
 			String initMode,
@@ -311,7 +337,7 @@ public class MediaTools {
 		
 		removeEmptyOpt(args);		
 		return args;
-	}
+	} */
 
 	/**
 	 * Convert H265(HEV1) to H265(HVC1) media file.
@@ -347,12 +373,12 @@ public class MediaTools {
 	
 	public static List<String> getDashCryptArgs(File drmspecFile,  
 				StreamSpec spec, String mode) {
-		// "temp-v1.mp4" -> "temp-v1-cenc.mp4"		
+		// negctts: trun.version=1, remove editlist, allow negative compositeOffset
 		String filename  = spec.inputFileTrack.getName().replace(".mp4", "-"+mode+".mp4");
 		List<String> args=Arrays.asList(MP4BOX,
 			"-crypt", drmspecFile.getName(), // temp-drmspec.xml input file
 			Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true), // "temp-v1.mp4"
-			"-out", filename 
+			"-out", filename+":negctts" // "temp-v1-cenc.mp4:negctts"
 		);
 		args = new ArrayList<String>(args);
 		return args;
@@ -377,7 +403,7 @@ public class MediaTools {
 	 */
 	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile) {
 		List<String> args=Arrays.asList(MP4BOX,
-			"-add", subFile.getAbsolutePath()+":ext=ttml",
+			"-add", subFile.getAbsolutePath()+":ext=ttml",  // TODO use ":negctts"?
 			"-new", outputFile.getName() //outputFile.getAbsolutePath()
 		);
 		args = new ArrayList<String>(args);
@@ -468,8 +494,14 @@ public class MediaTools {
 				meta.put("videoPAR", props.get("streams.stream."+idx+".sample_aspect_ratio") ); // 12/11 pixelaspect
 				meta.put("videoDAR", props.get("streams.stream."+idx+".display_aspect_ratio") ); // 15/11, dar=par*frameaspect 
 				meta.put("videoDuration", props.get("streams.stream."+idx+".duration") ); // 60.040000  sec.millis
-				meta.put("videoPixFormat", props.get("streams.stream."+idx+".pix_fmt") ); // yuv420p, yuv422p10le
+				meta.put("videoPixFormat", props.get("streams.stream."+idx+".pix_fmt") ); // yuv420p, yuv420p10le, yuv422p10le
+				meta.put("videoPixFormat", props.get("streams.stream."+idx+".field_order") ); // progressive
 				meta.put("videoLang", props.get("streams.stream."+idx+".tags.language") ); // eng
+
+				meta.put("videoColorRange", props.get("streams.stream."+idx+".color_range") ); // tv
+				meta.put("videoColorSpace", props.get("streams.stream."+idx+".color_space") ); // bt709
+				meta.put("videoColorTransfer", props.get("streams.stream."+idx+".color_transfer") ); // bt709
+				meta.put("videoColorPrimaries", props.get("streams.stream."+idx+".color_range") ); // bt709
 				
 				value=props.get("streams.stream."+idx+".disposition.default");
 				if("1".equals(value)) meta.put("videoDispositionDefault", "1");
@@ -529,12 +561,9 @@ public class MediaTools {
 		meta.put("filesize", ""+file.length());
 
 		value = meta.get("videoDuration");
-		if (value==null || value.isEmpty())
-			value = meta.get("audioDuration");
-		if (value==null || value.isEmpty())
-			value = props.get("format.duration");
-		if (value==null) value="";
-		
+		if (value==null || value.isEmpty()) value = meta.get("audioDuration");
+		if (value==null || value.isEmpty()) value = props.get("format.duration");
+		if (value==null) value="";		
 		meta.put("duration", value); // seconds.millis=1567.893333 
 		if (!value.isEmpty()) {
 			int delim = value.indexOf('.');
@@ -581,6 +610,9 @@ public class MediaTools {
 		meta.put("interlaceModeBFF", String.valueOf(bff));
 		meta.put("interlaceModePRF", String.valueOf(prf));
 
+		for(String key : meta.keySet()) {
+			if(meta.get(key)==null) meta.put(key, "");
+		}		
 		return meta;
 	}
 
@@ -625,50 +657,42 @@ public class MediaTools {
 		execp.getOutputStream().close();
 		return builder.toString();
 	}
-
-	public static int updateOverlayOpt(List<String> args, StreamSpec spec, 
+	
+	public static String getOverlayOpt(StreamSpec spec, 
 			int fps, int gop, int segdur, String overlayOpt) {
-		int argIdx=args.indexOf("${overlayOpt}");
-		if (argIdx<1) return argIdx;
+		if (!overlayOpt.equals("1")) return "";
 
 		// segdur(millis) 8000->8, 3840->3.84
 		String sSegdur=String.format(Locale.US, "%.2f", (double)segdur/1000).replace(".00","");				
 
-		if (overlayOpt.equals("1")) {
-			//String arg="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=38:box=1:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+60"
-			//		+ ":text='${mode} ${size} ${bitrate} ${fps}fps ${gop}gop ${segdur} \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
-			String arg1="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=${fontsize}:alpha=0.5:box=1:boxborderw=4:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+${y1}"
-					+ ":text='${mode} ${size} ${bitrate} ${segdur}s \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
-			String arg2="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=${fontsize}:alpha=0.5:box=1:boxborderw=4:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+${y2}"
-					+ ":text='${fps}fps ${gop}gop frame\\:\\ %{frame_num}':start_number=1";
-			String arg = arg1+","+arg2; // separate drawtext if both timecode+framenum is used
-			
-			arg = arg.replace("${size}", spec.size)
-				.replace("${mode}", spec.getCodec())	// H264,H265 substring
-				.replace("${bitrate}", spec.bitrate)
-				.replace("${segdur}", sSegdur)
-				.replace("${fps}", ""+fps)
-				.replace("${gop}", ""+gop)
-				.replace("${libFolder}", LIBFOLDER.replace(":", "\\\\:"));			
-			if (spec.getWidth()<=2500) {
-				arg=arg.replace("${fontsize}", "38")
-					.replace("${y1}", "60")
-					.replace("${y2}", "98");
-			} else {
-				// use larger font for 3840x2160				
-				arg=arg.replace("${fontsize}", "50")
-					.replace("${y1}", "60")
-					.replace("${y2}", "110");
-			}
-			args.set(argIdx, arg);
+		//String arg="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=38:box=1:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+60"
+		//		+ ":text='${mode} ${size} ${bitrate} ${fps}fps ${gop}gop ${segdur} \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
+		String arg1="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=${fontsize}:alpha=0.5:box=1:boxborderw=4:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+${y1}"
+				+ ":text='${mode} ${size} ${bitrate} ${segdur}s \\ ':timecode='00\\:00\\:00\\:00':rate=${fps}";
+		String arg2="drawtext=fontfile=${libFolder}/Roboto-Regular.ttf:fontcolor=White:fontsize=${fontsize}:alpha=0.5:box=1:boxborderw=4:boxcolor=black:x=(w-text_w)/2:y=text_h-line_h+${y2}"
+				+ ":text='${fps}fps ${gop}gop frame\\:\\ %{frame_num}':start_number=1";
+		String arg = arg1+","+arg2; // two drawtext lines if both timecode+framenum was used
+		
+		arg = arg.replace("${size}", spec.size)
+			.replace("${mode}", spec.getCodec())	// H264,H265 substring
+			.replace("${bitrate}", spec.bitrate)
+			.replace("${segdur}", sSegdur)
+			.replace("${fps}", ""+fps)
+			.replace("${gop}", ""+gop)
+			.replace("${libFolder}", LIBFOLDER.replace(":", "\\\\:"));			
+		if (spec.getWidth()<=2500) {
+			arg=arg.replace("${fontsize}", "38")
+				.replace("${y1}", "60")
+				.replace("${y2}", "98");
 		} else {
-			args.remove(argIdx);	// remove $overlayOpt arg
-			args.remove(argIdx-1);  // remove previous "-vf" videofilter arg
-			argIdx=-1;
+			// use larger font for 3840x2160				
+			arg=arg.replace("${fontsize}", "50")
+				.replace("${y1}", "60")
+				.replace("${y2}", "110");
 		}
-		return argIdx;
-	}
-	
+		return arg;
+	}		
+
 	public static int updateOpt(List<String> args, String key, String value, boolean setToKeyPos) {
 		// update [ "-somekey", "${someval}" ] element,
 		// find by -somekey or ${someval}, delete elements if value is NULL.

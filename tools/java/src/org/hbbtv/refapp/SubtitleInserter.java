@@ -51,7 +51,8 @@ public class SubtitleInserter {
 			insertOB(
 				subFile, manifestFile, outputFile,
 				params.get("lang"), // fin,eng,..
-				"sub_"+params.get("lang"), // "sub_fin" representation id				
+				"sub_"+params.get("lang"), // "sub_fin" representation id
+				(int)Utils.getLong(params, "asid", 51),
 				Utils.getBoolean(params, "copyinput", false),
 				""
 				);
@@ -63,6 +64,7 @@ public class SubtitleInserter {
 				tempFolder,
 				params.get("lang"),  // fin,eng,..
 				"sub_"+params.get("lang"), // "sub_fin" representation id
+				(int)Utils.getLong(params, "asid", 51),
 				Utils.getBoolean(params, "copyinput", false), // split ttml.xml to segment files
 				(int)Utils.getLong(params, "segdur", 8000),
 				Utils.getBoolean(params, "deletetempfiles", true),
@@ -71,7 +73,7 @@ public class SubtitleInserter {
 				Utils.getString(params, "segname", "number", true),
 				Utils.getLong(params, "timelimit", -1) // read X seconds from start
 				); // "../" for drm/manifest.mpd file
-		}		
+		}	
 	}
 
 	/**
@@ -81,12 +83,13 @@ public class SubtitleInserter {
 	 * @param outputFile	output manifest
 	 * @param lang			adaptationset.lang attribute value (eng,fin,swe,..)
 	 * @param repId			representation id sub_eng
+	 * @param asId			AdaptationSet@id
 	 * @param copyInput		copy subtitle file to manifest output folder
 	 * @param urlPrefix		segment template init+media templates (../ for drm manifest.mpd file)
 	 * @throws Exception
 	 */
 	public static void insertOB(File subFile, File manifestFile, File outputFile,
-			String lang, String repId, boolean copyInput, String urlPrefix) throws Exception {
+			String lang, String repId, int asId, boolean copyInput, String urlPrefix) throws Exception {
 		String filename=repId+".xml";
 		if (copyInput) {
 			if (!subFile.exists())
@@ -97,7 +100,7 @@ public class SubtitleInserter {
 			filename = subFileOut.getName();
 		}
 
-		String template=Utils.NL+Utils.NL+"  <AdaptationSet contentType=\"text\" mimeType=\"application/ttml+xml\" lang=\"${lang}\">"+Utils.NL
+		String template=Utils.NL+Utils.NL+"  <AdaptationSet id=\""+asId+"\" contentType=\"text\" mimeType=\"application/ttml+xml\" lang=\"${lang}\">"+Utils.NL
 			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL  // subtitle,captions,main
 			+"    <Representation id=\"${id}\" bandwidth=\"3000\">"
 			+"<BaseURL>${file}</BaseURL></Representation>"+Utils.NL
@@ -123,6 +126,7 @@ public class SubtitleInserter {
 	 * @param tempFolder    use temp folder for "temp-sub_eng.mp4" file
 	 * @param lang			adaptationset.lang attribute value (eng,fin,swe,..)
 	 * @param repId			representation id sub_eng
+	 * @param asId			adaptationset id 31..n			
 	 * @param createSegs	create sub_lang/sub_x.m4s segment files
 	 * @param segdur		segment duration (millis, 3840, 8000)
 	 * @param deletetempfiles  delete temporary files
@@ -134,7 +138,7 @@ public class SubtitleInserter {
 	 */
 	public static void insertIB(File subFile, File manifestFile, File outputFile,
 			File tempFolder,
-			String lang, String repId, boolean createSegs, int segdur,
+			String lang, String repId, int asId, boolean createSegs, int segdur,
 			boolean deletetempfiles, String urlPrefix,
 			String cmaf, boolean isSingleSeg,
 			String segname, long timeLimit) throws Exception {
@@ -189,7 +193,7 @@ public class SubtitleInserter {
 		// mimeType is in Representation field (mimeType="application/mp4")
 		StringBuilder sbuf = new StringBuilder(8048);
 		sbuf.append(Utils.NL+Utils.NL); 
-		sbuf.append("  <AdaptationSet contentType=\"text\" lang=\""+lang+"\" segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
+		sbuf.append("  <AdaptationSet id=\""+asId+"\" contentType=\"text\" lang=\""+lang+"\" segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
 		sbuf.append("    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL );  // subtitle,captions,main
 		sbuf.append("    "+asData+Utils.NL);
 		sbuf.append("  </AdaptationSet>"+Utils.NL);

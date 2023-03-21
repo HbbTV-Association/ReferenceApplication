@@ -128,7 +128,7 @@ public class WidevineTool {
 		baos.write(Utils.toIntArray(32+pssh.length)); // length, 0..31=pssh header, 32..n=payload
 		baos.write(new byte[]{ 'p','s','s','h' }); // boxId
 		baos.write(new byte[] { (byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00 }); // PSSH version=0
-		baos.write(Utils.hexToBytes(DashDRM.SYSID_WIDEVINE)); // SystemId 16-bytes
+		baos.write(Utils.hexToBytes(DashDRM.WIDEVINE.SYSID)); // SystemId 16-bytes
 		baos.write(Utils.toIntArray(pssh.length)); // payload length, not including this length field
 		baos.write(pssh); // payload
 		return baos.toByteArray();		

@@ -112,6 +112,46 @@ public class Utils {
 		sb.append( (s < 10 ? "0" + s : "" + s) );
 		return sb.toString();
 	}
+	
+	   /**
+	    * Parse ISO8601 duration string
+	    * @param value P2Y11M4W2DT8H29M59.124S
+	    * returns milliseconds 0..n
+	    */
+	public static long parseISODuration(String value) {
+       // http://en.wikipedia.org/wiki/ISO_8601 as (P)eriod(T)ime format 
+       // PT29M, PT4M30S, PT2H25M, PT52S, P1Y, PT3H, P2Y11M4W2DT8H29M59S, PT1M32.800S
+       if (value==null || value.equals("")) return 0;
+       
+       long seconds=0, millis=0;
+       int startIdx=-1, endIdx=-1;
+       boolean isTime=false;
+       for(int idx=0; idx < value.length(); idx++) {
+           char ch = value.charAt(idx);
+           if (ch=='P') { isTime=false; }
+           else if (ch=='T') { isTime=true; }
+           else if (Character.isDigit(ch)) {
+               if (startIdx<0) startIdx=idx;
+           } else {
+               endIdx=idx;
+               long num = Long.parseLong(value.substring(startIdx, endIdx));
+               if (ch=='Y') seconds+=num*31556926; // value*seconds
+               else if (ch=='M' && !isTime) seconds+=num*2629743;
+               else if (ch=='W') seconds+=num*604800;
+               else if (ch=='D') seconds+=num*86400;
+               else if (ch=='H') seconds+=num*3600;
+               else if (ch=='M' && isTime) seconds+=num*60;
+               else if (ch=='S') seconds+=num; // seconds only "32S"
+               else if (ch=='.') {
+            	   seconds+=num; // seconds and millis "32.008S"
+            	   millis = Long.parseLong(value.substring(idx+1, value.length()-1));
+            	   break;
+               }
+               startIdx=endIdx=-1;
+           }
+       }
+       return seconds*1000+millis;
+	}	
 
 	/**
 	 * Convert hexstring to byte array

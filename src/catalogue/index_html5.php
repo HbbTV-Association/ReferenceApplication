@@ -54,7 +54,7 @@
 		to ensure device is not using cache when file is modified
 		***/
 		$profileResources = "html5"; // additional resources
-		include("resources.php"); 
+		include_once("resources.php"); 
 	?>
 
 	<script onload="odd.init('sofia')" src="https://odd.dtv.fi/odd.js"></script>

@@ -705,8 +705,17 @@ function createOIPFDrmAgent() {
 		$("#drm").html('<object id="oipfDrm" type="application/oipfDrmAgent" width="0" height="0"></object>');	
 	}
 }
+function destroyOIPFDrmAgent() {
+	// remove DrmAgent+parent DIV from html DOM
+	var drmAgent = $("#oipfDrm")[0];
+	if(!drmAgent) return;	
+	$("#oipfDrm").remove();
+	$("#drm").remove();	
+	console.log("Destroy DRM agent");	
+}
 
 function displayDRMCapabilities() {
+	destroyOIPFDrmAgent();
 	createOIPFDrmAgent();
 	var drmAgent = $("#oipfDrm")[0];
 	setOIPFActiveDRM(null);

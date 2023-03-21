@@ -109,10 +109,8 @@ VideoPlayer.prototype.prepareAdPlayers = function(){
 		console.log( e.type );
 		var player = $(this);
 		if( self.adCount < self.adBuffer.length ){
-			player.addClass("hide");
-			
-			self.playAds();
-			
+			player.addClass("hide");			
+			self.playAds();			
 		}
 		else{
 			// no more ads, continue content
@@ -128,8 +126,7 @@ VideoPlayer.prototype.prepareAdPlayers = function(){
 	};
 	
 	var onAdPlay = function(){ 
-		//console.log("ad play event triggered");
-		
+		//console.log("ad play event triggered");		
 		//$("#adInfo").html("");
 	};
 	
@@ -166,12 +163,9 @@ VideoPlayer.prototype.getAds = function( adBreak ){
 	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
 		self.adBuffer = ads;
 		//self.adCount = ads.length;
-		console.log( "Got " + ads.length + " ads");
-		
-		self.prepareAdPlayers();
-		
-		self.playAds();
-		
+		console.log( "Got " + ads.length + " ads");		
+		self.prepareAdPlayers();		
+		self.playAds();		
 	}, "json" );
 };
 
@@ -230,11 +224,13 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 	var self = this;
 	if(!this.drm || !this.drm.system) {
 		callback();
+		return;
 	} else if(this.drm.system.indexOf("playready")===0) {
 		msgType = "application/vnd.ms-playready.initiator+xml";
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<PlayReadyInitiator xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols/">' +
+		  '<LicenseServerUriOverride><LA_URL></LA_URL></LicenseServerUriOverride>' +
 		'</PlayReadyInitiator>';
 		var DRMSysID = "urn:dvb:casystemid:19219";		
 	}	
@@ -263,6 +259,7 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 	}
 	else if( this.drm.system == "clearkey" ){
 		callback();
+		return;
 	}
 		
 	try {
@@ -279,9 +276,10 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 		var msgId=-1;
 		if(msgType!="")
 			msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-		console.log("drm data cleared, msgId: " + msgId);
+		console.log( this.drm.system+" drm data cleared, msgId: " + msgId );
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
+		callback();
 	}
 	
 };
@@ -659,9 +657,10 @@ VideoPlayer.prototype.clearVideo = function(){
 		console.log("Error at clearVideo()");
 		console.log( e.description );
 	}
-	this.subtitles = null;
 	
+	this.subtitles = null;	
 	this.clearLicenseRequest( function(msg){
+		//destroyOIPFDrmAgent();
 		console.log("License cleared:" + msg);
 	});
 };
@@ -833,11 +832,7 @@ VideoPlayer.prototype.changeAVcomponent = function( component ) {
 	console.log("changeAVcomponent("+ component +")");
 	var self = this;
 	try{
-	
 		var track = ( component == self.AVCOMPONENTS.AUDIO? self.audioTrack : self.subtitleTrack );
-	
-	
-
 		console.log("current track: " + track  );
 		if( track == undefined || track == NaN || track === false ){
 			console.log("Change to 0"  );

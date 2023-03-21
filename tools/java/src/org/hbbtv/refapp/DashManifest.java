@@ -131,8 +131,11 @@ public class DashManifest {
 			}
 		}
 		
+		//TODO: insert h264,h265 AdaptationSet prop
+		// <SupplementalProperty schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016" value="1"/>
+		
 		// Add Role=main,alternate inside AdaptationSet elements
-		elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");		
+		/* elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");		
 		int countA=0, countV=0;
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
 			elem = XMLUtil.getChildElement(elemAS, "Role");
@@ -158,7 +161,7 @@ public class DashManifest {
 				elemAS.insertBefore( doc.importNode(newElem, true), elem);
 				countV++;
 			}
-		}
+		} */
 		
 		// see also MediaTools.getDashArgs(), -min-buffer=(gopdur*1000*2) millis, MDP@minBufferTime="PT4S" secs		
 		/*if(gopdur>0) {
@@ -231,12 +234,12 @@ public class DashManifest {
 	public void removeContentProtectionElement(String drmName) {
 		// remove <ContentProtection> element by schemeIdUri value
 		String tag;
-		if (drmName.equals("cenc")) 			tag="urn:mpeg:dash:mp4protection:2011";
-		else if (drmName.equals("playready")) 	tag="urn:uuid:"+DashDRM.GUID_PLAYREADY;
-		else if (drmName.equals("widevine")) 	tag="urn:uuid:"+DashDRM.GUID_WIDEVINE;
-		else if (drmName.equals("marlin")) 		tag="urn:uuid:"+DashDRM.GUID_MARLIN;
-		else if (drmName.equals("clearkey") || drmName.equals("emecenc") ) 	
-												tag="urn:uuid:"+DashDRM.GUID_CENC;
+		if (drmName.equals(DashDRM.CENC.NAME)) 			 tag="urn:mpeg:dash:mp4protection:2011";
+		else if (drmName.equals(DashDRM.PLAYREADY.NAME)) tag="urn:uuid:"+DashDRM.PLAYREADY.GUID;
+		else if (drmName.equals(DashDRM.WIDEVINE.NAME))  tag="urn:uuid:"+DashDRM.WIDEVINE.GUID;
+		else if (drmName.equals(DashDRM.MARLIN.NAME))    tag="urn:uuid:"+DashDRM.MARLIN.GUID;
+		else if (drmName.equals(DashDRM.CLEARKEY.NAME))  tag="urn:uuid:"+DashDRM.CLEARKEY.GUID;
+		else if (drmName.equals("clearkeycenc"))         tag="urn:uuid:"+DashDRM.CENC.GUID; // legacy clearkey element
 		else return;
 		
 		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
@@ -310,7 +313,7 @@ public class DashManifest {
 	 */
 	public String toString() {
 		try {
-			return XMLUtil.createXML(doc.getDocumentElement());
+			return XMLUtil.createXML(doc.getDocumentElement(), true);
 		} catch(Exception ex) {
 			if (ex instanceof IllegalArgumentException) throw (IllegalArgumentException)ex;
 			else throw new IllegalArgumentException(ex);

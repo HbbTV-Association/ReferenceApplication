@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 ## Download DASH files: manifest.mpd, init.mp4, 1.m4s, 2.m4s, ...
 ## Versions:
+##   1.2/2023-03-11: test "$Number%05d$" mediaurl syntax
 ##   1.1/2022-12-08: contentType="image" thumbnail adaptation set
 ##   1.0/2022-11-21: initial version
 ##
@@ -405,6 +406,14 @@ def appendSegmentUrls(manifest, segTemplate, track, useLiveEdge):
 	sUrlTemplate = sUrlTemplate.replace("$Bandwidth$", str(track.bitrate))
 
 	##FIXME: verify live $Number from availabilitityStartTime,currenTime calculation
+	##FIXME: fix "$Number%05d$" syntax
+	numberVar="$Number$"
+	numberFormat="{:0>1d}"
+	delim = sUrlTemplate.find(numberVar)
+	if delim<0:
+		numberVar="$Number%05d$"  ## hardcoded for testing use only
+		numberFormat="{:0>5d}"
+		delim = sUrlTemplate.find(numberVar)
 
 	elemTimeline = segTemplate.find("SegmentTimeline")
 	if elemTimeline is not None:
@@ -416,7 +425,7 @@ def appendSegmentUrls(manifest, segTemplate, track, useLiveEdge):
 			r = int(getXMLAttribute(elemSeg, "r", "0"))+1  ## (r)epeat segs
 			for idx in range(0,r):
 				sUrl = sUrlTemplate.replace("$Time$", str(t))
-				sUrl = sUrl.replace("$Number$", str(segNumber))
+				sUrl = sUrl.replace(numberVar, numberFormat.format(segNumber))
 				seg = MediaSegment()
 				seg.number = segNumber
 				seg.url = track.baseUrl + sUrl
@@ -444,7 +453,7 @@ def appendSegmentUrls(manifest, segTemplate, track, useLiveEdge):
 			segNumber = segNumberEdge - int(totDur/segDur)
 
 		for idx in range(1, int(totDur/segDur)+1):
-			sUrl = sUrlTemplate.replace("$Number$", str(segNumber))
+			sUrl = sUrlTemplate.replace(numberVar, numberFormat.format(segNumber)) #sUrlTemplate.replace(numberVar, str(segNumber))
 			seg = MediaSegment()
 			seg.number = segNumber
 			seg.url = track.baseUrl + sUrl

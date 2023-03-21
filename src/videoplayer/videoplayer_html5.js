@@ -104,7 +104,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	} );
 	
 	player.addEventListener('loadedmetadata', function(){
-		console.log("loadedmetadata");
+		//console.log("loadedmetadata");
 	} );
 	
 	player.addEventListener('loadstart', function(){
@@ -211,21 +211,22 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 						var cuelist = this.activeCues; // TextTrackCueList
 						if ( cuelist && cuelist.length > 0) {
 							//console.log("cue keys: ",  Object.keys( cuelist[0] ) ); 
-							var info = "";
+							var info= "";
+							var dur = 0; // seconds
 							$.each( cuelist, function(c, cue){								
 								// try read text attribute
 								if( cue.text ){
 									showInfo( cue.text );
 								}
-								
+
+								dur=cue.endTime-cue.startTime;
 								var cueValue = arrayBufferToString( cue.data );
-								console.log( "startTime : " + cue.startTime + ", endTime : " + cue.endTime + " cueValue: " + cueValue );
+								console.log( "EVENT.START startTime : " + cue.startTime + ", endTime : " + cue.endTime + " cueValue: " + cueValue );
 								info +=  "cue: '" + cueValue + "' start: " + cue.startTime + ", ends: " + cue.endTime + "<br/>";
-							} );							
-							showInfo( info, 999 );
-						}
-						else{
-							showInfo("Metadata cue exit", 1);
+							} );													
+							showInfo( info, dur>1?dur:1 ); // show overlay info
+						} else {
+							showInfo("", 0); // Metadata cue exit
 						}
 					} catch(e){
 						console.log("error Reading cues", e.message );
@@ -238,7 +239,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 					}
 				}
 			};
-			console.log( "oncuechange function set" );
+			//console.log( "oncuechange function set" );
 		} );
 	}
 	
@@ -530,28 +531,32 @@ VideoPlayerHTML5.prototype.clearLicenseRequest = function(callback){
 	}
 	
 	var msgType="";
+	var xmlLicenceAcquisition;
+	var DRMSysID;
 	var self = this;
 	if(!this.drm || !this.drm.system) {
 		callback();
+		return;
 	} else if(this.drm.system.indexOf("playready")===0) {
 		msgType = "application/vnd.ms-playready.initiator+xml";
-		var DRMSysID = "urn:dvb:casystemid:19219";		
-		var xmlLicenceAcquisition =
+		DRMSysID = "urn:dvb:casystemid:19219";		
+		xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<PlayReadyInitiator xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols/">' +
+		  '<LicenseServerUriOverride><LA_URL></LA_URL></LicenseServerUriOverride>' +
 		'</PlayReadyInitiator>';		
 	}
 	else if( this.drm.system == "marlin" ){
 		msgType = "application/vnd.marlin.drm.actiontoken+xml";
-		var DRMSysID = "urn:dvb:casystemid:19188";
-		var xmlLicenceAcquisition =
+		DRMSysID = "urn:dvb:casystemid:19188";
+		xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL></URL></RightsIssuer></RightsURL></Marlin>';		
 	}
 	else if(this.drm.system.indexOf("widevine")===0) {
 		msgType = "application/widevine+xml";
-		var DRMSysID = "urn:dvb:casystemid:19156";
-		var xmlLicenceAcquisition =
+		DRMSysID = "urn:dvb:casystemid:19156";
+		xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<WidevineCredentialsInfo xmlns="http://www.smarttv-alliance.org/DRM/widevine/2012/protocols/">' +
 		'<ContentURL></ContentURL>' +
@@ -566,9 +571,9 @@ VideoPlayerHTML5.prototype.clearLicenseRequest = function(callback){
 	}
 	else if( this.drm.system == "clearkey" ){
 		callback();
+		return;
 	}
-	
-	
+		
 	try {
 		this.oipfDrm.onDRMMessageResult = callback;
 	} catch (e) {
@@ -583,11 +588,11 @@ VideoPlayerHTML5.prototype.clearLicenseRequest = function(callback){
 		var msgId=-1;
 		if(msgType!="")
 			msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-		console.log("drm data cleared, msgId: " + msgId);
+		console.log( this.drm.system+ " drm data cleared, msgId: " + msgId );
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
-	}
-	
+		callback();
+	}	
 };
 
 VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
@@ -921,11 +926,10 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 		console.log( e.description );
 	}
 	
-	this.clearAds();
-	
-	this.subtitles = null;
-	
+	this.clearAds();	
+	this.subtitles = null;	
 	this.clearLicenseRequest( function(msg){
+		//destroyOIPFDrmAgent();
 		console.log("License cleared:" + msg);
 	});
 	

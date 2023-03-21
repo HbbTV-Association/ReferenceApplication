@@ -74,7 +74,7 @@
 	<!-- List all css and js resource files or minified and combined resource files -->
 	<?php 
 		$profileResources = $profile['version'];
-		include("resources.php"); 
+		include_once("resources.php"); 
 	?>
 	
 <script type="text/javascript">
