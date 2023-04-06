@@ -78,6 +78,19 @@ public class Utils {
 		
 		return params;
 	}
+	
+	/**
+	 * Split args "key1=val1 key2=val2" to params
+	 * @param params	write key=value to params
+	 * @param keyPrefix keyprefix "input.1." -> "input.1.key1=val1 input.1.key2=val2"
+	 * @param args
+	 */
+	public static void putArgsToParams(Map<String,String> params, String keyPrefix, String[] args) {
+		for(int idx=0; idx<args.length; idx++) {
+			int delim=args[idx].indexOf('=');
+			if(delim>0) params.put( keyPrefix+args[idx].substring(0,delim), args[idx].substring(delim+1) );
+		}			
+	}
 
     public static String getStackTrace(Throwable ex) {
 		StringWriter sw = new StringWriter();
@@ -324,6 +337,13 @@ public class Utils {
 			if(!val.isEmpty()) list.add(val);
 		}
 		return list;
+	}
+	
+	public static int indexOfArray(String[] arr, String val) {
+		for(int idx=0; idx<arr.length; idx++) {
+			if(arr[idx].equalsIgnoreCase(val)) return idx;
+		}
+		return -1;
 	}
 
 	/**

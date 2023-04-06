@@ -128,6 +128,7 @@ public class MediaTools {
 			"-color_primaries", "bt709", // RGB map to real values
 			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 
 			"-an", "-sn",
+			"-metadata:s:v:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile
 		);
@@ -188,6 +189,7 @@ public class MediaTools {
 			"-color_primaries", "bt709", // RGB map to real values
 			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 						
 			"-an", "-sn",
+			"-metadata:s:v:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile
 		);
@@ -237,6 +239,7 @@ public class MediaTools {
 			// initial_moov=100% fragmented output, don't use empty_moov flag for ac3,eac3 
 			"-movflags", ( codec.equals("aac")? "empty_moov+negative_cts_offsets+faststart" : "negative_cts_offsets+faststart" ), 			
 			"-vn", "-sn",
+			"-metadata:s:a:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",			
 			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
 			"-y", outputFile
 		);
@@ -399,11 +402,13 @@ public class MediaTools {
 	 * Convert TTML subtitles sub_xxx.xml to sub_xxx.mp4 file.
 	 * @param subFile
 	 * @param outputFile
+	 * @param lang
 	 * @return
 	 */
-	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile) {
+	public static List<String> getSubIBTempMp4Args(File subFile, File outputFile, String lang) {
 		List<String> args=Arrays.asList(MP4BOX,
-			"-add", subFile.getAbsolutePath()+":ext=ttml",  // TODO use ":negctts"?
+			"-add", subFile.getAbsolutePath()+":ext=ttml"
+			    +(!lang.isEmpty() ? ":lang="+lang:""), // TODO use ":negctts"?
 			"-new", outputFile.getName() //outputFile.getAbsolutePath()
 		);
 		args = new ArrayList<String>(args);

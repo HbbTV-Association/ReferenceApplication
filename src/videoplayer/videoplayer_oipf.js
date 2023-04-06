@@ -159,8 +159,8 @@ VideoPlayer.prototype.getAds = function( adBreak ){
 	this.adCount = 0;
 	this.video.pause();
 	var self = this;
-	console.log("get ads breaks=" + adBreak.ads);
-	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
+	console.log("get ads breaks=" + adBreak.ads + ", position="+adBreak.position );
+	$.get( "../getAds.php?breaks=" + adBreak.ads + "&position="+adBreak.position, function(ads){
 		self.adBuffer = ads;
 		//self.adCount = ads.length;
 		console.log( "Got " + ads.length + " ads");		
@@ -581,7 +581,6 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 	
 	try{
 		console.log("video.play()");
-		//showInfo("Play NOW");
 		self.play();
 	} catch(e){
 		console.log("error start video play: " , e);

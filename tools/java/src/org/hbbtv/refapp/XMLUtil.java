@@ -134,17 +134,18 @@ public class XMLUtil {
 	    StringBuilder buf = new StringBuilder();
 	    try {
 		    String line;
-	    	boolean wasEmptyLine=false;
+	    	//boolean wasEmptyLine=false;
 		    while( (line=reader.readLine())!=null ) {
 		    	String linetrim = line.trim();
 		    	if (!linetrim.isEmpty()) {
 		    		if(line.startsWith("<SegmentTemplate ")) line="   "+line;
 		    		else if(line.startsWith("<ContentProtection ")) line="   "+line;
-		    		else if(linetrim.startsWith("<AdaptationSet ") && !wasEmptyLine) line=Utils.NL+line;		    			
+		    		//else if(linetrim.startsWith("<AdaptationSet ") && !wasEmptyLine) line=Utils.NL+line;
+		    		else if(linetrim.startsWith("<AdaptationSet ")) line=Utils.NL+line;
 		    		buf.append(line); 
 		    		buf.append(Utils.NL);
-		    		wasEmptyLine=false;
-		    	} else wasEmptyLine=true;
+		    		//wasEmptyLine=false;
+		    	} //} else wasEmptyLine=true;
 		    }
 	    } finally {
 	    	reader.close();

@@ -43,17 +43,9 @@ public class WidevineTool {
 				System.arraycopy(pssh,32,buf,0,buf.length);  // index 32..n is a widevine payload
 				pssh=buf;
 			}
-			
-			WidevineCencHeaderProto.WidevineCencHeader psshObj = 
-				WidevineCencHeaderProto.WidevineCencHeader.parseFrom(pssh, null);
-			System.out.println(psshObj.toString().trim());
-			for(int idx=0; idx<psshObj.getKeyIdCount(); idx++) {
-				byte[] buf=psshObj.getKeyId(idx).toByteArray();
-				System.out.println(String.format("KeyID(%d)=%s", idx, Utils.bytesToHex(buf)));
-			}
+			decodePrint(pssh);
 			
 		} else if(mode.equalsIgnoreCase("encode")) {
-			String alg = Utils.getString(params, "alg", "AESCTR", true); // algorithm AESCTR
 			List<String> keyIds = new ArrayList<String>(4); // "keyid", "keyid0", keyid1", ...
 			for(int idx=-1; ; idx++) {				
 				String val = Utils.getString(params, "keyid"+(idx<0?"":""+idx), null, false); // hexvalue, 32 chars(16 bytes), 0xAABBCC..
@@ -63,27 +55,23 @@ public class WidevineTool {
 					keyIds.add(val);
 				}
 			}
+
+			String alg      = Utils.getString(params, "alg", "CENC", true); // algorithm CENC, CBCS
+			String scheme   = Utils.getString(params, "scheme", "", true); // scheme cenc, cbcs
 			String provider = Utils.getString(params, "provider", null, false); // intertrust, usp-cenc, whatever, <null>
 			String contentId= Utils.getString(params, "contentid", null, false); // MyContentId001, 0x1122AABB, <null>
 			String trackType= Utils.getString(params, "tracktype", null, false); // HD,SD,AUDIO,<null>
 			String policy   = Utils.getString(params, "policy", null, false);
-
-			byte[] psshFull = createPSSH(alg, keyIds, provider, contentId, trackType, policy);
+			
+			byte[] psshFull = createPSSH(alg, scheme, keyIds, provider, contentId, trackType, policy);
 			byte[] pssh     = new byte[psshFull.length-32];
 			System.arraycopy(psshFull,32,pssh,0,pssh.length);  // index 32..n is a widevine payload
 			
 			String filename = Utils.getString(params, "output", "", true);
 			if(!filename.isEmpty())
-				Utils.saveFile(new File(filename), psshFull);				
-
-			// use pssh payload to print out fields
-			WidevineCencHeaderProto.WidevineCencHeader psshObj = 
-					WidevineCencHeaderProto.WidevineCencHeader.parseFrom(pssh, null);
-			System.out.println(psshObj.toString().trim());
-			for(int idx=0; idx<psshObj.getKeyIdCount(); idx++) {
-				byte[] buf=psshObj.getKeyId(idx).toByteArray();
-				System.out.println(String.format("KeyID(%d)=%s", idx, Utils.bytesToHex(buf)));
-			}			
+				Utils.saveFile(new File(filename), psshFull);
+			
+			decodePrint(pssh); // use pssh payload to print out fields
 			System.out.println("b64(pssh): " + Utils.base64Encode(psshFull));
 			System.out.println("b64(payload): " + Utils.base64Encode(pssh));
 		}
@@ -92,7 +80,8 @@ public class WidevineTool {
 
 	/**
 	 * Create Widevine PSSH data.
-	 * @param alg		AESCTR
+	 * @param alg		CENC, CBCS
+	 * @param scheme    cenc, cbcs or use empty to use default alg+scheme
 	 * @param keyIds	one or more KeyIDs
 	 * @param provider
 	 * @param contentId
@@ -101,12 +90,23 @@ public class WidevineTool {
 	 * @return	full PSSH bytes, 0..31 is mp4 box header, 32..n is widevine protobuf object
 	 * @throws IOException
 	 */
-	public static byte[] createPSSH(String alg, List<String> keyIds,
+	private static byte[] createPSSH(String alg, String scheme, List<String> keyIds,
 			String provider, String contentId, String trackType, String policy) 
 			throws IOException {
-		if(alg==null || alg.isEmpty()) alg="AESCTR";
-		WidevineCencHeaderProto.WidevineCencHeader.Builder psshBuilder=WidevineCencHeaderProto.WidevineCencHeader.newBuilder();		
-		psshBuilder.setAlgorithm( WidevineCencHeaderProto.WidevineCencHeader.Algorithm.valueOf(alg) );
+		WidevineCencHeaderProto.WidevineCencHeader.Builder psshBuilder=WidevineCencHeaderProto.WidevineCencHeader.newBuilder();
+
+		alg   = alg.toUpperCase(Locale.US);
+		scheme= scheme.toLowerCase(Locale.US);
+		
+		if(alg.isEmpty() || alg.equals("CENC")) alg="AESCTR";
+		if(alg.equals("AESCTR")) {
+			psshBuilder.setAlgorithm( WidevineCencHeaderProto.WidevineCencHeader.Algorithm.valueOf(alg) );
+			if(!scheme.isEmpty()) psshBuilder.setProtectionScheme(Utils.getFourCCInt(scheme));
+		} else {
+			String val = !scheme.isEmpty() ? scheme : alg.toLowerCase(Locale.US);
+			psshBuilder.setProtectionScheme(Utils.getFourCCInt(val)); // cbcs: int=1667392371,hex=63626373 | cenc: int=1667591779,hex=63656E63
+		}
+		
 		for(String val : keyIds) {
 			if(val!=null && !val.isEmpty())
 				psshBuilder.addKeyId( ByteString.copyFrom( val.startsWith("0x") ?
@@ -132,6 +132,19 @@ public class WidevineTool {
 		baos.write(Utils.toIntArray(pssh.length)); // payload length, not including this length field
 		baos.write(pssh); // payload
 		return baos.toByteArray();		
-	}	
+	}
+	
+	private static void decodePrint(byte[] pssh) throws Exception {
+		WidevineCencHeaderProto.WidevineCencHeader psshObj = 
+			WidevineCencHeaderProto.WidevineCencHeader.parseFrom(pssh, null);
+		System.out.println(psshObj.toString().trim());
+		// protectionScheme: cbcs int=1667392371,hex=63626373 | cenc int=1667591779,hex=63656E63
+		int ival = psshObj.getProtectionScheme();
+		System.out.println("protectionScheme: " + Utils.getFourCC(ival) + " ("+ival+")");					
+		for(int idx=0; idx<psshObj.getKeyIdCount(); idx++) {
+			byte[] buf=psshObj.getKeyId(idx).toByteArray();
+			System.out.println(String.format("KeyID(%d)=%s", idx, Utils.bytesToHex(buf)));
+		}		
+	}
 	
 }

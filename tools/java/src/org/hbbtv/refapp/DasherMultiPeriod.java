@@ -46,7 +46,7 @@ public class DasherMultiPeriod {
 		
 		val = Utils.getString(params, "logfile", "", true);
 		logger = new LogWriter();
-		logger.openFile(val.isEmpty() ? null : new File(val));
+		logger.openFile(val.isEmpty() ? null : new File(val), false);
 
 		logger.println(Utils.getNowAsString() + " Start multiperiod generator");
 		logger.println("output=" + Utils.normalizePath(outputFile.getAbsolutePath(), true) );

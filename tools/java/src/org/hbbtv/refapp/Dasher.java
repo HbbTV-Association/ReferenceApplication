@@ -12,6 +12,7 @@ import java.io.*;
  * FIXME: Use EventInserter to put mdpEvent+segEvent on given timestamps or segnumber
  * FIXME: Audio only manifest?
  * FIXME: define input videoIndex+audioIndex if source had multiple tracks
+ * FIXME: add "lang=xxx" video-audio param and set ffmpeg metadata field on temp-v1.mp4 file
  */
 public class Dasher {
 	public static String NL = System.getProperty("line.separator", "\r\n");
@@ -22,8 +23,8 @@ public class Dasher {
 		
 		params.put("iobuffer", ""); // last shellExec sysout, print on exception
 		try {
-			File inputFile = new File(params.get("input"));			
-
+			File inputFile = new File(params.get("input"));
+			
 			// output folder for manifest.mpd and segment files
 			// output/manifest.mpd, output/v1/i.mp4, output/v1/1.m4s, ..
 			// output/cenc/manifest.mpd, output/cenc/v1/..
@@ -56,7 +57,7 @@ public class Dasher {
 
 			val = Utils.getString(params, "logfile", "", true);
 			logger = new LogWriter();
-			logger.openFile(val.isEmpty() ? null : new File(val));
+			logger.openFile(val.isEmpty() ? null : new File(val), false);
 			
 			MediaTools.initTools(params.get("tool.ffmpeg"), params.get("tool.mp4box"));						
 
@@ -80,15 +81,19 @@ public class Dasher {
 				val = meta.get(key);
 				logger.println(key+"="+ (val!=null ? val : "") );
 			}
-						
+			
 			// create preview images
 			createImages(params, inputFile, outputFolder, (int)Utils.getLong(meta, "durationsec", -1) );
 			
 			// create a list of stream specs (video and audio tracks)
 			List<StreamSpec> specs=new ArrayList<StreamSpec>();
 			
+			val = Utils.getString(params, "input.arg", "", true); // optional input args: input.arg="vlang=und alang=eng"
+			Utils.putArgsToParams(params, "input.", val.split("\\s* \\s*") );
+			
 			for(int idx=1; ; idx++) {
-				// video.1="v1 640x360 768k"
+				// video.1="v1 640x360 512k"
+				// video.1="v1 640x360 512k profile=high level=3.1 crf=23 codec=h264"
 				val = Utils.getString(params, "video."+idx, "", true);
 				if (val.isEmpty()) {
 					if (idx<=5) continue; // try video.1..5 then give up.
@@ -96,13 +101,19 @@ public class Dasher {
 				}				
 				if (val.endsWith("disable") || val.startsWith("disable")) continue;				
 				
-				String[] valopts = val.split(" ");
-				StreamSpec spec = new StreamSpec();
+				String[] valopts = val.split("\\s* \\s*"); // delim=empty space trim tuple delimiters
+				StreamSpec spec= new StreamSpec();				
+				spec.name      = valopts[0].trim();
+				spec.size      = valopts[1].toLowerCase(Locale.US).trim();
+				spec.bitrate   = valopts[2].toLowerCase(Locale.US).trim();
+				for(int idxOpt=3; idxOpt<valopts.length; idxOpt++) {
+					val = valopts[idxOpt].trim();
+					int delim=val.indexOf('=');
+					if(delim>0) params.put("video."+idx+"."+val.substring(0,delim), val.substring(delim+1));
+				}
 				
-				spec.name   = valopts[0].trim();
-				spec.size   = valopts[1].toLowerCase(Locale.US).trim();
-				spec.bitrate= valopts[2].toLowerCase(Locale.US).trim();
 				//spec.enabled= true;
+				spec.lang = Utils.getString(params, "input.vlang", "", true);			
 				spec.inputFile = inputFile;
 				spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
 
@@ -117,10 +128,14 @@ public class Dasher {
 				val = Utils.getString(params, "video."+idx+".level", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "video.level", "", true);
 				spec.level=val;
-
-				val = Utils.getString(params, "video."+idx+".crf", "", true);
-				if (val.isEmpty()) val = Utils.getString(params, "video.crf", "", true);
-				spec.crf=val; // if value found then use CRF encoding
+				
+				val = Utils.getString(params, "video."+idx+".crf", "", true); // 0=bitrate encoding, 1..n=crf encoding
+				if (val.isEmpty()) {
+					val = Utils.getString(params, "video.crf", "", true);
+					if(val.isEmpty() && spec.type==StreamSpec.TYPE.VIDEO_H264) val="23";
+					else if(val.isEmpty() && spec.type==StreamSpec.TYPE.VIDEO_H265) val="28";
+				}
+				spec.crf = !val.equals("0") ? val : "";
 
 				spec.role     = "main";
 				spec.groupIdx = 0; // videos are grouped by codec(h264,h265,..), see MediaTools2.getDashArgs()
@@ -131,6 +146,7 @@ public class Dasher {
 			for(int idx=1; ; idx++) {
 				if(Utils.getString(meta, "audioIndex", "", false).isEmpty()) break; // no audio
 				// audio.1="a1 48000 128k 2"
+				// audio.1="a1 48000 128k 2 codec=AAC"
 				val = Utils.getString(params, "audio."+idx, "", true);
 				if (val.isEmpty()) {
 					if (idx<=5) continue; // try audio.1..5 then give up.
@@ -138,18 +154,24 @@ public class Dasher {
 				}				
 				if (val.endsWith("disable") || val.startsWith("disable")) continue;				
 				
-				String[] valopts = val.split(" "); 
-				StreamSpec spec = new StreamSpec();
-				spec.name    = valopts[0].trim();
-				spec.sampleRate = Integer.parseInt(valopts[1].trim());
-				spec.bitrate = valopts[2].toLowerCase(Locale.US).trim();
-				spec.channels= Integer.parseInt(valopts[3].trim());
-								
+				String[] valopts = val.split("\\s* \\s*"); 
+				StreamSpec spec= new StreamSpec();
+				spec.name      = valopts[0].trim();
+				spec.sampleRate= Integer.parseInt(valopts[1].trim());
+				spec.bitrate   = valopts[2].toLowerCase(Locale.US).trim();
+				spec.channels  = valopts.length>=4 ? Integer.parseInt(valopts[3].trim()) : 2;
+				for(int idxOpt=3; idxOpt<valopts.length; idxOpt++) {
+					val = valopts[idxOpt].trim();
+					int delim=val.indexOf('=');
+					if(delim>0) params.put("audio."+idx+"."+val.substring(0,delim), val.substring(delim+1));
+				}
+				
 				val = Utils.getString(params, "audio."+idx+".codec", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "audio.codec", "AAC", true);
 				spec.type = StreamSpec.TYPE.fromString(val); // AAC, AC3, EAC3
 				
 				//spec.enabled = true;
+				spec.lang = Utils.getString(params, "input.alang", "", true);				
 				spec.inputFile = inputFile; // video+audio from the same input file
 				spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
 				spec.role      = "main";
@@ -166,15 +188,20 @@ public class Dasher {
 					if (idxI<=5) continue; // try input.1..5 then give up.
 					else break;  
 				} else if (val.endsWith("disable") || val.startsWith("disable")) continue;
+				String filename=val;
+
+				val = Utils.getString(params, "input."+idxI+".arg", "", true); // optional input args: input.1.arg="alang=swe"
+				Utils.putArgsToParams(params, "input."+idxI+".", val.split("\\s* \\s*") );
 
 				for(int idx=0; idx<specs.size(); idx++) {
 					StreamSpec oldSpec = specs.get(idx);
 					if(!oldSpec.type.isAudio()) continue;
 					StreamSpec spec = (StreamSpec)oldSpec.clone();
 					spec.name = spec.name+"-"+idxI; // "a1" -> "a1-1"
-					spec.inputFile = new File(val);
+					spec.lang = Utils.getString(params, "input."+idxI+".alang", "", true);					
+					spec.inputFile = new File(filename);
 					spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
-					spec.role     = "main"; //"alternate"; // or use "main" for additional languages?
+					spec.role     = "alternate"; // alternate or main for additional languages? HbbTV exactly just one "main"
 					spec.groupIdx = spec.groupIdx+idxI; // codec+lang (2..n lang bitrates)
 					newSpecs.add(spec);
 				}
@@ -311,7 +338,7 @@ public class Dasher {
 			if (Utils.getBoolean(params, "drm.created", false)) {
 				final String[] manifests = new String[] {
 					"manifest", "manifest_prcenc", "manifest_wvcenc",
-					"manifest_prwvcenc"
+					"manifest_prwvcenc", "manifest_mlcenc"
 				};
 				
 				for(String drmMode : params.get("drm.mode").split(",")) {
@@ -471,12 +498,14 @@ public class Dasher {
 			DashDRM.PLAYREADY, DashDRM.WIDEVINE, DashDRM.MARLIN, DashDRM.CENC 
 		};
 		
-		 // combo manifest+init: "prwv", "prwvcenc", "prcenc", "wvcenc" 
-		final int[][] drmTypesCombo = new int[][]{  { 0,1 }, {0,1,3}, {0,3}, {1,3}  };
+		 // combo manifest+init: "prwv", "prwvcenc", "prcenc", "wvcenc", "mlcenc" 
+		final int[][] drmTypesCombo = new int[][]{  {0,1}, {0,1,3}, {0,3}, {1,3}, {2,3}  };
 		if(Utils.getString(params, "drm.playready", "0", true).equals("0")) // playready is disabled
 			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[2] = new int[]{};
 		if(Utils.getString(params, "drm.widevine", "0", true).equals("0"))  // widevine is disabled
 			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[3] = new int[]{};
+		if(Utils.getString(params, "drm.widevine", "0", true).equals("0"))
+			drmTypesCombo[4]=new int[]{};
 		
 		for(StreamSpec spec : specs) {
 			modifyInitSegment(spec, outputFolderDrm, Utils.getBoolean(params, "livesim", false) ); // remove senc+udta from init 
@@ -532,7 +561,7 @@ public class Dasher {
 						
 		// remove MPEG-CENC element if was disabled				
 		if (Utils.getString(params, "drm.cenc", "0", true).equals("0"))
-			manifest.removeContentProtectionElement("cenc");
+			manifest.removeContentProtectionElement("", "cenc");
 
 		manifest.save(manifestFile, false);
 		String manifestData = Utils.loadTextFile(manifestFile, "UTF-8").toString();
@@ -544,7 +573,7 @@ public class Dasher {
 			manifest.addContentProtectionElement("video", val);
 			manifest.addContentProtectionElement("audio", val);
 			for(int idx=0; idx<3; idx++)
-				manifest.removeContentProtectionElement(drmTypes[idx].NAME); // playready,widevine,marlin			
+				manifest.removeContentProtectionElement("", drmTypes[idx].NAME); // playready,widevine,marlin			
 			String data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
 					"initialization=\"$RepresentationID$/i_nopssh.mp4\"");					
 			Utils.saveFile(new File(outputFolderDrm, "manifest_ck.mpd"), data.getBytes("UTF-8") );
@@ -576,9 +605,9 @@ public class Dasher {
 		for(int idx=(!isSingleSeg?0:999); idx<3; idx++) {		
 			String name = drmTypes[idx].NAME;
 			manifest = new DashManifest(manifestData);
-			if (!name.equals(DashDRM.PLAYREADY.NAME)) manifest.removeContentProtectionElement(DashDRM.PLAYREADY.NAME);
-			if (!name.equals(DashDRM.WIDEVINE.NAME))  manifest.removeContentProtectionElement(DashDRM.WIDEVINE.NAME);
-			if (!name.equals(DashDRM.MARLIN.NAME))    manifest.removeContentProtectionElement(DashDRM.MARLIN.NAME);
+			if (!name.equals(DashDRM.PLAYREADY.NAME)) manifest.removeContentProtectionElement("",DashDRM.PLAYREADY.NAME);
+			if (!name.equals(DashDRM.WIDEVINE.NAME))  manifest.removeContentProtectionElement("",DashDRM.WIDEVINE.NAME);
+			if (!name.equals(DashDRM.MARLIN.NAME))    manifest.removeContentProtectionElement("",DashDRM.MARLIN.NAME);
 			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
 				"initialization=\"$RepresentationID$/i_"+drmTypes[idx].TAG+".mp4\""); // "pk","wv,"ml"			
 			if ( !Utils.getString(params, "drm."+name, "0", true).equals("0") )
@@ -590,14 +619,15 @@ public class Dasher {
 			int[] indexes = drmTypesCombo[idx];
 			for(int idxI=0; idxI<indexes.length; idxI++) {
 				tag += drmTypes[indexes[idxI]].TAG;      // "prwvcenc"
-				name+= drmTypes[indexes[idxI]].NAME+","; // "playready,widevine,cenc"
+				name+= drmTypes[indexes[idxI]].NAME+","; // "playready,widevine,marlin,cenc"
 			}
 			if(tag.isEmpty()) continue;
 			
 			manifest = new DashManifest(manifestData);
-			manifest.removeContentProtectionElement(DashDRM.MARLIN.NAME);
-			if(!name.contains(DashDRM.PLAYREADY.NAME)) manifest.removeContentProtectionElement(DashDRM.PLAYREADY.NAME);
-			if(!name.contains(DashDRM.WIDEVINE.NAME))  manifest.removeContentProtectionElement(DashDRM.WIDEVINE.NAME);				
+			//manifest.removeContentProtectionElement("",DashDRM.MARLIN.NAME);
+			if(!name.contains(DashDRM.PLAYREADY.NAME)) manifest.removeContentProtectionElement("",DashDRM.PLAYREADY.NAME);
+			if(!name.contains(DashDRM.WIDEVINE.NAME))  manifest.removeContentProtectionElement("",DashDRM.WIDEVINE.NAME);				
+			if(!name.contains(DashDRM.MARLIN.NAME))  manifest.removeContentProtectionElement("",DashDRM.MARLIN.NAME);			
 			data = manifest.toString().replace("initialization=\"$RepresentationID$/i.mp4\"", 
 					"initialization=\"$RepresentationID$/i_"+tag+".mp4\"");
 			Utils.saveFile(new File(outputFolderDrm, "manifest_"+tag+".mpd"), data.getBytes("UTF-8"));				
@@ -639,7 +669,7 @@ public class Dasher {
 				else break;  
 			}
 			if (val.endsWith("disable") || val.startsWith("disable")) continue;
-			String[] valopts = val.split(" ");
+			String[] valopts = val.split("\\s* \\s*");
 
 			asId++;
 			logger.println("Create subtitles(inband) "+val);			
@@ -676,7 +706,7 @@ public class Dasher {
 				else break;  
 			}
 			if (val.endsWith("disable") || val.startsWith("disable")) continue;
-			String[] valopts = val.split(" ");
+			String[] valopts = val.split("\\s* \\s*");
 	
 			asId++;
 			logger.println("Create subtitles(outband) "+val);			

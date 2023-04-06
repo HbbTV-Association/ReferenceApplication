@@ -96,18 +96,21 @@ var infoTimer = null;
 function showInfo( msg, timeout, inMs )
 {
 	clearTimeout( infoTimer );
-    timeout = timeout || 4; // sec
-	infoTimer = setTimeout(function(){
+	timeout = timeout || 4; // sec
+	if(timeout<0) {
+		$("#info").addClass("hide");
+		return;
+	}
+	infoTimer = setTimeout( function(){
         $("#info").addClass("hide");
-    }, timeout * ( inMs? 1 : 1000));
-	try{
+    }, timeout * ( inMs? 1 : 1000) );
+	try {
 		$("#info").removeClass("hide");
 		if( typeof msg != "string" ){
 			msg = JSON.stringify( msg );
 		}
 		$("#info").html( XMLEscape(msg,false,true) );
-	}
-	catch(e){
+	} catch(e){
 		console.log( "error in show info function: " + e.message );
 	}
 }

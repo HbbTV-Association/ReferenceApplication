@@ -134,6 +134,22 @@ public class DashManifest {
 		//TODO: insert h264,h265 AdaptationSet prop
 		// <SupplementalProperty schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016" value="1"/>
 		
+		// remove tuple Role=main,alternate (mp4box bug?)
+		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			Set<String> roles = new HashSet<String>(4);
+			List<Element> elems = XMLUtil.getChildElements(elemAS, "Role");
+			for(idx=elems.size()-1; idx>=0; idx--) {
+				elem = elems.get(idx);
+				val=elem.getAttribute("schemeIdUri")+elem.getAttribute("value");
+				if(roles.contains(val)) {
+					elems.remove(idx);
+					elem.getParentNode().removeChild(elem);
+				} else {
+					roles.add(val);
+				}
+			}
+		}
+		
 		// Add Role=main,alternate inside AdaptationSet elements
 		/* elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");		
 		int countA=0, countV=0;
@@ -231,7 +247,7 @@ public class DashManifest {
 		}
 	}
 	
-	public void removeContentProtectionElement(String drmName) {
+	public void removeContentProtectionElement(String asType, String drmName) {
 		// remove <ContentProtection> element by schemeIdUri value
 		String tag;
 		if (drmName.equals(DashDRM.CENC.NAME)) 			 tag="urn:mpeg:dash:mp4protection:2011";
@@ -244,6 +260,8 @@ public class DashManifest {
 		
 		Element elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");
 		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
+			if(!asType.isEmpty() && !elemAS.getAttribute("contentType").equals(asType))
+				continue;
 			for(Element elemCP : XMLUtil.getChildElements(elemAS, "ContentProtection")) {
 				if (tag.equalsIgnoreCase(elemCP.getAttribute("schemeIdUri"))) {
 					modified=true;
@@ -290,6 +308,79 @@ public class DashManifest {
 				elemIES.getParentNode().removeChild(elemIES);
 		}
 	}
+	
+	/**
+	 * Remove representations
+	 * @param id      Representation@id value, one or more comma(,) or "*" to drop AdaptationSet
+	 * @param mimeAS  "video", "audio" or use empty to read any AdaptationSet
+	 * @param langAS  "eng,fin" or "*" languages to match
+	 * @param maxHeight maxHeight of video representation to keep or -1 to skip this filter
+	 * @return
+	 */
+	public int removeRepresentation(String id, String mimeAS, String langAS
+			, int maxHeight) {
+		int count=0;
+		if(mimeAS.isEmpty()) mimeAS="*";
+		if(langAS.isEmpty()) langAS="*";
+		for(Element elemP : XMLUtil.getChildElements(doc.getDocumentElement(), "Period")) {
+			for(Element elemAS : XMLUtil.getChildElements(elemP, "AdaptationSet")) {
+				if(!langAS.equals("*")) {
+					String[] tokens = langAS.split("\\s*,\\s*"); // split "fin,swe", skip tuple whitespaces					
+					if(Utils.indexOfArray(tokens, elemAS.getAttribute("lang"))<0)
+						continue;
+				}
+
+				List<Element> elems = XMLUtil.getChildElements(elemAS, "Representation");
+
+				String[] tokens = mimeAS.split("\\s*,\\s*"); // split "video,audio,text"					
+				String mime=elemAS.getAttribute("contentType");
+				if(mime.isEmpty()) {
+					mime = !elems.isEmpty() ? elems.get(0).getAttribute("mimeType") : "unknown/xx"; // "video/mp4", "audio/mp4"
+					mime = mime.substring(0, mime.indexOf('/'));
+				}
+				if(!mimeAS.equals("*")) {
+					if(Utils.indexOfArray(tokens, mime)<0)
+						continue;
+				}
+				boolean isVideo = mime.startsWith("video");
+				
+				// drop 1..n Representation
+				tokens = id.split("\\s*,\\s*"); // split "v1,v2", skip tuple whitespaces
+				boolean wasModified=false;
+				for(int idx=elems.size()-1; idx>=0; idx--) {
+					Element elem = elems.get(idx);
+					if(tokens[0].equals("*") || Utils.indexOfArray(tokens, elem.getAttribute("id"))>=0) {
+						int h = isVideo ? Integer.parseInt(elems.get(idx).getAttribute("height")) : -1;						
+						if(!isVideo || (maxHeight<0 || h>maxHeight) ) { 						
+							wasModified=true;
+							elem.getParentNode().removeChild(elem);
+							elems.remove(idx);
+							count++;
+						}
+					}
+				}
+				if(wasModified) {
+					modified=true;
+					if(elems.isEmpty()) {
+						// no representations left, drop AdaptationSet
+						elemAS.getParentNode().removeChild(elemAS);
+					} else if(isVideo) {
+						int maxw=-1, maxh=-1;
+						for(int idx=elems.size()-1; idx>=0; idx--) {
+							int w = Integer.parseInt(elems.get(idx).getAttribute("width"));
+							int h = Integer.parseInt(elems.get(idx).getAttribute("height"));
+							if(w>maxw) maxw=w;
+							if(h>maxh) maxh=h;
+						}
+						if(maxw>-1) elemAS.setAttribute("maxWidth", ""+maxw);
+						if(maxh>-1) elemAS.setAttribute("maxHeight", ""+maxh);
+					}
+				}
+			} // loop-elemAS
+		}
+		return count;
+	}
+	
 	
 	/**
 	 * Save manifest.mpd if content was modified.

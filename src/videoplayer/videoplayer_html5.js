@@ -226,7 +226,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 							} );													
 							showInfo( info, dur>1?dur:1 ); // show overlay info
 						} else {
-							showInfo("", 0); // Metadata cue exit
+							showInfo("", -1); // Metadata cue exit
 						}
 					} catch(e){
 						console.log("error Reading cues", e.message );
@@ -472,8 +472,8 @@ VideoPlayerHTML5.prototype.getAds = function( adBreak ){
 		console.log("content video pause failed. May be not initialized yet (prerolls)");
 	}
 	var self = this;
-	console.log("get ads breaks=" + adBreak.ads);
-	$.get( "../getAds.php?breaks=" + adBreak.ads, function(ads){
+	console.log("get ads breaks=" + adBreak.ads + ", position="+adBreak.position );
+	$.get( "../getAds.php?breaks=" + adBreak.ads + "&position="+adBreak.position, function(ads){
 		self.adBuffer = ads;
 		console.log( "Got " + ads.length + " ads");
 		

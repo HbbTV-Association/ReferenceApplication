@@ -127,6 +127,7 @@ public class MediaTools2 {
 			"-color_primaries", "bt709", // RGB map to real values
 			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 
 			"-an", "-sn",			// skip audio, skip subtitles track
+			"-metadata:s:v:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile        // overwrite output file "temp-v1.mp4"
 		));
@@ -196,6 +197,7 @@ public class MediaTools2 {
 			"-color_primaries", "bt709", // RGB map to real values
 			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 			
 			"-an", "-sn",           // skip audio+subs
+			"-metadata:s:v:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",			
 			"-t", "${timelimit}",	// read X seconds then stop encoding
 			"-y", outputFile        // overwrite "temp-v1.mp4"
 		);
@@ -227,7 +229,7 @@ public class MediaTools2 {
 	/**
 	 * Create MP4Box command.
 	 * @param specs		stream specifications
-	 * @param segdur	segment duration in milliseconds
+	 * @param segdur	segment duration in milliseconds (3840=3,84s)
 	 * @param timeLimit  timelimit seconds or -1
 	 * @param initMode	init segment. inband=AVC3_common_init, multi=AVC1_common_init_hbbtv,
 	 * 			merge=AVC1_common_init, no=AVC1_separate_init(=best backward comp)
@@ -265,11 +267,11 @@ public class MediaTools2 {
 		specAttrs.put("asIdA", "20"); // audio: 21..n trackgroup per codec+lang
 		// Subtitle inserter uses asID=51..n
 		
-		int scale=-1;
+		//int scale=-1;
 		for(StreamSpec spec : specs) {
 			boolean isAudio = spec.type.isAudio();
-			if (isAudio && scale<0)
-				scale = spec.sampleRate; // 44100, 48000
+			//if (isAudio && scale<0)
+			//	scale = spec.sampleRate; // 44100, 48000
 
 			// AdaptationSet@id="1..n" track groups per codec (h264,h265)			
 			String key = spec.type.toString();
@@ -281,20 +283,23 @@ public class MediaTools2 {
 				specAttrs.put(asId, val);
 				specAttrs.put("codec."+key+"."+spec.groupIdx, val);
 				// spec.role=already set in dasher.java				
-			} else {
-				spec.role=""; // remove from additional tracks inside the same track group
+			//} else {
+			//	spec.role=""; // remove from additional tracks inside the same track group
 			}
 			spec.asId = val; // 1..n number
 		}
 		
-		scale = Math.max(1000, scale); // default to 1s if no audio was given
+		//scale = Math.max(1000, scale); // default to 1s if no audio was given
 		segname = segname.toLowerCase(Locale.US);
 		
 		// use ver=4, don't use ver=3 "-closest" as it most likely breaks 8s segdur(case: spring 3. and 4. segments)
 		List<String> args=Arrays.asList(MediaTools.MP4BOX,
-			"-dash", ""+(scale>0?segdur*scale/1000 : segdur), // segment duration 6sec*1000 or use audioRate
-			"-frag", ""+(scale>0?segdur*scale/1000 : segdur), // for better seg alignment (important for 44.1KHz)
-			scale>0?"-dash-scale":"", scale>0?""+scale:"",
+			//"-dash", ""+(scale>0?segdur*scale/1000 : segdur), // segment duration 6sec*1000 or use audioRate
+			//"-frag", ""+(scale>0?segdur*scale/1000 : segdur), // for better seg alignment (important for 44.1KHz)
+			//scale>0?"-dash-scale":"", scale>0?""+scale:"",
+			"-dash", ""+segdur, // segment duration millisecs
+			"-frag", ""+segdur, // for better seg alignment
+			"-dash-scale", "1000",  // use 1000 so that mp4box uses the same value in mpd+segments (cmaf requirement)
 			//(ver==1 || ver==4?"":ver==2?"-bound":"-closest"), // force seg duration, last segment may be shorter (video=146sec, segdur=6sec -> 24*6sec + 1*2sec segments)
 			"-mem-frags", "-rap",
 			"-profile", (isSingleSeg ? "dashavc264:onDemand":"dashavc264:live"),  // use single file or 1..N small segment files

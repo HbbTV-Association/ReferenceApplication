@@ -104,7 +104,7 @@ public class SubtitleInserter {
 			+"    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL  // subtitle,captions,main
 			+"    <Representation id=\"${id}\" bandwidth=\"3000\">"
 			+"<BaseURL>${file}</BaseURL></Representation>"+Utils.NL
-			+"  </AdaptationSet>"+Utils.NL;  
+			+"  </AdaptationSet>"; //+Utils.NL;  
 		template=template.replace("${lang}", lang)
 				.replace("${id}", repId)
 				.replace("${file}", urlPrefix+filename);
@@ -158,7 +158,7 @@ public class SubtitleInserter {
 			tempOutput.delete();
 			
 			// create fragmented output/temp-sub_xxx.mp4 from sub_xxx.xml text file
-			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput);
+			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, lang);
 			if(logger!=null) logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, tempOutput.getParentFile());
 			if (timeLimit>0) {
@@ -191,12 +191,13 @@ public class SubtitleInserter {
 			asData = asData.replace("$RepresentationID$/", urlPrefix+"$RepresentationID$/"); // drm manifest uses "../sub_eng/" path
 
 		// mimeType is in Representation field (mimeType="application/mp4")
-		StringBuilder sbuf = new StringBuilder(8048);
-		sbuf.append(Utils.NL+Utils.NL); 
+		// captions=viewers who cannot hear audio(transcription of dialog), subtitles=speakers or any language to watch video
+		StringBuilder sbuf = new StringBuilder(8048); 
+		sbuf.append(Utils.NL+Utils.NL);
 		sbuf.append("  <AdaptationSet id=\""+asId+"\" contentType=\"text\" lang=\""+lang+"\" segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
 		sbuf.append("    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL );  // subtitle,captions,main
 		sbuf.append("    "+asData+Utils.NL);
-		sbuf.append("  </AdaptationSet>"+Utils.NL);
+		sbuf.append("  </AdaptationSet>"); //+Utils.NL);
 
 		// insert subtitle <AS> to "manifest_subib.mpd"
 		if(manifestFile.exists()) {

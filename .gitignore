@@ -1,4 +1,5 @@
 *.bak
+bak
 #src/videoplayer/monitor/*
 
 ## editor sources are on tools/editor subfolder,

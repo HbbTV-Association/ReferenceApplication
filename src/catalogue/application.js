@@ -16,10 +16,11 @@ function showApplication() {
 
 function init() {
 	//toggleDebug();
-	//console.log("test");
-	// get context path "http://my.server.com/myapp/some/folder"
 	var ctxUrl = window.location.href;
-	ctxUrl = ctxUrl.substring(0, ctxUrl.lastIndexOf("/"));
+	var delim  = ctxUrl.lastIndexOf("/");
+	ctxUrl = ctxUrl.substring(0, delim);    // "http://my.server.com/production/catalogue"
+	delim  = ctxUrl.indexOf("/", 9)+1;
+	var appName= ctxUrl.substring(delim, ctxUrl.indexOf("/", delim)); // "production"
 	
 	setLoading(true);
 	$.ajaxSetup({ cache: false });
@@ -113,19 +114,18 @@ function init() {
 	}
 	
 	// selects the version of the videoplayer by application profile used
-	try{
-		
+	try{		
 		if( profile.hbbtv == "1.5" ){
 			vplayer = new VideoPlayer("videodiv", profile);
-			$("#wrapper").append("<div id='appversion'>HbbTV 1.5</div>");
+			$("#wrapper").append("<div id='appversion'>HbbTV 1.5/"+appName+"</div>");
 		}
 		else if( profile.hbbtv == false ) {
 			vplayer = new VideoPlayerEME("videodiv", profile);
-			$("#wrapper").append("<div id='appversion'>MSE-EME</div>");
+			$("#wrapper").append("<div id='appversion'>MSE-EME/"+appName+"</div>");
 		}
 		else {
 			vplayer = new VideoPlayerHTML5("videodiv", profile);
-			$("#wrapper").append("<div id='appversion'>HbbTV 2.0.1</div>");
+			$("#wrapper").append("<div id='appversion'>HbbTV 2.0.1/"+appName+"</div>");
 		}
 		
 		vplayer.populate();
@@ -133,8 +133,7 @@ function init() {
 	} catch(e){
 		showInfo("error "+ profile.hbbtv +" " + e.message + e.lineNumber + " vplayer " );
 		console.log( e.message );
-	}
-	
+	}	
 	
 	// if debug is included, display button to toggle debug screen on/off
 	if( typeof debug == "function" ){

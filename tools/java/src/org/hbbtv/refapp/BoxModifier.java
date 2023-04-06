@@ -216,7 +216,7 @@ public class BoxModifier {
         FileOutputStream fos = null;
         IsoFile isoFile = new IsoFile(fis.getChannel());
         try {
-    		// "playready,widevine", "playready,widevine,cenc", "playready,cenc", "widevine,cenc"
+    		// "playready,widevine", "playready,widevine,cenc", "playready,cenc", "widevine,cenc", "marlin,cenc"
         	List<byte[]> sysIdBytes = new ArrayList<byte[]>(2);
     		String[] tokens = sysId.split("\\,");
     		for(int idx=0; idx<tokens.length; idx++) {

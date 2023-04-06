@@ -14,17 +14,22 @@ public class LogWriter {
 	/**
 	 * Open a logging file or use STDOUT.
 	 * @param file	output file or NULL to use System.out.
+	 * @param  append
 	 * @throws IOException
 	 */
-	public void openFile(File file) throws IOException {
+	public void openFile(File file, boolean append) throws IOException {
 		String NL=System.getProperty("line.separator", "\r\n");
 		NLb = NL.getBytes("ISO-8859-1");
 		
 		if (file==null) {
 			close();
 		} else {
-			fos = new FileOutputStream(file);
-			fos.write( new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF } ); // UTF8 BOM marker
+			if(file.exists() && file.length()>0 && append) {
+				fos = new FileOutputStream(file,append);
+			} else {
+				fos = new FileOutputStream(file);
+				fos.write( new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF } ); // UTF8 BOM marker
+			}
 		}
 	}
 	

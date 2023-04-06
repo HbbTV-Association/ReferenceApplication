@@ -290,6 +290,7 @@ public class DashDRM {
 		String kid  = Utils.getString(params, "drm.kid."+keySuffix, "", true);
 		String key  = Utils.getString(params, "drm.key."+keySuffix, "", true);
 		String mode = Utils.getString(params, "drm.mode", "", true);
+		if(kid.isEmpty()) return "";
 
 		String laurl="";
 		if(mode.startsWith("cbcs")) laurl = Utils.getString(params, "drm.playready.laurl."+keySuffix+".mpd.cbcs", "", true);
@@ -319,6 +320,7 @@ public class DashDRM {
 		String prov= Utils.getString(params, "drm.widevine.provider", "", true);  // always use same provider and
 		String cid = Utils.getString(params, "drm.widevine.contentid", "", true); // contentid values for all tracks.
 		String mode= Utils.getString(params, "drm.mode", "", true);
+		if(kid.isEmpty()) return "";
 
 		String laurl="";
 		if(mode.startsWith("cbcs")) laurl = Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd.cbcs", "", true);

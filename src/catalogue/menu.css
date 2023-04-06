@@ -259,10 +259,11 @@ div, span {
 #logo1 {
 	top: 0px;
 	left: 55px;
-	height: 175px;
-	width: 235px;
+	width: 161px; height: 120px;
 	background-image:url(images/logo_hbbtv.png);
+	background-size: 161px 120px;
 }
+
 
 #logo2 {
 	top: 590px;
@@ -281,17 +282,16 @@ div, span {
 
 #appversion {
     position: absolute;
-    left: 75px;
-    height: 30px;
-    width: 130px;
-    top: 135px;
-    color: gray;
+    left: 68px;
+    top: 92px;
+	padding: 0 4px 0 4px;
+    color: white;
+	background-color: rgba(40, 40, 40, 0.8);
     z-index: 10;
     text-shadow: 1px 1px black;
-    text-transform: uppercase;
 	animation: fadein 3s;
-    -moz-animation: fadein 3s;
-    -webkit-animation: fadein 3s;
+    -moz-animation: fadein 3s; 
+	-webkit-animation: fadein 3s;
 }
 
 @keyframes fadein {
@@ -309,16 +309,16 @@ div, span {
 }
 
 #itemDescription {
-	width: 592px;
+	width: 730px;
 	height: 80px;
-	top: 650px;
+	top: 640px;
 	position: absolute;
 	color: #fff;
-	font-size: 21px;
-	left: 334px;
+	font-size: 20px;
+	left: 300px;
     background-image: url(images/bg_itemDescription.png);
     background-repeat: repeat-x;
-    padding: 10px;
+    padding: 4px;
 }
 
 /* Channel info */

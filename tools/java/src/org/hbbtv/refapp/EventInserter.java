@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import org.mp4parser.IsoFile;
 import org.mp4parser.boxes.iso23009.part1.EventMessageBox;
+import org.mp4parser.boxes.iso14496.part12.SegmentIndexBox;
 import org.mp4parser.Box;
 
 /**
@@ -12,6 +13,7 @@ import org.mp4parser.Box;
  * Modify manifest.mpd file.
  *
  * Insert EMSG to segment file:
+ * - Use "ts=0" timescale to read value from SIDX table 
  *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input=dash/v1_1.m4s scheme="urn:my:scheme" value="1" ts=1 ptd=1 dur=0xFFFF id=1 msg="any payload"
  * Remove all EMSG boxes from segment file:
  *   java -cp "./lib/*" org.hbbtv.refapp.EventInserter input=dash/v1_1.m4s scheme=""
@@ -84,6 +86,11 @@ public class EventInserter {
         		}
         	}
 
+        	// use SIDX timescale if value was not given, TODO: read from init.mp4 if SIDX not found?
+        	// - default 12800 it's what ffmepg-mp4box is using for video segments
+        	long defTimescale = sidxIdx>=0 ? 
+        		((SegmentIndexBox)boxes.get(sidxIdx)).getTimeScale() : 12800;
+ 
         	// insert new box before SIDX,MOOF box, if scheme="" then do not add EMSG box,
         	// params may use a hexstring (0x646566) or plain string format
         	
@@ -101,17 +108,33 @@ public class EventInserter {
             	emsg.setValue( val.startsWith("0x") ? 
             		new String(Utils.hexToBytes(val.substring(2)), "UTF-8") : val );
             	
-            	val = Utils.getString(params, "ts", "1", true);
-            	emsg.setTimescale( val.startsWith("0x") ? 
-            		Long.parseLong(val.substring(2), 16) : Long.parseLong(val) );
-            	            	
-            	val = Utils.getString(params, "ptd", "1", true);
-            	emsg.setPresentationTimeDelta( val.startsWith("0x") ? 
-            		Long.parseLong(val.substring(2), 16) : Long.parseLong(val) );
+            	val = Utils.getString(params, "ts", "", true);
+            	emsg.setTimescale( val.isEmpty() || val.equals("0") ? defTimescale : 
+            		val.startsWith("0x") ? Long.parseLong(val.substring(2), 16) :            		
+            		Long.parseLong(val) );
+            	 
+            	long ival;
+            	val = Utils.getString(params, "ptd", "0", true); // seconds 0..n, 2.34
+            	if(val.indexOf('.')<0) {
+	            	ival = val.startsWith("0x") ? 
+	                		 Long.parseLong(val.substring(2), 16) : Long.parseLong(val);
+	                ival = ival * emsg.getTimescale();
+            	} else {
+            		ival = (long)(Double.parseDouble(val) * emsg.getTimescale());
+            	}
+            	emsg.setPresentationTimeDelta(ival); // delta offset in timescale
 
-            	val = Utils.getString(params, "dur", "1", true);  // 0x0000FFFF=65535
-            	emsg.setEventDuration( val.startsWith("0x") ? 
-            		Long.parseLong(val.substring(2), 16) : Long.parseLong(val) );
+            	// duration seconds 0..n or "2.5" floating point
+            	// 0x0000FFFF=65535 unknown, 0xFFFFFFFF=4294967295 unknown
+            	val = Utils.getString(params, "dur", "1", true);
+            	if(val.indexOf('.')<0) {
+	            	ival = val.startsWith("0x") ? 
+	                		 Long.parseLong(val.substring(2), 16) : Long.parseLong(val);
+	                ival = ival<999999 ? ival * emsg.getTimescale() : 4294967295L;
+            	} else {
+            		ival = (long)(Double.parseDouble(val) * emsg.getTimescale());
+            	}
+            	emsg.setEventDuration(ival); // duration in timescale unit
 
             	val = Utils.getString(params, "id", "1", true);
             	emsg.setId( val.startsWith("0x") ? 

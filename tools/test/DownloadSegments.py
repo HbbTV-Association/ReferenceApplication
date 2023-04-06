@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 ## Download DASH files: manifest.mpd, init.mp4, 1.m4s, 2.m4s, ...
 ## Versions:
+##   1.3/2023-04-04: fixed segNumber formula for live edge download
 ##   1.2/2023-03-11: test "$Number%05d$" mediaurl syntax
 ##   1.1/2022-12-08: contentType="image" thumbnail adaptation set
 ##   1.0/2022-11-21: initial version
@@ -448,9 +449,12 @@ def appendSegmentUrls(manifest, segTemplate, track, useLiveEdge):
 		if manifest.live and useLiveEdge:
 			## forward to "mostRecentNumber - mediaDurationSegCount" seg number
 			## (currentTime - astTime) / (duration / timescale) + 1 = number of most recent segment
-			astMillis = int(manifest.availabilityStartTime.timestamp()*1000)
-			segNumberEdge = int( ((manifest.nowTime.timestamp()*1000) - astMillis) / (d / tscale *1000) +1 )
-			segNumber = segNumberEdge - int(totDur/segDur)
+			segNumberOrig= segNumber
+			astMillis    = int(manifest.availabilityStartTime.timestamp()*1000)
+			segNumberEdge= int( ((manifest.nowTime.timestamp()*1000) - astMillis) / (d / tscale *1000) +1 )
+			segNumberEdge= segNumber+segNumberEdge
+			segNumber    = segNumberEdge - int(totDur/segDur)
+			printLog("%s: segNumberOrig=%d, segNumber=%d, segNumberEdge=%d" % (track.id, segNumberOrig,segNumber,segNumberEdge) )
 
 		for idx in range(1, int(totDur/segDur)+1):
 			sUrl = sUrlTemplate.replace(numberVar, numberFormat.format(segNumber)) #sUrlTemplate.replace(numberVar, str(segNumber))

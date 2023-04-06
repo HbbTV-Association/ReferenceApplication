@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 if($kid=="") $kid = $_REQUEST["kid"]; // failsafe to "?kid=4321..." param
 $kid = strtoupper($kid);
+if(strlen($kid)==4) $kid="4321567812341234123412341234".$kid;
 
 // KID=KEY lookup table, find KEY and base64(trim trailing "=" chars)
 // "12341234123412341234123412341234" -> "EjQSNBI0EjQSNBI0EjQSNA==" -> "EjQSNBI0EjQSNBI0EjQSNA"
