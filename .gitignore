@@ -1,5 +1,12 @@
-*.bak
-bak
+## OS metafiles
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+/*.bak
+/bak/
 #src/videoplayer/monitor/*
 
 ## editor sources are on tools/editor subfolder,

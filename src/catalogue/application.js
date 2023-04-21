@@ -61,7 +61,8 @@ function init() {
 						}
 						
 						if(item.title=="Reload Video catalogue") {
-							item.desc = ctxUrl; // + ", YYYY-MM-DD";
+							if(item.desc=="") item.desc="${ctxUrl}";
+							item.desc = item.desc.replace("${ctxUrl}", ctxUrl); // + ", YYYY-MM-DD";
 						}
 
 						submenuItems.push( item );

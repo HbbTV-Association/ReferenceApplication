@@ -18,7 +18,8 @@ $headerNVAuth      = @$_REQUEST['header-nvauth']; // nv-authorizations jwt token
 $headerNVPreAuth   = @$_REQUEST['header-nvpreauth']; // PreAuthorization jwt token(nagra)
 $headerCustomdataDT= @$_REQUEST['header-dtcd']; // DrmToday CustomData
 
-$persist = @$_REQUEST['persist']; // MSTest server persist license
+$persist  = @$_REQUEST['persist'];   // MSTest server persist license
+$sessionId= @$_REQUEST['sessionid']; // refapp may use this for persistent laurl testing
 
 $logfile = @$_REQUEST['logfile']; // name of logfile (optional), allow a-z|0-9 characters only.
 if ($logfile!="") {
@@ -105,11 +106,11 @@ if($algId=="aescbc") {
 
 // use MSTest server with a persist license
 if($persist) {
-	// begindate,enddate=-4min .. +4min
+	// begindate,enddate=-4min .. +15min
 	$dtNow = new DateTime("now", new DateTimeZone("UTC") );
 	$dtNow->sub(new DateInterval("PT4M"));
 	$sBegin= $dtNow->format("YmdHis"); // YYYYMMDDhhmmss
-	$dtNow->add(new DateInterval("PT8M"));
+	$dtNow->add(new DateInterval("PT19M"));
 	$sEnd  = $dtNow->format("YmdHis");	
 	$url = str_replace(",persist:false,", ",persist:true,begindate:${sBegin},enddate:${sEnd},", $url);
 }
@@ -143,12 +144,14 @@ if ($logfile!="") {
 	$dtNow = new DateTime("now", new DateTimeZone("UTC") );
 	$sNow  = $dtNow->format("Y-m-d H:i:se");
 	$data = "------------------------\n"
-		. "Request: ". $sNow ."\n"
-		. "Url: ". $_SERVER["REQUEST_URI"] ."\n"
-		. "UserAgent: ". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
-		. "RemoteAddr: ". $_SERVER['REMOTE_ADDR'] ."\n"
-		. "LaUrl: ". $url ."\n"
-		. "KID(Guid): ". $kid ."\n"
+		. "DateTime=". $sNow ."\n"
+		. "Url=". $_SERVER["REQUEST_URI"] ."\n"
+		. "UserAgent=". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
+		. "RemoteAddr=". $_SERVER['REMOTE_ADDR'] ."\n"
+		. "LaUrl=". $url ."\n"
+		. "KID=". $kid ."\n"
+		. "SessionId=". $sessionId . "\n"
+		. "Request\n"
 		. $query ."\n";
 	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
 }
@@ -164,7 +167,7 @@ if($soap === FALSE || $curl_errno > 0){
 echo $soap;
 
 if ($logfile!="") {
-	$data = "\nResponse\n"
+	$data = "Response\n"
 		. $soap ."\n"
 		. "------------------------\n";
 	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);

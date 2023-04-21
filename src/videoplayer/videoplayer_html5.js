@@ -222,7 +222,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 								dur=cue.endTime-cue.startTime;
 								var cueValue = arrayBufferToString( cue.data );
 								console.log( "EVENT.START startTime : " + cue.startTime + ", endTime : " + cue.endTime + " cueValue: " + cueValue );
-								info +=  "cue: '" + cueValue + "' start: " + cue.startTime + ", ends: " + cue.endTime + "<br/>";
+								info +=  "'" + cueValue + "' start: " + cue.startTime + ", ends: " + cue.endTime + "<br/>";
 							} );													
 							showInfo( info, dur>1?dur:1 ); // show overlay info
 						} else {

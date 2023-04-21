@@ -153,59 +153,68 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			case VK_YELLOW:
 				try{
 					if( this.video.textTracks ){
-						console.log("switch text Track");
-						//var tracks = this.video.textTracks.length;						
+						var isEME=this.constructor.name=="VideoPlayerEME";
+						//console.log("switch text track");
+						
 						// count all tracks except metadata
 						var tracks = 0;
 						var metadataTracks = [];
 						var firstTextTrack = null;
 						try{
-							for( var i = 0; i < this.video.textTracks.length; ++i ){
-								if( this.video.textTracks[i].kind != "metadata" ){
-									if( firstTextTrack === null ){
-										firstTextTrack = i;
+							if(isEME) {
+								tracks = this.getTextTracks(); // counter
+								if(tracks>0) firstTextTrack=0;
+							} else {							
+								for( var i = 0; i < this.video.textTracks.length; ++i ){
+									if( this.video.textTracks[i].kind != "metadata" ){
+										if( firstTextTrack === null )
+											firstTextTrack = i;
+										tracks++;
+										this.video.textTracks[i].mode = 'hidden'; // hide all
+									} else {
+										metadataTracks.push(i);
 									}
-									tracks++;
-									this.video.textTracks[i].mode = 'hidden'; // hide all
-								}
-								else{
-									metadataTracks.push(i);
 								}
 							}
 						} catch(e){
 							console.log("error " + e.description);
 						}
 						
-						console.log("text tracks " + tracks );
-						console.log("metaDataTracks ", metadataTracks );
+						console.log("switch text track, tracks " + tracks);
+						//console.log("metaDataTracks ", metadataTracks );
 						if( !tracks ){
 							showInfo("No Subtitles Available");
 							break;
 						}
 						
-						if( this.subtitleTrack === false ) {
+						if( this.subtitleTrack === false )
 							this.subtitleTrack = firstTextTrack;
-						}
-						console.log("Current track index " + this.subtitleTrack);
-						if( this.subtitleTrack >= tracks ){
-							this.subtitleTrack = firstTextTrack; // was off, select first
-						}
-						else{
-							this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
-							do{
-								this.subtitleTrack++;
-								console.log("increment track index: " + this.subtitleTrack);
-							} while( metadataTracks.indexOf( this.subtitleTrack ) != -1 );
-						}
 						
-						var lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].language );
+						var lang;
+						if(isEME) {	
+							this.subtitleTrack = this.subtitleTrack >= tracks ? firstTextTrack : this.subtitleTrack+1;
+							this.setTextTrack(this.subtitleTrack);
+							lang = this.getCurrentTextTrack();
+							if(lang=="undefined") lang="off";						
+						} else {
+							if( this.subtitleTrack >= tracks ){
+								this.subtitleTrack = firstTextTrack; // was off, select first
+							} else {
+								this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
+								do{
+									this.subtitleTrack++;
+								} while( metadataTracks.indexOf( this.subtitleTrack ) != -1 );								
+							}
+							lang = (this.subtitleTrack >= tracks? "off" : this.video.textTracks[ this.subtitleTrack ].language );
+							if(lang!="off")
+								this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+						}
 						
 						$("#subtitleButtonText").html( "Subtitles: " + lang );
-						showInfo("Subtitles: " + lang);
-						
+						showInfo("Subtitles: " + lang);						
 						if( lang != "off" ){
 							console.log("Set textTrack["+ this.subtitleTrack +"] Showing: " + lang);
-							this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
+							//this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
 						}
 					}
 					else if( typeof this.enableSubtitles  == "function" ){
@@ -227,7 +236,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 								this.audioTrack = 0;
 							}
 							
-							var tracks = isEME ? this.getAudioTracks() : this.video.audioTracks.length;							
+							var tracks = isEME ? this.getAudioTracks() : this.video.audioTracks.length;	 // counter
 							if( this.audioTrack >= tracks ){
 								this.audioTrack = 0; // was off(muted), select first and unmute audio
 							} else {
@@ -479,9 +488,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				else if(this.video && this.video.playTime ){
 					position = (sec? this.video.playPosition / 1000 + sec : this.video.playPosition / 1000);
 					duration = this.video.playTime / 1000;
-				}
-				else{
-					console.log("Videoplayer not ready. Can not get position or duration");
+				} else {
+					//console.log("Videoplayer not ready. Can not get position or duration");
 					return;
 				}
 			}
@@ -579,8 +587,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 * @returns (Object) { duration : \d+, position : \d+ }
 	 */
 	this.time = function(){
-		try{
-			
+		try{			
 			if( this.timeInMilliseconds && this.video.playTime ){
 				return { duration : this.video.playTime/1000, position : this.video.playPosition/1000 };
 			}
@@ -588,8 +595,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				return { duration : this.video.duration, position : this.video.currentTime };
 			}
 			else{
-				console.log("timedata not available")
-				return { duration : 0, position : 0 };
+				//console.log("timedata not available")
+				return { duration : 0, position : 0 }; // timedata not available
 			}
 			
 		} catch(e){
