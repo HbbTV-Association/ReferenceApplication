@@ -363,7 +363,6 @@ VideoPlayerEME.prototype.createPlayer = function(){
 VideoPlayerEME.prototype.setURL = function(url){
 	url = url.replace("${GUID}", uuidv4());
 	console.log("setURL(",url,")");
-	//this.player.attachTTMLRenderingDiv(document.getElementById("video-caption")); //$("#video-caption")[0]);
 	
 	if(this.adBreaks) this.player.setAutoPlay(false); // disable autoplay, play preroll before starting a video
 	this.player.attachSource(url);
@@ -806,10 +805,10 @@ VideoPlayerEME.prototype.clearVideo = function(){
 	try{
 		if(self.video){
 			self.video.pause();
-			//self.video.src = ""; // must not clear a field value or dashjs gets an infinite error loop
+			//self.video.src = ""; // must not clear a value or dashjs infinite error loop
 			self.player.attachSource(null); // source+buffer teardown, keep settings
 			self.player.destroy(); // destroy an instance
-			//$("#video").remove(); // clear from dom(note: do not remove elements, reuse)
+			//$("#video").remove(); // clear from dom(note: do not remove elements, reuse to avoid dashjs texttrack errors)
 			//$("#video-caption").remove();
 			this.video = null;
 		}

@@ -154,7 +154,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				try{
 					if( this.video.textTracks ){
 						var isEME=this.constructor.name=="VideoPlayerEME";
-						//console.log("switch text track");
 						
 						// count all tracks except metadata
 						var tracks = 0;
@@ -198,7 +197,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 							if(lang=="undefined") lang="off";						
 						} else {
 							if( this.subtitleTrack >= tracks ){
-								this.subtitleTrack = firstTextTrack; // was off, select first
+								this.subtitleTrack = firstTextTrack; // current one was "off", select 1st track
 							} else {
 								this.video.textTracks[ this.subtitleTrack ].mode = 'hidden'; // hide current
 								do{
@@ -212,10 +211,8 @@ function VideoPlayerBasic(element_id, profile, width, height){
 						
 						$("#subtitleButtonText").html( "Subtitles: " + lang );
 						showInfo("Subtitles: " + lang);						
-						if( lang != "off" ){
+						if( lang != "off" )
 							console.log("Set textTrack["+ this.subtitleTrack +"] Showing: " + lang);
-							//this.video.textTracks[ this.subtitleTrack ].mode = 'showing';
-						}
 					}
 					else if( typeof this.enableSubtitles  == "function" ){
 						this.changeAVcomponent( this.AVCOMPONENTS.SUBTITLE );

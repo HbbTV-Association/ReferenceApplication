@@ -39,12 +39,13 @@ if( isset( $profileResources ) ){
 	echo "<!-- " . $profileResources. " -->\n";
 	if( $profileResources == "mse-eme" ){		
 		$dashjs = isset($_GET["dashjs"]) ? $_GET["dashjs"] : "";
-		if($dashjs=="local")
-			$resources[] = "../videoplayer/dash.all.min.js";
-		else if($dashjs=="nightly")
+		if($dashjs=="nightly")
 			$resources[] = ($isHTTPS?"https:":"http:")."//reference.dashif.org/dash.js/nightly/dist/dash.all.debug.js";
-		else if($dashjs=="" || $dashjs=="latest")
+		else if($dashjs=="latest")
 			$resources[] = ($isHTTPS?"https:":"http:")."//cdn.dashjs.org/latest/dash.all.min.js";
+		else // if($dashjs=="local" || $dashjs=="")
+			$resources[] = "../videoplayer/dash.all.min.js";
+		
 		$resources[] = "../videoplayer/videoplayer_mse-eme.js";
 	}
 	else if( $profileResources == "html5" ){
