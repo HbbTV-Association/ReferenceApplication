@@ -409,10 +409,8 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 		console.log( e.type );
 		var player = $(this);
 		if( self.adCount < self.adBuffer.length ){
-			player.addClass("hide");
-			
-			self.playAds();
-			
+			player.addClass("hide");			
+			self.playAds();			
 		}
 		else{
 			// no more ads, continue content
@@ -666,8 +664,11 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		console.log("sendLicenseRequest msgId: " + msgId);
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
-	}
-	
+		setTimeout( function(){
+			self.clearVideo();
+			showInfo(e.message);
+		}, 1000);
+	}	
 	
 	
 	function drmMsgHandler(msgID, resultMsg, resultCode) {
@@ -816,7 +817,7 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive) {
 			}
 		} );
 		return;
-	}	
+	}
 	
 	try{
 		if( !self.video ){
@@ -870,8 +871,7 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive) {
 };
 
 VideoPlayerHTML5.prototype.stop = function(){
-	showInfo("Exit Video", 1);
-	
+	//showInfo("Exit Video", 1);	
 	var self = this;
 	self.watched.save();
 	this.onAdBreak = false;

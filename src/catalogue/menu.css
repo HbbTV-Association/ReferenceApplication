@@ -266,12 +266,12 @@ div, span {
 
 
 #logo2 {
-	top: 590px;
+	top: 640px;
 	left: -235px;
     left: 55px;
 	height: 125px;
 	width: 235px;
-	background-image: url(images/logo_sofia.png);
+	background-image: url(images/logo_sofia.png?_=2);
     /*
     -webkit-animation-delay: 1s;
     animation-delay: 1s;

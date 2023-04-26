@@ -762,9 +762,8 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 VideoPlayerEME.prototype.stop = function(){
 	var self = this;
 	
-	self.watched.save();
-	
-	showInfo("Exit Video", 1);
+	self.watched.save();	
+	//showInfo("Exit Video", 1);
 
 	this.onAdBreak = false;
 	// if video not exist

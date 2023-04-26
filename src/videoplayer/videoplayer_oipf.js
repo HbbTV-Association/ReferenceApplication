@@ -351,6 +351,10 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		console.log("sendLicenseRequest msgId: " + msgId);
 	} catch (e) {
 		console.log("sendLicenseRequest Error 3: " + e.message );
+		setTimeout( function(){
+			self.clearVideo();
+			showInfo(e.message);
+		}, 1000);		
 	}
 	
 	function drmMsgHandler(msgID, resultMsg, resultCode) {
@@ -603,8 +607,7 @@ VideoPlayer.prototype.pause = function(){
 };
 
 VideoPlayer.prototype.stop = function(){
-	showInfo("Exit Video", 1);
-	
+	//showInfo("Exit Video", 1);	
 	var self = this;
 	self.watched.save();
 	

@@ -176,23 +176,24 @@ function showInfoBox( html )
 	}
 }
 
-function addTableRow( table, cells ){
+function addTableRow(table, cells, leftAlign) {
 	var row = $("<div style='display: table-row;background:rgba(0,0,0,0.9);'></div>");
 	$.each( cells, function (i, value){
-		row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+ XMLEscape(value,false,true) +"</div>");
+		if(leftAlign)
+			row.append("<div style='display:table-cell; vertical-align:middle; text-align:left; border: 1px solid white;'>"+ XMLEscape(value,false,true) +"</div>");
+		else
+			row.append("<div style='display: table-cell;vertical-align: middle;border: 1px solid white;'>"+ XMLEscape(value,false,true) +"</div>");
 	});
 	table.append( row );
 }
 
-function createTable(data){
+function createTable(data, leftAlign){
 	var table = $("<div class='verticalMiddle'></div>");
 	$.each(data, function(name, value){
-		addTableRow( table, [ name, value ] );
+		addTableRow( table, [ name, value ], leftAlign );
 	});
 	return table;
 }
-
-
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
@@ -541,10 +542,7 @@ function getChannelData(){
 			current = null;
 		}
 		
-		
-		
-		var channelPosition = -1;
-		
+		var channelPosition = -1;		
 		try{
 			for(var i = 0; i < chlist.length; ++i){
 				var ch = chlist.item(i);
@@ -617,6 +615,21 @@ function displayCookies(time){
 	});
 	showInfoBox( table );
 }
+
+function displayAbout(){
+	var items = {
+		"About"     : "DASH-DRM Reference Application",
+		"Disclaimer": "This tool is provided by the HbbTV Association, a cooperation between broadcasters, operators, manufacturers and technology providers worldwide.",
+		"Data"      : "When the live instance (refapp.hbbtv.org) is accessed it's logged in the server access log. The access data is tabulated monthly as total visitors, total requests and amount of data transferred.",
+		" "         : "No data is ever collected about the results of individual tests run by other people.",
+		"  "        : "The test data is anonymized in the result sheet (available to HbbTV members).",
+        "   "       : "This log is never analysed unless explicitly requested by HbbTV association to obtain for example data about the diversity of devices running the app.",
+		"More info" : "https://github.com/HbbTV-Association/ReferenceApplication"
+	};	
+	var table = createTable(items, true); // left-align table
+	showInfoBox(table);
+}
+
 
 /*****
 Capabilities
