@@ -676,6 +676,21 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 	}
 	
 	try{
+		var broadcast = $("#broadcast")[0];
+		if( !broadcast )
+			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
+		broadcast = $("#broadcast")[0];
+		console.log("Current broadcast.playState="+ broadcast.playState);
+		if( broadcast.playState != 3 ) { // 0=unrealized, 1=connecting, 2=presenting, 3=stopped
+			broadcast.bindToCurrentChannel();
+			broadcast.stop();
+			console.log("broadcast stopped");
+		}
+	} catch(e){
+		console.log("error on broadcast object, this browser does not support it");
+	}
+	
+	try{
 		if( !self.video ){
 			console.log("populate player and create video object");
 			self.populate();
@@ -810,6 +825,12 @@ VideoPlayerEME.prototype.clearVideo = function(){
 			//$("#video").remove(); // clear from dom(note: do not remove elements, reuse to avoid dashjs texttrack errors)
 			//$("#video-caption").remove();
 			this.video = null;
+		}
+		try {
+			if($("#broadcast")[0])
+				$("#broadcast")[0].bindToCurrentChannel();
+		} catch(e){
+			console.log("error on broadcast object, this browser does not support it");
 		}
 	} catch(e){
 		console.log("Error at clearVideo()");

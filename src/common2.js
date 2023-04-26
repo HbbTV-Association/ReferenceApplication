@@ -59,17 +59,17 @@ function getMSEEMECapabilities(){
 		var table = $("<div class='verticalMiddle'></div>");
 		var sKey="UserAgent"; 
 		var sVal = XMLEscape(navigator.userAgent);
-		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
+		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle; border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
 		
 		sKey="MSE";
 		sVal="MediaSource=" + ('MediaSource' in window);
-		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
+		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle; border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
 		
 		sKey="MediaKeys";
 		sVal="MediaKeys="+ ("MediaKeys" in window)
 			+", WebKitMediaKeys="+ ("WebKitMediaKeys" in window)
 			+", MSMediaKeys="+ ("MSMediaKeys" in window);
-		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
+		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle; border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
 				
 		results.forEach(function(result){ // loop OK results
 			if(result.retval==false) return;
