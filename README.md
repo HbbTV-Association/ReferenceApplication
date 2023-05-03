@@ -37,29 +37,31 @@ Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO J
  - Follow [dasher] guide to use dasher tool to create dash media files
  - See [tests] report
 
-### Versions
+## Versions
 
-## Production
+### Production (updated April 2023)
+
  - Updated in line with Test Suite, 3 times a year
- - HbbTV 2.0.x and 1.5 Playready and Marlin DRM streams 
+ - HbbTV 2.0.x and 1.5 Playready and Marlin DRM streams
  - Also non-DRM streams for reference and MSE/EME (dash.js) player for devices without a suitable native player
  - Subtitle and audio stream selection via color buttons
  - Live and VOD DASH profiles
- - available at https://refapp.hbbtv.org/production/
- 
- ## Staging
- - Intended for testing of new features considered stable enough
- - Will be in line with github repository
  - Low latency (multi moof/mdat) Live and VOD DASH
  - Security Level 3000 in Playready with recommendation parameter for license acquisition
  - CBCS Playready content
- - Separate KID values for video and audio in Playready 
+ - Separate KID values for video and audio in Playready
  - Multiperiod DRM and non-DRM tests
+ - available at https://refapp.hbbtv.org/production/catalogue/index.php
+
+### Staging
+
+ - Intended for testing of new features considered stable enough
+ - Will be in line with github repository
  - Multi-DRM tests (Playready and Widevine)
  - Persistent license tests for native players (MSE-EME coming soon)
- - available at https://refapp.hbbtv.org/staging/
+ - available at https://refapp.hbbtv.org/staging/catalogue/index.php
  
-  ## Testing
+### Testing
  - Intended for rolling out new features and signaling
  - Now includes Playready persistent license test for OIPF/HTML5 players (native)
  - Suitable for early testing and feedback
