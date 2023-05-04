@@ -28,7 +28,7 @@ def registerPlayready(drmType, auth, keys, persistent, contentId, algId):
 		,"unknownOutputBehavior"      : "Allow"		
 		,"analogVideoOPL"             : "100" ## or could use .0/.1 for tracks
 		,"compressedDigitalAudioOPL"  : "100"
-		,"compressedDigitalVideoOPL"  : "100"
+		,"compressedDigitalVideoOPL"  : "100" ## or 400?
 		,"uncompressedDigitalAudioOPL": "100"
 		,"uncompressedDigitalVideoOPL": "100"
 	}

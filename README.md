@@ -30,38 +30,36 @@ Issues can be reported here in github (PLEASE REMEMBER TO ASSIGN YOUR ISSUE TO J
 
 ### Usage, testing, installation, integration:
 
- - Test latest stable version of the application at https://refapp.hbbtv.org/production (see versions for more info)
+ - Test latest stable version of the application at https://refapp.hbbtv.org/production/catalogue/index.php (see versions for more info)
  - Follow [installation] guide to get source and set up local version
  - Read API documentation: https://meridian.sofiadigital.fi/tvportal/referenceapp/doc/
  - Follow [integration] guide to integrate videoplayer and/or components to different application
  - Follow [dasher] guide to use dasher tool to create dash media files
  - See [tests] report
 
-## Versions
+### Versions
 
-### Production (updated April 2023)
-
+## Production (updated April 2023)
  - Updated in line with Test Suite, 3 times a year
- - HbbTV 2.0.x and 1.5 Playready and Marlin DRM streams
+ - HbbTV 2.0.x and 1.5 Playready and Marlin DRM streams 
  - Also non-DRM streams for reference and MSE/EME (dash.js) player for devices without a suitable native player
  - Subtitle and audio stream selection via color buttons
  - Live and VOD DASH profiles
  - Low latency (multi moof/mdat) Live and VOD DASH
  - Security Level 3000 in Playready with recommendation parameter for license acquisition
  - CBCS Playready content
- - Separate KID values for video and audio in Playready
+ - Separate KID values for video and audio in Playready 
  - Multiperiod DRM and non-DRM tests
  - available at https://refapp.hbbtv.org/production/catalogue/index.php
-
-### Staging
-
+ 
+ ## Staging
  - Intended for testing of new features considered stable enough
  - Will be in line with github repository
  - Multi-DRM tests (Playready and Widevine)
  - Persistent license tests for native players (MSE-EME coming soon)
  - available at https://refapp.hbbtv.org/staging/catalogue/index.php
  
-### Testing
+  ## Testing
  - Intended for rolling out new features and signaling
  - Now includes Playready persistent license test for OIPF/HTML5 players (native)
  - Suitable for early testing and feedback

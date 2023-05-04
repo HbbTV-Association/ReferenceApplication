@@ -612,11 +612,10 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 * @param (Int) sec: How many seconds is seeked. Positiove integer for forward, negative for rewind.
 	 */
 	this.seek = function( sec ){
-		console.log("seek: " + sec);
+		//console.log("seek: " + sec);
 		var self = this;
-		try{
-			
-			console.log( this.time(), this.seekValue, sec );
+		try{			
+			//console.log( this.time(), this.seekValue, sec );
 			// if seek value goes below zero seconds, do immediate seek
 			if( this.time().position + (this.seekValue + sec) < 0 ){
 				console.log( "seek below starting position. go to start" );
@@ -641,13 +640,12 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			clearTimeout( this.seekTimer );
 			
 			this.seekTimer = setTimeout( function(){
-				console.log("perform seek now!");
+				//console.log("perform seek now!");
 				self.seekTimer = null;
 				try{
 					// if oipf player, form toSeek value absolute
-					var toSeek = (self.timeInMilliseconds? ( self.video.playPosition + (self.seekValue * 1000) ) : self.seekValue);
-					
-					console.log("seekValue: " + self.seekValue);
+					var toSeek = (self.timeInMilliseconds? ( self.video.playPosition + (self.seekValue * 1000) ) : self.seekValue);					
+					//console.log("seekValue: " + self.seekValue);
 					self.video.seek( toSeek );
 					Monitor.videoSeek( self.seekValue );
 					console.log("seek completed to " + toSeek);

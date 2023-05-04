@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 ## Download DASH files: manifest.mpd, init.mp4, 1.m4s, 2.m4s, ...
 ## Versions:
+##   1.4/2023-04-28: find "$Number%05d$" mediaurl with 1..n digit mask
 ##   1.3/2023-04-04: fixed segNumber formula for live edge download
 ##   1.2/2023-03-11: test "$Number%05d$" mediaurl syntax
 ##   1.1/2022-12-08: contentType="image" thumbnail adaptation set
@@ -406,15 +407,17 @@ def appendSegmentUrls(manifest, segTemplate, track, useLiveEdge):
 	sUrlTemplate = sUrlTemplate.replace("$RepresentationID$", track.id)
 	sUrlTemplate = sUrlTemplate.replace("$Bandwidth$", str(track.bitrate))
 
+	##FIXME: support single-segmentfile-indexRange mediafile url format
 	##FIXME: verify live $Number from availabilitityStartTime,currenTime calculation
-	##FIXME: fix "$Number%05d$" syntax
 	numberVar="$Number$"
 	numberFormat="{:0>1d}"
 	delim = sUrlTemplate.find(numberVar)
 	if delim<0:
-		numberVar="$Number%05d$"  ## hardcoded for testing use only
-		numberFormat="{:0>5d}"
-		delim = sUrlTemplate.find(numberVar)
+		for idx in range(1, 8):
+			numberVar   = "$Number%%0%dd$" % (idx) ## "seg-$Number%05d$.m4s"
+			numberFormat= "{:0>%dd}" % (idx)
+			delim = sUrlTemplate.find(numberVar)
+			if delim>=0: break
 
 	elemTimeline = segTemplate.find("SegmentTimeline")
 	if elemTimeline is not None:

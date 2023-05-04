@@ -43,10 +43,10 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		console.log("Error creating dashjs video object ", e.description );
 	}
 
-	var player = this.video;
+	var player = this.video; // HTML5 Video element
 	
 	addEventListeners( player, 'ended abort', function(e){
-		console.log( e.type );
+		console.log(e.type);
 		self.stop();
 	} );
 	
@@ -55,6 +55,8 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		if( !self.video ){
 			return;
 		}
+		
+		console.log(e.type);		
 		try{
 			var errorMessage = "undefined";
 			switch( self.video.error.code ){
@@ -72,11 +74,9 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 					break;
 			}
 			showInfo( "MediaError: " + errorMessage );
-			
 			Monitor.videoError( errorMessage );
 		} catch(e){
-			console.log("error reading video error code");
-			console.log(e.description);
+			console.log("error reading video error code " + e.description);
 		}
 	} );
 	
@@ -86,57 +86,39 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	
 	player.seektimer = null;
 	player.addEventListener('seeked', function(){
-		console.log("Seeked");
-	});
-	
-	player.addEventListener('playing', function(){
-		console.log("playing");
-		if( dialog && dialog.open ){
-			player.pause();
-		}
-	});
+		console.log("seeked");
+	});	
 	
 	var canplay = false;
 	player.addEventListener('canplay', function(){
 		canplay = true;
 		console.log("canplay");
-		
 	} );
 	
 	player.addEventListener('loadedmetadata', function(){
 		//console.log("loadedmetadata");
 	} );
-	
-	player.addEventListener('loadstart', function(){
-		console.log("loadstart");
-		self.setLoading(true);
-	} );
-	
-	addEventListeners( player, "waiting", function(e){ 
-		console.log( e.type );
-		self.setLoading(true);
-	} );
-	
-	addEventListeners( player, "waiting stalled suspend", function(e){ 
-		console.log( e.type );
-	} );
-	
-	addEventListeners( player, 'playing pause emptied', function(e){
-		self.setLoading(false);
-		console.log( e.type );
-	} );
-	
-	
-	player.addEventListener('ended emptied error', function(){
-		self.setLoading(false);
-		Monitor.videoEnded(console.log);
-	} );
-	
-	player.addEventListener('progress', function( e ){
 		
+	addEventListeners( player, "loadstart waiting", function(e){ 
+		console.log(e.type);
+		self.setLoading(true);
 	} );
+	
+	addEventListeners( player, "stalled suspend", function(e){ 
+		console.log(e.type);
+	} );
+	
+	addEventListeners( player, 'emptied', function(e){
+		console.log(e.type);
+		self.setLoading(false);		
+	} );	
+	
+	//player.addEventListener('progress', function( e ){
+	//	//no-op
+	//} );
 	
 	player.addEventListener('pause', function(){
+		console.log("pause");
 		Monitor.videoPaused(); 
 		self.setLoading(false);
 		$("#ppauseplay").removeClass("pause").addClass("play");
@@ -244,7 +226,14 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	}
 	
 	player.addEventListener('playing', function(){
-		console.log("video playing");
+		console.log("playing");
+		self.setLoading(false);
+
+		if(dialog && dialog.open) {
+			player.pause(); // resume_play dialog still open
+			return;
+		}
+		
 		if( self.firstPlay ){
 			self.firstPlay = false;
 			self.displayPlayer( 5 );
@@ -306,7 +295,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 		}
 		Monitor.videoPlaying();
 		self.setLoading(false);
-		$("#ppauseplay").removeClass("play").addClass("pause");
+		$("#ppauseplay").removeClass("play").addClass("pause");		
 	} );
 	
 	
@@ -328,8 +317,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 				return;
 			
 			console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-			// Set position
-			player.currentTime = target;
+			player.currentTime = target; // set position
 		} catch(e){
 			console.log("error seeking: " + e.description);
 		}

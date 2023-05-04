@@ -101,8 +101,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 					errorMessage = "audio/video not supported";
 					break;
 			}
-			showInfo( "MediaError: " + errorMessage );
-			
+			showInfo( "MediaError: " + errorMessage );			
 			Monitor.videoError( errorMessage );
 		} catch(e){
 			console.log("error reading video error code");
@@ -127,14 +126,9 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	player.addEventListener('loadedmetadata', function(){
 		//console.log("loadedmetadata");
 	} );
-	
-	player.addEventListener('loadstart', function(){
-		console.log("loadstart");
-		self.setLoading(true);
-	} );
-	
-	addEventListeners( player, "waiting", function(e){ 
-		console.log( e.type );
+		
+	addEventListeners( player, "loadstart waiting", function(e){ 
+		console.log(e.type);
 		self.setLoading(true);
 	} );
 	
@@ -142,20 +136,14 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		console.log( e.type );
 	} );
 	
-	addEventListeners( player, 'playing pause emptied', function(e){
+	addEventListeners( player, 'emptied', function(e){
 		self.setLoading(false);
-		console.log( e.type );
+		console.log(e.type);
 	} );
-	
-	
-	player.addEventListener('ended emptied error', function(){
-		self.setLoading(false);
-		Monitor.videoEnded(console.log);
-	} );
-	
-	player.addEventListener('progress', function( e ){
 		
-	} );
+	//player.addEventListener('progress', function( e ){
+	//	// no-op
+	//} );
 	
 	player.addEventListener('pause', function(){
 		Monitor.videoPaused(); 
@@ -273,8 +261,9 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		
 	player.addEventListener('playing', function(){
 		console.log("playing");
+		self.setLoading(false);
 		
-		if( dialog.open ){
+		if(dialog && dialog.open) {
 			player.pause();
 			return;
 		}
@@ -350,8 +339,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 				return;
 			
 			console.log("position: " + player.currentTime + "s. seek "+sec+"s to " + target);
-			// Set position 
-			player.currentTime = target;
+			player.currentTime = target; // set position
 		} catch(e){
 			console.log("error seeking: " + e.description);
 		}

@@ -28,6 +28,11 @@ You may use urls as LAURL address for dash players.
 
 Download dash manifest and segment files.
 
+`test/multiperiod_NN.php`
+
+Multiperiod simulator, see `common.php, multiperiod_NN.php, multiperiod_NAME.json`
+files. Script provides a live and static manifest with multiple advert breaks.
+
 ### editor
 
 Simple html editor for src/catalogue/config.json menu file. Deploy all editor files inside 

@@ -417,11 +417,11 @@ window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
 // adds event listener (action) for multiple (events) "separated by space" for object (obj) 
-function addEventListeners( obj, events, action ){
-	$.each(events.split(" "), function(i,event){
-		obj.addEventListener( event, action );		
-	});
-}
+//function addEventListeners( obj, events, action ){
+//	$.each(events.split(" "), function(i,event){
+//		obj.addEventListener( event, action );		
+//	});
+//}
 
 function addZeroPrefix(n){
 	return ("0" + n).slice(-2);
