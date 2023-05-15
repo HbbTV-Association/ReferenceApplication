@@ -42,8 +42,6 @@
 		include_once("resources.php"); 
 	?>
 	
-	<!-- yobora integration test -->
-	<script type="text/javascript" src="//smartplugin.youbora.com/v5/javascript/hbbtv-html5/5.3.0/sp.min.js" youbora-debug="4"></script>
 	<script onload="odd.init('sofia')" src="https://odd.dtv.fi/odd.js"></script>
 </head>
 <body onload="onLoad();">

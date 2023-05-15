@@ -34,6 +34,7 @@ VideoPlayer.prototype.createPlayer = function(){
 			+'<div id="pff"></div>'
 			+'<div id="subtitleButton"><div id="subtitleButtonText">Subtitles</div></div>'
 			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
+			+'<div id="playText"></div>'
 			+'</div>');
 		console.log("Add player component");
 	}
@@ -320,14 +321,14 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ laUrl +'</URL></RightsIssuer></RightsURL></Marlin>';
 	} else if(this.drm.system.indexOf("widevine")===0) {
-		var msgType = "application/widevine+xml";
+		var msgType = "application/widevine+xml"; // "application/smarttv-alliance.widevine+xml"
 		var DRMSysID = "urn:dvb:casystemid:19156";
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<WidevineCredentialsInfo xmlns="http://www.smarttv-alliance.org/DRM/widevine/2012/protocols/">' +
 		'<ContentURL>' + XMLEscape(this.url) +'</ContentURL>' +
-		'<DRMServerURL>' + XMLEscape(laUrl) + '</DRMServerURL>' +
 		'<DeviceID></DeviceID><StreamID></StreamID><ClientIP></ClientIP>' +
+		'<DRMServerURL>' + XMLEscape(laUrl) + '</DRMServerURL>' +
 		'<DRMAckServerURL></DRMAckServerURL><DRMHeartBeatURL></DRMHeartBeatURL>' +
 		'<DRMHeartBeatPeriod></DRMHeartBeatPeriod>' +
 		'<UserData></UserData>' +

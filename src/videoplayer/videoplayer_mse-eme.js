@@ -30,6 +30,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 			+'<div id="pff"></div>'
 			+'<div id="subtitleButton"><div id="subtitleButtonText">Subtitles</div></div>'
 			+'<div id="audioButton"><div id="audioButtonText">Audio</div></div>'
+			+'<div id="playText"></div>'
 			+'</div>'
 			);
 		console.log("Add player component");
@@ -156,7 +157,7 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	var SCHEME_ID_URI = "http://hbbtv.org/refapp";
 	var fnEvent = function(evt) {
 		var cueValue = uint8ArrayToString(evt.event.messageData);
-		var info = "startTime="+evt.event.calculatedPresentationTime + ", duration="+evt.event.duration;
+		var info = "time="+evt.event.calculatedPresentationTime + ", dur="+evt.event.duration;
 		info    += ", "+evt.event.eventStream.schemeIdUri + ", "+ evt.event.eventStream.value;
 		info    += ", id="+evt.event.id+", " + cueValue;
 		console.log("EVENT.START "+info);
@@ -538,12 +539,12 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			,"com.widevine.alpha": { "priority":99 }
 		});			
 	}
-	else if( this.drm.system.indexOf("playready.recommendation")===0 
-			|| this.drm.system.indexOf("playready.")===0 ){
+	else if( this.drm.system.indexOf("playready.recommendation")==0 
+			|| this.drm.system.indexOf("playready.")==0 ){
 		// playready.HW, playready.recommendation.SL3000, playready.recommendation.SL2000, playready.recommendation.SL150
 		// Trick DashJS to use a new "com.microsoft.playready.recommendation" systemId,
 		// this is supported in a recent MSEdge and SmartTVs.
-		var useRecommendationSys = this.drm.system.indexOf("playready.recommendation")===0;
+		var useRecommendationSys = this.drm.system.indexOf("playready.recommendation")==0;
 		var secLevel = this.drm.system.indexOf(".SL3000")>0 ? "3000" // best
 			: this.drm.system.indexOf(".3000")>0            ? "3000"
 			: this.drm.system.indexOf(".HW")>0              ? "3000"
@@ -588,7 +589,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 		if(msgFormat!="") {
 			var keySystems = self.player.getProtectionController().getKeySystems();
 			for(var idx=0; idx<keySystems.length; idx++) {
-				if(keySystems[idx].systemString.indexOf("com.microsoft.playready")===0)
+				if(keySystems[idx].systemString.indexOf("com.microsoft.playready")==0)
 					keySystems[idx].setPlayReadyMessageFormat(msgFormat);
 			}
 			console.log("Use playready message format " + msgFormat);
@@ -604,7 +605,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
 			}
 		});
-	} else if(this.drm.system.indexOf("widevine")===0) {
+	} else if(this.drm.system.indexOf("widevine")==0) {
 		// widevine, widevine.HW, widevine.SL1, widevine.SL2, widevine.SL3, also "widevine.SL1D"
 		// security level(best to worst): Widevine 1,2,3 | EME 5,4,3,2,1
 		var secLevel = this.drm.system.indexOf(".SL1")>0 ? "HW_SECURE_ALL"  // best

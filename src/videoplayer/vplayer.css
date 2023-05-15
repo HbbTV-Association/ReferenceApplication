@@ -297,6 +297,13 @@
 	background-position: -30px 0px !important;
 }
 
+#player > #playText {
+    position: absolute;
+    left: 75px;	bottom: 40px;
+    width: 800px; height: 30px;
+    line-height: 30px; text-align: left; font-size: 21px;
+}
+
 /* Player controls */
 
 #playerControls {

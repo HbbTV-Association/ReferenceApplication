@@ -77,6 +77,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 */
 	this.displayPlayer = function( sec ){
 		console.log("VideoPlayerBasic - displayPlayer");
+		$("#player>#playText").text(this.currentItem.title);
 		clearTimeout( this.hidePlayerTimer );
 		$("#player").removeClass("hide");
 		$("#player").addClass("show");

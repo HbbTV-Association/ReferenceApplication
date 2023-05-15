@@ -18,8 +18,20 @@ function getMSEEMECapabilities(){
 		"contentType": "video/mp4;codecs=\"avc1.4D401E\"" // avc1.42E01E = ConstrainedLevel3, 4D401E=MainLevel3
 		//,"robustness": "3000"
 	  }]
-	}];			
-
+	}];
+	
+	// scheme=cenc,cbcs,cbcs-19
+	var keySysConfigCbcs19 = [{
+	  "videoCapabilities": [{
+		"contentType": "video/mp4;codecs=\"avc1.4D401E\""
+		, "encryptionScheme": "cbcs-1-9"
+	  }],
+	  "audioCapabilities": [{
+		  "contentType": "audio/mp4;codecs=\"mp4a.40.2\""
+		  , "encryptionScheme": "cbcs-1-9"
+	  }]
+	}];
+	
 	var keySystems = {
 	  playready: ['com.microsoft.playready.recommendation', 'com.microsoft.playready'
 		, 'com.microsoft.playready.hardware' ],
@@ -30,7 +42,8 @@ function getMSEEMECapabilities(){
 		, 'com.apple.fps.1_0', 'com.apple.fps.2_0', 'com.apple.fps.3_0']
 	};
 
-	console.log("Invoke TestEME async functions");	
+	console.log("Invoke TestEME async functions");
+	var retvalProps={};
 	const promTasks=[];
 	if(navigator.requestMediaKeySystemAccess) {
 		for(let keyArr in keySystems) {
@@ -48,6 +61,16 @@ function getMSEEMECapabilities(){
 					}			
 				});
 				promTasks.push(promTask);
+				
+				promTask= navigator.requestMediaKeySystemAccess(sKeySys, keySysConfigCbcs19).
+				then(function(mediaKeySystemAccess) {
+					retvalProps[sKeySys+"_CBCS-1-9"]=true;
+					return null;
+				}).catch(function(ex) {
+					retvalProps[sKeySys+"_CBCS-1-9"]=false;
+					return null;
+				});
+				promTasks.push(promTask);
 			}
 		}
 	} else {
@@ -60,25 +83,24 @@ function getMSEEMECapabilities(){
 		var sKey="UserAgent"; 
 		var sVal = XMLEscape(navigator.userAgent);
 		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle; border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
-		
+
 		sKey="MSE";
-		sVal="MediaSource=" + ('MediaSource' in window);
-		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle; border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
-		
-		sKey="MediaKeys";
-		sVal="MediaKeys="+ ("MediaKeys" in window)
+		sVal="MediaSource="+ ('MediaSource' in window)
+			+", MediaKeys="+ ("MediaKeys" in window)
 			+", WebKitMediaKeys="+ ("WebKitMediaKeys" in window)
 			+", MSMediaKeys="+ ("MSMediaKeys" in window);
 		table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle; border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
-				
+						
 		results.forEach(function(result){ // loop OK results
-			if(result.retval==false) return;
-			var sKey=result.key; var sVal = result.keySystem + " supported";
+			if(!result || result.retval==false) return;
+			var sKey=result.key;
+			var sVal = result.keySystem + " supported";			
+			sVal += ", CBCS-1-9="+retvalProps[result.keySystem+"_CBCS-1-9"];			
 			console.log(sKey+":"+sVal);
 			table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
 		});
 		results.forEach(function(result){ // loop ERROR results
-			if(result.retval==true || result.keySystem=="unknown") return;
+			if(!result || result.retval==true || result.keySystem=="unknown") return;
 			var sKey=result.key; var sVal = result.keySystem + " not supported ("+result.message+")";
 			console.log(sKey+":" + sVal);
 			table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");

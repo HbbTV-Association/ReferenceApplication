@@ -27,7 +27,7 @@
 	<!-- List all css and js resource files or minified and combined resource files -->
 	<?php 
 		$profileResources = "oipf"; // additional resources
-		include("resources.php"); 
+		include_once("resources.php"); 
 	?>
 	
 <script type="text/javascript" language="javascript">
