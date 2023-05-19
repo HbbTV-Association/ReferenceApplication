@@ -77,7 +77,14 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 */
 	this.displayPlayer = function( sec ){
 		console.log("VideoPlayerBasic - displayPlayer");
-		$("#player>#playText").text(this.currentItem.title);
+		if(this.currentItem) {
+			$("#player>#playText").text(this.currentItem.title);
+			console.log("Current item=" + this.currentItem.title
+				+"\n"+this.currentItem.url
+				+"\ndrm="+this.currentItem.drm + " " + this.currentItem.la_url);
+		} else {
+			$("#player>#playText").text("");
+		}
 		clearTimeout( this.hidePlayerTimer );
 		$("#player").removeClass("hide");
 		$("#player").addClass("show");

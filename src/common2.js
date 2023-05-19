@@ -20,20 +20,32 @@ function getMSEEMECapabilities(){
 	  }]
 	}];
 	
-	// scheme=cenc,cbcs,cbcs-19
-	var keySysConfigCbcs19 = [{
+	// clone this config to schemes "cenc","cbcs","cbcs-19"
+	var keySysConfigScheme = [{
 	  "videoCapabilities": [{
 		"contentType": "video/mp4;codecs=\"avc1.4D401E\""
-		, "encryptionScheme": "cbcs-1-9"
+		, "encryptionScheme": "todovalue"
 	  }],
 	  "audioCapabilities": [{
 		  "contentType": "audio/mp4;codecs=\"mp4a.40.2\""
-		  , "encryptionScheme": "cbcs-1-9"
+		  , "encryptionScheme": "todovalue"
 	  }]
-	}];
+	  //,"initDataTypes": ["keyids"]
+	}];	
 	
+	var propKeys = new Array("cenc","cbcs","cbcs-1-9");
+	var propConfigs = {};
+	for(var idx=0; idx<propKeys.length; idx++) {
+		var kscfg = JSON.parse(JSON.stringify(keySysConfigScheme)); // deep-clone json obj
+		kscfg[0].videoCapabilities[0].encryptionScheme=propKeys[idx];
+		kscfg[0].audioCapabilities[0].encryptionScheme=propKeys[idx];
+		propConfigs[propKeys[idx]]=kscfg;
+	}	
+	
+	// com.microsoft.playready.recommendation.3000=HWDRM, com.microsoft.playready.recommendation=SWDRM	
 	var keySystems = {
-	  playready: ['com.microsoft.playready.recommendation', 'com.microsoft.playready'
+	  playready: ['com.microsoft.playready.recommendation', 'com.microsoft.playready.recommendation.3000'
+	    , 'com.microsoft.playready'
 		, 'com.microsoft.playready.hardware' ],
 	  widevine: ['com.widevine.alpha'],
 	  clearkey: ['org.w3.clearkey', 'webkit-org.w3.clearkey' ],
@@ -62,15 +74,17 @@ function getMSEEMECapabilities(){
 				});
 				promTasks.push(promTask);
 				
-				promTask= navigator.requestMediaKeySystemAccess(sKeySys, keySysConfigCbcs19).
-				then(function(mediaKeySystemAccess) {
-					retvalProps[sKeySys+"_CBCS-1-9"]=true;
-					return null;
-				}).catch(function(ex) {
-					retvalProps[sKeySys+"_CBCS-1-9"]=false;
-					return null;
-				});
-				promTasks.push(promTask);
+				for(let propKey in propConfigs) {
+					promTask= navigator.requestMediaKeySystemAccess(sKeySys, propConfigs[propKey]).
+					then(function(mediaKeySystemAccess) {
+						retvalProps[sKeySys+"_"+propKey]=true;
+						return null;
+					}).catch(function(ex) {
+						retvalProps[sKeySys+"_"+propKey]=false;
+						return null;
+					});
+					promTasks.push(promTask);
+				}
 			}
 		}
 	} else {
@@ -94,8 +108,11 @@ function getMSEEMECapabilities(){
 		results.forEach(function(result){ // loop OK results
 			if(!result || result.retval==false) return;
 			var sKey=result.key;
-			var sVal = result.keySystem + " supported";			
-			sVal += ", CBCS-1-9="+retvalProps[result.keySystem+"_CBCS-1-9"];			
+			var sVal = result.keySystem + " supported";
+			for(var idx=0; idx<propKeys.length; idx++) {
+				var propKey = propKeys[idx];
+				sVal += ", "+propKey.toUpperCase()+"="+retvalProps[result.keySystem+"_"+propKey];
+			}					
 			console.log(sKey+":"+sVal);
 			table.append("<div style='display: table-row;background:rgba(0,0,0,0.9);'><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+sKey+"</div><div style='display: table-cell;vertical-align: middle;word-break: break-all;border: 1px solid white;text-align:left !important;'>"+ sVal +"</div></div>");
 		});
