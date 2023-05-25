@@ -210,7 +210,7 @@ VideoPlayer.prototype.setSubtitles = function( subtitles ){
 };
 
 VideoPlayer.prototype.clearLicenseRequest = function(callback){
-	console.log("clearLicenseRequest()");
+	console.log("Clear DRM License, time: "+getYMDHMS(null));
 	
 	// if drm object exists set an empty acquisition
 	this.oipfDrm = $("#oipfDrm")[0];	
@@ -226,7 +226,7 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 	if(!this.drm || !this.drm.system) {
 		callback();
 		return;
-	} else if(this.drm.system.indexOf("playready")===0) {
+	} else if(this.drm.system.indexOf("playready")==0) {
 		msgType = "application/vnd.ms-playready.initiator+xml";
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
@@ -242,7 +242,7 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL></URL></RightsIssuer></RightsURL></Marlin>';
 		var DRMSysID = "urn:dvb:casystemid:19188";
 	}
-	else if(this.drm.system.indexOf("widevine")===0) {
+	else if(this.drm.system.indexOf("widevine")==0) {
 		msgType = "application/widevine+xml";
 		var DRMSysID = "urn:dvb:casystemid:19156";
 		var xmlLicenceAcquisition =
@@ -266,27 +266,28 @@ VideoPlayer.prototype.clearLicenseRequest = function(callback){
 	try {
 		this.oipfDrm.onDRMMessageResult = callback;
 	} catch (e) {
-		console.log("sendLicenseRequest Error 1: " + e.message );
+		console.log("clearLicenseRequest Error 1: " + e.message );
 	}
 	try {
 		this.oipfDrm.onDRMRightsError = callback;
 	} catch (e) {
-		console.log("sendLicenseRequest Error 2: " + e.message );
+		console.log("clearLicenseRequest Error 2: " + e.message );
 	}
 	try {
+		console.log("clearLicenseRequest type: "+ msgType + ", sysId: "+DRMSysID);
 		var msgId=-1;
 		if(msgType!="")
 			msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-		console.log( this.drm.system+" drm data cleared, msgId: " + msgId );
+		console.log("clearLicenseRequest drmMsgId: " + msgId);
 	} catch (e) {
-		console.log("sendLicenseRequest Error 3: " + e.message );
+		console.log("clearLicenseRequest Error 3: " + e.message );
 		callback();
 	}
 	
 };
 
 VideoPlayer.prototype.sendLicenseRequest = function(callback){
-	console.log("sendLicenseRequest()");
+	console.log("Send DRM License, time: "+getYMDHMS(null));
 	createOIPFDrmAgent(); // see common.js
 	this.oipfDrm = $("#oipfDrm")[0];
 	
@@ -302,7 +303,7 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		delete self.drm.la_url_guid;
 	}
 	
-	if(this.drm.system.indexOf("playready")===0) {
+	if(this.drm.system.indexOf("playready")==0) {
 		var msgType = "application/vnd.ms-playready.initiator+xml";
 		var DRMSysID = "urn:dvb:casystemid:19219";
 		var xmlLicenceAcquisition =
@@ -320,7 +321,7 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		var xmlLicenceAcquisition =
 		'<?xml version="1.0" encoding="utf-8"?>' +
 		'<Marlin xmlns="http://marlin-drm.com/epub"><Version>1.1</Version><RightsURL><RightsIssuer><URL>'+ laUrl +'</URL></RightsIssuer></RightsURL></Marlin>';
-	} else if(this.drm.system.indexOf("widevine")===0) {
+	} else if(this.drm.system.indexOf("widevine")==0) {
 		var msgType = "application/widevine+xml"; // "application/smarttv-alliance.widevine+xml"
 		var DRMSysID = "urn:dvb:casystemid:19156";
 		var xmlLicenceAcquisition =
@@ -348,10 +349,11 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		console.log("sendLicenseRequest Error 2: " + e.message );
 	}
 	try {
+		console.log("sendLicenseRequest type: "+ msgType + ", sysId: "+DRMSysID);
 		var msgId = this.oipfDrm.sendDRMMessage(msgType, xmlLicenceAcquisition, DRMSysID);
-		console.log("sendLicenseRequest msgId: " + msgId);
+		console.log("sendLicenseRequest drmMsgId: " + msgId);
 	} catch (e) {
-		console.log("sendLicenseRequest Error 3: " + e.message );
+		console.log("sendLicenseRequest Error 3: " + e.message);
 		setTimeout( function(){
 			self.clearVideo();
 			showInfo(e.message);
@@ -497,7 +499,6 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 	setOIPFActiveDRM(self.currentItem);
 	
 	if( this.drm && this.drm.ready == false ){
-		console.log("Send DRM License acquisition");
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
@@ -614,11 +615,10 @@ VideoPlayer.prototype.stop = function(){
 	
 	try{
 		self.video.stop();
-		console.log( "video stop succeed" );
+		console.log( "video.stop succeed" );
 		self.clearVideo();
-		console.log( "clear video succeed" );
+		console.log( "clearVideo succeed" );
 		self.resetProgressBar();
-		console.log( "reset progressBar succeed" );
 	} catch(ex) {
 		console.log(ex);
 	}

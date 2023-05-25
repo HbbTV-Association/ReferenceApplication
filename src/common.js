@@ -40,6 +40,28 @@ Date.prototype.getMonthString = function(){
 	return months[this.getMonth()];
 }
 
+function getYMDHMS(objDate) {
+	if(!objDate) objDate=new Date();
+	var arrYMD = new Array();
+	arrYMD[0] = objDate.getFullYear();
+	arrYMD[1] = objDate.getMonth()+1;
+	arrYMD[2] = objDate.getDate();		  
+	var arrHMS = new Array();
+	arrHMS[0] = objDate.getHours();
+	arrHMS[1] = objDate.getMinutes();
+	arrHMS[2] = objDate.getSeconds();
+	return ( 
+		(arrYMD[0] < 10 ? "0" + arrYMD[0] : arrYMD[0]) + "-" +
+		(arrYMD[1] < 10 ? "0" + arrYMD[1] : arrYMD[1]) + "-" +
+		(arrYMD[2] < 10 ? "0" + arrYMD[2] : arrYMD[2]) +
+		"T" +
+		(arrHMS[0] < 10 ? "0" + arrHMS[0] : arrHMS[0]) + ":" +
+		(arrHMS[1] < 10 ? "0" + arrHMS[1] : arrHMS[1]) + ":" +
+		(arrHMS[2] < 10 ? "0" + arrHMS[2] : arrHMS[2])
+	);
+}
+
+
 /**
  * Extends Array to support sortBy, which sorts an array of objects by given attributes
  * If secondary or more attributes are given and previous attribute comparison is equal, the next attribute is compared in given priority sorting order
