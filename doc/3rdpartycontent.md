@@ -15,4 +15,6 @@ HbbTV is happy to extend its DASH-DRM reference application to include reference
 
 The user interface of our DASH-DRM reference app consists of a number of tabs. Our current idea is to have a tab for third party streams in the style of the current tabs across the top of the screen. This tab would be on the far right hand end of our current tabs.
 
+![Tab structure of the Reference Application](tabs.png "Reference Application UI")
+
 A dedicated tab for streams from a particular company could also be considered if that company would make a significant number of streams available.
