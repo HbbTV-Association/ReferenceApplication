@@ -15,6 +15,8 @@ Application provides test cases and test material done with tools included in [t
 - Live DASH with multi mood/mdat signaling
 - MultiPeriod DASH
 
+HbbTV Association is happy to accept content contributions to be included in the Reference Application. Please see [3rdpartycontent] for further details.
+
 The software is under continuous development and licensed with MIT License.
 
 ## Disclaimer and data collection
@@ -101,3 +103,4 @@ Overall menu structure or datamodel is documented here: [datamodel]
 [config.json]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/src/catalogue/config.json>
 [dasher]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/dasher.md>
 [tests]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/refapp_test.txt>
+[3rdpartycontent]: <https://github.com/HbbTV-Association/ReferenceApplication/blob/master/doc/3rdpartycontent.md>

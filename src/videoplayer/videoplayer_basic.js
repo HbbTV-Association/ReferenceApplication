@@ -705,7 +705,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 				if( this.current !== null ){
 					this.deleteCurrent();
 					 this.current = null;
-					 console.log("deleted record for video " + videoid);
+					 //console.log("deleted record for video " + videoid);
 				}
 				//console.log("play positio not saved. too close to end");
 				return;
@@ -713,7 +713,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			var item = null;
 			if( this.current === null && videoid ){
-				console.log("create watched new item");
+				//console.log("create watched new item");
 				item = { videoid : videoid, position : time, duration : duration };
 			}
 			else if( this.current !== null ){
@@ -726,7 +726,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			
 			// new item was not before in the list
 			if( item ){
-				console.log("new item to first slot of the list");
+				//console.log("new item to first slot of the list");
 				this.list.unshift( item );
 				this.current = 0;
 				// if list is full drop off last

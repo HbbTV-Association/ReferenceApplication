@@ -82,7 +82,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	} );
 	
 	player.addEventListener('play', function(){ 
-		console.log("video play event triggered");
+		//console.log("video play event triggered");
 	} );
 	
 	player.seektimer = null;
@@ -668,7 +668,7 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 		switch (resultCode) {
 			case 0:
 				self.drm.ready = true;
-				console.log("call self.drm.successCallback()");
+				//console.log("call self.drm.successCallback()");
 				self.drm.successCallback();
 			break;
 			case 1:
@@ -719,8 +719,9 @@ VideoPlayerHTML5.prototype.sendLicenseRequest = function(callback){
 };
 
 
-VideoPlayerHTML5.prototype.startVideo = function(isLive) {
+VideoPlayerHTML5.prototype.startVideo = function(isLive, ntCall) {
 	var self = this;
+	if(!ntCall) ntCall=0; // 0=initial, 1=afterDrmLaurlOverride
 	console.log("startVideo(), " + self.currentItem.title);
 	this.subtitleTrack = false
 	
@@ -791,14 +792,14 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive) {
 			return; // return startVideo(). after prerolls this is called again
 		}
 	}	
-	
-	setOIPFActiveDRM(self.currentItem);
+
+	if(ntCall==0) setOIPFActiveDRM(self.currentItem);
 	
 	if( this.drm && this.drm.ready == false ){
 		this.sendLicenseRequest( function( response ){
 			console.log("License ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo(isLive); // async 2nd call
+				self.startVideo(isLive, ntCall+1); // async 2nd call
 			} else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );
 			} else {

@@ -71,7 +71,7 @@ public class SubtitleInserter {
 				Utils.getString(params, "urlprefix", "", true),
 				"", false,
 				Utils.getString(params, "segname", "number", true),
-				Utils.getLong(params, "timelimit", -1) // read X seconds from start
+				Utils.getString(params, "timelimit", "", true) // read X seconds from start
 				); // "../" for drm/manifest.mpd file
 		}	
 	}
@@ -133,7 +133,7 @@ public class SubtitleInserter {
 	 * @param urlPrefix		url prefix for init+media files, use "../" for drm manifests
 	 * @param isSingleSeg   use single segment(not implemented yet)
 	 * @param segname		number,time,number-timeline,time-timeline
-	 * @param timeLimit		seconds of subtitle track to read or -1 to read a full ttml file
+	 * @param timeLimit		seconds of subtitle track to read or "" to read a full ttml file
 	 * @throws Exception
 	 */
 	public static void insertIB(File subFile, File manifestFile, File outputFile,
@@ -141,7 +141,7 @@ public class SubtitleInserter {
 			String lang, String repId, int asId, boolean createSegs, int segdur,
 			boolean deletetempfiles, String urlPrefix,
 			String cmaf, boolean isSingleSeg,
-			String segname, long timeLimit) throws Exception {
+			String segname, String timeLimit) throws Exception {
 		if (createSegs) {
 			if (!subFile.exists())
 				throw new FileNotFoundException(subFile.getAbsolutePath() + " not found");
@@ -161,7 +161,7 @@ public class SubtitleInserter {
 			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, lang);
 			if(logger!=null) logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, tempOutput.getParentFile());
-			if (timeLimit>0) {
+			if (!timeLimit.isEmpty()) {
 				args=MediaTools.getTrimMp4Args(tempOutput, tempOutput, timeLimit); 
 				if(logger!=null) logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 				MediaTools.executeProcess(args, tempOutput.getParentFile());

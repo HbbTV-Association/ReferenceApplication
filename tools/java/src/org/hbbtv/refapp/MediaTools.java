@@ -80,6 +80,10 @@ public class MediaTools {
 		val = Utils.getString(params, "gopdur", "2", true);
 		if(val.equalsIgnoreCase("auto")) val="0";
 		params.put("gopdur",""+( (int)(Double.parseDouble(val)*1000) ));
+
+		val = Utils.getString(params, "timelimit", "", true); // N int or N.MILLIS float seconds 139, 139.640   
+		if(val.equals("-1") || val.equals("0"))
+			params.put("timelimit", "");
 		
 		// manifest profile
 		val = Utils.getString(params, "profile", "", true);
@@ -93,7 +97,7 @@ public class MediaTools {
 
 	public static List<String> getTranscodeH264Args(StreamSpec spec, 
 				int fps, boolean forceFps, int gopdur, int segdur, 
-				String overlayOpt, long timeLimit, int ver) {
+				String overlayOpt, String timeLimit, int ver) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
 		
@@ -141,14 +145,14 @@ public class MediaTools {
 		String val     = overlay+","+scale+","+format;
 		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
 		
-		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
+		updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);
 		removeEmptyOpt(args);
 		return args;
 	}
 
 	public static List<String> getTranscodeH265Args(StreamSpec spec, 
 			int fps, boolean forceFps, int gopdur, int segdur, 
-			String overlayOpt, long timeLimit, int ver) {
+			String overlayOpt, String timeLimit, int ver) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
 		
@@ -212,12 +216,12 @@ public class MediaTools {
 		String val     = overlay+","+scale+","+format;
 		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
 
-		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
+		updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);		
 		removeEmptyOpt(args);
 		return args;
 	}
 	
-	public static List<String> getTranscodeAudioArgs(StreamSpec spec, long timeLimit) {
+	public static List<String> getTranscodeAudioArgs(StreamSpec spec, String timeLimit) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
 		
@@ -236,8 +240,11 @@ public class MediaTools {
 			"-af", "aresample="+ spec.sampleRate, // rate 48000, 44100
 			"-ar", ""+spec.sampleRate,
 			"-ac", ""+spec.channels,	// channel count 2..n
-			// initial_moov=100% fragmented output, don't use empty_moov flag for ac3,eac3 
-			"-movflags", ( codec.equals("aac")? "empty_moov+negative_cts_offsets+faststart" : "negative_cts_offsets+faststart" ), 			
+			// initial_moov=100% fragmented output, don't use empty_moov flag for ac3,eac3
+			// use movflags=delaymoov useeditlist=0
+			//"-movflags", ( codec.equals("aac")? "empty_moov+negative_cts_offsets+faststart" : "negative_cts_offsets+faststart" ), 			
+			"-movflags", ( codec.equals("aac")? "delay_moov+negative_cts_offsets+faststart" : "negative_cts_offsets+faststart" ),			
+			"-use_editlist", "0",
 			"-vn", "-sn",
 			"-metadata:s:a:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",			
 			"-t", "${timelimit}",	// read X seconds or "hh:mm:ss"
@@ -245,7 +252,7 @@ public class MediaTools {
 		);
 		args = new ArrayList<String>(args);
 		
-		updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
+		updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);
 		removeEmptyOpt(args);
 		return args;
 	}
@@ -387,7 +394,7 @@ public class MediaTools {
 		return args;
 	}
 
-	public static List<String> getTrimMp4Args(File inputFile, File outputFile, long timeLimit) {
+	public static List<String> getTrimMp4Args(File inputFile, File outputFile, String timeLimit) {
 		// see SubtitleInserter.java
 		List<String> args=Arrays.asList(MP4BOX,
 			"-splitx", "0:"+timeLimit,	// trim 0-XX seconds 

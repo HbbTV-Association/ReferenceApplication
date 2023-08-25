@@ -367,7 +367,7 @@ VideoPlayer.prototype.sendLicenseRequest = function(callback){
 		switch (resultCode) {
 			case 0:
 				self.drm.ready = true;
-				console.log("call self.drm.successCallback()");
+				//console.log("call self.drm.successCallback()");
 				self.drm.successCallback();
 			break;
 			case 1:
@@ -469,8 +469,9 @@ VideoPlayer.prototype.setSubtitles = function(){
 };
 
 
-VideoPlayer.prototype.startVideo = function( isLive ){
+VideoPlayer.prototype.startVideo = function(isLive, ntCall) {
 	var self = this;
+	if(!ntCall) ntCall=0; // 0=initial, 1=afterDrmLaurlOverride
 	console.log("startVideo(), " + self.currentItem.title);
 	
 	this.resetProgressBar(); // always reset progress bar	
@@ -495,14 +496,14 @@ VideoPlayer.prototype.startVideo = function( isLive ){
 	} catch(e){
 		console.log("error stopping broadcast");
 	}
-	
-	setOIPFActiveDRM(self.currentItem);
+
+	if(ntCall==0) setOIPFActiveDRM(self.currentItem);	
 	
 	if( this.drm && this.drm.ready == false ){
 		this.sendLicenseRequest( function( response ){
 			console.log("license ready ", self.drm);
 			if( self.drm.ready ){
-				self.startVideo(isLive); // async 2nd call
+				self.startVideo(isLive, ntCall+1); // async 2nd call
 			} else if( self.drm.error ){
 				showInfo( "Error: " + self.drm.error );
 			} else{
@@ -899,17 +900,11 @@ VideoPlayer.prototype.enableSubtitles = function( next ) {
 	try{
 		if( next ){
 			console.log("current track: " + this.subtitleTrack  );
-			if( this.subtitleTrack == undefined || this.subtitleTrack == NaN ){
-				console.log("Change NaN to 0"  );
+			if(!this.subtitleTrack || this.subtitleTrack == undefined || this.subtitleTrack == NaN){
 				this.subtitleTrack = 0;
-			}
-			if( this.subtitleTrack === false ){
-				this.subtitleTrack = 0;
-			}
-			else{
+			} else {
 				this.subtitleTrack++;
-			}
-			
+			}			
 			console.log("switched track: " + this.subtitleTrack  );
 		}
 		switch ( this.video.playState) {

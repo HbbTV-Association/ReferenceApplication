@@ -208,7 +208,7 @@ public class Dasher {
 			}
 			specs.addAll(newSpecs);
 
-			long timeLimit = Utils.getLong(params, "timelimit", -1); // read X seconds from start
+			String timeLimit = Utils.getString(params, "timelimit", "", true); // read X seconds from start (139, 139.640)
 			String overlayOpt = Utils.getString(params, "overlay", "0", true); // 1=enabled, 0=disabled
 			
 			String origFps  = Utils.getString(meta, "videoFPS", "25", false); // "25", "29.97"
@@ -429,7 +429,7 @@ public class Dasher {
 	}
 	
 	private static boolean createDRM(Map<String,String> params,
-			int segdur, long timeLimit, int frags,
+			int segdur, String timeLimit, int frags,
 			List<StreamSpec> specs,
 			File outputFolderDrm, File tempFolder) 
 			throws Exception {
@@ -687,7 +687,7 @@ public class Dasher {
 				Utils.getString(params, "cmaf", "", true), // cmf2,cmfc,no
 				false, //Utils.getBoolean(params, "segments.singleseg", false),
 				Utils.getString(params, "segname", "number", true),
-				Utils.getLong(params, "timelimit", -1) // read X seconds from start
+				Utils.getString(params, "timelimit", "", true) // read X seconds from start
 			);
 			isFirstSub=false;			
 		}

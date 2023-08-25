@@ -880,7 +880,7 @@ function XMLIndentChildren(xmlDoc, node, prevPrefix, prefix) {
       child.nodeValue = prevPrefix;
     } else {
       var textNode = xmlDoc.createTextNode(prevPrefix);
-      node.append(textNode);
+      node.appendChild(textNode);
     }
   }
 }

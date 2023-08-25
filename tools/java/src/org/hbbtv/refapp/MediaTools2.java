@@ -74,7 +74,7 @@ public class MediaTools2 {
 	 */
 	public static List<String> getTranscodeH264Args(StreamSpec spec, 
 			int fps, boolean forceFps, int gopdur, int segdur, 
-			String overlayOpt, long timeLimit) {
+			String overlayOpt, String timeLimit) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
 
@@ -139,7 +139,7 @@ public class MediaTools2 {
 		String val     = overlay+","+scale+","+format;
 		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
 		
-		MediaTools.updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);
+		MediaTools.updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);
 		MediaTools.removeEmptyOpt(args);
 		return args;
 	}
@@ -150,7 +150,7 @@ public class MediaTools2 {
 	 */
 	public static List<String> getTranscodeH265Args(StreamSpec spec, 
 			int fps, boolean forceFps, int gopdur, int segdur, 
-			String overlayOpt, long timeLimit) {
+			String overlayOpt, String timeLimit) {
 		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
 		String outputFile= spec.inputFileTrack.getName(); //Utils.normalizePath(spec.inputFileTrack.getAbsolutePath(), true);
 
@@ -221,7 +221,7 @@ public class MediaTools2 {
 		String val     = overlay+","+scale+","+format;
 		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
 		
-		MediaTools.updateOpt(args, "${timelimit}", timeLimit>0 ? String.valueOf(timeLimit) : null, true);		
+		MediaTools.updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);		
 		MediaTools.removeEmptyOpt(args);
 		return args;
 	}
@@ -245,7 +245,7 @@ public class MediaTools2 {
 	 */
 	public static List<String> getDashArgs(List<StreamSpec> specs, int segdur, 
 			//int gopdur, @param gopdur	GOP duration seconds
-			long timeLimit, String initMode, int sidx,
+			String timeLimit, String initMode, int sidx,
 			String segname,
 			String cmaf,
 			boolean isSingleSeg,
@@ -343,7 +343,7 @@ public class MediaTools2 {
 			else arg = arg.replace("${role}", spec.role);
 			
 			arg = arg.replace("${name}", spec.name)
-				.replace(":${timelimit}", timeLimit>0?":dur="+timeLimit:"");
+				.replace(":${timelimit}", !timeLimit.isEmpty()?":dur="+timeLimit:"");
 						
 			args.add(arg);  //if(Utils.isWindows()) args.add("\""+arg+"\"");
 		}
