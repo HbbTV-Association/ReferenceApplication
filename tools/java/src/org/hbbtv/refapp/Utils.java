@@ -30,14 +30,21 @@ public class Utils {
 		else return Long.parseLong(val);
 	}
 	
+	public static final double getDouble(Map<String,String> params, String key, double defval) {
+		String val = params.get(key);
+		if (val==null || val.equals("")) return defval;
+		return Double.parseDouble(val);
+	}	
+	
 	/**
 	 * Parse commandline and config=myapp.properties name-value pairs,
 	 * commandline arguments override config file values. 
 	 * @param args JVM argument array
+	 * @param useConfig use default "dasher.properties" config file
 	 * @return	Application parameters
 	 * @throws IOException
 	 */
-	public static final Map<String,String> parseParams(String[] args) throws IOException {
+	public static final Map<String,String> parseParams(String[] args, boolean useConfig) throws IOException {
 		// read commandline arguments
 		Map<String,String> params = new HashMap<>();
 		for(int idx=0; idx<args.length; idx++) {
@@ -51,7 +58,7 @@ public class Utils {
 		}
 		
 		// read config file or use a default dasher.properties in a dasher app folder
-		if (!params.containsKey("config")) {
+		if (useConfig && !params.containsKey("config")) {
 			// "C:\apps\refapp\tools\java\lib" -> "C:/apps/refapp/tools/java/dasher.properties"
 			String libFolder = Utils.getLibraryFolder(MediaTools.class);
 			libFolder = Utils.normalizePath(libFolder, true);

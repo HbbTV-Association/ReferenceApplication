@@ -25,7 +25,7 @@ public class DasherManifest {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Map<String,String> params = Utils.parseParams(args);
+		Map<String,String> params = Utils.parseParams(args, true);
 
 		String val = Utils.getString(params, "logfile", "", true);
 		logger = new LogWriter();

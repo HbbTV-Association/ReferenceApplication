@@ -25,7 +25,7 @@ import org.mp4parser.Container;
 public class BoxModifier {
 
 	public static void main(String[] args) throws Exception {
-		Map<String,String> params = Utils.parseParams(args);
+		Map<String,String> params = Utils.parseParams(args, true);
 
 		String val = Utils.getString(params, "input", "", true);
         File videoFile = val.isEmpty() ? null : new File(val);

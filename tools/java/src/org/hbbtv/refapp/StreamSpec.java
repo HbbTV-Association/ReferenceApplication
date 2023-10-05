@@ -45,7 +45,8 @@ public class StreamSpec implements Cloneable {
 	public String profile;	// h264: main,high, h265: main,main10,main12, high->main10
 	public String level; 	// h264: 4.0,  h265: 5.0
 	
-	// https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes, use 639-2/T or 639-2/B 	
+	// https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes, use 639-2T(3-letter from native lang)
+	// german: mp4 MDHD.lang="deu", manifest@lang="de"
 	public String lang;		// force language or empty to use an existing input value
 	
 	public String role;		// manifest role=main,alternate, see Dasher.java, MediaTools2.getDashArgs()

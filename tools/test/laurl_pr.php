@@ -17,6 +17,7 @@ $headerCustomdata  = @$_REQUEST['header-customdata']; // put to LAURL request he
 $headerNVAuth      = @$_REQUEST['header-nvauth']; // nv-authorizations jwt token(nagra)
 $headerNVPreAuth   = @$_REQUEST['header-nvpreauth']; // PreAuthorization jwt token(nagra)
 $headerCustomdataDT= @$_REQUEST['header-dtcd']; // DrmToday CustomData
+$headerAxinomToken = @$_REQUEST['header-AxDrmMessage']; //  Axinom token
 
 $persist  = @$_REQUEST['persist'];   // MSTest server persist license
 $sessionId= @$_REQUEST['sessionid']; // refapp may use this for persistent laurl testing
@@ -115,17 +116,22 @@ if($persist) {
 	$url = str_replace(",persist:false,", ",persist:true,begindate:${sBegin},enddate:${sEnd},", $url);
 }
 
+$soapAction = @$_SERVER["SOAPAction"];
+if($soapAction=="") $soapAction="http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense";
+
 $c_url = curl_init();
 $reqHeaders = array(
 	"Content-Type: text/xml; charset=utf-8",
-	"SOAPAction: ". $_SERVER["SOAPAction"], // http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense, /AcknowledgeLicense
+	"SOAPAction: ". $soapAction, // http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense, /AcknowledgeLicense
 	"Content-Length: " . strlen($query)
 );
+
 if ($headerCustomdata!="") array_push($reqHeaders, "customdata: ${headerCustomdata}");
 if ($headerNVAuth!="") array_push($reqHeaders, "nv-authorizations: ${headerNVAuth}");
 if ($headerNVPreAuth!="") array_push($reqHeaders, "PreAuthorization: ${headerNVPreAuth}");
 //if ($headerCustomdataDT!="") array_push($reqHeaders, "dt-customdata: ${headerCustomdataDT}");
 if ($headerCustomdataDT!="") array_push($reqHeaders, "http-header-CustomData: ${headerCustomdataDT}");
+if ($headerAxinomToken!="")   array_push($reqHeaders, "X-AxDRM-Message: ${headerAxinomToken}");
 
 // $post = array();
 // $query = http_build_query($post);
@@ -149,8 +155,10 @@ if ($logfile!="") {
 		. "UserAgent=". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
 		. "RemoteAddr=". $_SERVER['REMOTE_ADDR'] ."\n"
 		. "LaUrl=". $url ."\n"
+		. "SoapAction=". $soapAction ."\n"
 		. "KID=". $kid ."\n"
-		. "SessionId=". $sessionId . "\n"
+		. "SessionId=". $sessionId ."\n"
+		. "Content-Length=". strlen($query) ."\n"
 		. "Request\n"
 		. $query ."\n";
 	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);

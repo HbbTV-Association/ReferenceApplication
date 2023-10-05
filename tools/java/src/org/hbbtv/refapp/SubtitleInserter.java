@@ -20,7 +20,7 @@ public class SubtitleInserter {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Map<String,String> params = Utils.parseParams(args);
+		Map<String,String> params = Utils.parseParams(args, true);
 		MediaTools.initTools(params.get("tool.ffmpeg"), params.get("tool.mp4box"));
 		MediaTools.initParams(params); // init default values		
 
@@ -105,7 +105,7 @@ public class SubtitleInserter {
 			+"    <Representation id=\"${id}\" bandwidth=\"3000\">"
 			+"<BaseURL>${file}</BaseURL></Representation>"+Utils.NL
 			+"  </AdaptationSet>"; //+Utils.NL;  
-		template=template.replace("${lang}", lang)
+		template=template.replace("${lang}", MediaTools2.getLangAsISO639(lang, 2))  // "ger"->"de"
 				.replace("${id}", repId)
 				.replace("${file}", urlPrefix+filename);
 		
@@ -158,7 +158,7 @@ public class SubtitleInserter {
 			tempOutput.delete();
 			
 			// create fragmented output/temp-sub_xxx.mp4 from sub_xxx.xml text file
-			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, lang);
+			List<String> args=MediaTools.getSubIBTempMp4Args(subFile, tempOutput, MediaTools2.getLangAsISO639(lang, 3) ); // "ger"->"deu"
 			if(logger!=null) logger.println(Utils.getNowAsString()+" "+ Utils.implodeList(args, " "));
 			MediaTools.executeProcess(args, tempOutput.getParentFile());
 			if (!timeLimit.isEmpty()) {
@@ -194,7 +194,7 @@ public class SubtitleInserter {
 		// captions=viewers who cannot hear audio(transcription of dialog), subtitles=speakers or any language to watch video
 		StringBuilder sbuf = new StringBuilder(8048); 
 		sbuf.append(Utils.NL+Utils.NL);
-		sbuf.append("  <AdaptationSet id=\""+asId+"\" contentType=\"text\" lang=\""+lang+"\" segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
+		sbuf.append("  <AdaptationSet id=\""+asId+"\" contentType=\"text\" lang=\""+ MediaTools2.getLangAsISO639(lang, 2) +"\" segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
 		sbuf.append("    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL );  // subtitle,captions,main
 		sbuf.append("    "+asData+Utils.NL);
 		sbuf.append("  </AdaptationSet>"); //+Utils.NL);

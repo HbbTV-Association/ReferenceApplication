@@ -315,6 +315,7 @@ public class MediaTools2 {
 			"--noroll=yes",		 // don't write SGPD,SBGP(sample-to-groupbox roll) atoms
 			"--btrt=no",		 // don't write BTRT bitrate in init.mp4 (old Sony players may crash)
 			"--truns_first=yes", // MOOF/TRAF/TRUN, /SENC ordering, some devices may crash if SENC is before TRUN
+			"--trunv1=yes",      // use trun.version=1 for video+audio segments (validator is more happy) 
 			(cmaf.isEmpty() ? "$DEL$" : "--cmaf="+cmaf), // CMAF constraints (no edit list, truns_first, negative composite offset, ..)
 			"-subsegs-per-sidx", ""+sidx,
 			//"-last-dynamic",  // insert lmsg brand to the last segment(MDP.type=dynamic)
@@ -351,5 +352,41 @@ public class MediaTools2 {
 		MediaTools.removeEmptyOpt(args);		
 		return args;
 	}
-		
+
+	// FIXME: for now hardcoded refapp test languages
+	private static String[][] langCodes=new String[][] {
+		// ISO-639-2B(key) | ISO-639-2T(mdhd.lang) | ISO-639-1(mpd@lang)
+		{ "eng", "eng", "en" }, // english
+		{ "ger", "deu", "de" }, // german +aliasIdx
+		{ "fin", "fin", "fi" }, // finnish
+		{ "swe", "swe", "sv" }, // swedish
+		{ "fre", "fra", "fr" }, // french +aliasIdx
+		{ "spa", "spa", "es" }, // spanish
+		{ "rus", "rus", "ru" }, // russian
+		{ "chi", "zho", "zh" }, // chinese +aliasIdx
+		{ "und", "und", "" }    // undefined
+	};
+	/**
+	 * Lookup ISO639 language code.
+	 * @param value   "ger", "fin", ..
+	 * @param langlen 2=2-letter "de","fi" (639-1), 3=3-letter "deu","fin" (639-2T)
+	 * @return
+	 */
+	public static String getLangAsISO639(String value, int langlen) {
+		// value: "fin", langlen: 3=ISO-639-2T, 2=ISO-639-1
+		// returns ffmpeg+mp4box cmdline 3-letter code from ISO-639-2T list 
+		// mp4.mdhd.lang = ISO-639-2T(3-letter, from native name) "deu"
+		// mpd@lang      = ISO-639-1 (2-letter) "de"
+		// do not use    = ISO-639-2B(3-letter, from english name) "ger"
+		value  = value.toLowerCase(Locale.US);
+		langlen= langlen==2 ? 2 : 1; // 0..n index to table
+		int aliasIdx=-1; // "deu" match to "ger" key
+		for(int idx=0; idx<langCodes.length; idx++) {
+			if(langCodes[idx][0].equals(value)) return langCodes[idx][langlen];
+			if(aliasIdx<0 && langCodes[idx][1].equals(value)) aliasIdx=idx;
+		}
+		return aliasIdx<0 ? value : langCodes[aliasIdx][langlen];
+	}
+	
 }
+

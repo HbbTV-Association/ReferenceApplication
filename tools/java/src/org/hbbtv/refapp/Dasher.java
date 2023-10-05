@@ -12,14 +12,14 @@ import java.io.*;
  * FIXME: Use EventInserter to put mdpEvent+segEvent on given timestamps or segnumber
  * FIXME: Audio only manifest?
  * FIXME: define input videoIndex+audioIndex if source had multiple tracks
- * FIXME: add "lang=xxx" video-audio param and set ffmpeg metadata field on temp-v1.mp4 file
+ * FIXME: hls.m4s "audio,language="eng,deu,fin,swe" should use 2-letter
  */
 public class Dasher {
 	public static String NL = System.getProperty("line.separator", "\r\n");
 	private static LogWriter logger;
 	
 	public static void main(String[] cmdargs) throws Exception {
-		Map<String,String> params = Utils.parseParams(cmdargs);
+		Map<String,String> params = Utils.parseParams(cmdargs, true);
 		
 		params.put("iobuffer", ""); // last shellExec sysout, print on exception
 		try {
@@ -113,7 +113,7 @@ public class Dasher {
 				}
 				
 				//spec.enabled= true;
-				spec.lang = Utils.getString(params, "input.vlang", "", true);			
+				spec.lang = MediaTools2.getLangAsISO639(Utils.getString(params, "input.vlang", "", true), 3); // "ger"->"deu"			
 				spec.inputFile = inputFile;
 				spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
 
@@ -171,7 +171,7 @@ public class Dasher {
 				spec.type = StreamSpec.TYPE.fromString(val); // AAC, AC3, EAC3
 				
 				//spec.enabled = true;
-				spec.lang = Utils.getString(params, "input.alang", "", true);				
+				spec.lang = MediaTools2.getLangAsISO639(Utils.getString(params, "input.alang", "", true), 3); // "ger"->"deu" 
 				spec.inputFile = inputFile; // video+audio from the same input file
 				spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
 				spec.role      = "main";
@@ -198,7 +198,7 @@ public class Dasher {
 					if(!oldSpec.type.isAudio()) continue;
 					StreamSpec spec = (StreamSpec)oldSpec.clone();
 					spec.name = spec.name+"-"+idxI; // "a1" -> "a1-1"
-					spec.lang = Utils.getString(params, "input."+idxI+".alang", "", true);					
+					spec.lang = MediaTools2.getLangAsISO639(Utils.getString(params, "input."+idxI+".alang", "", true), 3); // "ger"->"deu" 
 					spec.inputFile = new File(filename);
 					spec.inputFileTrack = new File(tempFolder, "temp-"+spec.name+".mp4");
 					spec.role     = "alternate"; // alternate or main for additional languages? HbbTV exactly just one "main"

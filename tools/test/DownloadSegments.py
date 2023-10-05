@@ -350,14 +350,20 @@ def main():
 				track.segments = track.segments[startIdx:segCount]
 
 	## download segments in sync over all tracks (1st from all bitrates, 2nd from all bitrates, ..)
+	isDownloaded=True
 	startSegment=1
 	for segNumber in range(startSegment, options.maxSegments+1):
+		if not manifest.live and options.maxSegments>=sys.maxsize-1 and not isDownloaded:
+			break
+		isDownloaded=False
+		
 		for mset in manifest.sets:
 			for track in mset.tracks:
 				if track.downloadCount > options.maxSegments: break
 				track.downloadCount = track.downloadCount+1
 				if track.downloadCount > len(track.segments): break
 		
+				isDownloaded=True
 				seg = track.segments[track.downloadCount-1]
 				printLog("seg%d=%s" % (seg.number, seg.url))								
 

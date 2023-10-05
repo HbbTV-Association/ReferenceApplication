@@ -322,13 +322,24 @@ public class DashManifest {
 		int count=0;
 		if(mimeAS.isEmpty()) mimeAS="*";
 		if(langAS.isEmpty()) langAS="*";
+
+		// handle 2-letter,3-letter codes "ger","deu",de"
+		List<String> langTokens = !langAS.equals("*") ?
+			Utils.getList(langAS.toLowerCase(Locale.US), ",") : Collections.<String>emptyList();
+		for(int idx=0; idx<langTokens.size(); idx++) {
+			String val = langTokens.get(idx);
+			if(val.length()>=3) {
+				String newval=MediaTools2.getLangAsISO639(val, 2); // "ger"->"de", "deu"->"de", "fin"->"fi"
+				if(!newval.equals(val)) langTokens.add(newval);
+				newval=MediaTools2.getLangAsISO639(val, 3); // "ger"->"deu"
+				if(!newval.equals(val)) langTokens.add(newval);				
+			}
+		}
+		
 		for(Element elemP : XMLUtil.getChildElements(doc.getDocumentElement(), "Period")) {
 			for(Element elemAS : XMLUtil.getChildElements(elemP, "AdaptationSet")) {
-				if(!langAS.equals("*")) {
-					String[] tokens = langAS.split("\\s*,\\s*"); // split "fin,swe", skip tuple whitespaces					
-					if(Utils.indexOfArray(tokens, elemAS.getAttribute("lang"))<0)
-						continue;
-				}
+				if(!langTokens.isEmpty() && !langTokens.contains(elemAS.getAttribute("lang"))) 
+					continue; // keep this AdaptationSet
 
 				List<Element> elems = XMLUtil.getChildElements(elemAS, "Representation");
 

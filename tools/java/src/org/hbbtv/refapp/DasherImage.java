@@ -26,16 +26,20 @@ import javax.imageio.stream.ImageOutputStream;
 /**
  * Image tools.
  * Scale input image to 1..n jpg or png files:
-   java -cp "/dasher/lib/*" org.hbbtv.refapp.DasherImage input="/tmp/image.png" output="/data/files/" \
-     image.1=320x180 image.2=640x360 image.3=1280x720 image.filename="image_{w}x{h}.png"
-     image.keepaspect=1
+   java -cp "/dasher/lib/*" org.hbbtv.refapp.DasherImage input="/tmp/image.png" output="/data/files/"
+     image.1=320x180 image.2=640x360 image.3=1280x720 
+     image.filename="image_{w}x{h}.png" image.keepaspect=1
+ * Scale 16:9 to 4:3 images, crop center:
+   java -cp "/dasher/lib/*" org.hbbtv.refapp.DasherImage input="/tmp/image_1280x720.jpg" output="/data/files/"
+     image.1=240x180 image.2=480x360 image.3=960x720 image.crop=center
+     image.filename="image_{w}x{h}.png" image.quality=70
  */
 public class DasherImage {
 
 	public static void main(String[] cmdargs) throws Exception {
-		// Input is "/images/image.jpg" or "/images/image.png" file
-		Map<String,String> params = Utils.parseParams(cmdargs);
+		Map<String,String> params = Utils.parseParams(cmdargs, false);
 
+		// Input is "/images/image.jpg" or "/images/image.png" file		
 		String val = params.get("input");
 		File inputFile = !val.isEmpty() ? new File(val) : null;
 		if(inputFile==null || !inputFile.exists() || !inputFile.isFile())
@@ -49,20 +53,35 @@ public class DasherImage {
 		File outputFolder = new File(val);
 		outputFolder.mkdirs();
 		
-		boolean keepAspect = Utils.getBoolean(params, "image.keepaspect", true);		
-		String filename = Utils.getString(params, "image.filename", "image_{w}x{h}.jpg", true);
+		boolean keepAspect= Utils.getBoolean(params, "image.keepaspect", true);
+		String crop       = Utils.getString(params, "image.crop", "", true); // "center",  crop input image
+		String filename   = Utils.getString(params, "image.filename", "image_{w}x{h}.jpg", true); // output filename mask
+		int quality       = (int)Utils.getLong(params, "image.quality", 70); // 0-100 jpeg quality 
+		
+		BufferedImage image = readImage(inputFile);
+		if(crop.equalsIgnoreCase("center")) {
+			// crop input image before scaling target sizes
+			// crop from 16:9 to 4:3 image: image.1=240x180 -> 1.333333333 -> 1280x720 -> 960x720
+			int[] wh = parseXY(Utils.getString(params, "image.1", "", true), 'x');
+			double ratio = (double)wh[0]/wh[1];
+			int[] wh2= new int[] { (int)Math.round(ratio*image.getHeight()), image.getHeight() }; 
+			int x = Math.max(0, (image.getWidth()-wh2[0]) / 2);
+			int y = Math.max(0, (image.getHeight()-wh2[1]) / 2);
+			if(x>0) wh2[0]=image.getWidth()-x-x;
+			if(y>0) wh2[1]=image.getHeight()-y-y;
+			System.out.printf("%s Crop from %dx%d to %dx%d%n", Utils.getNowAsString() 
+					, image.getWidth(),image.getHeight(), wh2[0],wh2[1]);
+			image = image.getSubimage(x, y, wh2[0], wh2[1]);
+		}
 		
 		for(int idx=1; ; idx++) {
-			val = Utils.getString(params, "image."+idx, "", true); // image.1=640x360
-			if (val.isEmpty()) break;
-			int delim = val.indexOf('x');
-			int width = Integer.parseInt(val.substring(0,delim));
-			int height= Integer.parseInt(val.substring(delim+1));
-
-			String outFilename = filename.replace("{w}", ""+width)
-					.replace("{h}", ""+height)
+			int[] wh = parseXY(Utils.getString(params, "image."+idx, "", true), 'x');  // image.1=640x360
+			if(wh[0]<0) break;
+			String outFilename = filename.replace("{w}", ""+wh[0])
+					.replace("{h}", ""+wh[1])
 					.replace("{idx}", "1");
-			scaleImage(inputFile, new File(outputFolder, outFilename), keepAspect, width, height);
+			System.out.printf("%s Scale to %s%n", Utils.getNowAsString(), outFilename); 
+			scaleImage(image, new File(outputFolder, outFilename), keepAspect, wh[0], wh[1], quality, crop);
 		}
 	}
 	
@@ -73,29 +92,26 @@ public class DasherImage {
 		scaleImage(file, outputFile, width, height);
 	}*/
 
+	private static int[] parseXY(String val, char delim) {
+		if (val.isEmpty()) return new int[] {-1,-1};
+		int idx = val.indexOf(delim);
+		int width = Integer.parseInt(val.substring(0,idx));
+		int height= Integer.parseInt(val.substring(idx+1));		
+		return new int[]{ width,height };
+	}
+	
 	/**
-	 * Scale image file.
-	 * @param file
+	 * Scale image.
+	 * @param image     input image.
 	 * @param outputFile
 	 * @param width
 	 * @param height
+	 * @param quality   jpeg 0-100 quality
+	 * @param crop      "center", from 16:9 to 4:3 crop
 	 * @throws Exception
 	 */
-	public static void scaleImage(File file, File outputFile, boolean keepAspect, int width, int height) throws Exception {
-        BufferedImage image;
-        try {
-        	// Java ImageIO can only read RGB-JPEGs, do magic for CMYK-JPEG files,
-        	// http://stackoverflow.com/questions/2408613/problem-reading-jpeg-image-using-imageio-readfile-file
-            InputStream fileis = new FileInputStream(file);
-            try {
-                image = ImageIO.read(fileis);
-            } finally {
-                try { fileis.close(); } catch (Exception ex) {}
-            }
-        } catch (javax.imageio.IIOException ex) {
-        	image = readCMYKImage(file);
-        }
-
+	public static void scaleImage(BufferedImage image, File outputFile, boolean keepAspect, int width, int height,
+				int quality, String crop) throws Exception {
         int[] newwh = { width, height }; //calcExactScaledSize(image, width, height);
         if(keepAspect)
         	image = scaleToSize(image, newwh[0], newwh[1], true, true, null);
@@ -105,7 +121,7 @@ public class DasherImage {
 		String format = outputFile.getName().toLowerCase(Locale.US).endsWith(".png") ? "png" : "jpeg";
         if (format.equals("jpeg")) {
             // make sure image is RGB, jpeg does not support alpha channel
-        	byte[] bytes=createJPEGBytes(image, 0.80f);
+        	byte[] bytes=createJPEGBytes(image, (float)quality/100); // 0.80f
         	Utils.saveFile(outputFile, bytes);
         } else {
         	ImageIO.write(image, format, outputFile);
@@ -170,6 +186,23 @@ public class DasherImage {
 		g.dispose();
 		return newImage;
 	}	
+	
+	private static BufferedImage readImage(File file) throws Exception {
+        BufferedImage image;
+        try {
+        	// Java ImageIO can only read RGB-JPEGs, do magic for CMYK-JPEG files,
+        	// http://stackoverflow.com/questions/2408613/problem-reading-jpeg-image-using-imageio-readfile-file
+            InputStream fileis = new FileInputStream(file);
+            try {
+                image = ImageIO.read(fileis);
+            } finally {
+                try { fileis.close(); } catch (Exception ex) {}
+            }
+        } catch (javax.imageio.IIOException ex) {
+        	image = readCMYKImage(file);
+        }
+        return image;
+	}
 
     /**
      * ImageIO cannot read CMYK-jpegs, it throws IIOException(Unsupported Image Type).

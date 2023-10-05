@@ -301,7 +301,7 @@ public class DashDRM {
 		byte[] wrm = createPlayreadyXML(kid, key, laurl, mode).getBytes("UTF-16LE");
 		
 		StringBuilder buf = new StringBuilder();
-		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+PLAYREADY.GUID+"\" value=\"playready\">"+Dasher.NL);
+		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+PLAYREADY.GUID+"\" value=\"MSPR 2.0\">"+Dasher.NL); // playready
 		for(String optTag : opt.split(",")) {
 			if (optTag.equals("pro"))
 				buf.append("     <mspr:pro>"+createPlayreadyPRO(wrm)+"</mspr:pro>"+Dasher.NL); // legacy field

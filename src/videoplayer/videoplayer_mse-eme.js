@@ -560,7 +560,8 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 				"com.microsoft.playready": { 
 					"serverURL": laUrl
 					, "priority":1
-					, "persistentState": "required", "distinctiveIdentifier": "required"
+					//, "persistentState": "required", "distinctiveIdentifier": "required"
+					, "persistentState": "optional", "distinctiveIdentifier": "optional"
 					, "videoRobustness": secLevel // SL3000 needs a new GPU(trusted module) 
 					, "audioRobustness": secLevel=="150" ? "150": "2000"  // always SL2000 for audio
 					, "systemStringPriority": [ "com.microsoft.playready.recommendation","com.microsoft.playready" ]
@@ -608,14 +609,15 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	} else if(this.drm.system.indexOf("widevine")==0) {
 		// widevine, widevine.HW, widevine.SL1, widevine.SL2, widevine.SL3, also "widevine.SL1D"
 		// security level(best to worst): Widevine 1,2,3 | EME 5,4,3,2,1
-		var secLevel = this.drm.system.indexOf(".SL1")>0 ? "HW_SECURE_ALL"  // best
+		// EME 5=crypto+media trusted wvL1, 4=allow insecure codec-wvL1, 3=wvL2, 2,1=wv3
+		var secLevel = this.drm.system.indexOf(".SL1")>0 ? "HW_SECURE_ALL"  // L1, best
 			: this.drm.system.indexOf(".1")>0            ? "HW_SECURE_ALL"
-			: this.drm.system.indexOf(".HW")>0           ? "HW_SECURE_ALL"
-			: this.drm.system.indexOf(".SL1D")>0         ? "HW_SECURE_DECODE"
+			: this.drm.system.indexOf(".HW")>0           ? "HW_SECURE_ALL" 
+			: this.drm.system.indexOf(".SL1D")>0         ? "HW_SECURE_DECODE" // L1
 			: this.drm.system.indexOf(".1D")>0           ? "HW_SECURE_DECODE"
-			: this.drm.system.indexOf(".SL2")>0          ? "HW_SECURE_CRYPTO"
+			: this.drm.system.indexOf(".SL2")>0          ? "HW_SECURE_CRYPTO" // L2
 			: this.drm.system.indexOf(".2")>0            ? "HW_SECURE_CRYPTO" 
-			: "SW_SECURE_DECODE";  // worst L1 for video
+			: "SW_SECURE_DECODE";  // worst L3 for video
 		console.log("Use widevine security level "+secLevel);			
 		self.player.setProtectionData({
 			"com.widevine.alpha": {
@@ -626,7 +628,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 				//, "persistentState": "required", "distinctiveIdentifier": "required"
 				, "persistentState": "optional", "distinctiveIdentifier": "optional"
 				, "videoRobustness": secLevel
-				, "audioRobustness": "SW_SECURE_CRYPTO" // worst L1 for audio
+				, "audioRobustness": "SW_SECURE_CRYPTO" // worst L3 for audio
 			}
 			,"com.microsoft.playready": { "priority":99 }
 		});
