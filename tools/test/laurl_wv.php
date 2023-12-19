@@ -120,12 +120,15 @@ if ($logfile!="") {
 	$dtNow = new DateTime("now", new DateTimeZone("UTC") );
 	$sNow  = $dtNow->format("Y-m-d H:i:se");
 	$data = "------------------------\n"
-		. "Request: ". $sNow ."\n"
-		. "UserAgent: ". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
-		. "RemoteAddr: ". $_SERVER['REMOTE_ADDR'] ."\n"
-		. "Url: ". $url ."\n"
-		. $query ."\n";
-	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
+		. "DateTime=". $sNow ."\n"
+		. "Url=". $_SERVER["REQUEST_URI"] ."\n"
+		. "UserAgent=". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
+		. "RemoteAddr=". $_SERVER['REMOTE_ADDR'] ."\n"		
+		. "LaUrl=". $url ."\n"
+		. "SessionId=". $sessionId . "\n"
+		. "Request(base64 encoded)\n"
+		. base64_encode($query) ."\n";
+	//file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
 }
 
 $soap = curl_exec($c_url);
@@ -139,8 +142,8 @@ if($soap === FALSE || $curl_errno > 0){
 echo $soap;
 
 if ($logfile!="") {
-	$data = "\nResponse\n"
-		. $soap ."\n"
+	$data = $data . "\nResponse(Base64 encoded)\n"
+		. base64_encode($soap) ."\n"
 		. "------------------------\n";
 	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
 }

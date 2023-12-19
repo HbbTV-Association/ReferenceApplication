@@ -4,6 +4,7 @@ require "common.php";
 // Dynamic(live) multiperiod.mpd, use MPD Reload Event to refresh manifest.
 // MPD events, EMSG events, inband subtitles, advert periods, multiple audio langs
 // - see "MPDReload" comments
+// - see "lang3 to lang2(natural)" hardcoded list
 // /videos/multiperiod_v8.php?drm=ck,cbcs&advert=1&emsg=1&video=v1&audiolang=eng&sublang=eng,fin
 // /videos/multiperiod_v8.php?drm=pr,cenc&advert=1&emsg=1&subtitle=&video=&audio=
 // Static(vod) multiperiod.mpd
@@ -198,6 +199,18 @@ for($idx=0, $startNumberMain=1; $idx<$periodCount; $idx++) {
 
 			$content[$key]["type"]   = $asType; // AdaptationSet@contentType
 			$content[$key]["id"]     = $asCounter; // AdaptationSet@id 1..n number
+			// lang3 to lang2(natural), use lang2 in AdaptationSet@lang
+			$val = $content[$key]["lang"];
+			if($val=="eng")      $val="en";
+			else if($val=="fin") $val="fi";
+			else if($val=="ger") $val="de";
+			else if($val=="swe") $val="sv";
+			else if($val=="pol") $val="pl";
+			else if($val=="kor") $val="ko";
+			else if($val=="ita") $val="it";
+			else if($val=="gre") $val="el";
+			else if($val=="spa") $val="es";
+			$content[$key]["lang2"] = $val;
 		}}
 	}
 	
@@ -327,16 +340,16 @@ $periodIdSeq = $skipCycles*$periodCount; // period@id sequence 1..n, 1970-01-01=
 $fullPeriods = $fullCycles*$periodCount;
 $lastIdx = $fullPeriods+$extraPeriods-1; // inclusive foreach index for <Period> loop
 
-if($durExtraPeriod>0) {
-	// drop last (partial)period if less than segment.duration, period must have at least one full segment.
-	$item   = $config["periods"][$lastIdx % $periodCount];
-	$content= $config[$item["name"]];
-	$dur    = intval($durExtraPeriod / $content["segdurms"]) * $content["segdurms"];
-	if($dur<1) {
-		$lastIdx--;
-		$durExtraPeriod=0;
-	}	
-}
+//if($durExtraPeriod>0) {
+//	// drop last (partial)period if less than segment.duration, period must have at least one full segment.
+//	$item   = $config["periods"][$lastIdx % $periodCount];
+//	$content= $config[$item["name"]];
+//	$dur    = intval($durExtraPeriod / $content["segdurms"]) * $content["segdurms"];
+//	if($dur<1) {
+//		$lastIdx--;
+//		$durExtraPeriod=0;
+//	}	
+//}
 
 $writtenPeriods = 0;
 $dtPeriodStart = null;
@@ -476,7 +489,7 @@ function writeMPD($dom, $root) {
 	$root->appendChild( xml_createAttribute($dom, "timeShiftBufferDepth", "todo" ) ); // manifest must have periods+timeline enough for this backlog
 	$root->appendChild( xml_createAttribute($dom, "suggestedPresentationDelay", "todo") ); // effectiveTimeShiftBuffer=(now-timeShiftbuffer)..(now-presentationDelay)
 	$root->appendChild( xml_createAttribute($dom, "maxSegmentDuration", "todo" ) );
-	$root->appendChild( xml_createAttribute($dom, "minBufferTime", "PT2S" ) ); // usually fragdur, GOP or segdur?
+	$root->appendChild( xml_createAttribute($dom, "minBufferTime", "PT4S" ) ); // usually fragdur, GOP or segdur?
 	$root->appendChild( xml_createAttribute($dom, "profiles", "urn:dvb:dash:profile:dvb-dash:2014,urn:dvb:dash:profile:dvb-dash:isoff-ext-live:2014" ) );
 }
 
@@ -524,7 +537,7 @@ function writeAS($dom, $period, $aset) {
 	$period->appendChild($as);
 	xml_appendAttribute($dom, $as, "id", $aset["id"]); // must be integer value
 	xml_appendAttribute($dom, $as, "contentType", $aset["type"]); // video,audio,subtitles,..
-	$as->appendChild( xml_createAttribute($dom, "lang", $aset["lang"]) );
+	$as->appendChild( xml_createAttribute($dom, "lang", $aset["lang2"]) );
 	if($aset["type"]=="video") {
 		$val= $aset["reps"][0]["fps"]; // all reps must use the same fps
 		$as->appendChild( xml_createAttribute($dom, "maxFrameRate", $val!=""?$val:"25") );

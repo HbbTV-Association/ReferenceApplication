@@ -35,9 +35,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	}
 
 	try{
-		// removed type attribute
-		//this.video = $("<video id='video' type='application/dash+xml' class='fullscreen'></video>")[0];
-		this.video = $("<video id='video' class='fullscreen'></video>")[0];
+		this.video = $("<video id='video' class='fullscreen'></video>")[0]; // type='application/dash+xml'
 		this.element.appendChild( this.video );
 		console.log("html5 video object created");
 	} catch( e ){
@@ -275,8 +273,7 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 			if( self.video.audioTracks && self.video.audioTracks.length ){
 				var defaultAudio = -1;
 				$.each( self.video.audioTracks, function(i, track){
-					//console.log("audiotrack " + i);
-					//console.log( track );
+					//console.log("audiotrack " + i, track);
 					if( defaultAudio < 0 && track.kind != "metadata" ) {
 						track.mode = "showing";
 						defaultAudio = i;
@@ -289,7 +286,6 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 				if( defaultAudio >= 0 ){
 					console.log("Found default audio track: " + defaultAudio);
 					self.audioTrack = defaultAudio;
-					//console.log( self.video.audioTracks[ defaultAudio ] );
 				}
 			}
 			
@@ -327,28 +323,44 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	return true;
 }
 
-VideoPlayerHTML5.prototype.setURL = function(url){
-	url = url.replace("${GUID}", uuidv4());
-	console.log("setURL(",url,")");	
-
-	var type = "application/dash+xml";
-	if( url.match(/mp4$/) ){
-		this.video.setAttribute("type", "video/mp4");
-	}
-	else{
-		this.video.setAttribute("type", type );
-	}
-		
-	try{
+VideoPlayerHTML5.prototype.setURL = function(url, ntCall){
+	if(!ntCall) ntCall=0; // 0=initial, 1=afterPreroll(deferred call)
+	if(ntCall==0) {
+		if(url.indexOf("{",0)>=0) {
+			url = url.replace("${GUID}", uuidv4());
+			url = url.replace("${NOWUTC}", getUTCYMDHMS(null)+"Z"); // ${NOWUTC} -> "2023-10-18T07:36:40Z"
+		}
+		console.log("setURL(",url,")");
 		this.url = url;  // see sendLicenseRequest()
-		this.video.src = url;
-	} catch( e ){
-		console.log( e.message );
+		this.firstPlay=true;		
+	} else {
+		url = this.url;
+		console.log("setURL(",url,"), ntCall="+ntCall );
 	}
 	
-	// create id for video url
-	this.videoid = url.hashCode();
+	// if preroll then do not initialize maincontent+laurl yet, see prepareAdPlayers()
+	if(ntCall==0 && this.adBreaks){
+		var playPreroll = false;
+		var self = this;
+		$.each(self.adBreaks, function(n, adBreak){
+			if( !adBreak.played && adBreak.position == "preroll" ){
+				console.log("found preroll, postpone setURL");
+				playPreroll=true;
+				return false;
+			}
+		});
+		if(playPreroll) return;
+	}	
 	
+    var videoSrc = document.createElement("source"); // use "<source>" child element
+	this.video.appendChild(videoSrc);
+	
+	var type = "application/dash+xml";
+	if( url.match(/mp4$/) ) type="video/mp4";
+	
+	videoSrc.type=type;	
+	videoSrc.src=url;		
+	this.videoid = url.hashCode(); // create id for video url	
 	return;
 };
 
@@ -376,7 +388,6 @@ VideoPlayerHTML5.prototype.checkAds = function(){
 };
 
 VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
-	
 	// if ad players are prepared do nothing
 	if( $("#ad1")[0] && $("#ad2")[0] ){
 		console.log("ready to play ads");
@@ -392,8 +403,7 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 	console.log("html5 ad-video objects created");
 	
 	var adEnd = function(e){
-		self.setLoading(false);
-		
+		self.setLoading(false);		
 		console.log("ad ended. adCount="+ self.adCount + " adBuffer length: " + self.adBuffer.length );
 		console.log( e.type );
 		var player = $(this);
@@ -415,6 +425,7 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 			}
 			
 			if( self.firstPlay ){
+				self.setURL(null, 1); // reuse a deferred url after a preroll
 				self.startVideo( self.live );
 			}
 			else{
@@ -433,6 +444,7 @@ VideoPlayerHTML5.prototype.prepareAdPlayers = function(){
 	var onAdProgress = function(e){};
 	
 	var onAdTimeupdate = function(){
+		if(self.adBuffer==null) return;
 		var timeLeft = Math.floor( this.duration - this.currentTime )
 		if( timeLeft != NaN ){
 			$("#adInfo").addClass("show");
@@ -740,11 +752,10 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive, ntCall) {
 	
 	try{
 		var broadcast = $("#broadcast")[0];
-		if( !broadcast ){
+		if( !broadcast )
 			$("body").append("<object type='video/broadcast' id='broadcast'></object>");
-		}
 		broadcast = $("#broadcast")[0];
-		console.log( "Current broadcast.playState="+ broadcast.playState );
+		console.log("Current broadcast.playState="+ broadcast.playState);
 		if( broadcast.playState != 3 ) { // 0=unrealized, 1=connecting, 2=presenting, 3=stopped
 			broadcast.bindToCurrentChannel();
 			broadcast.stop();
@@ -753,10 +764,7 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive, ntCall) {
 	} catch(e){
 		console.log("error stopping broadcast");
 	}
-	
-	this.onAdBreak = false;
-	this.firstPlay = true;
-	
+		
 	try{
 		if( !self.video ){
 			console.log("populate player and create video object");
@@ -773,11 +781,9 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive, ntCall) {
 	self.element.removeClass("hidden");
 	self.visible = true;
 	self.setFullscreen(true);
-
 	
-	// first play preroll if present
+	// play preroll if present
 	var playPreroll = false;
-	// check prerolls on first start
 	if( self.adBreaks ){
 		$.each( self.adBreaks, function(n, adBreak){
 			if( !adBreak.played && adBreak.position == "preroll" ){
@@ -900,15 +906,11 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 	try{
 		if(self.video){
 			self.video.pause();
-			self.video.src = "";
+			self.video.src = ""; // do this so that "bindToCurrentChannel()" works
 			$( "#video" ).remove(); // clear from dom
 			this.video = null;
 		}
-		if( $("#broadcast")[0] ){
-			$("#broadcast")[0].bindToCurrentChannel();
-		}
-	}
-	catch(e){
+	} catch(e){
 		console.log("Error at clearVideo()");
 		console.log( e.description );
 	}
@@ -919,32 +921,32 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 		//destroyOIPFDrmAgent();
 		console.log("License cleared:" + msg);
 	});
-	
+	if($("#broadcast")[0])
+		$("#broadcast")[0].bindToCurrentChannel();	
 };
+
 VideoPlayerHTML5.prototype.clearAds = function(){
+	var self = this;
 	if( self.adPlayer ){
-		try{
-			self.adPlayer[0].stop();
-		} catch(e){ console.log("Error at clearAds(): " + e.message); }
-		try{
-			self.adPlayer[1].stop();
-		} catch(e){ console.log("Error at clearAds(): " + e.message); }
-		try{
-			$( self.adPlayer[0] ).addClass("hide");
-			$( self.adPlayer[1] ).addClass("hide");
-			self.adPlayer[0].src = "";
-			self.adPlayer[1].src = "";
-		} catch(e){ console.log("Error at clearAds(): " + e.message); }
-		
+		console.log("clearAds, adPlayer.length="+self.adPlayer.length);
+		for(var idx=0; idx<self.adPlayer.length; idx++) {
+			try{
+				self.adPlayer[idx].pause();
+				self.adPlayer[idx].src = ""; // do this so that "bindToCurrentChannel" works
+				$(self.adPlayer[idx]).addClass("hide");
+			} catch(e){
+				console.log("Error at clearAds(): " + e.message); 
+			}
+		}		
 		self.adPlayer = null;
-		self.onAdBreak = false;
+		self.onAdBreak= false;
 		self.adBreaks = null;
 		self.adBuffer = null;
-		self.adCount = 0;
+		self.adCount  = 0;
 	}
 	$( "#ad1" ).remove(); // clear from dom
-	$( "#ad2" ).remove(); // clear from dom
-	$( "#adInfo" ).remove(); // clear from dom
+	$( "#ad2" ).remove();
+	$( "#adInfo" ).remove();
 };
 
 VideoPlayerHTML5.prototype.isFullscreen = function(){

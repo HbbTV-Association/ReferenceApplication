@@ -144,7 +144,7 @@ public class Dasher {
 			
 			// audio should use the same codec for all bitrates, multiple audio codec may or may not work atm.
 			for(int idx=1; ; idx++) {
-				if(Utils.getString(meta, "audioIndex", "", false).isEmpty()) break; // no audio
+				if(Utils.getString(meta, "audioIndex", "", false).isEmpty()) break; // no-audio input
 				// audio.1="a1 48000 128k 2"
 				// audio.1="a1 48000 128k 2 codec=AAC"
 				val = Utils.getString(params, "audio."+idx, "", true);

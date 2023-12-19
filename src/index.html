@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="generator" content="Sofia Digital" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>RefApp</title>
+<script>
+//document.addEventListener('DOMContentLoaded', init);
+var checkLoad = function(counter) {
+  counter++;
+  if (document.readyState != "complete" && counter<1000) {
+	var fn = function() { checkLoad(counter); };
+	setTimeout(fn,10);
+  } else init(counter);
+};
+checkLoad(0);
+function init(counter) {
+	var sUrl = document.getElementById("mainlink").getAttribute("href");
+	var fn = function() { window.location=sUrl; };
+	setTimeout(fn, 1000);
+}
+</script>
+</head>
+<body>
+Go to <a href="./catalogue" id="mainlink">main page</a>
+</body>
+</html>

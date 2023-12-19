@@ -49,19 +49,15 @@ public class Utils {
 		Map<String,String> params = new HashMap<>();
 		for(int idx=0; idx<args.length; idx++) {
 			int pos = args[idx].indexOf('=');			
-			if (pos>0)
-				params.put( args[idx].substring(0, pos).trim(), args[idx].substring(pos+1).trim() );
-			else if (pos==0)
-				params.put("", args[idx].substring(pos+1).trim() );
-			else
-				params.put(args[idx].trim(), "");
+			if (pos>0)			params.put( args[idx].substring(0, pos).trim(), args[idx].substring(pos+1).trim() );
+			else if (pos==0)	params.put("", args[idx].substring(pos+1).trim() );
+			else				params.put(args[idx].trim(), "");
 		}
 		
 		// read config file or use a default dasher.properties in a dasher app folder
 		if (useConfig && !params.containsKey("config")) {
 			// "C:\apps\refapp\tools\java\lib" -> "C:/apps/refapp/tools/java/dasher.properties"
-			String libFolder = Utils.getLibraryFolder(MediaTools.class);
-			libFolder = Utils.normalizePath(libFolder, true);
+			String libFolder = Utils.normalizePath( Utils.getLibraryFolder(MediaTools.class), true);
 			params.put("config", new File(libFolder).getParent()+"/dasher.properties" );
 		}
 		
@@ -81,6 +77,22 @@ public class Utils {
 			} finally {
 				fis.close();
 			}				
+		}
+		
+		// normalize input fields
+		for(String key : new String[] { "input", "input.$IDX", "logfile", "tempfolder" } ){
+			int delim = key.indexOf(".$IDX");
+			if(delim>0) {
+				key = key.substring(0,delim+1);
+				for(int idx=0; ; idx++) {
+					String val = Utils.normalizePath(params.get(key+idx), true);
+					if(val==null && idx>2) break;
+					else if(val!=null) params.put(key+idx, val);
+				}
+			} else {
+				String val = Utils.normalizePath(params.get(key), true);
+				if(val!=null) params.put(key, val);
+			}
 		}
 		
 		return params;
@@ -476,9 +488,9 @@ public class Utils {
 	 * step 6 of section 5.2. This always return "unix" compatible path.
 	 */
 	public static String normalizePath(String path, boolean normalizeFolders) {
-		   	if (path == null || path.length() < 1)
+		   	if (path == null || path.isEmpty())
 		   		return path;
-		   	path = path.replace('\\', '/'); // Win '\' to Unix '/' separator
+		   	path = path.replace('\\', '/').replace("//", "/"); // Win '\' to Unix '/' separator		   	
 		   	
 		   	if (normalizeFolders) {
 			   // replace all /./ with /

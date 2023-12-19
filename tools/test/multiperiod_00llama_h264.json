@@ -1,7 +1,7 @@
 {
 	
 "main": {
-	"folder"  : "00_llama_h264_v8",	
+	"folder"  : "00_llama_h264_v9",
 	"segcount": 99
 	,"video": {
 	  "segdur"   : 49152,  "timescale": 12800,
@@ -9,15 +9,15 @@
 	  "reps": [
 	  {
 		"id" : "v1", "codecs": "avc1.4D401E",
-		"fps": "25", "width": 640, "height": 360, "bandwidth": 427395
+		"fps": "25", "width": 640, "height": 360, "bandwidth": 427402
 	  },
 	  {
 		"id" : "v2", "codecs": "avc1.640028",
-		"fps": "25", "width": 1280, "height": 720, "bandwidth": 1299594
+		"fps": "25", "width": 1280, "height": 720, "bandwidth": 1299396
 	  },
 	  {
 		"id" : "v3", "codecs": "avc1.640028",
-		"fps": "25", "width": 1920, "height": 1080, "bandwidth": 1781687
+		"fps": "25", "width": 1920, "height": 1080, "bandwidth": 1781630
 	  }  
 	  ]
 	  ,"drm": {

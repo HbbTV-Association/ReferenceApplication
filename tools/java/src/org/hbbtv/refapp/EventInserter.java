@@ -100,7 +100,7 @@ public class EventInserter {
         	
         	if (moofIdx>=0 && !scheme.isEmpty()) {
             	EventMessageBox emsg = new EventMessageBox();
-            	emsg.setVersion(0);
+            	emsg.setVersion(0); // 0=use presentationTimeDelta per segment start, 1=use presentationTime in media timeline.
             	emsg.setFlags(0);
             	emsg.setSchemeIdUri(scheme);
             	
@@ -108,12 +108,12 @@ public class EventInserter {
             	emsg.setValue( val.startsWith("0x") ? 
             		new String(Utils.hexToBytes(val.substring(2)), "UTF-8") : val );
             	
-            	val = Utils.getString(params, "ts", "", true);
-            	emsg.setTimescale( val.isEmpty() || val.equals("0") ? defTimescale : 
+            	val = Utils.getString(params, "ts", "", true); // value should match to m4s timescale !!!
+            	long ival = val.isEmpty() || val.equals("0") ? defTimescale : 
             		val.startsWith("0x") ? Long.parseLong(val.substring(2), 16) :            		
-            		Long.parseLong(val) );
-            	 
-            	long ival;
+            		Long.parseLong(val);            	
+            	if(ival>-1) emsg.setTimescale(ival);
+            	
             	val = Utils.getString(params, "ptd", "0", true); // seconds 0..n, 2.34
             	if(val.indexOf('.')<0) {
 	            	ival = val.startsWith("0x") ? 
@@ -122,11 +122,12 @@ public class EventInserter {
             	} else {
             		ival = (long)(Double.parseDouble(val) * emsg.getTimescale());
             	}
-            	emsg.setPresentationTimeDelta(ival); // delta offset in timescale
+            	if(ival>-1) emsg.setPresentationTimeDelta(ival); // delta offset in timescale
 
-            	// duration seconds 0..n or "2.5" floating point
+            	// duration seconds 0..n or "2.5" floating point seconds
             	// 0x0000FFFF=65535 unknown, 0xFFFFFFFF=4294967295 unknown
             	val = Utils.getString(params, "dur", "1", true);
+            	if(val.equalsIgnoreCase("unknown")) val="4294967295";
             	if(val.indexOf('.')<0) {
 	            	ival = val.startsWith("0x") ? 
 	                		 Long.parseLong(val.substring(2), 16) : Long.parseLong(val);
@@ -134,15 +135,20 @@ public class EventInserter {
             	} else {
             		ival = (long)(Double.parseDouble(val) * emsg.getTimescale());
             	}
-            	emsg.setEventDuration(ival); // duration in timescale unit
+            	if(ival>-1) emsg.setEventDuration(ival); // this is a duration in timescale unit
 
             	val = Utils.getString(params, "id", "1", true);
-            	emsg.setId( val.startsWith("0x") ? 
-            		Long.parseLong(val.substring(2), 16) : Long.parseLong(val) );
+            	ival= val.startsWith("0x") ? 
+                		Long.parseLong(val.substring(2), 16) : Long.parseLong(val);
+            	if(ival>-1) emsg.setId(ival);
 
+            	byte[] buf; // msgData is always byte buffer
             	val = Utils.getString(params, "msg", "", true);  // "This is an EMSG event (value=1, id=1)"
-            	emsg.setMessageData( val.startsWith("0x") ?
-            		Utils.hexToBytes(val) : val.getBytes("UTF-8") );
+            	if(val.startsWith("b64:"))		buf=Utils.base64Decode(val.substring(4));
+            	else if(val.startsWith("hex:"))	buf=Utils.hexToBytes(val.substring(4));
+            	else if(val.startsWith("0x"))	buf=Utils.hexToBytes(val); // old syntax
+            	else							buf=val.getBytes("UTF-8"); // empty string is zero-length buffer
+            	emsg.setMessageData(buf);
             	
         		boxes.add(sidxIdx>-1?sidxIdx:moofIdx, emsg);
         		isoFile.setBoxes(boxes);

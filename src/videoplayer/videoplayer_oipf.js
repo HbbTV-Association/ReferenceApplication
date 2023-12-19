@@ -47,7 +47,10 @@ VideoPlayer.prototype.createPlayer = function(){
 };
 
 VideoPlayer.prototype.setURL = function(url){
-	url = url.replace("${GUID}", uuidv4());
+	if(url.indexOf("{",0)>=0) {
+		url = url.replace("${GUID}", uuidv4());
+		url = url.replace("${NOWUTC}", getUTCYMDHMS(null)+"Z"); // ${NOWUTC} -> "2023-10-18T07:36:40Z"
+	}	
 	console.log("setURL("+url+")");
 	
 	var type = "application/dash+xml";

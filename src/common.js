@@ -61,6 +61,26 @@ function getYMDHMS(objDate) {
 	);
 }
 
+function getUTCYMDHMS(objDate) {
+	if(!objDate) objDate=new Date();
+	var arrYMD = new Array();
+	arrYMD[0] = objDate.getUTCFullYear();
+	arrYMD[1] = objDate.getUTCMonth()+1;
+	arrYMD[2] = objDate.getUTCDate();		  
+	var arrHMS = new Array();
+	arrHMS[0] = objDate.getUTCHours();
+	arrHMS[1] = objDate.getUTCMinutes();
+	arrHMS[2] = objDate.getUTCSeconds();
+	return ( 
+		(arrYMD[0] < 10 ? "0" + arrYMD[0] : arrYMD[0]) + "-" +
+		(arrYMD[1] < 10 ? "0" + arrYMD[1] : arrYMD[1]) + "-" +
+		(arrYMD[2] < 10 ? "0" + arrYMD[2] : arrYMD[2]) +
+		"T" +
+		(arrHMS[0] < 10 ? "0" + arrHMS[0] : arrHMS[0]) + ":" +
+		(arrHMS[1] < 10 ? "0" + arrHMS[1] : arrHMS[1]) + ":" +
+		(arrHMS[2] < 10 ? "0" + arrHMS[2] : arrHMS[2])
+	);
+}
 
 /**
  * Extends Array to support sortBy, which sorts an array of objects by given attributes
