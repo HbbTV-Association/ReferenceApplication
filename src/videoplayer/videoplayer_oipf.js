@@ -42,6 +42,8 @@ VideoPlayer.prototype.createPlayer = function(){
 	if( this.profile.hbbtv == "1.5" ){
 		this.video = $("<object id='video' type='application/dash+xml'></object>")[0];
 		this.element.appendChild( this.video );
+		if($("#video-playtimer").length<1)
+			$("<div id='video-playtimer'></div>").insertAfter("#video");		
 		return true;
 	}
 };
@@ -53,13 +55,13 @@ VideoPlayer.prototype.setURL = function(url){
 	}	
 	console.log("setURL("+url+")");
 	
+	$("#video-playtimer").text("");
+	this.playbackStartTime = new Date().getTime();
+		
 	var type = "application/dash+xml";
-	if( url.match(/mp4$/) ){
-		this.video.setAttribute("type", "video/mp4");
-	}
-	else{
-		this.video.setAttribute("type", type );
-	}
+	if( url.match(/mp4$/) ) type="video/mp4";
+	this.video.setAttribute("type", type);
+	
 	try{
 		this.url = url; // see sendLicenseRequest()
 		this.video.data = url;
@@ -652,7 +654,8 @@ VideoPlayer.prototype.clearVideo = function(){
 			if( self.isPlaying() ){
 				self.video.stop();
 			}
-			$( "#video" ).remove(); // clear from dom
+			$("#video").remove(); // clear from dom
+			$("#video-playtimer").remove();
 			this.video = null;
 			console.log("video object stopped, removed from dom and VideoPlayerClass");
 		}

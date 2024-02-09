@@ -470,15 +470,16 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		var duration = 0;
 		var pbMaxWidth = 895; // progress bar maximum width in pixels
 		
+		var dtNow = new Date();
+		var sHMS  = getMillisAsHMS(dtNow.getTime()-this.playbackStartTime, true);
+		$("#video-playtimer").text("Playback started " + sHMS + " ago");
+		
 		// first try get time out of player and decide which player is used
-		try{
-			
+		try{			
 			if( this.live ){
 				duration = 100;
 				position = 100;
-				
-				var time = this.time();
-				
+				var time = this.time();				
 				duration = time.duration;
 				position = time.position;
 			}
@@ -504,7 +505,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		
 		try{
 			var self = this;
-
 			pbar = document.getElementById("progressbar");
 
 			var barWidth=0;
@@ -525,14 +525,9 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			$("#playposition").css("left", play_position);
 			$("#progress_currentTime").css("left", play_position);
 
-
-			
 			$("#playposition").html("");
 			if(position){
-				var pp_hours = Math.floor(position / 60 / 60);
-				var pp_minutes = Math.floor((position-(pp_hours*60*60)) / 60);
-				var pp_seconds = Math.round((position-(pp_hours*60*60)-(pp_minutes*60)));
-				$("#playposition").html( addZeroPrefix(pp_hours) + ":" + addZeroPrefix(pp_minutes) + ":" + addZeroPrefix(pp_seconds) );
+				$("#playposition").html(getMillisAsHMS(position*1000));
 			}
 
 			document.getElementById("playtime").innerHTML = "";
@@ -541,10 +536,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 					document.getElementById("playtime").innerHTML = "LIVE";
 				}
 				else{
-					var pt_hours = Math.floor(duration / 60 / 60);
-					var pt_minutes = Math.floor((duration-(pt_hours*60*60))  / 60);
-					var pt_seconds = Math.round((duration-(pt_hours*60*60)-(pt_minutes*60)) );
-					document.getElementById("playtime").innerHTML = addZeroPrefix(pt_hours) + ":" + addZeroPrefix(pt_minutes) + ":" + addZeroPrefix(pt_seconds);
+					document.getElementById("playtime").innerHTML = getMillisAsHMS(duration*1000);
 				}
 			}
 		} catch(e){

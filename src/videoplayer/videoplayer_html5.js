@@ -37,6 +37,8 @@ VideoPlayerHTML5.prototype.createPlayer = function(){
 	try{
 		this.video = $("<video id='video' class='fullscreen'></video>")[0]; // type='application/dash+xml'
 		this.element.appendChild( this.video );
+		if($("#video-playtimer").length<1)
+			$("<div id='video-playtimer'></div>").insertAfter("#video");		
 		console.log("html5 video object created");
 	} catch( e ){
 		console.log("Error creating dashjs video object ", e.description );
@@ -332,7 +334,10 @@ VideoPlayerHTML5.prototype.setURL = function(url, ntCall){
 		}
 		console.log("setURL(",url,")");
 		this.url = url;  // see sendLicenseRequest()
-		this.firstPlay=true;		
+		this.firstPlay=true;
+		
+		$("#video-playtimer").text("");
+		this.playbackStartTime = new Date().getTime();		
 	} else {
 		url = this.url;
 		console.log("setURL(",url,"), ntCall="+ntCall );
@@ -907,7 +912,8 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 		if(self.video){
 			self.video.pause();
 			self.video.src = ""; // do this so that "bindToCurrentChannel()" works
-			$( "#video" ).remove(); // clear from dom
+			$("#video").remove(); // clear from dom
+			$("#video-playtimer").remove();
 			this.video = null;
 		}
 	} catch(e){

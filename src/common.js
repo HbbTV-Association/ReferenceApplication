@@ -25,6 +25,18 @@ function daysLeft( time ){
 	return Math.ceil(Math.abs(((new Date(time)).getTime()) - ((new Date).getTime()))/8.64e7);
 }
 
+function getMillisAsHMS(iTimems, withMillis) {
+	// convert millis to "hh:mm:ss" or "hh:mm:ss.mil"
+	iTime = Math.floor(iTimems / 1000);
+	iMillis = iTimems-(iTime*1000);
+	var hh = Math.floor(iTime/3600);
+	var mm = Math.floor((iTime-(hh*3600))/60);
+	var ss = iTime-(hh*3600)-(mm*60);
+	return (hh < 10 ? "0" + hh : hh) + ":"
+		+ (mm < 10 ? "0" + mm : mm) + ":"
+		+ (ss < 10 ? "0" + ss : ss)
+		+ (withMillis ? "."+("000"+iMillis).substr(-3) : "")
+}
 
 function UTCDate(){
 	return new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000);

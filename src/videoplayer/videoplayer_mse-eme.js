@@ -47,9 +47,8 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		if($("#video-caption").length<1)
 			$("<div id='video-caption'></div>").insertAfter("#video"); // put TTML subtitles div after a video element
 
-		//this.video = $("<video id='video' style='width:100%'></video>")[0]; // data-dashjs-player		
-		//this.element.appendChild( this.video );
-		//$("<div id='video-caption'></div>").insertAfter("#video"); // put TTML subtitles div after a video element		
+		if($("#video-playtimer").length<1)
+			$("<div id='video-playtimer'></div>").insertAfter("#video");
 		
 		this.player = dashjs.MediaPlayer().create();
 		this.player.initialize();
@@ -355,6 +354,9 @@ VideoPlayerEME.prototype.setURL = function(url){
 		url = url.replace("${NOWUTC}", getUTCYMDHMS(null)+"Z"); // ${NOWUTC} -> "2023-10-18T07:36:40Z"
 	}
 	console.log("setURL(",url,")");
+	
+	$("#video-playtimer").text("");
+	this.playbackStartTime = new Date().getTime();
 	
 	if(this.adBreaks) this.player.setAutoPlay(false); // disable autoplay, play preroll before starting a video
 	this.player.attachSource(url);
@@ -818,6 +820,7 @@ VideoPlayerEME.prototype.clearVideo = function(){
 			self.player.destroy(); // destroy an instance
 			//$("#video").remove(); // clear from dom(note: do not remove elements, reuse to avoid dashjs texttrack errors)
 			//$("#video-caption").remove();
+			$("#video-playtimer").remove();
 			this.video = null;
 		}
 		try {

@@ -181,6 +181,13 @@
 	text-align: right;
 }
 
+#video-playtimer {
+  background-color:gray; opacity:0.8; color:white; 
+  position:absolute; left:75px; top:40px;
+  padding: 3px 3px 3px 3px;
+  font-size: 16px;
+}
+
 #progressbarbg {
 	position: absolute;
 	top: 33px;
