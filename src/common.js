@@ -427,6 +427,22 @@ function XMLEscape(sValue, bUseApos, bStripTags) {
 	}
 }
 
+// parse parameter value from url (case sensitive)
+function getURLParam(strURL, strKey) {
+   // http://mywebapp/do.url?key1=val1&key2=val2
+   var idx = strURL!=null ? strURL.indexOf('?') : -1;
+   if (idx < 0) return ""; // no params
+	 
+   // "&key1=val1&key2=val2&"
+   strURL = "&" + strURL.substring(idx+1) + "&";
+   idx = strURL.indexOf("&" + strKey + "=");
+   if (idx < 0) return ""; // param not found
+	 
+   // "&key1=val1&key2=val2&" -> "val1&key2=val2&" -> "val1"
+   strURL = strURL.substring(idx + strKey.length + 2);
+   idx = strURL.indexOf("&");	 
+   return strURL.substring(0, idx);
+}
 
 /*
 window.onerror = function(message, url, lineNumber) { 

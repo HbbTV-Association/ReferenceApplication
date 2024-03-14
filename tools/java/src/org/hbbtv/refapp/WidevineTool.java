@@ -25,9 +25,11 @@ public class WidevineTool {
 			// decode <cenc:pssh> widevine data
 			String input = Utils.getString(params, "input", "", true);
 			byte[] pssh;
-			if(input.startsWith("base64://") || input.startsWith("b64://")) {
-				// "base64://AAAAR3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAACcIARIBMBoNd2lkZXZpbmVfdGVzdCIKMjAxNV90ZWFycyoFQVVESU8="
-				pssh = Utils.base64Decode(input.substring(input.indexOf('/')+2) );
+			if(input.startsWith("base64:/") || input.startsWith("b64:/")) {
+				// "base64:/AAAA.." or "base64://AAAAR3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAACcIARIBMBoNd2lkZXZpbmVfdGVzdCIKMjAxNV90ZWFycyoFQVVESU8="
+				int delim = input.indexOf('/');
+				if(input.charAt(delim+1)=='/') delim++;
+				pssh = Utils.base64Decode(input.substring(delim+1));
 			} else if (input.startsWith("<cenc:pssh>")) {
 				// "<cenc:pssh>AAAAR3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAACcIARIBMBoNd2lkZXZpbmVfdGVzdCIKMjAxNV90ZWFycyoFQVVESU8=</cenc:pssh>"
 				int endDelim = input.lastIndexOf("</cenc:pssh>");

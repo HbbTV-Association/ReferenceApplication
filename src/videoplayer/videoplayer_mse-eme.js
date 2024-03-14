@@ -55,8 +55,16 @@ VideoPlayerEME.prototype.createPlayer = function(){
 		this.player.setAutoPlay(true); // this fixes some slow-to-start live test manifests
 		this.player.attachView(document.getElementById("video"));
 		this.player.attachTTMLRenderingDiv(document.getElementById("video-caption"));
+		
+		// dashjs logLevel 0..N: NONE,FATAL,ERROR,WARNING,INFO,DEBUG
+		var sLoglevel= getURLParam(document.location.href, "loglevel");
+		var iLoglevel= sLoglevel=="debug" ? dashjs.Debug.LOG_LEVEL_DEBUG
+				: sLoglevel=="info" ? dashjs.Debug.LOG_LEVEL_INFO
+				: sLoglevel=="none" ? dashjs.Debug.LOG_LEVEL_NONE
+				: dashjs.Debug.LOG_LEVEL_WARNING;		
+		
 		this.player.updateSettings({ 
-		    debug: { logLevel: dashjs.Debug.LOG_LEVEL_WARNING } // LOG_LEVEL_WARNING,LOG_LEVEL_INFO,LOG_LEVEL_DEBUG
+			debug: { logLevel: iLoglevel }
 			,streaming: {
 				text: {defaultEnabled: true}
 				//,manifestUpdateRetryInterval: 100
