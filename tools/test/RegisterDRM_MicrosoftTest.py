@@ -89,7 +89,7 @@ def main():
 	now = datetime.datetime.utcnow()
 	obj={}
 	obj["created"]=now.strftime('%Y-%m-%dT%H:%M:%SZ')	
-	obj["Test1234"]=register(DRM_TYPE.TEST, options.authtest, "0x43215678123412341234123412341234", "0x12341234123412341234123412341234")
+	obj["Test1234"]=register(DRM_TYPE.TEST, options.authtest, "0x43215678123412341234123412341234", "0x12341234123412341234123412341234") ## PersistKey
 	obj["Test1235"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341235", "12341234123412341234123412341235")
 	obj["Test1236"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341236", "12341234123412341234123412341236")
 	obj["Test1237"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341237", "12341234123412341234123412341237")
@@ -100,6 +100,14 @@ def main():
 
 	obj["Test1236_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341236", "12341234123412341234123412341236", "CBCS")
 	obj["Test1237_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341237", "12341234123412341234123412341237", "CBCS")
+	
+	## use separate KeyID+EncKey for CBCS (secLevel=2000)
+	obj["Test1244_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341244", "12341234123412341234123412341244", "CBCS")
+	obj["Test1245_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341245", "12341234123412341234123412341245", "CBCS")
+	obj["Test1246_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341246", "12341234123412341234123412341246", "CBCS")
+	obj["Test1247_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341247", "12341234123412341234123412341247", "CBCS")
+	obj["Test1248_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341248", "12341234123412341234123412341248", "CBCS")	
+	obj["Test1249_CBCS"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341249", "12341234123412341234123412341249", "CBCS")
 
 	obj["Test12371236"]=registerMultiKey(DRM_TYPE.TEST, options.authtest, 
 		[
@@ -114,6 +122,21 @@ def main():
 			[ obj["Test1236"]["kid.0"], obj["Test1236"]["key.0"], "2000" ]
 		],
 		"CENC"
+	)
+	
+	obj["Test12471246"]=registerMultiKey(DRM_TYPE.TEST, options.authtest, 
+		[
+			[ obj["Test1247_CBCS"]["kid.0"], obj["Test1247_CBCS"]["key.0"], "3000" ],
+			[ obj["Test1246_CBCS"]["kid.0"], obj["Test1246_CBCS"]["key.0"], "2000" ]
+		],
+		"CBCS"
+	)
+	obj["Test12471246_7"]=registerMultiKey(DRM_TYPE.TEST, options.authtest, 
+		[
+			[ obj["Test1247_CBCS"]["kid.0"], obj["Test1247_CBCS"]["key.0"], "2000" ],
+			[ obj["Test1246_CBCS"]["kid.0"], obj["Test1246_CBCS"]["key.0"], "2000" ]
+		],
+		"CBCS"
 	)
 
 	obj = json.dumps(obj, indent=2, sort_keys=False, ensure_ascii=False)

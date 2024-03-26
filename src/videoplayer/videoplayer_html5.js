@@ -355,16 +355,15 @@ VideoPlayerHTML5.prototype.setURL = function(url, ntCall){
 			}
 		});
 		if(playPreroll) return;
-	}	
+	}
 	
     var videoSrc = document.createElement("source"); // use "<source>" child element
-	this.video.appendChild(videoSrc);
-	
 	var type = "application/dash+xml";
 	if( url.match(/mp4$/) ) type="video/mp4";
-	
-	videoSrc.type=type;	
-	videoSrc.src=url;		
+	videoSrc.type=type;
+	videoSrc.src=url;
+	this.video.appendChild(videoSrc);
+
 	this.videoid = url.hashCode(); // create id for video url	
 	return;
 };
@@ -744,12 +743,8 @@ VideoPlayerHTML5.prototype.startVideo = function(isLive, ntCall) {
 	
 	this.resetProgressBar(); // always reset progress bar	
 	this.onAdBreak = false;
-	this.firstPlay = true;	
-	if( isLive ){
-		self.live = true;
-	} else{
-		self.live = false;
-	}
+	this.firstPlay = true;
+	self.live = isLive?true:false;
 	
 	if( !this.subtitles ){
 		this.subtitleTrack = false;
@@ -907,6 +902,7 @@ VideoPlayerHTML5.prototype.clearVideo = function(){
 	var self = this;
 	self.element.addClass("hidden");
 	$("#player").removeClass("show");
+	showInfo("", -1);
 	self.visible = false;
 	try{
 		if(self.video){

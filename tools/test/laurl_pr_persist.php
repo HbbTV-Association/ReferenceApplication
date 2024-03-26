@@ -1,4 +1,6 @@
 <?php
+require "common.php";
+
 header( "Expires: Mon, 20 Dec 1998 01:00:00 GMT" );
 header( "Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 header( "Cache-Control: no-cache, must-revalidate" );
@@ -19,7 +21,7 @@ $headerNVPreAuth   = @$_REQUEST['header-nvpreauth']; // PreAuthorization jwt tok
 $headerCustomdataDT= @$_REQUEST['header-dtcd']; // DrmToday CustomData
 $headerAxinomToken = @$_REQUEST['header-AxDrmMessage']; //  Axinom token
 
-$persist  = @$_REQUEST['persist'];   // MSTest server persist license
+$persist  = @$_REQUEST['persist'];   // MSTest server persist license (1,0 or "status")
 $sessionId= @$_REQUEST['sessionid']; // refapp may use this for persistent laurl testing
 
 $logfile = @$_REQUEST['logfile']; // name of logfile (optional), allow a-z|0-9 characters only.
@@ -36,9 +38,56 @@ if ($_SERVER['REQUEST_METHOD']=="OPTIONS") {
 	header("Expires: -1");
 	return;
 }
+
+$tzUTC = new DateTimeZone("UTC");
+$dtNow = new DateTime("now", $tzUTC);
+
+if($persist=="status") {
+	header('Content-Type: application/json; charset=utf-8');
+	// use stateless-noCookie-noUrlparam php sessionId. Return json of session values	
+	$phpSessionId = "refapp-". sha1("noua" ."_". getRemoteIP()); // $phpSessionId = "refapp-". sha1($_SERVER["HTTP_USER_AGENT"] ."_". getRemoteIP());
+	session_id($phpSessionId);
+	session_start([
+		 "use_cookies"     => 0, "use_strict_mode"=> 0
+		,"use_only_cookies"=> 0, "use_trans_sid"  => 0
+	]);
+	
+	$jsonObj = [ "status"=>null ];
+	if( $sessionId && isset($_SESSION[$sessionId]) )
+		$jsonObj["status"] = $_SESSION[$sessionId];
+	session_write_close(); // close PHPSESSION filelock
+	if($jsonObj["status"]!=null){
+		$secFloat= $jsonObj["status"]["lastAccessedms"]/1000.0; // millis 1711100523491 to sec 1711100523.3491
+		$dt      = DateTime::createFromFormat("U\.u", sprintf("%1.6F",$secFloat), $tzUTC); // Uu=000000 microseconds(6 digits)
+		$jsonObj["status"]["lastAccessed"] = $dt->format("Y-m-d\\TH:i:s.vO");  // .v=000 milliseconds(3 digits), O=+hhmm offset "2024-03-22T09:42:03.491+0000"
+		$jsonObj["status"]["lastAccessedSince"] = (int)$dtNow->format('Uv') - $jsonObj["status"]["lastAccessedms"]; // milliseconds since last call
+	}
+	echo(json_encode($jsonObj));	
+	return;
+}
+
 //header('Content-type: application/soap+xml; charset=utf-8');
 header('Content-Type: text/xml; charset=utf-8');
 //header('Content-Type: text/plain; charset=utf-8');
+
+if($persist && $sessionId!="") {
+	// use stateless-noCookie-noUrlparam php sessionId, do not use "UserAgent" field it may not be the same for mpd,laurl,mp4seg requests
+	$phpSessionId = "refapp-". sha1("noua" ."_". getRemoteIP()); // $phpSessionId = "refapp-". sha1($_SERVER["HTTP_USER_AGENT"] ."_". getRemoteIP());
+	session_id($phpSessionId);
+	session_start([
+		 "use_cookies"     => 0, "use_strict_mode"=> 0
+		,"use_only_cookies"=> 0, "use_trans_sid"  => 0
+	]);
+
+	$_SESSION[$sessionId]["lastAccessedms"] = (int)$dtNow->format('Uv'); // millisecondsUTC
+	if(!isset($_SESSION[$sessionId]["requestCount"])) {
+		$_SESSION[$sessionId]["requestCount"]=0;
+		$_SESSION[$sessionId]["sessionId"]=$sessionId;
+	}
+	$_SESSION[$sessionId]["requestCount"] = $_SESSION[$sessionId]["requestCount"]+1;
+	session_write_close(); // close PHPSESSION filelock
+}
+
 
 $query = file_get_contents('php://input'); // read POST bodypart
 
@@ -109,7 +158,6 @@ if($algId=="aescbc") {
 // use MSTest server with a persist license
 if($persist) {
 	// begindate,enddate=-4min .. +15min
-	$dtNow = new DateTime("now", new DateTimeZone("UTC") );
 	$dtNow->sub(new DateInterval("PT4M"));
 	$sBegin= $dtNow->format("YmdHis"); // YYYYMMDDhhmmss
 	$dtNow->add(new DateInterval("PT19M"));
@@ -152,7 +200,7 @@ if ($logfile!="") {
 		. "LaUrl=". $url ."\n"
 		. "SOAPAction=". $soapAction ."\n"
 		. "KID=". $kid ."\n"
-		. "SessionId=". $sessionId ."\n"
+		. "SessionId=". $sessionId . "\n"
 		. "Content-Length=". strlen($query) ."\n"
 		. "Request\n"
 		. $query ."\n";

@@ -68,10 +68,8 @@ VideoPlayer.prototype.setURL = function(url){
 	} catch( e ){
 		console.log( e.message );
 	}
-	
-	// create id for video url
-	this.videoid = url.hashCode();
-
+		
+	this.videoid = url.hashCode(); // create id for video url
 	return;
 };
 
@@ -647,6 +645,7 @@ VideoPlayer.prototype.play = function(){
 VideoPlayer.prototype.clearVideo = function(){
 	var self = this;
 	self.element.addClass("hidden");
+	showInfo("", -1);
 	self.visible = false;
 	clearInterval(self.progressUpdateInterval);
 	try{

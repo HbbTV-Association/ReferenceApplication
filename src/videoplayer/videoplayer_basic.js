@@ -444,17 +444,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			$("#playposition").css("left", "0px");
 			$("#progress_currentTime").css("left", "0px");
 			$("#playposition").html( "00:00:00" );
-			
-
-			document.getElementById("playtime").innerHTML = "";
-			
-			if( self.live ){
-				document.getElementById("playtime").innerHTML = "LIVE";
-			}
-			else{
-				document.getElementById("playtime").innerHTML = "00:00:00";
-			}
-			
+			document.getElementById("playtime").innerHTML = self.live ? "LIVE" : "00:00:00";
 		} catch(e){
 			console.log( e.message );
 		}
@@ -466,15 +456,34 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	 * @method updateProgressBar
 	 */
 	this.updateProgressBar = function( sec ){
+		var self = this;
 		var position = 0;
 		var duration = 0;
 		var pbMaxWidth = 895; // progress bar maximum width in pixels
 		
 		var dtNow = new Date();
-		var sHMS  = getMillisAsHMS(dtNow.getTime()-this.playbackStartTime, true);
+		var msElapsed = dtNow.getTime()-this.playbackStartTime;
+		var sHMS  = getMillisAsHMS(msElapsed, true, true);
 		$("#video-playtimer").text("Playback started " + sHMS + " ago");
+
+		// if this was "setPersist(yes)" test then read persist_after status
+		// see setDRM(), updateProgressBar()
+		if(self.drm && msElapsed>5000 && self.drm.persist_before && !self.drm.persist_after) {
+			self.drm.persist_after={}; // flag this request is done only once
+			$.get(self.drm.persist_url, function(retval){
+				self.drm.persist_after=retval;
+				console.log("drm.persist_after " + JSON.stringify(retval));
+				var befCount = self.drm.persist_before.status? self.drm.persist_before.status.requestCount || -1: -1;
+				var aftCount = self.drm.persist_after.status ? self.drm.persist_after.status.requestCount || -1: -1;
+				var tsLast   = self.drm.persist_after.status ? self.drm.persist_after.status.lastAccessedSince || -1 : -1;
+				var info = "usePersist=" + (befCount!=aftCount ? "NO(laurl was invoked)" : "YES(reused a local license)")
+					+ (tsLast>=0 ? "\nlastSince="+getMillisAsHMS(tsLast, true, true)+" ago" : "");
+				console.log(info);
+				showInfo(info, 7);
+			}, "json");
+		}
 		
-		// first try get time out of player and decide which player is used
+		// first get a time out of player and decide which player is used
 		try{			
 			if( this.live ){
 				duration = 100;
@@ -504,7 +513,6 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		}
 		
 		try{
-			var self = this;
 			pbar = document.getElementById("progressbar");
 
 			var barWidth=0;
@@ -546,18 +554,33 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	};
 	
 	/**
-	 * 
+	 * Initialize drm values, may trigger "setPersist(yes)" counter.
 	 * @param {String} system. Specifies DRM system to be used as a string value (for example playready or marlin)
 	 * @param {String} la_url. DRM lisence url
 	 * @method setDRM
 	 */
-	this.setDRM = function( system, la_url){
+	this.setDRM = function(system, la_url){
 		if( !system ){
 			this.drm = null;
-		}
-		else{
+		} else {
 			console.log("setDRM("+ system +", "+la_url+")");
-			this.drm = { la_url : la_url, system : system, ready : false, error : null};
+			this.drm = { la_url : la_url, system : system, ready : false, error : null
+				, persist_before:null, persist_after:null, persist_url:null
+			};
+
+			// keep track of persistence request count before and after playback.
+			// see setDRM(), updateProgressBar()
+			var delimS = this.currentItem.desc.indexOf("setPersist(");
+			var delimE = delimS>=0 ? this.currentItem.desc.indexOf(")", delimS) : -1;
+			var sValue = delimE>=0 ? this.currentItem.desc.substring(delimS,delimE+1) : "";
+			if(sValue=="setPersist(yes)") {
+				var self=this;
+				self.drm.persist_url = la_url.replace(/\?persist\=1\&/, "?persist=status&"); // "?persist=1&" to "?persist=status&"
+				$.get(self.drm.persist_url, function(retval){
+					console.log("drm.persist_before " + JSON.stringify(retval));
+					self.drm.persist_before=retval;
+				}, "json");
+			} // else "setPersist(no)" or ""
 		}
 	};
 	
@@ -682,12 +705,19 @@ function VideoPlayerBasic(element_id, profile, width, height){
 	watched.save() : saves list to cookie
     watched.delete() : delete watched cookie
 	
+	NOT USED ANYMORE, functions do nothing.
 	*******************************/
 	this.watched = {
 		list : [],
 		current : null,
-		set : function( time, duration, videoid ){
-			
+		
+		set : function(time, duration, videoid){ return; },
+		save: function(){ },
+		get : function(id){ return null; },
+		load: function(successCB){ },
+		deleteCurrent: function(){ }
+		
+		/*set : function( time, duration, videoid ){			
 			// do not save if watched less than 10s
 			if( time < 10 )
 				return;
@@ -767,7 +797,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		},
 		deleteCurrent: function() {
 			this.list.splice(this.current, 1);
-		}
+		}*/
 	};
 	
 }

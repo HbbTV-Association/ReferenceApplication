@@ -536,7 +536,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	this.drm.successCallback = callback;
 	var self = this;
 	
-	// persistent-license test needs a session GUID to track laurl invocation
+	// ${GUID}=per playback or ${SESSION_GUID}=per app(reload)
 	var laUrl = self.drm.la_url;
 	if(laUrl.indexOf("${GUID}")>=0) {
 		self.drm.la_url_guid = uuidv4();
@@ -668,12 +668,7 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 	this.subtitleTrack = false;
 	this.onAdBreak = false;
 	this.firstPlay = true;
-	
-	if( isLive ){
-		self.live = true;
-	} else {
-		self.live = false;
-	}
+	self.live = isLive?true:false;
 	
 	if( !this.subtitles ){
 		this.subtitleTrack = false;
@@ -701,8 +696,7 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 			self.createPlayer();
 			self.setEventHandlers();
 		}
-	}
-	catch(e){
+	} catch(e){
 		console.log( e.message );
 		console.log( e.description );
 	}
@@ -710,7 +704,6 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 	self.element.removeClass("hidden");
 	self.visible = true;
 	self.setFullscreen(true);
-
 	
 	// first play preroll if present
 	var playPreroll = false;
@@ -730,17 +723,7 @@ VideoPlayerEME.prototype.startVideo = function( isLive ){
 		}
 	}
 	
-	try{	/*
-		self.element.removeClass("hidden");
-		self.visible = true;
-		
-		console.log("video.play()")
-		self.video.play();
-
-		self.setFullscreen(true);
-		self.displayPlayer(5);
-		*/
-		
+	try{		
 		self.element.removeClass("hidden");
 		self.visible = true;
 		self.watched.load();
@@ -819,6 +802,7 @@ VideoPlayerEME.prototype.clearVideo = function(){
 	$("#player").removeClass("show");
 	$("#subtitleButton").hide();
 	$("#audioButton").hide();
+	showInfo("", -1);
 	self.visible = false;
 	try{
 		if(self.video){

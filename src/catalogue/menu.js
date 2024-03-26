@@ -261,40 +261,21 @@ Menu.prototype.prepareVideoStart = function(){
 		}
 		*/
 		
-		vplayer.currentItem = self.focus;
-		
-		if( self.focus.adBreaks ){
-			vplayer.setAdBreaks( self.focus.adBreaks );
-		}
-		else{
-			vplayer.setAdBreaks( null ); // no ads
-		}
+		vplayer.currentItem = self.focus;		
+		vplayer.setAdBreaks(self.focus.adBreaks ? self.focus.adBreaks : null);
 		
 		// set out-of-band subtitles
 		if( self.focus.subtitles ){
 			vplayer.setSubtitles( self.focus.subtitles );
 		}
 		
-		if( profile.version == "mse-eme" ){
-			if( self.focus.la_url ){
-				vplayer.setDRM( self.focus.drm, self.focus.la_url );
-				vplayer.sendLicenseRequest();
-			}
-			else{
-				vplayer.setDRM( false );
-			}
-			//vplayer.player.initialize( vplayer.video, null, false);
-			vplayer.setURL( self.focus.url );
+		if( self.focus.la_url ){
+			vplayer.setDRM( self.focus.drm, self.focus.la_url ); // may trigger "setPersist(yes)" counter
+			if( profile.version == "mse-eme" ) vplayer.sendLicenseRequest(); // set player.drm config fields
+		} else {
+			vplayer.setDRM( false );
 		}
-		else{
-			vplayer.setURL( self.focus.url );
-			if( self.focus.la_url ){
-				vplayer.setDRM( self.focus.drm, self.focus.la_url );
-			}
-			else{
-				vplayer.setDRM( false );
-			}
-		}
+		vplayer.setURL( self.focus.url );
 		//vplayer.video.data = self.focus.url;
 	} catch(e){
 		console.log("try: " + self.focus.url + " : " + e.message );
