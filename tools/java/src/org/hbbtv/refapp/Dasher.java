@@ -436,7 +436,7 @@ public class Dasher {
 		// DASH: write encrypted segments+manifest if KID+KEY values are found
 		DashDRM drm = new DashDRM();
 		drm.initParams(params);
-		String mode = params.get("drm.mode");
+		final String mode = params.get("drm.mode"); // "cenc","cbcs"
 		
 		logger.println("");
 		logger.println(Utils.getNowAsString()+" Start DRM "+mode);

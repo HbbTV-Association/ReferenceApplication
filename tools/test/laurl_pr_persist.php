@@ -11,8 +11,7 @@ header('Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST');
 header('Access-Control-Expose-Headers: server,range,content-range,content-length,content-type');
 // write content-type header after OPTIONS check
 
-// laurl_pr.php?laurl=MS1236&logfile=mymedia1
-// laurl_pr.php?laurl=clientinfo&logfile=mymedia1
+// laurl_pr_persist.php?persist=1&logfile=persist&sessionid=${SESSION_GUID}
 
 $url = @$_REQUEST['laurl']; // redirect soapxml to this LAURL address or use predefined values, if empty use WRMHeaderKID
 $headerCustomdata  = @$_REQUEST['header-customdata']; // put to LAURL request header (BuyDRM xmlauth)
@@ -22,6 +21,8 @@ $headerCustomdataDT= @$_REQUEST['header-dtcd']; // DrmToday CustomData
 $headerAxinomToken = @$_REQUEST['header-AxDrmMessage']; //  Axinom token
 
 $persist  = @$_REQUEST['persist'];   // MSTest server persist license (1,0 or "status")
+$validSec = @$_REQUEST['valid'];     // license offline valid for N sec
+if($validSec=="") $validSec=15*60;
 $sessionId= @$_REQUEST['sessionid']; // refapp may use this for persistent laurl testing
 
 $logfile = @$_REQUEST['logfile']; // name of logfile (optional), allow a-z|0-9 characters only.
@@ -157,10 +158,10 @@ if($algId=="aescbc") {
 
 // use MSTest server with a persist license
 if($persist) {
-	// begindate,enddate=-4min .. +15min
-	$dtNow->sub(new DateInterval("PT4M"));
+	// begindate,enddate=-4min .. timeSec expiration
+	$dtNow->sub(new DateInterval("PT240S"));
 	$sBegin= $dtNow->format("YmdHis"); // YYYYMMDDhhmmss
-	$dtNow->add(new DateInterval("PT19M"));
+	$dtNow->add(new DateInterval("PT".(240+$validSec)."S"));
 	$sEnd  = $dtNow->format("YmdHis");	
 	$url = str_replace(",persist:false,", ",persist:true,begindate:${sBegin},enddate:${sEnd},", $url);
 }

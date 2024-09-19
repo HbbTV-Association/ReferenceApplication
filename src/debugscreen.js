@@ -4,18 +4,26 @@
 
 var applog = [];
 var originalLog = console.log;
+var applogLastTime=0;
 console.log = function(){
 	if( !arguments[0] ){ // ??
 		originalLog.apply( this, arguments );
 		return;
 	}
 	if( arguments[0][0] == "[" ) return; // this will erase dashjs console
-		
+	
+	var tsNow=Date.now();
+	var isTuple=false; // true=identical log within 1.5sec time window
+	if(tsNow < applogLastTime+1500 && applog.length>0 && arguments.length==1) {
+		isTuple = applog[applog.length-1]==arguments[0];		
+	}
+	applogLastTime=tsNow;
+	
 	applog.push( Array.apply(this, arguments).map( function(argument){ 
 		return XMLEscape( typeof argument == "string"? argument : JSON.stringify(argument), false,true )
 	})); 
 	originalLog.apply( this, arguments ); 
-	debug( arguments );
+	if(!isTuple) debug(arguments);
 };
 
 function saveAppLog(){
@@ -46,24 +54,22 @@ function debug(lines){
 		$("body").append('<div id="debugScreen"><div id="debugText"></div></div>');
 	}
 	try{
-	var textArea = $("#debugText");
-	
-	var hasPerformance = typeof( performance ) != "undefined";
-	var timestamp = "";
-	if( hasPerformance ){
-		timestamp = "[" + performance.now() + "ms]: ";
-	}
-	$.each( lines, function( i, object ){
-		var line = "";
-		
-		if( typeof object == "string" ){
-			line = timestamp + XMLEscape(object,false,true);
+		var textArea = $("#debugText");
+			
+		var hasPerformance = typeof( performance ) != "undefined";
+		var timestamp = "";
+		if( hasPerformance ){
+			timestamp = "[" + Math.floor(performance.now()) + "ms]: ";
 		}
-		else {
-			line = timestamp + "[obj] " + XMLEscape(JSON.stringify(object),false,true);
-		}
-		textArea.append( line + "<br/>");
-	} );
+		$.each( lines, function( i, object ){
+			var line = "";
+			if( typeof object == "string" ){
+				line = timestamp + XMLEscape(object,false,true);
+			} else {
+				line = timestamp + "[obj] " + XMLEscape(JSON.stringify(object),false,true);
+			}
+			textArea.append( line + "<br/>");
+		} );
 	} catch(e){
 		showInfo(e.description);
 	}

@@ -131,6 +131,7 @@ public class SubtitleInserter {
 	 * @param segdur		segment duration (millis, 3840, 8000)
 	 * @param deletetempfiles  delete temporary files
 	 * @param urlPrefix		url prefix for init+media files, use "../" for drm manifests
+	 * @param cmaf          cmaf profile (cmf2,cmfc,no)
 	 * @param isSingleSeg   use single segment(not implemented yet)
 	 * @param segname		number,time,number-timeline,time-timeline
 	 * @param timeLimit		seconds of subtitle track to read or "" to read a full ttml file

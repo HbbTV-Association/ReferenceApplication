@@ -428,6 +428,7 @@ public class MediaTools {
 	 * @param id		sub_xxx
 	 * @param segdur	segment duration, millis(8000=8sec)
 	 * @param segname	number,time,number-timeline,time-timeline
+	 * @param cmaf      cmaf profile (cmf2,cmfc,no)
 	 * @return
 	 */
 	public static List<String> getSubIBSegmentsArgs(File subFile, String id, int segdur
@@ -441,6 +442,7 @@ public class MediaTools {
 			"--tfdt64", "--tfdt_traf", "--noroll=yes", "--btrt=no",
 			"--truns_first=yes",
 			(cmaf.isEmpty() ? "$DEL$" : "--cmaf="+cmaf),
+			"--ttml_agg", // single sample (TRUN.samplecount=1) instead of 1..N samples per segment. Livesim2 supports just 1-sample. 
 			"-segment-name", segname.startsWith("number") ? "$RepresentationID$/sub_$Number$$Init=i$" : "$RepresentationID$/sub_$Time$$Init=i$",
 			segname.endsWith("-timeline") ? "-segment-timeline" : "",
 			"-out", subFile.getName().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd					

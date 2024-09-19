@@ -45,19 +45,7 @@ public class DashDRM {
 		if(val.endsWith("disable") || val.startsWith("disable")
 				|| val.equalsIgnoreCase("no") || val.equals("0") )
 			return false;
-		
-		String keys[]=new String[]{ 
-				"drm.kid",       "drm.key",		  // use same value for video+audio tracks.       
-				"drm.kid.video", "drm.key.video", // Playready may need to use separate KIDs
-				"drm.kid.audio", "drm.key.audio", // for video(SL3000) and audio(SL2000) tracks.
-		};
-		for(int idx=0; idx<keys.length; idx=+2) {
-			// KID and KEY params found?
-			if(!Utils.getString(params, keys[idx], "", true).isEmpty() &&
-					!Utils.getString(params, keys[idx+1], "", true).isEmpty())
-				return true;
-		}
-		return false;		
+		return true;
 	}
 	
 	/**
@@ -72,29 +60,21 @@ public class DashDRM {
 			
 		// rng=RandomNumberGenerator
 		String keys[]=new String[]{ 
-				"drm.kid",       "drm.key",       "drm.iv",        // 0..2 
-				"drm.kid.video", "drm.key.video", "drm.iv.video",  // 3..5
-				"drm.kid.audio", "drm.key.audio", "drm.iv.audio"   // 6..8
+				"drm.kid.video", "drm.key.video", "drm.iv.video",
+				"drm.kid.video.cbcs", "drm.key.video.cbcs",
+				"drm.kid.audio", "drm.key.audio", "drm.iv.audio",
+				"drm.kid.audio.cbcs", "drm.key.audio.cbcs"
 		};
 		for(String key : keys) {
-			boolean isIv = key.contains(".iv");
+			boolean isIv = key.contains(".iv.");
 			String val = Utils.getString(params, key, "", true);
-			if(isIv && val.isEmpty()) val="rng"; // empty IV defaults to rng
+			if(isIv && val.isEmpty()) val="rng"; // empty IV defaults to rng, other keys may use "rng" value.
 			if(val.equals("rng")) {
 				int byteLen = isIv ? 8 : 16;
 				params.put(key, "0x"+Utils.bytesToHex(
 					key.contains(".key") ? randomizeKey(byteLen) : randomizeBytes(byteLen)
 				));				
 			}
-		}
-		// copy values to .video|.audio fields if missing, use "drm.kid|.key|.iv" defaults. 
-		for(int idx=3; idx<=5; idx++) {
-			if(Utils.getString(params, keys[idx], "", true).isEmpty())
-				params.put(keys[idx], Utils.getString(params, keys[idx-3], "", true));
-		}
-		for(int idx=6; idx<=8; idx++) {
-			if(Utils.getString(params, keys[idx], "", true).isEmpty())
-				params.put(keys[idx], Utils.getString(params, keys[idx-6], "", true));
 		}
 
 		for(String keySuffix : new String[]{"video","audio"}) {
@@ -111,23 +91,11 @@ public class DashDRM {
 	
 	public void printParamsToLogger(LogWriter logger) {
 		try {
-			for(String key : new String[]{ 
-				"drm.kid.video", "drm.key.video", "drm.iv.video", 
-				"drm.playready.laurl.video",      "drm.playready.laurl.video.mpd",
-				"drm.playready.laurl.video.cbcs", "drm.playready.laurl.video.mpd.cbcs",
-				
-				"drm.kid.audio", "drm.key.audio", "drm.iv.audio", 
-				"drm.playready.laurl.audio",      "drm.playready.laurl.audio.mpd",
-				"drm.playready.laurl.audio.cbcs", "drm.playready.laurl.audio.mpd.cbcs",
-				
-				"drm.widevine.laurl.video",       "drm.widevine.laurl.video.mpd",
-				"drm.widevine.laurl.video.cbcs",  "drm.widevine.laurl.video.mpd.cbcs",
-				"drm.widevine.laurl.audio",       "drm.widevine.laurl.audio.mpd",
-				"drm.widevine.laurl.audio.cbcs",  "drm.widevine.laurl.audio.mpd.cbcs"
-			}) {
-				String val = Utils.getString(params, key, "", true);
-				if(!val.isEmpty())
-					logger.println(key+"="+params.get(key));
+			for(String key : params.keySet()) {
+				if(key.startsWith("drm.")) {
+					String val = Utils.getString(params, key, "", true);
+					if(!val.isEmpty()) logger.println(key+"="+params.get(key));
+				}
 			}
 		} catch(IOException ex) { 
 			ex.printStackTrace();
@@ -171,9 +139,12 @@ public class DashDRM {
 
 		// write KID,KEY,IV values to xml comment (0xAABBCC..DD)
 		// IV: CENC=8 bytes, CBCS=16 bytes
-		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
-		String key = Utils.getString(params, "drm.key."+keySuffix, "", true);
+		String kid = Utils.getString(params, "drm.kid."+keySuffix+"."+drmMode, "", true); // "drm.kid.video.cbcs"
+		if(kid.isEmpty()) kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);  // "drm.kid.video"
+		String key = Utils.getString(params, "drm.key."+keySuffix+"."+drmMode, "", true); // "drm.key.video.cbcs"
+		if(key.isEmpty()) key = Utils.getString(params, "drm.key."+keySuffix, "", true);  // "drm.key.video"
 		String iv  = Utils.getString(params, "drm.iv."+keySuffix, "", true); // "0x22ee7d4745d3a26a" or "0x22ee7d4745d3a26a0100000000000002"
+		
 		if(drmMode.startsWith("cenc") && iv.length()>2+16)
 			iv = iv.substring(0, 2+16); // cut to 8 bytes(16 hex)
 		else if(drmMode.startsWith("cbcs") && iv.length()<2+32)
@@ -183,7 +154,8 @@ public class DashDRM {
 		buf.append("  suffix=" + keySuffix+Dasher.NL);
 		buf.append("  kid=" + kid +Dasher.NL);
 		buf.append("  key=" + key +Dasher.NL);
-		buf.append("  iv="  + iv  +Dasher.NL);
+		buf.append("  iv =" + iv  +Dasher.NL);
+		buf.append("  drm=" + drmMode  +Dasher.NL);
 		buf.append("--> "+Dasher.NL);
 		
 		// write Playready(0,pro,pssh)
@@ -264,7 +236,8 @@ public class DashDRM {
 		}		
 
 		buf.append(Dasher.NL);
-		buf.append(String.format("<CrypTrack trackID=\"1\" IsEncrypted=\"1\" %s=\"%d\" %s=\"%s\" saiSavedBox=\"senc\""		
+		buf.append(String.format("<CrypTrack trackID=\"1\" IsEncrypted=\"1\" %s=\"%d\" %s=\"%s\" saiSavedBox=\"senc\""
+				//+ " encryptSliceHeader=\"yes\"" // yes=CENCv1 NAL encrypt, no=CENCv3+v4 NAL no encrypt https://github.com/w3c/encrypted-media/issues/563
 				+ " %s %s >"
 				, (drmMode.startsWith("cbcs") ? "constant_IV_size" : "IV_size")
 				, (iv.length()-2)/2
@@ -286,19 +259,22 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.playready", "0", true); // 0,1,pro,pssh
 		if (opt.equals("0")) return ""; // do not create element
 		else if (opt.equals("1")) opt="pro,pssh";
+		
+		String drmMode = Utils.getString(params, "drm.mode", "", true); // "cenc","cbcs"
 
-		String kid  = Utils.getString(params, "drm.kid."+keySuffix, "", true);
-		String key  = Utils.getString(params, "drm.key."+keySuffix, "", true);
-		String mode = Utils.getString(params, "drm.mode", "", true);
+		String kid = Utils.getString(params, "drm.kid."+keySuffix+"."+drmMode, "", true);
+		if(kid.isEmpty()) kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		String key = Utils.getString(params, "drm.key."+keySuffix+"."+drmMode, "", true);
+		if(key.isEmpty()) key = Utils.getString(params, "drm.key."+keySuffix, "", true);
 		if(kid.isEmpty()) return "";
 
 		String laurl="";
-		if(mode.startsWith("cbcs")) laurl = Utils.getString(params, "drm.playready.laurl."+keySuffix+".mpd.cbcs", "", true);
+		laurl = Utils.getString(params, "drm.playready.laurl."+keySuffix+".mpd."+drmMode, "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix+".mpd", "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix, "", true);
-		if(laurl.equalsIgnoreCase("empty")) laurl="";			
+		if(laurl.equalsIgnoreCase("empty")) laurl="";
 
-		byte[] wrm = createPlayreadyXML(kid, key, laurl, mode).getBytes("UTF-16LE");
+		byte[] wrm = createPlayreadyXML(kid, key, laurl, drmMode).getBytes("UTF-16LE");
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+PLAYREADY.GUID+"\" value=\"MSPR 2.0\">"+Dasher.NL); // playready
@@ -316,21 +292,23 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.widevine", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 		
-		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		String drmMode = Utils.getString(params, "drm.mode", "", true); // "cenc","cbcs"
+		String kid = Utils.getString(params, "drm.kid."+keySuffix+"."+drmMode, "", true);
+		if(kid.isEmpty()) kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		
 		String prov= Utils.getString(params, "drm.widevine.provider", "", true);  // always use same provider and
 		String cid = Utils.getString(params, "drm.widevine.contentid", "", true); // contentid values for all tracks.
-		String mode= Utils.getString(params, "drm.mode", "", true);
 		if(kid.isEmpty()) return "";
 
 		String laurl="";
-		if(mode.startsWith("cbcs")) laurl = Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd.cbcs", "", true);
+		laurl = Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd."+drmMode, "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd", "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.widevine.laurl."+keySuffix, "", true);
 		if(laurl.equalsIgnoreCase("empty")) laurl="";			
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+WIDEVINE.GUID+"\" value=\"widevine\">"+Dasher.NL);
-		buf.append("     <cenc:pssh>"+ createWidevinePSSH(kid, prov, cid, mode) +"</cenc:pssh>"+Dasher.NL);
+		buf.append("     <cenc:pssh>"+ createWidevinePSSH(kid, prov, cid, drmMode) +"</cenc:pssh>"+Dasher.NL);
 		if(!laurl.isEmpty()) {
 			buf.append("     <dashif:laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
 			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ XMLUtil.encode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
@@ -343,7 +321,10 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.marlin", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);		
+		String drmMode = Utils.getString(params, "drm.mode", "", true); // "cenc","cbcs"
+		String kid = Utils.getString(params, "drm.kid."+keySuffix+"."+drmMode, "", true);
+		if(kid.isEmpty()) kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+
 		StringBuilder buf = new StringBuilder();
 		// Marlin must have schemeidUri UCASE(against regular specs) and kid LCASE
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+ (MARLIN.GUID.toUpperCase(Locale.US)) +"\" value=\"marlin\">"+Dasher.NL);
@@ -376,7 +357,10 @@ public class DashDRM {
 		String opt = Utils.getString(params, "drm.cenc", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
 
-		String kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);		
+		String drmMode = Utils.getString(params, "drm.mode", "", true); // "cenc","cbcs"
+		String kid = Utils.getString(params, "drm.kid."+keySuffix+"."+drmMode, "", true);
+		if(kid.isEmpty()) kid = Utils.getString(params, "drm.kid."+keySuffix, "", true);
+		
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+CENC.GUID+"\">"+Dasher.NL); // use legacy clearkey GUID
 		buf.append("     <cenc:pssh>"+createPSSHv1(CENC.SYSID, kid)+"</cenc:pssh>"+Dasher.NL);

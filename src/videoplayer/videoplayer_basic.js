@@ -472,14 +472,16 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			self.drm.persist_after={}; // flag this request is done only once
 			$.get(self.drm.persist_url, function(retval){
 				self.drm.persist_after=retval;
-				console.log("drm.persist_after " + JSON.stringify(retval));
+				//console.log("drm.persist_after " + JSON.stringify(retval));
 				var befCount = self.drm.persist_before.status? self.drm.persist_before.status.requestCount || -1: -1;
 				var aftCount = self.drm.persist_after.status ? self.drm.persist_after.status.requestCount || -1: -1;
 				var tsLast   = self.drm.persist_after.status ? self.drm.persist_after.status.lastAccessedSince || -1 : -1;
 				var info = "usePersist=" + (befCount!=aftCount ? "NO(laurl was invoked)" : "YES(reused a local license)")
 					+ (tsLast>=0 ? "\nlastSince="+getMillisAsHMS(tsLast, true, true)+" ago" : "");
-				console.log(info);
-				showInfo(info, 7);
+				if(self.isPlaying()) {
+					console.log(info.replace(/(\r\n|\n|\r)/gm," "));
+					showInfo(info, 7);
+				}
 			}, "json");
 		}
 		
@@ -566,18 +568,20 @@ function VideoPlayerBasic(element_id, profile, width, height){
 			console.log("setDRM("+ system +", "+la_url+")");
 			this.drm = { la_url : la_url, system : system, ready : false, error : null
 				, persist_before:null, persist_after:null, persist_url:null
+				, persist_key:null
 			};
 
 			// keep track of persistence request count before and after playback.
 			// see setDRM(), updateProgressBar()
-			var delimS = this.currentItem.desc.indexOf("setPersist(");
+			var delimS = this.currentItem.desc.indexOf("setPersist("); // "setPersist(yes,key1234)"
 			var delimE = delimS>=0 ? this.currentItem.desc.indexOf(")", delimS) : -1;
 			var sValue = delimE>=0 ? this.currentItem.desc.substring(delimS,delimE+1) : "";
-			if(sValue=="setPersist(yes)") {
+			if(sValue.indexOf("setPersist(yes")==0) {
 				var self=this;
 				self.drm.persist_url = la_url.replace(/\?persist\=1\&/, "?persist=status&"); // "?persist=1&" to "?persist=status&"
+				self.drm.persist_key = sValue.substring(sValue.indexOf(",")+1, sValue.length-1); // localStorage lookup key for drmSessionId
 				$.get(self.drm.persist_url, function(retval){
-					console.log("drm.persist_before " + JSON.stringify(retval));
+					//console.log("drm.persist_before " + JSON.stringify(retval));
 					self.drm.persist_before=retval;
 				}, "json");
 			} // else "setPersist(no)" or ""

@@ -128,3 +128,17 @@ function getMSEEMECapabilities(){
 	});	
 }
 
+/* LocalStorage wrapper functions */
+function storage_getItem(sKey, sDefVal) {
+	sKey = sKey.replace(/ /g, "");
+	var val = localStorage.getItem(sKey);
+	return val!=null ? val : sDefVal;
+}
+function storage_setItem(sKey, sVal) {
+	sKey = sKey.replace(/ /g, "");
+	localStorage.setItem(sKey, sVal);
+}
+function storage_removeItem(sKey) {
+	sKey = sKey.replace(/ /g, "");
+	localStorage.removeItem(sKey);
+}

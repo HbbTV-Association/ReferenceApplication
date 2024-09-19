@@ -174,6 +174,8 @@ VideoPlayerEME.prototype.createPlayer = function(){
 	};
 	self.player.on(SCHEME_ID_URI, fnEvent
 		, null, { mode: dashjs.MediaPlayer.events.EVENT_MODE_ON_START }); // EVENT_MODE_ON_RECEIVE
+
+	// dashjs.MediaPlayer.events.KEY_SESSION_CREATED: see sendLicenseRequest()
 	
 	player.textTracks.addEventListener('addtrack', function(evt){
 		// set up inband cue events listeners for new tracks
@@ -435,8 +437,7 @@ VideoPlayerEME.prototype.prepareAdPlayers = function(){
 			
 			if( self.firstPlay ){
 				self.startVideo( self.live );
-			}
-			else{
+			} else {
 				self.video.play();
 			}
 			$(self.video).removeClass("hide"); // show content video
@@ -535,7 +536,9 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	// Create DRM object and container for it
 	this.drm.successCallback = callback;
 	var self = this;
-	
+	var isPersist= self.drm.persist_url?true:false;
+	var sesType  = isPersist ? "persistent-license" : "temporary";
+		
 	// ${GUID}=per playback or ${SESSION_GUID}=per app(reload)
 	var laUrl = self.drm.la_url;
 	if(laUrl.indexOf("${GUID}")>=0) {
@@ -545,18 +548,8 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 		delete self.drm.la_url_guid;
 	}
 	
-	if( this.drm.system == "playready" ){
-		// use simple playready config (persistentState=optional, distinctiveIdentifier=optional)
-		self.player.setProtectionData({
-			"com.microsoft.playready": { "serverURL": laUrl, "priority":1 }
-			,"com.widevine.alpha": { "priority":99 }
-		});			
-	}
-	else if( this.drm.system.indexOf("playready.recommendation")==0 
-			|| this.drm.system.indexOf("playready.")==0 ){
-		// playready.HW, playready.recommendation.SL3000, playready.recommendation.SL2000, playready.recommendation.SL150
-		// Trick DashJS to use a new "com.microsoft.playready.recommendation" systemId,
-		// this is supported in a recent MSEdge and SmartTVs.
+	if( this.drm.system == "playready" || this.drm.system.indexOf("playready.")==0 ) {
+		// playready, playready.HW, playready.recommendation.SL3000, playready.recommendation.SL2000, playready.recommendation.SL150
 		var useRecommendationSys = this.drm.system.indexOf("playready.recommendation")==0;
 		var secLevel = this.drm.system.indexOf(".SL3000")>0 ? "3000" // best
 			: this.drm.system.indexOf(".3000")>0            ? "3000"
@@ -565,35 +558,56 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			: this.drm.system.indexOf(".2000")>0            ? "2000"
 			: this.drm.system.indexOf(".SL150")>0           ? "150"
 			: this.drm.system.indexOf(".150")>0             ? "150" // worst
+			: this.drm.system=="playready"                  ? "default" // use oldskool drmConfig
 			: "2000";
-		console.log("Use playready security level "+secLevel);
+		console.log("Use playready securityLevel="+secLevel + ", sessionType="+sesType);
+
+		var protData=null;
 		if(useRecommendationSys || secLevel=="3000") {
-			// use new systemStringPriority to activate a new ".recommmendation" drm on Edge
-			self.player.setProtectionData({
+			// use new systemStringPriority to activate ".recommmendation" drm on Edge
+			protData={
 				"com.microsoft.playready": { 
 					"serverURL": laUrl
 					, "priority":1
-					//, "persistentState": "required", "distinctiveIdentifier": "required"
-					, "persistentState": "optional", "distinctiveIdentifier": "optional"
-					, "videoRobustness": secLevel // SL3000 needs a new GPU(trusted module) 
-					, "audioRobustness": secLevel=="150" ? "150": "2000"  // always SL2000 for audio
+					, "sessionType": sesType
+					, "persistentState": "optional", "distinctiveIdentifier": "optional"  // required,required
+					, "videoRobustness": secLevel // SL3000 needs a new trusted module(cpu-gpu-os)
+					, "audioRobustness": secLevel=="150" ? "150": "2000"  // audio use max SL2000
 					, "systemStringPriority": [ "com.microsoft.playready.recommendation","com.microsoft.playready" ]
 				}
 				,"com.widevine.alpha": { "priority":99 }
-			});
+			};
+		} else if(secLevel=="default") {
+			// use simple oldskool config (persistentState=optional, distinctiveIdentifier=optional, noRobustness)
+			protData={
+				"com.microsoft.playready": { 
+					"serverURL": laUrl
+					, "priority":1 
+					, "sessionType": sesType
+				}
+				,"com.widevine.alpha": { "priority":99 }
+			};
 		} else {
-			// this "persistentState+distinctiveIdentifier" without sysStrPriority used to activate a new drm on older dashjs releases
-			self.player.setProtectionData({
+			// old dashjs config to initialize a new drm on WinEdge browser (no systemStringPriority)
+			protData={
 				"com.microsoft.playready": { 
 					"serverURL": laUrl
 					, "priority":1
+					, "sessionType": sesType
 					, "persistentState": "required", "distinctiveIdentifier": "required"
 					, "videoRobustness": secLevel
 					, "audioRobustness": secLevel=="150" ? "150": "2000"  // always SL2000 for audio
 				}
 				,"com.widevine.alpha": { "priority":99 }
-			});
+			};
 		}
+		
+		var drmSessionId = isPersist ? storage_getItem("drmSessionId."+self.drm.persist_key, "") : "";
+		if(drmSessionId!="") {
+			console.log("Use an existing license session, key="+self.drm.persist_key + ", DRMSessionId=" + drmSessionId);
+			protData["com.microsoft.playready"]["sessionId"]=drmSessionId;
+		}
+		self.player.setProtectionData(protData);
 		
 		// playready.UTF8, playready.UTF16
 		// some devices may use utf-8 playready format.
@@ -614,9 +628,9 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 	}
 	else if( this.drm.system == "clearkey" ){
 		self.player.setProtectionData({
-			"org.w3.clearkey": { 
+			"org.w3.clearkey": {
 				"serverURL": laUrl
-				/* "clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" } */
+				 //"clearkeys": { "EjQSNBI0EjQSNBI0EjQSNA" : "QyFWeBI0EjQSNBI0EjQSNA" }
 			}
 		});
 	} else if(this.drm.system.indexOf("widevine")==0) {
@@ -631,7 +645,8 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			: this.drm.system.indexOf(".SL2")>0          ? "HW_SECURE_CRYPTO" // L2
 			: this.drm.system.indexOf(".2")>0            ? "HW_SECURE_CRYPTO" 
 			: "SW_SECURE_DECODE";  // worst L3 for video
-		console.log("Use widevine security level "+secLevel);			
+		console.log("Use widevine securityLevel="+secLevel);
+		
 		self.player.setProtectionData({
 			"com.widevine.alpha": {
 				"serverURL": laUrl
@@ -649,6 +664,76 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 		var protData={};
 		protData[self.drm.system] = { "serverURL": laUrl };
 		self.player.setProtectionData(protData);
+	}
+
+	if(isPersist) {
+		var drmRestartFn=function(){
+			setTimeout(function(){
+				// use menuItem(ENTER) to fully reinit a player+drmConfig from scratch
+				self.navigate(VK_BACK);
+				setTimeout(function(){
+					menu.navigate(VK_ENTER, true);
+				}, 500);
+			}, 100);
+		};
+
+		var drmSessionObj=null;
+		var drmSessionObjRemove=false;		
+		var drmFailsafeTimer=null;
+
+		self.player.on(dashjs.MediaPlayer.events.KEY_SESSION_CREATED, function(evt){
+			//console.log("EME.KeySessionCreated", evt);
+			// Some clients don't send any KEY errors so use a failsafe timer to restart a stalled EME
+			if(drmFailsafeTimer==null) {
+				drmFailsafeTimer=setTimeout(function(){
+					storage_removeItem("drmSessionId."+self.drm.persist_key);
+					var sMsg = "000 DRMSession stalled on FailsafeTimer";
+					console.log("Remove an invalid license session, key="+self.drm.persist_key 
+						+ ", DRMSessionId="+ (drmSessionObj!=null ? drmSessionObj.getSessionId():"") 
+						+ ", " + sMsg);
+					if(drmSessionObj!=null)
+						self.player.getProtectionController().removeKeySession(drmSessionObj);
+					drmRestartFn();
+				}, 5000);
+			};
+			
+			if(evt.data !=null) drmSessionObj = evt.data; // remember this sessionObj
+			if(evt.error==null) return;
+			// show error but do not restart a playback, it may create an infinite loop (why study later)			
+			clearTimeout(drmFailsafeTimer);
+			storage_removeItem("drmSessionId."+self.drm.persist_key);
+			var sMsg = "" + evt.error.code + " " + evt.error.message + " on KeySessionCreated";
+			console.log("Remove an invalid license session, key="+self.drm.persist_key 
+				+ ", DRMSessionId="+ (drmSessionObj!=null ? drmSessionObj.getSessionId():"") 
+				+ ", " + sMsg);
+			showInfo(sMsg, 3);
+			if(drmSessionObj!=null)
+				self.player.getProtectionController().removeKeySession(drmSessionObj);
+		});
+		self.player.on(dashjs.MediaPlayer.events.KEY_STATUSES_CHANGED, function(evt) {
+			//console.log("EME.KeyStatusesChanged", evt);
+			clearTimeout(drmFailsafeTimer);
+			if (!evt.data) {
+				storage_removeItem("drmSessionId."+self.drm.persist_key);
+				var sMsg = "" + evt.error.code + " " + evt.error.message + " on KeyStatusesChanged";
+				console.log("Remove an invalid license session, key="+self.drm.persist_key 
+					+ ", DRMSessionId="+ (drmSessionObj!=null ? drmSessionObj.getSessionId():"") 
+					+ ", " + sMsg);
+				if(drmSessionObj!=null) {
+					self.player.getProtectionController().removeKeySession(drmSessionObj);
+					drmSessionObj=null;
+					drmSessionObjRemove=true; // event may be called N times, do not use this sessionId anymore.
+					drmRestartFn();
+				}
+			} else {
+				// save a new drmSessionId to a localStorage and reuse later
+				if(!drmSessionObjRemove && storage_getItem("drmSessionId."+self.drm.persist_key, "")=="") {
+					console.log("Save a license session for later use, key="+self.drm.persist_key 
+						+ ", DRMSessionId="+ (drmSessionObj!=null ? drmSessionObj.getSessionId():"") );
+					storage_setItem("drmSessionId."+self.drm.persist_key, drmSessionObj.getSessionId() );
+				}
+			}
+		});			
 	}
 	
 	self.drm.ready = true;
@@ -768,7 +853,6 @@ VideoPlayerEME.prototype.stop = function(){
 	//showInfo("Exit Video", 1);
 
 	this.onAdBreak = false;
-	// if video not exist
 	if( !self.video ){
 		self.clearVideo();
 		return;

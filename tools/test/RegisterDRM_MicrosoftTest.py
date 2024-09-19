@@ -95,6 +95,11 @@ def main():
 	obj["Test1237"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341237", "12341234123412341234123412341237")
 	obj["Test1238"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341238", "12341234123412341234123412341238")
 	obj["Test1239"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341239", "12341234123412341234123412341239")
+	
+	obj["Test1331"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341331", "12341234123412341234123412341331")
+	obj["Test1332"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341332", "12341234123412341234123412341332")
+	obj["Test1333"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341333", "12341234123412341234123412341333", "CBCS")
+	obj["Test1334"]=register(DRM_TYPE.TEST, options.authtest, "43215678123412341234123412341334", "12341234123412341234123412341334", "CBCS")
 
 	obj["Test148D"]=register(DRM_TYPE.TEST, options.authtest, "5A461E692ABF5534A30FFC45BFD7148D", "307F7B3F5579BEF53894A6D946762267")
 
@@ -135,6 +140,22 @@ def main():
 		[
 			[ obj["Test1247_CBCS"]["kid.0"], obj["Test1247_CBCS"]["key.0"], "2000" ],
 			[ obj["Test1246_CBCS"]["kid.0"], obj["Test1246_CBCS"]["key.0"], "2000" ]
+		],
+		"CBCS"
+	)
+
+	obj["Test13321331_CENC"]=registerMultiKey(DRM_TYPE.TEST, options.authtest, 
+		[
+			[ obj["Test1332"]["kid.0"], obj["Test1332"]["key.0"], "2000" ],
+			[ obj["Test1331"]["kid.0"], obj["Test1331"]["key.0"], "2000" ]
+		],
+		"CENC"
+	)
+	
+	obj["Test13341333_CBCS"]=registerMultiKey(DRM_TYPE.TEST, options.authtest, 
+		[
+			[ obj["Test1334"]["kid.0"], obj["Test1334"]["key.0"], "2000" ],
+			[ obj["Test1333"]["kid.0"], obj["Test1333"]["key.0"], "2000" ]
 		],
 		"CBCS"
 	)
