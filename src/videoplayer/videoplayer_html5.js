@@ -332,7 +332,7 @@ VideoPlayerHTML5.prototype.setURL = function(url, ntCall){
 			url = url.replace("${GUID}", uuidv4());
 			url = url.replace("${NOWUTC}", getUTCYMDHMS(null)+"Z"); // ${NOWUTC} -> "2023-10-18T07:36:40Z"
 		}
-		console.log("setURL(",url,")");
+		console.log("setURL "+url);
 		this.url = url;  // see sendLicenseRequest()
 		this.firstPlay=true;
 		
@@ -340,7 +340,7 @@ VideoPlayerHTML5.prototype.setURL = function(url, ntCall){
 		this.playbackStartTime = new Date().getTime();		
 	} else {
 		url = this.url;
-		console.log("setURL(",url,"), ntCall="+ntCall );
+		console.log("setURL "+url+", ntCall="+ntCall );
 	}
 	
 	// if preroll then do not initialize maincontent+laurl yet, see prepareAdPlayers()

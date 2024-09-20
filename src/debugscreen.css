@@ -13,6 +13,7 @@
 	position:absolute;
 	bottom:0px;
 	color:white;
+	font-size:85%; line-height:90%;	
 }
 #debugButton {
     position: absolute;

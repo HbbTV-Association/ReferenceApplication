@@ -363,7 +363,7 @@ VideoPlayerEME.prototype.setURL = function(url){
 		url = url.replace("${GUID}", uuidv4());
 		url = url.replace("${NOWUTC}", getUTCYMDHMS(null)+"Z"); // ${NOWUTC} -> "2023-10-18T07:36:40Z"
 	}
-	console.log("setURL(",url,")");
+	console.log("setURL "+url);
 	
 	$("#video-playtimer").text("");
 	this.playbackStartTime = new Date().getTime();
