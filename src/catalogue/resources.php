@@ -43,6 +43,8 @@ if( isset( $profileResources ) ){
 			$resources[] = ($isHTTPS?"https:":"http:")."//reference.dashif.org/dash.js/nightly/dist/dash.all.debug.js";
 		else if($dashjs=="latest")
 			$resources[] = ($isHTTPS?"https:":"http:")."//cdn.dashjs.org/latest/dash.all.min.js";
+		else if($dashjs=="debug")
+			$resources[] = "../videoplayer/dash.all.debug.js"; // with EME "showing" subtitle fix		
 		else // if($dashjs=="local" || $dashjs=="")
 			$resources[] = "../videoplayer/dash.all.min.js";
 		

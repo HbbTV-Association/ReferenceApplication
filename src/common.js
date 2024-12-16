@@ -899,6 +899,23 @@ function getDeviceID(sysid, callback) {
 	}
 }
 
+function getBrowserInfo() {
+	var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+	var isFF = /Firefox/.test(navigator.userAgent);
+	var isIE = /Edg/.test(navigator.userAgent); // IEChromium
+	var isIETrident = /Edge/.test(navigator.userAgent); // IE legacy
+
+	var name = isChrome && !isIE ? "Chrome"
+		: isFF ? "Firefox"
+		: isIE ? "Edge"
+		: isIETrident ? "EdgeTrident"
+		: "Unknown";
+	var objRetval = {
+		"name":name
+	};
+	return objRetval;
+}
+
 function XMLIndentChildren(xmlDoc, node, prevPrefix, prefix) {
   var children = node.childNodes;
   var idx;

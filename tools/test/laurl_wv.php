@@ -81,21 +81,33 @@ if($reqLen>15 && $url=="") {
 }
 
 // map predefined names to an url
+// 2023-10-05/Aki
 if ($url=="wvproxy") {
 	$url="https://widevine-proxy.appspot.com/proxy"; // generic Google test proxy
 } else if ($url=="debug") {
 	$url="https://m.dtv.fi:8443/debug.jsp"; // dump request-response txt(does not work as a license)
 
+} else if ($url=="Prod1234") {
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KcgAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIBvWQ0UTVvbmnBsYWPW04moKNTnqGI0a-p7HVtbTDyYPdvX3Mzel0xFeXzossdq2MhMAj0nREOeq3AC3ee6Li2TtK7BA_kDe5o-6Dzg7ORYKXnmh-PvhTRS0a5-2hZ7K4tD69GJJXJn3w1ZVxcnR7JG3RstdkanYkI0LSiNKyU39uYlQQUA1MUjnxSdiu8taJgaoHtC";
+} else if ($url=="Prod1235") {
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KdcAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIAkNQZ5zucxMDUEvO6uhp5QiUW9gN3SMS8dLT8T0GFLm88KRUIiM6sQOOqqNx9gL-FejCDaM721kqxIPWbxMAoXi3IHjFoPAIczz-0CtENO2OievwiCN-RFzcBxdOeRQWx2j3taqZ1y2ZPLqqbmMxpmF0Qw926Xl2w9vhmEaRITU33Lq1kK7uhIAf5z8V4DgEkRkJOy";
 } else if ($url=="Prod1236") {
-	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BgAAABc2Ke0AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAHBGpE_oy8Ke7joE41kJg_NPODFHaJl6abAZbYLxDwJfc9OHM3PEPUFxf0vKNbPta3iZqzKy29vfWVQ1bNjdHAggOhsPphdJeWDC1fsGSqFPY8A2hcqBBgRLZXQ_sgIYMWFLHCSbxl6TsoFjY8n7Bdvm3WPQVV-m1Q1MvwmDafF1tMcwi6U";
-} else if ($url=="Prod1236_CBCS") {
-	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BgAAABc2KZ0AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAHDDA0TTQCSGcSkcYd8sPEpsT7csFco7nOe-7wJ4ws3LQRRaccS07gWw_JlcLEyon6988mcn-NnsBuGDQZtwzuaZB_VgYajXCw2MJ-JSixfpL10ZGVbdpS1myYgxncjOJrGqxsTKeSNVt0MLD2jq5NLjWLJqhU0pxsEW5S5x57uAW4H9p7w";
-
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KeEAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIC7eetKNLrt0kWI-1g6u46WqQO13UEUkHevGFyrWZgfOYoPqWTl_d7A3qn7T1XpfADcozqapYVkHYwVekuq56wND7Sl35MlUFe4ecVKIHU5vjzoczEpth9-q-bIc1vrWZNfoQbBKBxy3Q1jXib_CbukzBiQv3HxYmFezmal6JCiawF3LH4Ptqg6iG38rTNCaAnAuLKM";
 } else if ($url=="Prod1237") {
-	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BgAAABc2KaEAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAHC_J54gqyb9L61HbWX9a9ZdpGqK3KW97YouIpMqvkFLO8XAP3VV5aGqY_QbHyL4Rl3zE6v8D5BY36U0vgKd0Edvs7WDxBoLE0qxNRlCbMd5e_RZ2PeKX0UBYHg1YOC7EKgL1lvNnz_ui5gdvyxryb8gDUzWRRIWcphPA-yXvaBoBx-Y23s";
-} else if ($url=="Prod1237_CBCS") {
-	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BgAAABc2Ke0AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAHC810DjxmIQC5Rv2Hkc-YUb7KcRkX2-vUy2CK9l5Q6tzcIWaEvSf6qLbP8UkmOJqyN3-dYrkzJGQcQR-HsqLJTHRMbfCiwNvLdhWVr8HERSVPnBEIdNBIBcoVHcJui5rKukBJxgX5V1z_WUjs8VYXPJgzOYGXUd24K7yvd-5TtZFD_pg_A";
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KZ4AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAICuhJDhUbGN_mJLOCREdhhtGjYnKhjRDLhIoXN4wSy3OsITEwP0_ttZHRGKmGAdh3MsT9ZsZi7EUPeyrFfspFKcgmjpmvB4WTvI629HmG7PCyN-SiVZGRqUkQm_Db4BFwg_Qxz8Cc3B6AqsBau-CXWEz6AJOESBIJVuqttuFNxesxDJslzNrRX0EMb0GJtWtWcmFoEp";
 
+} else if ($url=="Prod1235_CBCS") {
+	// use "Prod1235" key for now
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KdcAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIAkNQZ5zucxMDUEvO6uhp5QiUW9gN3SMS8dLT8T0GFLm88KRUIiM6sQOOqqNx9gL-FejCDaM721kqxIPWbxMAoXi3IHjFoPAIczz-0CtENO2OievwiCN-RFzcBxdOeRQWx2j3taqZ1y2ZPLqqbmMxpmF0Qw926Xl2w9vhmEaRITU33Lq1kK7uhIAf5z8V4DgEkRkJOy";
+} else if ($url=="Prod1236_CBCS") {
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KfcAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDO1fImL3H2sAcEsPbaJ7lvHKsudYA2crFN_RqG9_eMl5Veynbrosm-HsP_Cv_2Gvt8veUp2rt-2iGK45Kqx-1riTiiCn9fhfNRKDyGFk9qq_KCkyh8hpXXQMaMIKFRlXuBNvcHWu8NDIy0W8shSYGVNfNPZ6HhMIYmEMb0P9CrBnnyJ9Jwth-GoDCiNyqRIaLO96rr";
+} else if ($url=="Prod1237_CBCS") {
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KbQAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIAcywxhKuUjclu8Mb9U7vyiHX7LosyvpXYWSh6PcuQSH-_9KXdk4KQApHHaYBVrSJS0D2Q-AlVJlfwtA5qWCvnBRjJMA2OKJLdZXa9gYXdkulPNia4DV0tc_M9q12tA4LehD3n6ZcmdD7hXScxGPFWF_H9RH7kZFIl9BNPLsHeBp6yiyWCLq47pvRUZrNsluwDk6eu2";
+
+} else if ($url=="Prod12371236") { // SL3000,SL1
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2Ka4AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALAFdou2SIbyKqi5RDgerm-ZsPiDAdAue82-S8Q147it6Me9-jXfOvA75VksodkyBnY27Qwr-k8C1HmTKohRD08aLt99RTs1BFlugeXtPkQhElyNUAHK2JbDwyI1XRc2bO32APE_dgDXgvXGu732Cio8yssnE3aXlwCLH-TGv_vb4QCDGd_g4EE0WG7subaW3THF5N3O38UEpNldofSiqLb4_5OA31PMkrwvGf6cEuPIR3kq3gtN4-9sTtZhZMOl3qomwUum";
+} else if ($url=="Prod12371236_7") { // SL2000,SL2
+	$url="https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KaYAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALDljjYzDweX6ApBcKBnxCeSNWvnElm336havWqZQA6F6TYuTsSxVjHTotRJhSdpn_5_v7mnYEXmWr6bkjsazYl-S2PvabSjgPPpQi_gql6BAv0gxqyhzsf1wPv0b5RUY81dc_jH6TcAV0QXc3GUpBp6eSvAxPazPakR8RKiMuwYwxKN1oZYdWwibdwarXuQr466WuDo0Z1dKU8hwwtZEbGb_HC_lPXTZ5KtxxMGgeMG0MUV3RRsdo8H-WVzlqAQ1Rza5UGK";
 } // else use $url value as-is
 
 
@@ -120,15 +132,12 @@ if ($logfile!="") {
 	$dtNow = new DateTime("now", new DateTimeZone("UTC") );
 	$sNow  = $dtNow->format("Y-m-d H:i:se");
 	$data = "------------------------\n"
-		. "DateTime=". $sNow ."\n"
-		. "Url=". $_SERVER["REQUEST_URI"] ."\n"
-		. "UserAgent=". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
-		. "RemoteAddr=". $_SERVER['REMOTE_ADDR'] ."\n"		
-		. "LaUrl=". $url ."\n"
-		. "SessionId=". $sessionId . "\n"
-		. "Request(base64 encoded)\n"
-		. base64_encode($query) ."\n";
-	//file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
+		. "Request: ". $sNow ."\n"
+		. "UserAgent: ". $_SERVER['HTTP_USER_AGENT'].'' ."\n"
+		. "RemoteAddr: ". $_SERVER['REMOTE_ADDR'] ."\n"
+		. "Url: ". $url ."\n"
+		. $query ."\n";
+	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
 }
 
 $soap = curl_exec($c_url);
@@ -142,8 +151,8 @@ if($soap === FALSE || $curl_errno > 0){
 echo $soap;
 
 if ($logfile!="") {
-	$data = $data . "\nResponse(Base64 encoded)\n"
-		. base64_encode($soap) ."\n"
+	$data = "\nResponse\n"
+		. $soap ."\n"
 		. "------------------------\n";
 	file_put_contents($logfile, $data, FILE_APPEND|LOCK_EX);
 }

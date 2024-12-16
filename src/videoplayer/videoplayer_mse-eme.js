@@ -558,26 +558,35 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			: this.drm.system.indexOf(".2000")>0            ? "2000"
 			: this.drm.system.indexOf(".SL150")>0           ? "150"
 			: this.drm.system.indexOf(".150")>0             ? "150" // worst
-			: this.drm.system=="playready"                  ? "default" // use oldskool drmConfig
+			: this.drm.system=="playready"                  ? "default"
 			: "2000";
-		console.log("Use playready securityLevel="+secLevel + ", sessionType="+sesType);
+		
+		var isEdge = getBrowserInfo().name=="Edge"; // MSEdge(chromium) shall always use playready.recommendation
+		if(isEdge) useRecommendationSys=true;
+			
+		console.log("Use securityLevel="+secLevel + ", sessionType="+sesType 
+			+ ", sysId=playready"+(useRecommendationSys?".recommendation":"") );
 
 		var protData=null;
-		if(useRecommendationSys || secLevel=="3000") {
+		if(useRecommendationSys) {
 			// use new systemStringPriority to activate ".recommmendation" drm on Edge
+			// Robustness flag: HbbTV defaults to SL3000 | MSEdge defaults to SL2000
 			protData={
 				"com.microsoft.playready": { 
 					"serverURL": laUrl
 					, "priority":1
 					, "sessionType": sesType
 					, "persistentState": "optional", "distinctiveIdentifier": "optional"  // required,required
-					, "videoRobustness": secLevel // SL3000 needs a new trusted module(cpu-gpu-os)
-					, "audioRobustness": secLevel=="150" ? "150": "2000"  // audio use max SL2000
 					, "systemStringPriority": [ "com.microsoft.playready.recommendation","com.microsoft.playready" ]
 				}
 				,"com.widevine.alpha": { "priority":99 }
 			};
-		} else if(secLevel=="default") {
+			if($.isNumeric(secLevel)) {
+				protData["com.microsoft.playready"]["videoRobustness"]=secLevel; // SL3000 needs a new trusted module(cpu-gpu-os) in PC browsers
+				protData["com.microsoft.playready"]["audioRobustness"]=secLevel=="150" ? "150": "2000"  // audio use max SL2000
+			}
+			
+		} else if(secLevel=="default") {			
 			// use simple oldskool config (persistentState=optional, distinctiveIdentifier=optional, noRobustness)
 			protData={
 				"com.microsoft.playready": { 

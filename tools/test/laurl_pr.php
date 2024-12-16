@@ -80,7 +80,16 @@ if($delimE>0) {
 }
 
 if ($url=="" && $kid!="") $url = "MS".substr($kid, 32, 4);
-if ($url=="MS1234") {
+if ($url=="MS1331") {
+	$url="https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQTMQ==,\$algId)";
+} else if ($url=="MS1332") {
+	$url="https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQTMg==,\$algId)";
+} else if ($url=="MS1333") {
+	$url="https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQTMw==,\$algId)";
+} else if ($url=="MS1334") {	
+	$url="https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQTNA==,\$algId)";
+	
+} else if ($url=="MS1234") {
 	$url="https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNA==,\$algId)";
 } else if ($url=="MS1235") {
 	$url="https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNQ==,\$algId)";
