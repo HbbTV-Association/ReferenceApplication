@@ -320,8 +320,10 @@ public class MediaTools2 {
 			"-subsegs-per-sidx", ""+sidx,
 			//"-last-dynamic",  // insert lmsg brand to the last segment(MDP.type=dynamic)
 			//"-segment-name", (useIdFolder ? "$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$_$Number$$Init=i$"),
-			"-segment-name", segname.startsWith("number") ? 
-					"$RepresentationID$/$Number$$Init=i$" : "$RepresentationID$/$Time$$Init=i$",
+			isSingleSeg ? "-single-file" : "$DEL$",
+			"-segment-name", isSingleSeg           ? "$RepresentationID$/$RepresentationID$"
+					: segname.startsWith("number") ? "$RepresentationID$/$Number$$Init=i$" 
+					: "$RepresentationID$/$Time$$Init=i$",
 			segname.endsWith("-timeline") ? "-segment-timeline" : "$DEL$", //ver==1?"-segment-timeline":"",
 			"-out", manifestName + (useHLS?":dual":"")  // output file
 		);

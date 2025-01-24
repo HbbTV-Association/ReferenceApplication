@@ -28,7 +28,9 @@ public class StreamSpec implements Cloneable {
 				val.equals("EAC3") || val.endsWith("_EAC3")? AUDIO_EAC3 :  // Dolby Digital Plus
 				val.equals("EC3")  || val.endsWith("_EC3") ? AUDIO_EAC3 :
 				val.equals("H264") || val.endsWith("_H264")? VIDEO_H264 :
+				val.equals("AVC")  || val.endsWith("_AVC") ? VIDEO_H264 :
 				val.equals("H265") || val.endsWith("_H265")? VIDEO_H265 :
+				val.equals("HEVC") || val.endsWith("_HEVC")? VIDEO_H265 :
 				val.equals("DASH") ? DASH :
 				null;
 		}

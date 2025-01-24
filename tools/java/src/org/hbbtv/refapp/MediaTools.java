@@ -442,8 +442,11 @@ public class MediaTools {
 			"--tfdt64", "--tfdt_traf", "--noroll=yes", "--btrt=no",
 			"--truns_first=yes",
 			(cmaf.isEmpty() ? "$DEL$" : "--cmaf="+cmaf),
-			"--ttml_agg", // single sample (TRUN.samplecount=1) instead of 1..N samples per segment. Livesim2 supports just 1-sample. 
-			"-segment-name", segname.startsWith("number") ? "$RepresentationID$/sub_$Number$$Init=i$" : "$RepresentationID$/sub_$Time$$Init=i$",
+			"--ttml_agg", // single sample (TRUN.samplecount=1) instead of 1..N samples per segment. Livesim2 supports just 1-sample.
+			isSingleSeg ? "-single-file" : "$DEL$",
+			"-segment-name", isSingleSeg           ? "$RepresentationID$/$RepresentationID$"
+					: segname.startsWith("number") ? "$RepresentationID$/sub_$Number$$Init=i$" 
+					: "$RepresentationID$/sub_$Time$$Init=i$",
 			segname.endsWith("-timeline") ? "-segment-timeline" : "",
 			"-out", subFile.getName().replace(".mp4", ".mpd"), // output output/temp-sub_xxx.mpd					
 			subFile.getAbsolutePath()+":id="+id	// input output/temp-sub_xxx.mp4

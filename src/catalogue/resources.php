@@ -31,7 +31,7 @@ $resources = array(
 	"../keycodes.js",
 	"navigation.js", 
 	"../videoplayer/videoplayer_basic.js"
-	,"../videoplayer/monitor/monitor-base.js" // Monitor interface is and must be included and present
+	,"../videoplayer/monitor/monitor-base.js" // Monitor interface must be included
 	//,"../videoplayer/monitor/monitor.js" // Monitor implementation is not included to reference application
 );
 
@@ -39,15 +39,17 @@ if( isset( $profileResources ) ){
 	echo "<!-- " . $profileResources. " -->\n";
 	if( $profileResources == "mse-eme" ){		
 		$dashjs = isset($_GET["dashjs"]) ? $_GET["dashjs"] : "";
-		if($dashjs=="nightly")
-			$resources[] = ($isHTTPS?"https:":"http:")."//reference.dashif.org/dash.js/nightly/dist/dash.all.debug.js";
-		else if($dashjs=="latest")
-			$resources[] = ($isHTTPS?"https:":"http:")."//cdn.dashjs.org/latest/dash.all.min.js";
-		else if($dashjs=="debug")
-			$resources[] = "../videoplayer/dash.all.debug.js"; // with EME "showing" subtitle fix		
-		else // if($dashjs=="local" || $dashjs=="")
-			$resources[] = "../videoplayer/dash.all.min.js";
-		
+		if($dashjs=="nightly") {
+			// "/dist/legacy/umd/" is UMD build targeting legacy platforms by specifying the babel target ie: '11', core.js polyfills are enabled.
+			// also available "/dist/modern/umd/", "/dist/modern/esm/"
+			$resources[] = ($isHTTPS?"https:":"http:")."//reference.dashif.org/dash.js/nightly/dist/legacy/umd/dash.all.debug.js"; // V5
+		} else if($dashjs=="latest") {
+			$resources[] = ($isHTTPS?"https:":"http:")."//cdn.dashjs.org/latest/dash.all.min.js"; // V4.7.4
+		} else if($dashjs=="debug") {
+			$resources[] = "../videoplayer/dash.all.debug.js"; // with EME "showing" subtitle fix, V4.7.4
+		} else {
+			$resources[] = "../videoplayer/dash.all.min.js"; // V4.7.4
+		}		
 		$resources[] = "../videoplayer/videoplayer_mse-eme.js";
 	}
 	else if( $profileResources == "html5" ){

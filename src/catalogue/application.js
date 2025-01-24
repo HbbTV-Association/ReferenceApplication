@@ -30,7 +30,7 @@ function init() {
 
 		var new_config = [];		
 		var sessionGUID = uuidv4(); // GUID per each configjson reload session
-		console.log("SessionGUID=" + sessionGUID);
+		console.log("SessionGUID=" + sessionGUID + ", browser="+getBrowserInfo().name );
 
 		for(var i = 0; i < main.items.length; i++){
 			if(main.items[i].submenu){

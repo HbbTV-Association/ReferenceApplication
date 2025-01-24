@@ -188,8 +188,10 @@ public class SubtitleInserter {
 		int startIdx = data.indexOf("<AdaptationSet ");
 		startIdx     = data.indexOf(">", startIdx)+1;
 		String asData= data.substring(startIdx, data.indexOf("</AdaptationSet")).trim();
-		if(!urlPrefix.isEmpty())
-			asData = asData.replace("$RepresentationID$/", urlPrefix+"$RepresentationID$/"); // drm manifest uses "../sub_eng/" path
+		if(!urlPrefix.isEmpty()) {
+			asData = isSingleSeg ? asData.replace("<BaseURL>"+repId+"/", "<BaseURL>"+urlPrefix+repId+"/") // drm use: <BaseURL>../sub_fin/sub_fin.mp4</BaseURL> path
+					: asData.replace("$RepresentationID$/", urlPrefix+"$RepresentationID$/");             // drm use: "../sub_eng/" path
+		}
 
 		// mimeType is in Representation field (mimeType="application/mp4")
 		// captions=viewers who cannot hear audio(transcription of dialog), subtitles=speakers or any language to watch video

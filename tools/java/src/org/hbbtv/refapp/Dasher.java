@@ -306,7 +306,10 @@ public class Dasher {
 				manifest.save(new File(outputFolder, "manifest.mpd"), false);
 				
 				for(StreamSpec spec : specs)
-					modifyInitSegment(spec, outputFolder, Utils.getBoolean(params, "livesim", false) ); 
+					modifyInitSegment(spec, outputFolder
+						, Utils.getBoolean(params, "segments.singleseg", false)
+						, Utils.getBoolean(params, "livesim", false)						
+					); 
 			}
 
 			// DASH: write encrypted segments if KID+KEY values are found
@@ -502,13 +505,13 @@ public class Dasher {
 		final int[][] drmTypesCombo = new int[][]{  {0,1}, {0,1,3}, {0,3}, {1,3}, {2,3}  };
 		if(Utils.getString(params, "drm.playready", "0", true).equals("0")) // playready is disabled
 			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[2] = new int[]{};
-		if(Utils.getString(params, "drm.widevine", "0", true).equals("0"))  // widevine is disabled
-			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[3] = new int[]{};
 		if(Utils.getString(params, "drm.widevine", "0", true).equals("0"))
+			drmTypesCombo[0]=drmTypesCombo[1]=drmTypesCombo[3] = new int[]{};
+		if(Utils.getString(params, "drm.marlin", "0", true).equals("0"))
 			drmTypesCombo[4]=new int[]{};
 		
 		for(StreamSpec spec : specs) {
-			modifyInitSegment(spec, outputFolderDrm, Utils.getBoolean(params, "livesim", false) ); // remove senc+udta from init 
+			modifyInitSegment(spec, outputFolderDrm, isSingleSeg, Utils.getBoolean(params, "livesim", false) ); // remove senc+udta from init 
 			File initFile = new File(outputFolderDrm, spec.name+"/i.mp4");
 			File outFile  = new File(outputFolderDrm, spec.name+"/i_nopssh.mp4"); // without any PSSH boxes					
 			if (!isSingleSeg && BoxModifier.removeBox(initFile, outFile, "moov/pssh[*]"))
@@ -637,11 +640,16 @@ public class Dasher {
 		return true;
 	}
 
-	private static void modifyInitSegment(StreamSpec spec, File outputFolder, boolean livesim) 
+	private static void modifyInitSegment(StreamSpec spec, File outputFolder, boolean isSingleSeg, boolean livesim) 
 			throws IOException {
 		// remove moov/trak/senc box from init.mp4, it breaks some hbbtv players, box is found in a 1..n.m4s files.		
 		// some dash validators give a warning of an unknown atom 'udta', we don't need an user-defined-meta box. 
-		File initFile = new File(outputFolder, spec.name+"/i.mp4");
+		File initFile = isSingleSeg ? new File(outputFolder, spec.name+"/"+spec.name+".mp4") :
+				new File(outputFolder, spec.name+"/i.mp4");
+		//FIXME: if singleSeg file then SIDX index in a manifest must be fixed !!
+		//  <SegmentBase indexRange="959-1034"(len=76) <Initialization range="0-938"/>
+		if(isSingleSeg) return;
+		
 		if (BoxModifier.removeBox(initFile, initFile, "moov/trak/senc"))
 			logger.println("Removed moov/trak/senc from " + initFile.getAbsolutePath() );
 		if (BoxModifier.removeBox(initFile, initFile, "moov/udta"))
@@ -685,7 +693,7 @@ public class Dasher {
 				Utils.getBoolean(params, "deletetempfiles", true), 
 				urlPrefix,
 				Utils.getString(params, "cmaf", "", true), // cmf2,cmfc,no
-				false, //Utils.getBoolean(params, "segments.singleseg", false),
+				Utils.getBoolean(params, "segments.singleseg", false),
 				Utils.getString(params, "segname", "number", true),
 				Utils.getString(params, "timelimit", "", true) // read X seconds from start
 			);
