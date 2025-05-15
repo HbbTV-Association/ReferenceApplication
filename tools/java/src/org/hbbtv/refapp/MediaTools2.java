@@ -227,6 +227,151 @@ public class MediaTools2 {
 	}
 
 	/**
+	 * H266 encoding with CRF value
+	 * @return
+	 */
+	public static List<String> getTranscodeH266Args(StreamSpec spec, 
+			int fps, boolean forceFps, int gopdur, int segdur, 
+			String overlayOpt, String timeLimit) {
+		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
+		String outputFile= spec.inputFileTrack.getName();
+
+		String bufSuffix= spec.bitrate.substring(spec.bitrate.length()-1); // "1024k"->"k" bitrate should always be "k" suffix
+		String bufSize  = spec.bitrate.substring(0, spec.bitrate.length()-1); // "1024k"->"1024"
+		bufSize         = ((int)Math.ceil(Integer.parseInt(bufSize)*1.5)) +bufSuffix; // "1024k * 1.5"->"1536k" 
+		//String level    = spec.level.isEmpty()?"":spec.level;
+		int gop         = fps*gopdur/1000;
+		int keyMin      = gop / 2;
+		
+		String pixFormat = "yuv420p10le"; //spec.profile.equals("main10")?"yuv420p10le"
+			//: spec.profile.equals("high")  ?"yuv420p10le"
+			//: spec.profile.equals("main12")?"yuv420p12le"
+			//: "yuv420p";  // "main" 8bit
+		
+		List<String> args=Arrays.asList(MediaTools.FFMPEG, 
+			"-hide_banner", "-nostats",
+			"-i", inputFile,
+			"-threads", "4", "-preset", "fast",
+			"-c:v", "libvvenc", 
+			"-tier:v", spec.profile.startsWith("high")?"high":"main",
+			"-qp", !spec.crf.isEmpty()?spec.crf:"32", // ConstantQualityFactor 0-63 best..worst
+			"-level", !spec.level.isEmpty() ? ""+spec.level:"$DEL2$",
+			"-b:v", spec.bitrate,
+			"-maxrate:v", bufSize, // max rate for crf
+			//"-bufsize:v", spec.bitrate,			
+			"-pix_fmt", pixFormat,			
+			"-r", forceFps ? ""+fps:"$DEL2$",			
+			//"-refs", "3",			// reference frames
+			//"-bf", "3",				// max number of bframes
+			"-g", ""+gop,			// GOP frames
+			"-keyint_min", ""+keyMin,	// I-Frame interval (keyframes)
+			//"-b_strategy", "1",		// BPyramid strategy
+			"-flags", "+cgop",		// use ClosedGOP
+			//"-sc_threshold", "0",	// disable Scenecut
+			"-movflags", "negative_cts_offsets+faststart",
+			// idr=closedGop,cra=openGop,cra_cre=openGopForStreaming, sdr=sdr(709)/sdr_2020, hdr=pq(hdr10)/pq_2020/hlg/hlg_2020
+			"-vvenc-params", "decodingrefreshtype=idr:intraperiod==${keymin}:vuiparameterspresent=1:sdr=sdr", 			
+			"-vf", "${overlay,scale}",	// draw overlay text on video (optional),swscale
+			"-color_range", "tv",	// limited(tv), full(pc) rgb range, signal range
+			"-colorspace", "bt709", // RGB to YUV colormatrix
+			"-color_primaries", "bt709", // RGB map to real values
+			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 			
+			"-an", "-sn",           // skip audio+subs
+			"-metadata:s:v:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",			
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", outputFile        // overwrite "temp-v1.mp4"
+		);
+		args = new ArrayList<String>(args); // create modifiable list
+
+		int idx= args.indexOf("-vvenc-params")+1;
+		args.set(idx, args.get(idx)
+				//.replace("${profile}", spec.profile.isEmpty()?"main":spec.profile)
+				//.replace("${level}", level)
+				//.replace("${fps}", ""+fps)
+				.replace("${keymin}", ""+keyMin)
+				//.replace("${gop}", ""+gop)
+				//.replace("${bitrate}", spec.bitrate.replace("k", ""))
+				//.replace("${bufsize}", bufSize.replace("k", ""))
+				);
+
+		// use full internal YUV444+accurate rounding: flags=full_chroma_int+accurate_rnd 
+		String scale   = "scale="+spec.size+":out_range=tv:out_color_matrix=bt709:flags=full_chroma_int+accurate_rnd";
+		String format  = "format="+pixFormat+",setsar=1/1"; // StorageAspectRatio(1:1)
+		String overlay = MediaTools.getOverlayOpt(spec, fps, gop, segdur, overlayOpt);
+		String val     = overlay+","+scale+","+format;
+		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
+		
+		MediaTools.updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);		
+		MediaTools.removeEmptyOpt(args);
+		return args;
+	}
+	
+	/**
+	 * AV1 encoding with CRF value
+	 * @return
+	 */
+	public static List<String> getTranscodeAV1Args(StreamSpec spec, 
+			int fps, boolean forceFps, int gopdur, int segdur, 
+			String overlayOpt, String timeLimit) {
+		String inputFile = Utils.normalizePath(spec.inputFile.getAbsolutePath(), true);
+		String outputFile= spec.inputFileTrack.getName();
+
+		String bufSuffix= spec.bitrate.substring(spec.bitrate.length()-1); // "1024k"->"k" bitrate should always be "k" suffix
+		String bufSize  = spec.bitrate.substring(0, spec.bitrate.length()-1); // "1024k"->"1024"
+		bufSize         = ((int)Math.ceil(Integer.parseInt(bufSize)*1.5)) +bufSuffix; // "1024k * 1.5"->"1536k" 
+		//String level    = spec.level.isEmpty()?"":spec.level;
+		int gop         = fps*gopdur/1000;
+		int keyMin      = gop; // gop / 2;   AV1 wants GOP=KEYMIN?, use frags=1 for dash segments
+
+		String pixFormat = spec.profile.equals("high")?"yuv444p10le"
+				: 	"yuv420p10le";
+
+		List<String> args=Arrays.asList(MediaTools.FFMPEG, 
+			"-hide_banner", "-nostats",
+			"-i", inputFile,
+			"-threads", "4", "-preset", "fast",
+			"-c:v", "libaom-av1", 
+			"-crf", !spec.crf.isEmpty()?spec.crf:"35", // ConstantRateFactor 0-63 best..worst
+			//"-level", !spec.level.isEmpty() ? ""+spec.level:"$DEL2$",
+			"-b:v", spec.bitrate,
+			"-maxrate:v", bufSize, // max rate for crf
+			//"-bufsize:v", spec.bitrate,			
+			"-pix_fmt", pixFormat,			
+			"-r", forceFps ? ""+fps:"$DEL2$",			
+			//"-refs", "3",			// reference frames
+			//"-bf", "3",				// max number of bframes
+			"-g", ""+gop,			// GOP frames
+			"-keyint_min", ""+keyMin,	// I-Frame interval (keyframes)
+			//"-b_strategy", "1",		// BPyramid strategy
+			"-flags", "+cgop",		// use ClosedGOP
+			//"-sc_threshold", "0",	// disable Scenecut
+			"-cpu-used", "1",  "-row-mt", "1", "-tiles", "3x1", // AV1 flags
+			"-movflags", "negative_cts_offsets+faststart",
+			"-vf", "${overlay,scale}",	// draw overlay text on video (optional),swscale
+			"-color_range", "tv",	// limited(tv), full(pc) rgb range, signal range
+			"-colorspace", "bt709", // RGB to YUV colormatrix
+			"-color_primaries", "bt709", // RGB map to real values
+			"-color_trc", "bt709",  // transfer function RGB or YUV to display luminance 			
+			"-an", "-sn",           // skip audio+subs
+			"-metadata:s:v:0", !spec.lang.isEmpty() ? "language="+spec.lang : "$DEL2$",			
+			"-t", "${timelimit}",	// read X seconds then stop encoding
+			"-y", outputFile        // overwrite "temp-v1.mp4"
+		);
+		args = new ArrayList<String>(args); // create modifiable list
+
+		// use full internal YUV444+accurate rounding: flags=full_chroma_int+accurate_rnd 
+		String scale   = "scale="+spec.size+":out_range=tv:out_color_matrix=bt709:flags=full_chroma_int+accurate_rnd";
+		String format  = "format="+pixFormat+",setsar=1/1"; // StorageAspectRatio(1:1)
+		String overlay = MediaTools.getOverlayOpt(spec, fps, gop, segdur, overlayOpt);
+		String val     = overlay+","+scale+","+format;
+		args.set(args.indexOf("${overlay,scale}"), val.charAt(0)==','?val.substring(1):val);
+		
+		MediaTools.updateOpt(args, "${timelimit}", !timeLimit.isEmpty() ? timeLimit : null, true);		
+		MediaTools.removeEmptyOpt(args);
+		return args;
+	}	
+	
+	/**
 	 * Create MP4Box command.
 	 * @param specs		stream specifications
 	 * @param segdur	segment duration in milliseconds (3840=3,84s)

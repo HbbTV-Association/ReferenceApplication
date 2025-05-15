@@ -248,14 +248,21 @@ function VideoPlayerBasic(element_id, profile, width, height){
 								this.audioTrack++;
 							}
 							
-							var lang;
+							var lang="",attrs="";
 							if(isEME) {
 								if(this.audioTrack == tracks) {
 									this.player.setMute(true);
 									lang="Muted";
 								} else {
+									var val;
 									var track = this.player.getTracksFor("audio")[this.audioTrack];
 									lang = track.lang;
+									val = track.labels ? track.labels.toString():"";
+									if(val!="") attrs += ", label="+val;
+									val = track.roles ? track.roles.toString():"";
+									if(val!="") attrs += ", role="+val;
+									val = track.accessibility ? track.accessibility.toString():"";
+									if(val!="") attrs += ", accessibility="+val;									
 									this.player.setCurrentTrack(track);
 									this.player.setMute(false);
 								}
@@ -265,14 +272,19 @@ function VideoPlayerBasic(element_id, profile, width, height){
 								}
 								var muted = ( this.audioTrack == tracks );
 								if( !muted ){
+									var val;
 									this.video.audioTracks[this.audioTrack].enabled = true;
+									val = this.video.audioTracks[this.audioTrack].label || "";
+									if(val!="") attrs += ", label="+val;
+									val = this.video.audioTracks[this.audioTrack].kind || "";
+									if(val!="") attrs += ", kind="+val;
 								}
 								lang = (muted? "Muted" : this.video.audioTracks[this.audioTrack].language );
 							}
-							console.log("audiotracks " + tracks + ", current: "+this.audioTrack + ", " + lang);
+							console.log("audiotracks " + tracks + ", current: "+this.audioTrack + ", " + lang+attrs);
 							
 							$("#audioButtonText").html( "Audio: " + lang );
-							showInfo("Audio: " + lang);
+							showInfo("Audio: " + lang+attrs);
 						} else{
 							this.changeAVcomponent( this.AVCOMPONENTS.AUDIO );
 						}

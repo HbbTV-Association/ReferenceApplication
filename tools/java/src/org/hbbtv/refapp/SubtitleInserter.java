@@ -193,12 +193,16 @@ public class SubtitleInserter {
 					: asData.replace("$RepresentationID$/", urlPrefix+"$RepresentationID$/");             // drm use: "../sub_eng/" path
 		}
 
-		// mimeType is in Representation field (mimeType="application/mp4")
-		// captions=viewers who cannot hear audio(transcription of dialog), subtitles=speakers or any language to watch video
+		// Role: captions=viewers who cannot hear audio(transcription of dialog), subtitles=speakers or any language to watch video
+		// subtitle,captions,main
+		
+		boolean isMimeType=asData.contains(" mimeType="); // mimeType is in Representation or AdaptationSet field
 		StringBuilder sbuf = new StringBuilder(8048); 
 		sbuf.append(Utils.NL+Utils.NL);
-		sbuf.append("  <AdaptationSet id=\""+asId+"\" contentType=\"text\" lang=\""+ MediaTools2.getLangAsISO639(lang, 2) +"\" segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
-		sbuf.append("    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL );  // subtitle,captions,main
+		sbuf.append("  <AdaptationSet id=\""+asId+"\" contentType=\"text\" lang=\""+ MediaTools2.getLangAsISO639(lang, 2)+"\""
+			+ (isMimeType ? "" : " mimeType=\"application/mp4\"")
+			+ " segmentAlignment=\"true\" startWithSAP=\"1\">"+Utils.NL);
+		sbuf.append("    <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"main\"/>"+Utils.NL );
 		sbuf.append("    "+asData+Utils.NL);
 		sbuf.append("  </AdaptationSet>"); //+Utils.NL);
 

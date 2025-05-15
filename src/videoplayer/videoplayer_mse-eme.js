@@ -63,18 +63,22 @@ VideoPlayerEME.prototype.createPlayer = function(){
 				: sLoglevel=="none" ? dashjs.Debug.LOG_LEVEL_NONE
 				: dashjs.Debug.LOG_LEVEL_WARNING;		
 		
-		this.player.updateSettings({ 
+		this.player.updateSettings({
 			debug: { logLevel: iLoglevel }
 			,streaming: {
-				text: {defaultEnabled: true}
+				text: { defaultEnabled: true }
 				//,manifestUpdateRetryInterval: 100
 				,delay: {
 					//liveDelayFragmentCount: 4,  // segcount
 					//liveDelay: 6, // seconds
-					useSuggestedPresentationDelay: true 
+					useSuggestedPresentationDelay: true
 				}
-			}  
-		}); 
+				,capabilities: {
+					useMediaCapabilitiesApi: false  // true=CapsApi, false=EME.isTypeSupported(older func)
+					//,filterUnsupportedEssentialProperties: true
+				}
+			}
+		});
 		console.log("video object created, dashjs "+this.player.getVersion() );
 	} catch( e ){
 		console.log(e);
@@ -559,6 +563,7 @@ VideoPlayerEME.prototype.sendLicenseRequest = function(callback){
 			: this.drm.system.indexOf(".SL150")>0           ? "150"
 			: this.drm.system.indexOf(".150")>0             ? "150" // worst
 			: this.drm.system=="playready"                  ? "default"
+			: this.drm.system=="playready.auto"             ? "default"
 			: "2000";
 		
 		var isEdge = getBrowserInfo().name=="Edge"; // MSEdge(chromium) shall always use playready.recommendation

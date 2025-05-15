@@ -63,6 +63,7 @@
 
 	<target name="jar" depends="updatemanifest" description="Create a .jar file">
 		<echo message="Build release: ${reltag}" />
+        <echo>Java ${java.version}, ${ant.version}</echo>
 		<jar manifest="${build}/META-INF/MANIFEST.MF" 
 			 jarfile="./lib/${name}.jar" >
   			<fileset dir="${build}">

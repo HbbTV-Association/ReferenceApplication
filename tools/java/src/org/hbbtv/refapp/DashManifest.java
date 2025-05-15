@@ -149,43 +149,6 @@ public class DashManifest {
 				}
 			}
 		}
-		
-		// Add Role=main,alternate inside AdaptationSet elements
-		/* elem = XMLUtil.getChildElement(doc.getDocumentElement(), "Period");		
-		int countA=0, countV=0;
-		for(Element elemAS : XMLUtil.getChildElements(elem, "AdaptationSet")) {
-			elem = XMLUtil.getChildElement(elemAS, "Role");
-			if (elem!=null) continue;
-			elem = XMLUtil.getChildElement(elemAS, "Representation");
-			if (elem==null) continue;
-			String mime = elem.getAttribute("mimeType");
-			if (mime.isEmpty()) mime = elemAS.getAttribute("mimeType");
-			if (mime.startsWith("audio/")) {
-				modified=true;
-				String xml= String.format("<Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"%s\"/>"
-					, (countA==0?"main":"alternate"));
-				Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
-				elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
-				elemAS.insertBefore( doc.importNode(newElem, true), elem);
-				countA++;
-			} else if (mime.startsWith("video/")) {
-				modified=true;
-				String xml= String.format("<Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"%s\"/>"
-					, (countV==0?"main":"alternate"));
-				Element newElem = XMLUtil.createDocument(xml).getDocumentElement();
-				elem = XMLUtil.getChildElement(elemAS, "SegmentTemplate");
-				elemAS.insertBefore( doc.importNode(newElem, true), elem);
-				countV++;
-			}
-		} */
-		
-		// see also MediaTools.getDashArgs(), -min-buffer=(gopdur*1000*2) millis, MDP@minBufferTime="PT4S" secs		
-		/*if(gopdur>0) {
-			int time = gopdur/1000; //gopdur*2;
-			val = doc.getDocumentElement().getAttribute("minBufferTime");
-			if(!val.contains("PT"+time+"S"))
-				doc.getDocumentElement().setAttribute("minBufferTime", "PT"+time+"S");
-		}*/
 	}
 	
 	public void addNamespaces() {

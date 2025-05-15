@@ -2,6 +2,7 @@
 ## Register ExpressPlay DRM keys, parse LAURL array (test and production)
 ##  python.exe RegisterDRM_ExpressPlay.py --authprod="5050,5555" --authtest="4040,4444" > keys_expressplay.json
 ## Aki Nieminen/Sofia Digital
+## 2025-05-15/Aki: marlin ms3SchemeType param
 ## 2022-12-20/Aki: changed securitylevel 150 to 2000
 ## 2022-10-06/Aki: added algid(CENC,CBCS) param
 ## 2019-05-25/Aki: added kid+key arguments
@@ -111,6 +112,7 @@ def registerMarlinMS3(drmType, auth, keys, persistent, contentId):
 	
 	params = {
 		"customerAuthenticator" : auth
+		,"ms3SchemeType"  : "ms3hs"     ## reply laurl from "https://" to "ms3hs://", older "ms3://" is now obsolete
 		,"expirationTime" : "+2592000"	## 2592000=+30d
 		,"useHttps"       : "true"
 		,"errorFormat"    : "json"

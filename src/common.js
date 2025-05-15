@@ -899,6 +899,21 @@ function getDeviceID(sysid, callback) {
 	}
 }
 
+/* LocalStorage wrapper functions */
+function storage_getItem(sKey, sDefVal) {
+	sKey = sKey.replace(/ /g, "");
+	var val = localStorage.getItem(sKey);
+	return val!=null ? val : sDefVal;
+}
+function storage_setItem(sKey, sVal) {
+	sKey = sKey.replace(/ /g, "");
+	localStorage.setItem(sKey, sVal);
+}
+function storage_removeItem(sKey) {
+	sKey = sKey.replace(/ /g, "");
+	localStorage.removeItem(sKey);
+}
+
 function getBrowserInfo() {
 	var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 	var isFF = /Firefox/.test(navigator.userAgent);

@@ -10,7 +10,8 @@ public class StreamSpec implements Cloneable {
 	// fixme: dash=dash only without transcoding
 	// fixme: subtitling(inband, outband)
 	public static enum TYPE { 
-		VIDEO_H264, VIDEO_H265, AUDIO_AAC, AUDIO_AC3, AUDIO_EAC3,
+		VIDEO_H264, VIDEO_H265, VIDEO_H266, VIDEO_AV1,
+		AUDIO_AAC, AUDIO_AC3, AUDIO_EAC3,
 		DASH; 
 
 		public boolean isAudio() { 
@@ -27,10 +28,15 @@ public class StreamSpec implements Cloneable {
 				val.equals("AC3")  || val.endsWith("_AC3") ? AUDIO_AC3 :   // Dolby Digital
 				val.equals("EAC3") || val.endsWith("_EAC3")? AUDIO_EAC3 :  // Dolby Digital Plus
 				val.equals("EC3")  || val.endsWith("_EC3") ? AUDIO_EAC3 :
+				//val.equals("AC4")  || val.endsWith("_AC4") ? AUDIO_AC4 :   // Dolby NextGen
 				val.equals("H264") || val.endsWith("_H264")? VIDEO_H264 :
 				val.equals("AVC")  || val.endsWith("_AVC") ? VIDEO_H264 :
 				val.equals("H265") || val.endsWith("_H265")? VIDEO_H265 :
 				val.equals("HEVC") || val.endsWith("_HEVC")? VIDEO_H265 :
+				val.equals("H266") || val.endsWith("_H266")? VIDEO_H266 :
+				val.equals("VVC")  || val.endsWith("_VVC") ? VIDEO_H266 :
+				val.equals("AV1")  || val.endsWith("_AV1") ? VIDEO_AV1 :
+				//val.equals("AVS3")  || val.endsWith("_AVS3") ? VIDEO_AVS3 :  // HiSilicon
 				val.equals("DASH") ? DASH :
 				null;
 		}

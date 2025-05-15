@@ -1,7 +1,7 @@
 /**
  * Common helpers to be used in catalogue or videoplayers
  * - keep new EcmaScript functions here, old devices may not support.
- *
+ * - WebOS2+3 may not support "let" definition
  * @module Common
  */
 
@@ -126,19 +126,4 @@ function getMSEEMECapabilities(){
 	}).catch(function(ex) {
 		console.log("getMSEEMECapabilities "+ex.name+" "+ex.message);
 	});	
-}
-
-/* LocalStorage wrapper functions */
-function storage_getItem(sKey, sDefVal) {
-	sKey = sKey.replace(/ /g, "");
-	var val = localStorage.getItem(sKey);
-	return val!=null ? val : sDefVal;
-}
-function storage_setItem(sKey, sVal) {
-	sKey = sKey.replace(/ /g, "");
-	localStorage.setItem(sKey, sVal);
-}
-function storage_removeItem(sKey) {
-	sKey = sKey.replace(/ /g, "");
-	localStorage.removeItem(sKey);
 }

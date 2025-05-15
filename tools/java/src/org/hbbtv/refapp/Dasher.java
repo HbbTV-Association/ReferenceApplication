@@ -123,11 +123,11 @@ public class Dasher {
 
 				val = Utils.getString(params, "video."+idx+".profile", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "video.profile", "", true);
-				spec.profile=val;
+				spec.profile=val.equals("-")?"":val;;
 
 				val = Utils.getString(params, "video."+idx+".level", "", true);
 				if (val.isEmpty()) val = Utils.getString(params, "video.level", "", true);
-				spec.level=val;
+				spec.level=val.equals("-")?"":val;
 				
 				val = Utils.getString(params, "video."+idx+".crf", "", true); // 0=bitrate encoding, 1..n=crf encoding
 				if (val.isEmpty()) {
@@ -230,6 +230,7 @@ public class Dasher {
 					segdur=8000; // 8s to align with AAC48Khz segments
 					gopdur=2000;
 				}
+				// todo: 29.97fps: 2sec or 2.002sec  
 				params.put("segdur", ""+segdur);
 				params.put("gopdur", ""+gopdur);
 			}
@@ -249,7 +250,12 @@ public class Dasher {
 						args=MediaTools.getTranscodeH265Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
 					else if(spec.type==StreamSpec.TYPE.VIDEO_H264)
 						args=MediaTools.getTranscodeH264Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit, 2); // legacy, bitrate encoding
-
+					
+					else if(spec.type==StreamSpec.TYPE.VIDEO_H266) // && !spec.crf.isEmpty())
+						args=MediaTools2.getTranscodeH266Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);					
+					else if(spec.type==StreamSpec.TYPE.VIDEO_AV1) // && !spec.crf.isEmpty())
+						args=MediaTools2.getTranscodeAV1Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);					
+					
 				} else if(spec.type.isAudio() && spec.inputFile!=null) {
 					args=MediaTools.getTranscodeAudioArgs(spec, timeLimit);
 					

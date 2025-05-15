@@ -618,7 +618,7 @@ VideoPlayer.prototype.stop = function(){
 	self.watched.save();
 	
 	try{
-		self.video.stop();
+		if(self.video) self.video.stop();
 		console.log( "video.stop succeed" );
 		self.clearVideo();
 		console.log( "clearVideo succeed" );
@@ -695,6 +695,10 @@ VideoPlayer.prototype.doPlayStateChange = function(){
 			Monitor.videoEnded(console.log);
             break;
         case 1: // playing
+			if(!self.visible) {
+				console.log("playing but is to be stopped");
+				break;
+			}		
         	console.log("playing");
 			
 			if( dialog.open ){
