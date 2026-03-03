@@ -45,9 +45,31 @@
           "submenu": 8
         },
         {
-          "title": "Settings",
+          "title": "MultiDRM",
           "app": 0,
           "submenu": 9
+        },
+		
+        {
+          "title": "HEVC",
+          "app": 0,
+          "submenu": 10
+        },		
+        {
+          "title": "AV1",
+          "app": 0,
+          "submenu": 11
+        },
+        {
+          "title": "VVC",
+          "app": 0,
+          "submenu": 12
+        },
+		
+        {
+          "title": "Settings",
+          "app": 0,
+          "submenu": 13
         }
       ]
     },
@@ -86,8 +108,7 @@
             }
           ],
           "profile": [
-            "html5",
-            "mse-eme"
+            "html5"
           ]
         },
         {
@@ -102,10 +123,10 @@
         },
         {
           "title": "1.4 In-band subtitles",
-          "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/manifest_subib_1080p_1a.mpd",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v11/manifest_subib_1080p_1a.mpd",
           "img": "icons/icons_1x1_in-band-subtitle.png",
           "app": 6,
-          "desc": "TTML subtitles, in-band m4s segments",
+          "desc": "TTML subtitles, in-band m4s segments, use sansSerif font",
           "profile": [
             "html5",
             "mse-eme"
@@ -187,7 +208,7 @@
         {
           "title": "2.1.2 AVC 1080p ExpressPlay",
           "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/cenc/manifest_prcenc_1080p.mpd",
-          "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=CAAAABc2N10AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJDKVWx3zUg1ZzDM8WuH53cYpRDSYUqaeOXXeYtMOVmjf0z4jAWp_zWcVnLrWsdL5XBmR-LfkP8Lxu3oUgPnMfQoFmkoqKiYOqG7Owl3wep3EpL4U-RIc7ASZFDO6STQeujE09fP8DSYz2d2aU21wVk29CFcc4y0tr4qWR3NlFQtaPGqEhrt9nmdZ8Cxw6H0lTIeOOdtfn5ejZBnyPSjKHDM5nFrbQ",
+          "la_url": "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=CQAAABc2N40AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAJDq4xw0sDjyGucsgM-F-1SaKoNmGdEsT93R9Mj5VDvVm8AV-j_rin7NCKEP_FD55EiAcAFIwgbMpoBDwVYmVHsxnTZi3gVNJ01z_edNfmHGI9ImbIoV0pNWZOm-DEsQOZUtaDmllrsIgv136px6D2Lh5uB6OchYX4_xPQe1iLs70q7_Ybh3qPPCQam7jyPpZzt1_tRBNzCg5UgEJRBOO_I4HS7JAQ&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod1236}",
           "drm": "playready",
           "img": "icons/icons_1x1_1080p.png",
@@ -222,8 +243,7 @@
             }
           ],
           "profile": [
-            "html5",
-            "mse-eme"
+            "html5"
           ]
         },
         {
@@ -388,6 +408,34 @@
           "drm": "playready",
           "app": 6,
           "desc": "Playready CBCS_1:9 (10% partial encryption), laurl override, h265(720p,1080p,2160p)"
+        },
+        {
+          "title": "2.18.1 Persistent license",
+          "url": "https://refapp.hbbtv.org/videos/agent327_h264_v9/cenc/manifest_prcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://refapp.hbbtv.org/videos/laurl_pr_persist.php?persist=1&valid=120&logfile=persist&sessionid=${SESSION_GUID}",
+          "desc": "setPersist(yes,key1234) expiration=2m, Playready CENC SL2000, sessionid=${SESSION_GUID}",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        },
+        {
+          "title": "2.19 HEVC 2160p high bitrate",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h265hbr_v9/cenc/manifest_prcenc_subib_evtib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "desc": "Playready CENC, h265(2160p Main@5.0 32Mbit)",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
         }
       ]
     },
@@ -401,7 +449,7 @@
           "img": "icons/icons_1x1_1080p.png",
           "app": 6,
           "drm": "widevine",
-          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KaEAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAICrGOU8ex_ovJy0t-AUMf_BOf7mjDHVbmd1rMTlJXb7vvcNNi7O2Dudb-F_1SwcVY24plHgRIqduYs89Z5qdhqM70MmCwLZkCayJBcM4RZ0iyn_sYDw2Gh973ZG9nOgLm70Y55Bor28kuP_YnTXyCg972y5KXgNRRUnKsCfoH1WwQ2fFsw4eFPa4sTWZsOifehlQLhq",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod1236}",
           "desc": "Widevine, CENC, multiple audio languages"
         },
@@ -411,7 +459,7 @@
           "img": "icons/icons_1x1_1080p-cbcs.png",
           "app": 6,
           "drm": "widevine",
-          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KZgAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIBOmalDFvkYMkO4acqkaFrQdBOlk3OKCgcynOgkZ2zCcFiCz8jUoqwDZap8j0jaw1_0xlTQFAkx9_CvmmWagHK4uz-MrKXSDa95SXGaHsLJZXI96LRtnQNhIYSFkEHsJQ6RBzGeIPk3EWsf9X7Cul6Dxr5g5jkdpZdIxngGIMBJHqpE7pwFuLrS3fGXbtrbyo_x7ph3",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KZYAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDi1lzs1mhArBHtR9cK4X2eIBKphj_EW6pzwM9XqrgSm7WwRBzN0JxxcAgxakYB_V3TKX1NqWNsZX5mPj_eUydds7xpn4i9vUaP-O204nhcMIFrOhd91xZ4xPgm8FNOxjdqtkQf-zgz-QWVSUVanUA4hS0vnTURcAdmKDCF1q-zVVScrqfl5L3rp56NKe7euLgknz88&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod1236_CBCS}",
           "desc": "Widevine, CBCS, multiple audio languages"
         },
@@ -421,7 +469,7 @@
           "img": "icons/icons_1x1_1080p.png",
           "app": 6,
           "drm": "widevine",
-          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KbEAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALDKNZAsErrbhaaGym-6VLlNQpBgVIoa_sacMBif42HCNnzKp4BgMNAxqQPBDZlftRqHV29Mkb62Owbylnd8gROlXRVGnnaWR1-r8gKdFPqkfzUxRja-w0JMeNNzQciUGnYVpDIaVig7KgBcAHaSQZnqe4zXaGP_fubGA5ABDofmmNdhZ5XGCeZQYpyuHcnurBmQpUfTHk2G07CK6Kp-6FdBkVr88CPkKr7_xs_zRypbc9vjbqAf9t4j4tam8zyjr-0ZT0GM",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeYAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALB4IsCUUmpXUwYNucrlNg1MCO7uwT8QEe-kJHIa0T6pxh_rjorlE9USBSv9E5pDN1GZbiGn3e2oojP4kbxLRhoj_3XnTmP-mcS1AkF_3ndPkSOdefU4BLRgRKkcFSB6wcaZkIgl5XlBEN479u00umouImHMKAexywUyHBagfJoan21RjMw7OaITWI0oQy7kop9k2OILDLhtMPQ4V8hLCx_4es-aJOaZECByfRzw-dVP5XanrHZpVMT4-h6MZNQdbOPzUNd3&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod12371236_7}",
           "desc": "Widevine, CENC, inband subtitles, inband events, different KIDs for video and audio"
         },
@@ -431,7 +479,7 @@
           "img": "icons/icons_1x1_2160p.png",
           "app": 6,
           "drm": "widevine",
-          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2KbEAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALDKNZAsErrbhaaGym-6VLlNQpBgVIoa_sacMBif42HCNnzKp4BgMNAxqQPBDZlftRqHV29Mkb62Owbylnd8gROlXRVGnnaWR1-r8gKdFPqkfzUxRja-w0JMeNNzQciUGnYVpDIaVig7KgBcAHaSQZnqe4zXaGP_fubGA5ABDofmmNdhZ5XGCeZQYpyuHcnurBmQpUfTHk2G07CK6Kp-6FdBkVr88CPkKr7_xs_zRypbc9vjbqAf9t4j4tam8zyjr-0ZT0GM",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeYAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALB4IsCUUmpXUwYNucrlNg1MCO7uwT8QEe-kJHIa0T6pxh_rjorlE9USBSv9E5pDN1GZbiGn3e2oojP4kbxLRhoj_3XnTmP-mcS1AkF_3ndPkSOdefU4BLRgRKkcFSB6wcaZkIgl5XlBEN479u00umouImHMKAexywUyHBagfJoan21RjMw7OaITWI0oQy7kop9k2OILDLhtMPQ4V8hLCx_4es-aJOaZECByfRzw-dVP5XanrHZpVMT4-h6MZNQdbOPzUNd3&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod12371236_7}",
           "desc": "Widevine, CENC, inband subtitles, inband events, different KIDs for video and audio, h265(720p,1080p,2160p)"
         },
@@ -441,7 +489,7 @@
           "img": "icons/icons_1x1_2160p-cbcs.png",
           "app": 6,
           "drm": "widevine",
-          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2Kc0AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALD7cGKsExVbnk75lhHX3EorXMnIB8HsBvBhlhTA-B9KGetXUjTNof6mDHGuF7-Me9T6B2myuzO7BgdtcWGrqDydI6yxrQhgYii4d7EijQp1OOMh5c8EIz-Rx4YFdZKx5kPxroJZZHvf3ql5vFBK8yf3Kzy6s1bQN-llPivMz0yvlBm8l5Xozjrdvr8m-PRuTNd4V-l6PyHIOwn2MMoSKfppDWKNZLcz_h-hwLpkhnDgrPuvuEWaPRjqUXECOY9f-IdOJEN7",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2Ke4AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALCBOgbvpK93kPZkvyixMXhzv1_xrhwFcTLXalrHiXW9MDFPUf5A_2Rg5WPUwPmdTEPWm1RYNfR4fqIEBp603CKCjPXwJDVoX3tkAwOcbCIkPljUjXuXu8gCD2CDihq8JJV1uknpLYx_PoHHIQWn7yoDIVHx2AdtkpQ3wn7FD1lHE9C59ozVBqf7raUDx2QQ0IB-CKjb3I7xNI0O1FSITbfDjMmC_hgcQO-jNP2gs5cttUnMPLd50Pn1dEZLU02MDLyqulPu&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod12371236_CBCS_3}",
           "desc": "Widevine, CBCS, inband subtitles, inband events, different KIDs for video and audio, h265(720p,1080p,2160p)"
         },
@@ -450,11 +498,36 @@
           "url": "https://refapp.hbbtv.org/videos/spring_h264_v9/cenc/manifest_wvcenc_1080p.mpd",
           "img": "icons/icons_1x1_1080p.png",
           "app": 6,
-          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwAAABc2Ka0AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALDOx7O6KoJH6FQQU3vwpvHo-sNl2JkqMKYaqzuNXhBrCwqI1YxlG2KqFz3nQGHcpBuv-grFPk2NiVJ4ObAx6gYnVzIkKkObdocPeU8dut0EPn_BmGQD3OfuRa7ZgZG8SZkbcO_HmNNtzlvWWtmx69LykItt5XbqbDLnvVUoWhuS0fqdZrzRtaSHdaG71lTGKXfplg9MkphpsowE1OdHT4u85CaoWsxrxlBIFz73kQAsB-v33QoHYKQqDEVmITz740tUf-Wx",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2Ka4AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALDi86uDS9F03LN3kvXQXpEKy6pL9i9pPiyirnB4296Efxy_2MeE_GA7EP53i3696QINpRT6-peBmexF8g3RyvqY2rTob3YPKT9p9LlK0ngleFbtc_9SCeBE1QLKaigkwEvh-QkktE8B3tBpoUo4D2aPEP3PmrmtBK_jFimWQJCpw6odzyccjg8P9rcUpszSExPg4rqmDVfih2POxG6I5hsM1BsRuPwT3-iYKjjGSqBS3UJVeL_6NwAgGBOHd97Z9ZQai4qq&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
           "la_url_id": "${ep_Prod12371236}",
           "drm": "widevine.SL1",
           "desc": "Widevine, CENC, video SL1(hardware,best), audio SL3(software), different KIDs for video and audio"
-        }		
+        },
+        {
+          "title": "WV.6.1 HEVC 2160p CBCS SL1 Different KIDs",
+          "url": "https://refapp.hbbtv.org/videos/spring_h265_v9/cbcs/manifest_wvcenc_subib_evtib.mpd",
+          "img": "icons/icons_1x1_2160p-cbcs.png",
+          "app": 6,
+          "drm": "widevine.SL1",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2Ke4AJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAALCBOgbvpK93kPZkvyixMXhzv1_xrhwFcTLXalrHiXW9MDFPUf5A_2Rg5WPUwPmdTEPWm1RYNfR4fqIEBp603CKCjPXwJDVoX3tkAwOcbCIkPljUjXuXu8gCD2CDihq8JJV1uknpLYx_PoHHIQWn7yoDIVHx2AdtkpQ3wn7FD1lHE9C59ozVBqf7raUDx2QQ0IB-CKjb3I7xNI0O1FSITbfDjMmC_hgcQO-jNP2gs5cttUnMPLd50Pn1dEZLU02MDLyqulPu&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod12371236_CBCS_3}",
+          "desc": "Widevine, CBCS, video SL1(hardware,best), audio SL3(software), inband subtitles, inband events, different KIDs for video and audio, h265(720p,1080p,2160p)"
+        },
+        {
+          "title": "WV.7 HEVC 2160p high bitrate",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h265hbr_v9/cenc/manifest_wvcenc_subib_evtib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "drm": "widevine",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "desc": "Widevine CENC, h265(2160p Main@5.0 32Mbit)",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        }
       ]
     },
     {
@@ -464,7 +537,7 @@
         {
           "title": "3.1 AVC 1080p",
           "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/cenc/manifest_mlcenc_1080p_1a.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCn3ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHRAVsQWvihIeRM82Ahi6nYAgMgElNo-sv-cN-7aHCtLhomzT8csaItmyIWcRkCcnspzX6zeqWiz1jSzZmbzvDBNnCo0XN6jAQ-xmEMInf68TPlCQORr_LOLRDfGXySKh6oGXv-LTYgA5Eelt1RaEb-HXyN7sbkXATmYoQecibS-Q8lvaDNiu2AyMXuZCtnfn1zVAAAAFMwjoliWAVj7JEQah57G0ft7kMTp",
           "la_url_id": "${ep_Prod1236}",
           "drm": "marlin",
           "img": "icons/icons_1x1_1080p.png",
@@ -478,7 +551,7 @@
         {
           "title": "3.2 HEVC 2160p",
           "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h265_v9/cenc/manifest_mlcenc.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCmmACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEBH851sm9Z31jqyulEiZHccAgKBExR0pjvTPuH3u8AapD3QUTRxnPFpwxNcA3I8EH7yCTQRCXw9JpaE4l4iXV0pugMYK9PEi-p0-UIYqoPXgj5iA5BgPEZIvk7wRIQUtKIwO6OXpLQjiaLxM260JZiPEic-kjooe5X_zNJKSS88CfV29lCyyPuyuSLZKMhoyyWdSAAAAFEmCIaPvWjtvCSgE6lq2kDnA0_OJ",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCmaACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJkJ5tWQSzwnDq8aakYhAKQAgPKd0ruu6SIPFrFxPFb_PSBLrDXRgqcGRAzy88cE5sIjvxjryKyAeT-CSBpGYAuPps79GVR6DDmeIpLEVYvy-B-uhbXV54W5FJ4itfNIJTvAtzPoIox2AX0XrSrSh-Nwg5ZDoSTW4nLR0JJWaLN4QwWzvth-z1bL6uMoPpe3uGnDAAAAFPJfl5viUTfB2ICPqeyTjNkyG8ZR",
           "la_url_id": "${ep_Prod1237}",
           "drm": "marlin",
           "img": "icons/icons_1x1_2160p.png",
@@ -492,7 +565,7 @@
         {
           "title": "3.3 Out-of-band subtitles",
           "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/cenc/manifest_mlcenc_1080p_1a.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCn3ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHRAVsQWvihIeRM82Ahi6nYAgMgElNo-sv-cN-7aHCtLhomzT8csaItmyIWcRkCcnspzX6zeqWiz1jSzZmbzvDBNnCo0XN6jAQ-xmEMInf68TPlCQORr_LOLRDfGXySKh6oGXv-LTYgA5Eelt1RaEb-HXyN7sbkXATmYoQecibS-Q8lvaDNiu2AyMXuZCtnfn1zVAAAAFMwjoliWAVj7JEQah57G0ft7kMTp",
           "la_url_id": "${ep_Prod1236}",
           "drm": "marlin",
           "img": "icons/icons_1x1_out-of-band-subtitle.png",
@@ -515,7 +588,7 @@
         {
           "title": "3.4 In-band subtitles",
           "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/cenc/manifest_mlcenc_subib_1080p_1a.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCn3ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHRAVsQWvihIeRM82Ahi6nYAgMgElNo-sv-cN-7aHCtLhomzT8csaItmyIWcRkCcnspzX6zeqWiz1jSzZmbzvDBNnCo0XN6jAQ-xmEMInf68TPlCQORr_LOLRDfGXySKh6oGXv-LTYgA5Eelt1RaEb-HXyN7sbkXATmYoQecibS-Q8lvaDNiu2AyMXuZCtnfn1zVAAAAFMwjoliWAVj7JEQah57G0ft7kMTp",
           "la_url_id": "${ep_Prod1236}",
           "drm": "marlin",
           "img": "icons/icons_1x1_in-band-subtitle.png",
@@ -528,7 +601,7 @@
         {
           "title": "3.5 Advert insertion",
           "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/cenc/manifest_mlcenc_1080p_1a.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCn3ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHRAVsQWvihIeRM82Ahi6nYAgMgElNo-sv-cN-7aHCtLhomzT8csaItmyIWcRkCcnspzX6zeqWiz1jSzZmbzvDBNnCo0XN6jAQ-xmEMInf68TPlCQORr_LOLRDfGXySKh6oGXv-LTYgA5Eelt1RaEb-HXyN7sbkXATmYoQecibS-Q8lvaDNiu2AyMXuZCtnfn1zVAAAAFMwjoliWAVj7JEQah57G0ft7kMTp",
           "la_url_id": "${ep_Prod1236}",
           "drm": "marlin",
           "img": "icons/icons_1x1_insert-ad.png",
@@ -563,7 +636,7 @@
         {
           "title": "3.6 In-band events, multiple audio languages",
           "url": "https://refapp.hbbtv.org/videos/00_llama_h264_v9/cenc/manifest_mlcenc_evtib.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCn3ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHRAVsQWvihIeRM82Ahi6nYAgMgElNo-sv-cN-7aHCtLhomzT8csaItmyIWcRkCcnspzX6zeqWiz1jSzZmbzvDBNnCo0XN6jAQ-xmEMInf68TPlCQORr_LOLRDfGXySKh6oGXv-LTYgA5Eelt1RaEb-HXyN7sbkXATmYoQecibS-Q8lvaDNiu2AyMXuZCtnfn1zVAAAAFMwjoliWAVj7JEQah57G0ft7kMTp",
           "la_url_id": "${ep_Prod1236}",
           "drm": "marlin",
           "img": "icons/icons_1x1_in-band-events.png",
@@ -656,61 +729,80 @@
       "title": "Live",
       "items": [
         {
-          "title": "5.1 Livesim multi moof/mdat",
-          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_12/02_llamav2/manifest_baseurl.mpd",
+          "title": "5.1 Livesim2 NoDrm",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v10/manifest_1080p.mpd",
           "img": "icons/icons_1x1_livestream.png",
           "app": 6,
-          "desc": "Livesim1 with multiple fragments (NoDRM)",
+          "desc": "NoDrm, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s",
           "live": true
         },
         {
-          "title": "5.2 Livesim multi moof/mdat Playready",
-          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_12/02_llamadrmv2/manifest_baseurl.mpd",
+          "title": "5.1.2 Livesim2 NoDrm single moof/mdat",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v9_1frag/manifest_1080p.mpd",
+          "img": "icons/icons_1x1_livestream.png",
+          "app": 6,
+          "desc": "NoDrm, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s, single moof/mdat chunk",
+          "live": true
+        },
+        {
+          "title": "5.1.3 Livesim2 NoDrm ttml",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v11/manifest_subib_evtib_1080p.mpd",
+          "img": "icons/icons_1x1_livestream.png",
+          "app": 6,
+          "desc": "NoDrm, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s, ttml(trun.samplecount=1), sansSerif font",
+          "live": true
+        },
+        {
+          "title": "5.2 Livesim2 Playready CENC",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v10_cenc/manifest_prcenc_1080p.mpd",
           "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
           "img": "icons/icons_1x1_livestream.png",
           "app": 6,
           "drm": "playready",
-          "desc": "Livesim1 with multiple fragments (Playready)",
+          "desc": "Playready CENC, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s",
           "live": true
         },
         {
-          "title": "5.3 Livesim multi moof/mdat Marlin DRM",
-          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_12/02_llamadrmv2/manifest_baseurl.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
-          "la_url_id": "${ep_Prod1236}",
-          "drm": "marlin",
+          "title": "5.2.2 Livesim2 Playready CBCS",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v10_cbcs/manifest_prcenc_1080p.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==,ckt:aescbc)",
           "img": "icons/icons_1x1_livestream.png",
           "app": 6,
-          "desc": "Livesim1 with multiple fragments (Marlin)",
-          "live": true
-        },
-        {
-          "title": "5.4 Livesim single moof/mdat",
-          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_12/02_llamanofragv1/manifest_baseurl.mpd",
-          "img": "icons/icons_1x1_livestream.png",
-          "app": 6,
-          "desc": "Livesim1 with single fragment",
-          "live": true
-        },
-        {
-          "title": "5.5 Livesim single moof/mdat (Playready)",
-          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_12/02_llamanofragdrmv1/manifest_baseurl.mpd",
-          "img": "icons/icons_1x1_livestream.png",
           "drm": "playready",
-          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
-          "app": 6,
-          "desc": "Livesim1 with single fragment (Playready)",
+          "desc": "Playready CBCS, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s",
           "live": true
         },
         {
-          "title": "5.6 Livesim single moof/mdat (Marlin)",
-          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_12/02_llamanofragdrmv1/manifest_baseurl.mpd",
-          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABQAAFzYADHJlZmVyZW5jZWFwcCnDACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEJwSFpl59D-AFAGZRfby2f8AgKYdG-hTaCZwehYmqOusU54_LC43Cp2sbx2MAJ9skUEAHI8fKDsyIgEfhOpMTyk8uUmlc9805Qd_yAA7yBOOwHER96F1_Ks2kwPqOnq3w8f7J7D86X-ZeP1Mn5o6La6-FR1N-fb2rSeLES8D7Y8P2yAC0d7fQ66DRiRw1_nLgKtdAAAAFKKo0mkF2O2w7_tqO2_vRovxbFKR",
+          "title": "5.3 Livesim1 Marlin",
+          "url": "https://refapp.hbbtv.org/livesim/mup_4/spd_8/00_llama_h264_v9_8s_cenc/manifest_baseurl_ml.mpd",
+          "la_url": "https://ms3.service.expressplay.com:8443/hms/ms3/rights/?b=ADwABwAAFzYADHJlZmVyZW5jZWFwcCn3ACQ2Njc2OTljMC01Yjg2LTQzMDktYjIwOC00ZWNiZDI3ZjFjZjgAEHRAVsQWvihIeRM82Ahi6nYAgMgElNo-sv-cN-7aHCtLhomzT8csaItmyIWcRkCcnspzX6zeqWiz1jSzZmbzvDBNnCo0XN6jAQ-xmEMInf68TPlCQORr_LOLRDfGXySKh6oGXv-LTYgA5Eelt1RaEb-HXyN7sbkXATmYoQecibS-Q8lvaDNiu2AyMXuZCtnfn1zVAAAAFMwjoliWAVj7JEQah57G0ft7kMTp",
           "la_url_id": "${ep_Prod1236}",
           "drm": "marlin",
           "img": "icons/icons_1x1_livestream.png",
           "app": 6,
-          "desc": "Livesim1 with single fragment (Marlin)",
+          "desc": "Marlin, Livesim1 h264(360p,720p,1080p), aac(128k), segdur=8s",
+          "live": true
+        },
+        {
+          "title": "5.7.1 Livesim2 Widevine CENC",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v10_wvcenc/manifest_wvcenc_1080p.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "img": "icons/icons_1x1_livestream.png",
+          "app": 6,
+          "drm": "widevine",
+          "desc": "Widevine CENC, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s",
+          "live": true
+        },
+        {
+          "title": "5.7.2 Livesim2 Widevine CBCS",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h264_v10_wvcbcs/manifest_wvcenc_1080p.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KZYAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDi1lzs1mhArBHtR9cK4X2eIBKphj_EW6pzwM9XqrgSm7WwRBzN0JxxcAgxakYB_V3TKX1NqWNsZX5mPj_eUydds7xpn4i9vUaP-O204nhcMIFrOhd91xZ4xPgm8FNOxjdqtkQf-zgz-QWVSUVanUA4hS0vnTURcAdmKDCF1q-zVVScrqfl5L3rp56NKe7euLgknz88&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236_CBCS}",
+          "img": "icons/icons_1x1_livestream.png",
+          "app": 6,
+          "drm": "widevine",
+          "desc": "Widevine CBCS, Livesim2 h264(360p,720p,1080p), aac(96k,128k), multiple audio languages, segdur=3.84s",
           "live": true
         }
       ]
@@ -720,18 +812,8 @@
       "title": "MultiPeriod",
       "items": [
         {
-          "title": "6.1 Live",
-          "url": "https://refapp.hbbtv.org/videos/multiperiod_v8.php?drm=0&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=event&spd=8",
-          "img": "icons/icons_1x1_1080p.png",
-          "app": 6,
-          "drm": "",
-          "la_url": "",
-          "desc": "Main(3 video bitrates, 2 audio langs, 3 subtitle langs) + Advert. Multiperiod, MPDReload event",
-          "live": true
-        },
-        {
           "title": "6.2 Live (2s reload interval)",
-          "url": "https://refapp.hbbtv.org/videos/multiperiod_v8.php?drm=0&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=2&spd=8",
+          "url": "https://refapp.hbbtv.org/videos/multiperiod_v9.php?drm=0&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=2&spd=8",
           "img": "icons/icons_1x1_1080p.png",
           "app": 6,
           "drm": "",
@@ -740,18 +822,8 @@
           "live": true
         },
         {
-          "title": "6.3 Live (Playready)",
-          "url": "https://refapp.hbbtv.org/videos/multiperiod_v8.php?drm=pr,cenc&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=event&spd=8",
-          "img": "icons/icons_1x1_1080p.png",
-          "app": 6,
-          "drm": "playready",
-          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
-          "desc": "Main(3 video bitrates, 2 audio langs, 3 subtitle langs, CENC) + Advert. Multiperiod, MPDReload event",
-          "live": true
-        },
-        {
           "title": "6.4 Live (Playready, 2s reload interval)",
-          "url": "https://refapp.hbbtv.org/videos/multiperiod_v8.php?drm=pr,cenc&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=2&spd=8",
+          "url": "https://refapp.hbbtv.org/videos/multiperiod_v9.php?drm=pr,cenc&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=2&spd=8",
           "img": "icons/icons_1x1_1080p.png",
           "app": 6,
           "drm": "playready",
@@ -761,16 +833,340 @@
         },
         {
           "title": "6.7 Static (Playready)",
-          "url": "https://refapp.hbbtv.org/videos/multiperiod_v8.php?drm=pr,cenc&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&static=1&pflag=startonfirst",
+          "url": "https://refapp.hbbtv.org/videos/multiperiod_v9.php?drm=pr,cenc&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&static=1&pflag=startonfirst",
           "img": "icons/icons_1x1_1080p.png",
           "app": 6,
           "drm": "playready",
           "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
           "desc": "Main(3 video bitrates, 2 audio langs, 3 subtitle langs, CENC) + Advert. Static multiperiod, use Period@start on first + @duration on all."
+        },
+        {
+          "title": "6.8 Live (Playready, 2s reload interval, different packagers)",
+          "url": "https://refapp.hbbtv.org/videos/multiperiod_v9.php?drm=pr,cenc&advert=1&emsg=0&video=v1,v2,v3&audiolang=eng,fin&sublang=eng,fin,swe&mup=2&spd=8&config=multiperiod_00llama_h264_v2",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "desc": "Main(3 video bitrates, 2 audio langs, 3 subtitle langs, CENC) + Advert. Multiperiod, 2s reload interval. Mp4box+Ffmpeg dash packagers.",
+          "live": true
         }
       ]
     },
     {
+      "center": 0,
+      "title": "MultiDRM",
+      "items": [
+        {
+          "title": "7.1 Playready, setActiveDRM not used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_prcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
+          "desc": "setActiveDRM not used, Playready, laurl override",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        },
+        {
+          "title": "7.2 Widevine, setActiveDRM not used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_wvcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "widevine",
+          "la_url": "https://refapp.hbbtv.org/videos/laurl_wv.php",
+          "desc": "setActiveDRM not used, Widevine, laurl override",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        },
+        {
+          "title": "7.3 Playready and Widevine, setActiveDRM not used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_prwvcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
+          "desc": "setActiveDRM not used, Playready and Widevine, use Playready laurl override",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        },
+        {
+          "title": "7.4 Playready, setActiveDRM is used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_prcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
+          "desc": "setActiveDRM(playready), Playready, laurl override",
+          "profile": [
+            "oipf",
+            "html5"
+          ]
+        },
+        {
+          "title": "7.5 Widevine, setActiveDRM is used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_wvcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "widevine",
+          "la_url": "https://refapp.hbbtv.org/videos/laurl_wv.php",
+          "desc": "setActiveDRM(widevine), Widevine, laurl override",
+          "profile": [
+            "oipf",
+            "html5"
+          ]
+        },
+        {
+          "title": "7.6A Playready and Widevine, setActiveDRM is used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_prwvcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "drm": "playready",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNw==)",
+          "desc": "setActiveDRM(playready), Playready and Widevine, use Playready laurl override",
+          "profile": [
+            "oipf",
+            "html5"
+          ]
+        },
+        {
+          "title": "7.6B Playready and Widevine, setActiveDRM is used",
+          "url": "https://refapp.hbbtv.org/videos/tears_of_steel_h264_v9/cenc/manifest_prwvcenc_1080p.mpd",
+          "img": "icons/icons_1x1_1080p.png",
+          "drm": "widevine",
+          "la_url": "https://refapp.hbbtv.org/videos/laurl_wv.php",
+          "app": 6,
+          "desc": "setActiveDRM(widevine), Playready and Widevine, use Widevine laurl override",
+          "profile": [
+            "oipf",
+            "html5"
+          ]
+        },
+        {
+          "title": "7.7.1 AVC 1080p SL2000 dashif:laurl",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h264_multikey_v11/cenc/manifest_prwvcenc_subib_sl2000.mpd",
+          "drm": "",
+          "la_url": "",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "desc": "Playready SL2000 Widevine SL3 (software), h264, dashif:laurl in mpd, let player choose the drm settings.",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        },
+        {
+          "title": "7.7.2 AVC 1080p SL3000 dashif:laurl",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h264_multikey_v11/cenc/manifest_prwvcenc_subib.mpd",
+          "drm": "",
+          "la_url": "",
+          "img": "icons/icons_1x1_1080p.png",
+          "app": 6,
+          "desc": "Playready SL3000 Widevine SL1 (hardware), h264, dashif:laurl in mpd, let player choose the drm settings.",
+          "profile": [
+            "oipf",
+            "html5",
+            "mse-eme"
+          ]
+        }
+      ]
+    }
+	
+    ,{
+      "center": 0,
+      "title": "HEVC",
+      "items": [
+         {
+          "title": "HEVC.1 HEVC",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h265_v10/manifest_subib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "HEVC(720p,1080p,2160p), AAC, inband subs, No drm, segdur=3.84s"
+        }
+        ,{
+          "title": "HEVC.2 HEVC Playready",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h265_v10/cenc/manifest_prcenc_subib.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "playready",		  
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "HEVC(720p,1080p,2160p), AAC, inband subs, Playready, segdur=3.84s"
+        }
+        ,{
+          "title": "HEVC.3 HEVC Widevine",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h265_v10/cenc/manifest_wvcenc_subib.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "widevine",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "HEVC(720p,1080p,2160p), AAC, inband subs, Widevine, segdur=3.84s"
+        }
+        ,{
+          "title": "HEVC.4 HEVC Live",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h265_v10/manifest_subib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 HEVC(720p,1080p,2160p), AAC, inband subs, No drm, segdur=3.84s"
+        }
+        ,{
+          "title": "HEVC.5 HEVC Live Playready",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h265_v10_cenc/manifest_prcenc_subib.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "playready",		  
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 HEVC(720p,1080p,2160p), AAC, inband subs, Playready, segdur=3.84s"
+        }
+        ,{
+          "title": "HEVC.6 HEVC Live Widevine",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h265_v10_wvcenc/manifest_wvcenc_subib.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "widevine",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 HEVC(720p,1080p,2160p), AAC, inband subs, Widevine, segdur=3.84s"
+        }	  		
+      ]
+    }	
+	
+    ,{
+      "center": 0,
+      "title": "AV1",
+      "items": [
+        {
+          "title": "AV1.1 AV1",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_av1_v10/manifest_subib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "AV1(720p,1080p,2160p), AAC, inband subs, No drm, segdur=3.84s"
+        }
+        ,{
+          "title": "AV1.2 AV1 Playready",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_av1_v10/cenc/manifest_prcenc_subib.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "playready",		  
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "AV1(720p,1080p,2160p), AAC, inband subs, Playready, segdur=3.84s"
+        }
+        ,{
+          "title": "AV1.3 AV1 Widevine",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_av1_v10/cenc/manifest_wvcenc_subib.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "widevine",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "AV1(720p,1080p,2160p), AAC, inband subs, Widevine, segdur=3.84s"
+        }
+        ,{
+          "title": "AV1.4 AV1 Live",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_av1_v10/manifest_subib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 AV1(720p,1080p,2160p), AAC, inband subs, No drm, segdur=3.84s"
+        }
+        ,{
+          "title": "AV1.5 AV1 Live Playready",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_av1_v10_cenc/manifest_prcenc_subib.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "playready",		  
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 AV1(720p,1080p,2160p), AAC, inband subs, Playready, segdur=3.84s"
+        }
+        ,{
+          "title": "AV1.6 AV1 Live Widevine",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_av1_v10_wvcenc/manifest_wvcenc_subib.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "widevine",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 AV1(720p,1080p,2160p), AAC, inband subs, Widevine, segdur=3.84s"
+        }		
+		
+      ]
+    }
+	
+    ,{
+      "center": 0,
+      "title": "VVC",
+      "items": [
+         {
+          "title": "VVC.1 VVC",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h266_v10/manifest_subib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "VVC(720p,1080p,2160p), AAC, inband subs, No drm, segdur=3.84s"
+        }
+        ,{
+          "title": "VVC.2 VVC Playready",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h266_v10/cenc/manifest_prcenc_subib.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "playready",		  
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "VVC(720p,1080p,2160p), AAC, inband subs, Playready, segdur=3.84s"
+        }
+        ,{
+          "title": "VVC.3 VVC Widevine",
+          "url": "https://refapp.hbbtv.org/videos/00_llama_h266_v10/cenc/manifest_wvcenc_subib.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "widevine",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "VVC(720p,1080p,2160p), AAC, inband subs, Widevine, segdur=3.84s"
+        }
+        ,{
+          "title": "VVC.4 VVC Live",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h266_v10/manifest_subib.mpd",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 VVC(720p,1080p,2160p), AAC, inband subs, No drm, segdur=3.84s"
+        }
+        ,{
+          "title": "VVC.5 VVC Live Playready",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h266_v10_cenc/manifest_prcenc_subib.mpd",
+          "la_url": "https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:header,sl:2000,persist:false,contentkey:EjQSNBI0EjQSNBI0EjQSNg==)",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "playready",		  
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 VVC(720p,1080p,2160p), AAC, inband subs, Playready, segdur=3.84s"
+        }
+        ,{
+          "title": "VVC.6 VVC Live Widevine",
+          "url": "https://refapp.hbbtv.org/livesim2/tsbd_240/mup_4/spd_8/utc_keep/00_llama_h266_v10_wvcenc/manifest_wvcenc_subib.mpd",
+          "la_url": "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=CAAAABc2KeUAJDY2NzY5OWMwLTViODYtNDMwOS1iMjA4LTRlY2JkMjdmMWNmOAAAAIDo6tQklKJerHQlBonEHq2mkKK1FKJx4a9oYk9lo2qi3pJw3zlQaxLTT5o2LqlXT-YGG6BLmu44WStuvrhrMVNFiqOPebYrqR5VaBA_9iWScOUlz7VMgV4vB596DZMdg2ZcZWvPTEFLXrAXIBu8eWeT2ozWfd7e6uA_jqFHMZ-xsFwXDVIcPUUOdTb78isu6FYgfZd9&id=6915c7e843a39916e64b7fcb0dbc1179ad39c3e5",
+          "la_url_id": "${ep_Prod1236}",
+          "drm": "widevine",
+          "img": "icons/icons_1x1_2160p.png",
+          "app": 6,
+          "desc": "Livesim2 VVC(720p,1080p,2160p), AAC, inband subs, Widevine, segdur=3.84s"
+        }	  
+		
+      ]
+    }	
+	
+    ,{
       "center": 0,
       "title": "Settings",
       "items": [
@@ -862,6 +1258,20 @@
           "eval": "if( $( menu.focus.element ).css('transform') != 'none' ) { $( menu.focus.element ).css({'transform':'none'}); } else{ $( menu.focus.element ).css({'transform':'rotate(180deg)','transition':'transform 2s'})};",
           "app": 0,
           "img": "icons/icons_1x1_funny.png"
+        },
+        {
+          "title": "Use Dashjs subtitle fix",
+          "eval": "location.href='index_mse-eme.php?dashjs=debug'",
+          "app": 0,
+          "img": "icons/icons_1x1_reload.png",
+          "desc": "Use dashjs subtitle fix (force rendering on trackmode=hidden)"
+        },
+        {
+          "title": "Use Dashjs nightly",
+          "eval": "location.href='index_mse-eme.php?dashjs=nightly'",
+          "app": 0,
+          "img": "icons/icons_1x1_reload.png",
+          "desc": "Use a nightly build of dashjs, experimental."
         },
         {
           "title": "About the application",

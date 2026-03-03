@@ -260,6 +260,8 @@ public class Dasher {
 						args=MediaTools2.getTranscodeH266Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);					
 					else if(spec.type==StreamSpec.TYPE.VIDEO_AV1) // && !spec.crf.isEmpty())
 						args=MediaTools2.getTranscodeAV1Args(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);					
+					else if(spec.type==StreamSpec.TYPE.VIDEO_AV1AOM)
+						args=MediaTools2.getTranscodeAV1AOMArgs(spec, fps, forceFps, gopdur, segdur, overlayOpt, timeLimit);					
 					
 				} else if(spec.type.isAudio() && spec.inputFile!=null) {
 					args=MediaTools.getTranscodeAudioArgs(spec, timeLimit);

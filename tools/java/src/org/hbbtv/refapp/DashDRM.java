@@ -78,12 +78,17 @@ public class DashDRM {
 		}
 
 		for(String keySuffix : new String[]{"video","audio"}) {
-			String key="drm.playready.laurl"; // "drm.playready.laurl.video.mpd", ".audio.mpd", ".video.mpd.cbcs"
+			String key="drm.playready.laurl"; // "drm.playready.laurl.video", "drm.playready.laurl.video.mpd", ".video.mpd.cbcs"
 			if(Utils.getString(params, key+"."+keySuffix, "", true).isEmpty())
 				params.put(key+"."+keySuffix, Utils.getString(params, key, "", true));			
 			key="drm.widevine.laurl";
 			if(Utils.getString(params, key+"."+keySuffix, "", true).isEmpty())
 				params.put(key+"."+keySuffix, Utils.getString(params, key, "", true));
+		}
+		
+		// drm.laurl=pssh,mpd,mpdeme1  to "drm.laurl.pssh=1", write laurl to pssh object and mdp
+		for(String opt : Utils.getString(params, "drm.laurl", "pssh", true).split(",")) {
+			params.put("drm.laurl."+opt.trim(), "1");
 		}
 		
 		params.put("drm.initialized", "1"); // init drm.* params only once
@@ -158,14 +163,13 @@ public class DashDRM {
 		buf.append("  drm=" + drmMode  +Dasher.NL);
 		buf.append("--> "+Dasher.NL);
 		
-		// write Playready(0,pro,pssh)
+		// write Playready(0,pro,pssh), write laurl to wrmheader object if "drm.laurl.pssh=1"
 		val = Utils.getString(params, "drm.playready", "0", true);
 		if (!val.equals("0")) {
 			String laurl="";
-			if(drmMode.startsWith("cbcs"))
-				laurl = Utils.getString(params, "drm.playready.laurl."+keySuffix+".cbcs", "", true);
+			laurl = Utils.getString(params, "drm.playready.laurl."+keySuffix+ (drmMode.startsWith("cbcs")?".cbcs":".cenc"), "", true);
 			if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix, "", true);
-			if(laurl.equalsIgnoreCase("empty")) laurl="";			
+			if( !Utils.getBoolean(params, "drm.laurl.pssh",false) || laurl.equalsIgnoreCase("empty") ) laurl="";
 			
 			byte[] wrm = createPlayreadyXML(kid, key, laurl, drmMode).getBytes("UTF-16LE");
 			buf.append(Dasher.NL);
@@ -268,13 +272,14 @@ public class DashDRM {
 		if(key.isEmpty()) key = Utils.getString(params, "drm.key."+keySuffix, "", true);
 		if(kid.isEmpty()) return "";
 
-		String laurl="";
+		String laurl=""; // laurl goes inside the MSPR object
 		laurl = Utils.getString(params, "drm.playready.laurl."+keySuffix+".mpd."+drmMode, "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix+".mpd", "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.playready.laurl."+keySuffix, "", true);
 		if(laurl.equalsIgnoreCase("empty")) laurl="";
-
-		byte[] wrm = createPlayreadyXML(kid, key, laurl, drmMode).getBytes("UTF-16LE");
+		
+		boolean useLaUrl = Utils.getBoolean(params, "drm.laurl.pssh",false); // pssh,mpd,mpdeme1
+		byte[] wrm = createPlayreadyXML(kid, key, useLaUrl?laurl:"", drmMode).getBytes("UTF-16LE");
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+PLAYREADY.GUID+"\" value=\"MSPR 2.0\">"+Dasher.NL); // playready
@@ -282,8 +287,15 @@ public class DashDRM {
 			if (optTag.equals("pro"))
 				buf.append("     <mspr:pro>"+createPlayreadyPRO(wrm)+"</mspr:pro>"+Dasher.NL); // legacy field
 			else if (optTag.equals("pssh"))
-				buf.append("     <cenc:pssh>"+createPlayreadyPSSH(wrm)+"</cenc:pssh>"+Dasher.NL);
+				buf.append("     <cenc:pssh>"+createPlayreadyPSSH(wrm)+"</cenc:pssh>"+Dasher.NL);			
 		}
+
+		// use a generic mpd LaUrl field
+		if(!laurl.isEmpty() && Utils.getBoolean(params, "drm.laurl.mpd",false))
+			buf.append("     <dashif:Laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:Laurl>"+Dasher.NL); // new
+		if(!laurl.isEmpty() && Utils.getBoolean(params, "drm.laurl.mpdeme1",false))
+			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ XMLUtil.encode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
+		
 		buf.append("   </ContentProtection>"+Dasher.NL);
 		return buf.toString();
 	}
@@ -300,8 +312,8 @@ public class DashDRM {
 		String cid = Utils.getString(params, "drm.widevine.contentid", "", true); // contentid values for all tracks.
 		if(kid.isEmpty()) return "";
 
-		String laurl="";
-		laurl = Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd."+drmMode, "", true);
+		String laurl=""; // any mpdurl param is written to a generic laurl field
+		laurl                    = Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd."+drmMode, "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.widevine.laurl."+keySuffix+".mpd", "", true);
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.widevine.laurl."+keySuffix, "", true);
 		if(laurl.equalsIgnoreCase("empty")) laurl="";			
@@ -309,10 +321,13 @@ public class DashDRM {
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+WIDEVINE.GUID+"\" value=\"widevine\">"+Dasher.NL);
 		buf.append("     <cenc:pssh>"+ createWidevinePSSH(kid, prov, cid, drmMode) +"</cenc:pssh>"+Dasher.NL);
-		if(!laurl.isEmpty()) {
-			buf.append("     <dashif:laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
+		
+		// use a generic mpd LaUrl field
+		if(!laurl.isEmpty() && Utils.getBoolean(params, "drm.laurl.mpd",false))
+			buf.append("     <dashif:Laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:Laurl>"+Dasher.NL); // new
+		if(!laurl.isEmpty() && Utils.getBoolean(params, "drm.laurl.mpdeme1",false))
 			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ XMLUtil.encode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
-		}
+		
 		buf.append("   </ContentProtection>"+Dasher.NL);
 		return buf.toString();		
 	}
@@ -338,17 +353,23 @@ public class DashDRM {
 	public String createClearKeyMPDElement() throws Exception {
 		String opt = Utils.getString(params, "drm.clearkey", "0", true);
 		if (opt.equals("0")) return ""; // do not create element
+		
 		// https://github.com/Dash-Industry-Forum/dash.js/issues/3343
 		// https://dashif-documents.azurewebsites.net/Guidelines-Security/master/Guidelines-Security.html#CPS-mpd-drm-config
 		String laurl = Utils.getString(params, "drm.clearkey.laurl", "", true);
+		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.clearkey.laurl.video.mpd.cenc", "", true); //TODO: cenc,cbcs
 		if(laurl.isEmpty()) laurl= Utils.getString(params, "drm.clearkey.laurl.mpd", "", true);
 		if(laurl.equalsIgnoreCase("empty")) laurl="";
+		
 		StringBuilder buf = new StringBuilder();
 		buf.append("   <ContentProtection schemeIdUri=\"urn:uuid:"+CLEARKEY.GUID+"\" value=\"ClearKey1.0\">"+Dasher.NL);
-		if (!laurl.isEmpty()) {
-			buf.append("     <dashif:laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:laurl>"+Dasher.NL); // new 
+		
+		// use a generic mpd LaUrl field
+		if(!laurl.isEmpty() && Utils.getBoolean(params, "drm.laurl.mpd",false))
+			buf.append("     <dashif:Laurl>"+ XMLUtil.encode(laurl, false, false) +"</dashif:Laurl>"+Dasher.NL); // new
+		if(!laurl.isEmpty() && Utils.getBoolean(params, "drm.laurl.mpdeme1",false))
 			buf.append("     <ck:Laurl Lic_type=\"EME-1.0\">"+ XMLUtil.encode(laurl, false, false) +"</ck:Laurl>"+Dasher.NL); // legacy
-		}
+		
 		buf.append("   </ContentProtection>"+Dasher.NL);
 		return buf.toString();
 	}

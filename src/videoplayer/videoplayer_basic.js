@@ -577,6 +577,7 @@ function VideoPlayerBasic(element_id, profile, width, height){
 		if( !system ){
 			this.drm = null;
 		} else {
+			if(la_url=="empty") la_url="";
 			console.log("setDRM("+ system +", "+la_url+")");
 			this.drm = { la_url : la_url, system : system, ready : false, error : null
 				, persist_before:null, persist_after:null, persist_url:null
